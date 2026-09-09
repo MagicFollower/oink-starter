@@ -4,6 +4,7 @@ description: Replace the identity and sample content without rebuilding the them
 book_kind: chapter
 book_number: 3
 weight: 30
+upstream_link: ""
 ---
 
 Most projects need only content changes and two configuration edits.

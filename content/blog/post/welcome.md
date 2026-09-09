@@ -3,6 +3,7 @@ title: Welcome to the project blog
 date: 2026-01-15
 description: Replace this sample with the story behind your project.
 tags: [community, getting-started]
+upstream_link: ""
 ---
 
 Use the Post section for news, explanations, and stories that do not belong in the reference documentation.

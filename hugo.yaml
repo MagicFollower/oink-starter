@@ -3,20 +3,20 @@
 
 title: &siteTitle Project Name # CHANGE ME: one shared title for every language
 baseURL: https://example.org/ # CHANGE ME: canonical production URL
-defaultContentLanguage: en
+defaultContentLanguage: zh  # 默认的语言
 enableGitInfo: true
 enableRobotsTXT: true
 enableEmoji: true
 timeZone: UTC
 
 languages:
-  en:
-    label: English
-    locale: en-US
-    weight: 1
-    title: *siteTitle
-    params:
-      description: Documentation, updates, and guides for your project.
+#  en:
+#    label: English
+#    locale: en-US
+#    weight: 1
+#    title: *siteTitle
+#    params:
+#      description: Documentation, updates, and guides for your project.
   zh:
     label: 简体中文
     locale: zh-CN
@@ -25,13 +25,13 @@ languages:
     hasCJKLanguage: true
     params:
       description: 你的项目文档、动态与指南。
-  fr:
-    label: Français
-    locale: fr-FR
-    weight: 3
-    title: *siteTitle
-    params:
-      description: Documentation, actualités et guides de votre projet.
+#  fr:
+#    label: Français
+#    locale: fr-FR
+#    weight: 3
+#    title: *siteTitle
+#    params:
+#      description: Documentation, actualités et guides de votre projet.
 
 # OINK's Markdown components depend on these three Goldmark settings.
 markup:

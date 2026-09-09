@@ -10,4 +10,5 @@ menus:
     weight: 20
     params:
       icon: fa-solid fa-compass-drafting
+upstream_link: ""
 ---

@@ -4,6 +4,7 @@ description: 了解哪些少量文件分别负责配置、内容与部署。
 book_kind: chapter
 book_number: 2
 weight: 20
+upstream_link: ""
 ---
 
 这个模板把每项职责放在一个明显的位置。

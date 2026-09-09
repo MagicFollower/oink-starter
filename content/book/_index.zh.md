@@ -16,6 +16,7 @@ cascade:
   type: book
   footer_style: slim
   sidebar_headings: 3
+upstream_link: ""
 ---
 
 这本小书介绍模板本身。请先从头到尾阅读一次，再用你的项目真正需要的长篇指南替换它。

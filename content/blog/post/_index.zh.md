@@ -11,4 +11,5 @@ menus:
     weight: 10
     params:
       icon: fa-solid fa-pen-nib
+upstream_link: ""
 ---

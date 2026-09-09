@@ -4,6 +4,7 @@ description: Clone the repository and open a local home page in three commands.
 book_kind: chapter
 book_number: 1
 weight: 10
+upstream_link: ""
 ---
 
 OINK Starter is a Hugo Module site. Git downloads the source, Go resolves the pinned theme, and Hugo builds everything.

@@ -1,0 +1,193 @@
+---
+title: "核心运维概念"
+
+weight: 30
+icon: fa-solid fa-diagram-project
+math: true
+---
+
+<a id="id1"></a>
+
+## MinIO 部署由哪些组件构成？ {#minio}
+
+一个 MinIO 部署由一组存储和计算资源构成，这些资源运行一个或多个 [`minio server`](/docs/reference/minio-server/#command-minio.server) 节点，并共同作为单一对象存储库。
+
+一个单机 MinIO 实例由单个 服务器池 和单个 [`minio server`](/docs/reference/minio-server/#command-minio.server) 节点组成。 单机实例最适合初期开发和评估。
+
+MinIO 部署既可以直接运行在 裸金属 或非虚拟化基础设施中的物理设备上。 MinIO 也可以运行在云服务中的虚拟机上，例如使用 Docker、Podman 或 Kubernetes。 MinIO 可以运行在本地、私有云或市场上的众多公有云中。
+
+你设计、架构和构建系统的具体方式称为系统的 拓扑。
+
+## MinIO 支持哪些系统拓扑？ {#id3}
+
+MinIO 可以部署到以下三种拓扑：
+
+1. [单机单盘](/docs/operations/deployments/installation/#minio-snsd)，单个 MinIO server，使用单个驱动器或文件夹存储数据
+
+   例如，在本地 PC 上使用硬盘中的一个文件夹进行测试。
+2. [单机多盘](/docs/operations/deployments/installation/#minio-snmd)，单个 MinIO server，使用多个挂载驱动器或文件夹存储数据
+
+   例如，一个挂载了两个或更多卷的单容器。
+3. [多机多盘](/docs/operations/deployments/installation/#minio-mnmd)，多个 MinIO server，使用多个挂载驱动器或卷存储数据
+
+   对于裸金属 基础设施，你可以使用 Ansible、Terraform 或手动流程安装并管理分布式 MinIO 部署。
+
+   对于 Kubernetes 基础设施，请使用 MinIO Operator 来管理和部署分布式 MinIO Tenant。
+
+## 分布式 MinIO 部署如何工作？ {#id4}
+
+分布式部署会利用多台物理机或虚拟机的计算和存储资源。 在现代场景中，这通常意味着在私有云或公有云环境中运行 MinIO，例如 Amazon Web Services、Google Cloud Platform、Microsoft Azure 等。
+
+<a id="id5"></a>
+
+### MinIO 如何管理多个虚拟或物理服务器？ {#minio-intro-server-pool}
+
+虽然测试 MinIO 可能只涉及一台计算机上的单个驱动器，但大多数生产级 MinIO 部署都会使用多个计算和存储设备来构建高可用环境。 服务器池 是一组 [`minio server`](/docs/reference/minio-server/#command-minio.server) 节点，它们汇聚各自的驱动器和资源，以支持对象存储写入和读取请求。
+
+MinIO 支持向现有部署中添加一个或多个 服务器池，以实现横向扩容。 当 MinIO 拥有多个可用 服务器池 时，单个对象始终会写入同一个 服务器池 中的同一个纠删码集合。
+
+如果某个 服务器池 发生故障，MinIO 会停止所有服务器池的 I/O，直到集群恢复正常运行。 你必须将该服务器池恢复到可工作状态，部署的 I/O 才能恢复。 在执行修复操作期间，写入其他服务器池的对象仍会安全保留在磁盘上。
+
+传递给 [`minio server`](/docs/reference/minio-server/#command-minio.server) 命令的 [`HOSTNAME`](/docs/reference/minio-server/#minio.server.HOSTNAME) 参数表示一个 服务器池：
+
+请看下面的启动命令示例。该命令会创建一个单独的 服务器池，其中包含 4 个 [`minio server`](/docs/reference/minio-server/#command-minio.server) 节点，每个节点有 4 块驱动器，总计 16 块驱动器。
+
+```shell
+minio server https://minio{1...4}.example.net/mnt/disk{1...4}
+
+             |                    服务器池                |
+```
+
+在同一条 [`minio server`](/docs/reference/minio-server/#command-minio.server) 启动命令中启动多个 服务器池，可使各个 服务器池 对等节点彼此可感知。
+
+有关完整语法和用法，请参阅 [`minio server`](/docs/reference/minio-server/#command-minio.server)。
+
+<a id="minio-intro-cluster"></a>
+
+### MinIO 如何将多个 服务器池 连接为单一 MinIO 集群？ {#minio-minio}
+
+cluster 指由一个或多个 服务器池 组成的完整 MinIO 部署。
+
+请看下面的命令。它创建了一个由两个 服务器池 组成的 cluster，每个服务器池都包含 4 个 [`minio server`](/docs/reference/minio-server/#command-minio.server) 节点，且每个节点有 4 块驱动器，总计 32 块驱动器。
+
+```shell
+minio server https://minio{1...4}.example.net/mnt/disk{1...4} \
+             https://minio{5...8}.example.net/mnt/disk{1...4}
+
+             |                    服务器池                |
+```
+
+每个 服务器池 根据其中的驱动器和节点数量，包含一个或多个 [纠删码集合](/docs/operations/concepts/erasure-coding/#minio-ec-erasure-set)。
+
+MinIO 强烈建议生产集群中的每个 服务器池 至少包含 4 个 [`minio server`](/docs/reference/minio-server/#command-minio.server) 节点，以获得恰当的高可用性和持久性保障。
+
+### 我可以更改现有 MinIO 部署的大小吗？ {#id6}
+
+MinIO [分布式部署](/docs/operations/deployments/installation/#minio-mnmd) 支持通过扩容和退役来增加或减少可用存储。
+
+扩容是指向现有部署中添加一个或多个 [服务器池](#minio-intro-server-pool)。 每个 服务器池 都由专用节点和存储组成，并为部署的总体容量作出贡献。 服务器池 一旦创建，其大小便无法更改，但你可以随时通过添加或退役服务器池 来增加或移除容量。
+
+有关在裸金属 和 Kubernetes 基础设施上进行扩容的更多信息，请分别参阅 [裸金属：扩展 MinIO 部署](/docs/operations/deployments/baremetal-expand-minio-deployment/#expand-minio-distributed) 和 [Kubernetes：扩展 MinIO Tenant](/docs/operations/deployments/k8s-expand-minio-tenant-on-kubernetes/#minio-k8s-expand-minio-tenant)。
+
+对于包含多个 服务器池 的部署，你可以 [退役](/docs/operations/deployments/baremetal-decommission-server-pool/#minio-decommissioning) 较旧的 pool，并将其中的数据迁移到部署中的较新 pool。 退役一旦开始就无法停止。 MinIO 将退役功能设计为移除硬件老旧的 pool，而不是在任何部署中定期执行的操作。
+
+> [!NOTE]
+> **先下线再新增时保持 pool 顺序**
+>
+> 如果你在多 pool 部署中下线了一个 pool，就不能在新 pool 中复用相同的节点编号序列。 例如，假设某个部署包含以下几个 pool：
+>
+> ```text
+> https://minio-{1...4}.example.net/mnt/drive-{1...4}
+> https://minio-{5...8}.example.net/mnt/drive-{1...4}
+> https://minio-{9...12}.example.net/mnt/drive-{1...4}
+> ```
+>
+> 如果你下线了 `minio-{5...8}` 这个 pool，就不能再用相同的节点编号新增一个 pool。你必须将新 pool 添加在 `minio-{9...12}` *之后*：
+>
+> ```text
+> https://minio-{1...4}.example.net/mnt/drive-{1...4}
+> https://minio-{9...12}.example.net/mnt/drive-{1...4}
+> https://minio-{13...16}.example.net/mnt/drive-{1...4}
+> ```
+
+### 如何管理一个或多个 MinIO 实例或集群？ {#id7}
+
+你可以通过多种方式管理 MinIO 部署和集群：
+
+- 使用命令行工具 [`mc`](/docs/reference/minio-mc/#command-mc) 和 [`mc admin`](/docs/reference/minio-mc-admin/#command-mc.admin)
+- 使用 [MinIO Console](/docs/administration/minio-console/#minio-console) 图形用户界面管理单个实例
+
+<a id="id8"></a>
+
+### MinIO 如何管理对象在部署中的分布？ {#minio-rebalance}
+
+MinIO 会根据各个服务器池 的空闲空间占所有可用 服务器池 总空闲空间的比例，将新对象（即没有现有版本的对象）写入空闲空间最多的 服务器池。 MinIO 不会执行将对象从旧服务器池重新平衡到新服务器池 这类成本高昂的操作。 相反，新对象通常会首先路由到新 pool，因为它拥有最多空闲空间。 随着该服务器池逐渐填满，新的写操作最终会在部署中的所有服务器池之间趋于平衡。 有关写入偏好计算逻辑的更多信息，请参阅下文 [写入文件](/docs/operations/deployments/baremetal-expand-minio-deployment/#minio-writing-files)。
+
+扩容后在所有服务器池之间重新平衡数据是一项昂贵操作，需要扫描整个部署并在服务器池之间移动对象。 完成所需时间取决于需要移动的数据量。
+
+从 MinIO 客户端版本 RELEASE.2022-11-07T23-47-39Z 开始，你可以使用 [`mc admin rebalance`](/docs/reference/minio-mc-admin/mc-admin-rebalance/#command-mc.admin.rebalance) 手动在所有 服务器池 之间发起重新平衡操作。
+
+重新平衡不会阻塞现有操作，而是与其他 I/O 并行运行。 这可能导致常规操作性能下降。 建议在非高峰时段安排重新平衡操作，以避免影响生产工作负载。 你可以随时启动和停止重新平衡。
+
+## 如何向 MinIO 上传对象？ {#id9}
+
+你可以使用任何兼容 S3 的 SDK 向 MinIO 部署上传对象。 每个 SDK 都会执行等价于 PUT 的操作，将对象传输到 MinIO 进行存储。
+
+MinIO 还支持 [multipart uploads](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html)。 借助该机制，客户端可以将对象拆分为多个 part，以提高吞吐量和传输可靠性。 MinIO 会重组这些 part，直到对象完整，然后将其存储到指定路径。
+
+## MinIO 如何提供可用性、冗余性和可靠性？ {#id10}
+
+### MinIO 使用 [纠删码](/docs/operations/concepts/erasure-coding/#minio-erasure-coding) 提供数据冗余和可靠性 {#id11}
+
+MinIO 纠删码是一项数据冗余和可用性特性，可让具有多块驱动器的 MinIO 部署在集群中丢失多个驱动器或节点的情况下，仍然自动实时重建对象。 与 RAID 或复制等同类技术相比，纠删码以显著更低的开销提供对象级 [自愈](/docs/operations/concepts/healing/#minio-concepts-healing)。
+
+### MinIO 通过 bit rot 自愈保护静态数据 {#minio-bit-rot}
+
+bit rot 是一种可能发生在任何存储设备上的随机、静默数据损坏。 bit rot 损坏并非由用户活动触发，系统本身的操作系统通常也无法感知该损坏，因此无法通知用户或管理员数据已发生变化。
+
+bit rot 的常见原因包括：
+
+- 驱动器老化
+- 电流尖峰
+- 驱动器固件 bug
+- 幻写
+- 错误定向的读写
+- 驱动程序错误
+- 意外覆写
+
+MinIO 使用哈希算法确认对象完整性。 该算法会在对象执行任何 `GET` 和 `HEAD` 操作时自动生效。 对于启用了版本控制的存储桶，如果 MinIO 识别到版本不一致，`PUT` 操作也可能触发自愈。 如果对象因 bit rot 而损坏，MinIO 可根据该对象校验分片的可用性，自动 [自愈](/docs/operations/concepts/healing/#minio-concepts-healing) 该对象。
+
+MinIO 还可以使用 [MinIO 扫描器](/docs/operations/concepts/scanner/#minio-concepts-scanner) 执行 bit rot 检查和自愈。 不过，扫描器的 bit rot 检查默认 **关闭**。 与 bit rot 同时影响分布在多个驱动器和节点上的多个对象分片这一低概率事件相比，扫描期间主动执行 bit rot 自愈的性能影响较高。 正常操作期间的自动检查通常已足够应对 bit rot，MinIO 不建议将扫描器用于这类健康检查。
+
+### MinIO 将数据分布到 [纠删码集合](/docs/operations/concepts/erasure-coding/#minio-ec-erasure-set) 中，以实现高可用性和韧性 {#id12}
+
+纠删码集合是一组支持 MinIO [纠删码](/docs/operations/concepts/erasure-coding/#minio-erasure-coding) 的驱动器。 纠删码为存储在 MinIO 部署上的数据提供高可用性、可靠性和冗余性。
+
+MinIO 会将对象拆分为称作 `shards` 的块，并将其均匀分布到纠删码集合中的各块驱动器上。 即使任意单块驱动器丢失，MinIO 也可以继续无缝响应读写请求。 在最高冗余级别下，即使部署中最多有一半 (\(N / 2\)) 驱动器丢失，MinIO 仍能以很小的性能影响继续提供读取请求。
+
+MinIO 会根据集合中的驱动器总数以及集合中的 [`minio`](/docs/reference/minio-server/#command-minio) server 数量，计算 服务器池 中纠删码集合的大小和数量。 更多信息请参阅 [纠删码基础](/docs/operations/concepts/erasure-coding/#minio-ec-erasure-set)。
+
+### MinIO 自动实时自愈损坏或丢失的数据 {#id13}
+
+[自愈](/docs/operations/concepts/healing/#minio-concepts-healing) 是 MinIO 在某些事件导致数据丢失后恢复数据的能力。 数据丢失可能来自 bit rot、驱动器丢失或节点丢失。
+
+如果对象只是部分丢失，[纠删码](/docs/operations/concepts/erasure-coding/#minio-erasure-coding) 可继续提供读写访问。
+
+> [!NOTE]
+> **磁盘独占访问**
+>
+> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
+>
+> 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
+
+### MinIO 使用校验在对象级提供数据保护 {#id14}
+
+包含多块驱动器的 MinIO 部署会将可用驱动器划分为数据驱动器和校验驱动器。 MinIO 纠删码会在写入对象时，将关于对象内容的附加哈希信息写入校验驱动器。 MinIO 使用这些校验信息确认对象完整性，并在必要时恢复某个驱动器或某组驱动器上丢失、缺失或损坏的对象分片。
+
+即使丢失的驱动器总数达到纠删码集合中可用校验设备的数量，MinIO 仍可以继续提供对象的完整访问能力。
+
+### 通过仲裁提供读写能力 {#id15}
+
+仲裁指执行某项任务所必须可用的最少驱动器数量。 MinIO 为读取数据和写入数据分别定义了不同的仲裁值。
+
+通常，为保持写入对象的能力，MinIO 所需的可用驱动器数量会高于读取对象所需的数量。

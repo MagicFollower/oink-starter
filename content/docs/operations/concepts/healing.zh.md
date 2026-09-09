@@ -1,0 +1,62 @@
+---
+title: "对象自愈"
+
+weight: 40
+---
+
+<a id="minio-concepts-healing"></a>
+<a id="id1"></a>
+
+## 什么是自愈？ {#id3}
+
+自愈是 MinIO 恢复受损、损坏或部分丢失对象的能力。 这类丢失或损坏可能来自多种情况，包括但不限于：
+
+- 驱动器级错误或故障
+- 操作系统或文件系统错误或故障
+- [bit rot](/docs/operations/concepts/erasure-coding/#minio-ec-bitrot)
+
+## 自愈与纠删码 {#id4}
+
+MinIO 恢复受损对象的能力，直接取决于以下因素：
+
+- 对象所在 [纠删码集合](/docs/operations/concepts/erasure-coding/#minio-erasure-coding) 的驱动器总数
+- 保留对象完整分片的可用驱动器数量
+- 该纠删码集合的 [校验设置](/docs/operations/concepts/erasure-coding/#minio-ec-parity)
+
+  [Parity](/zh/glossary/#term-parity) 指 MinIO 在写入对象时创建的专用恢复分片数量。 例如，一个纠删码集合可能总共有 8 块驱动器，其中 3 块用于校验。 在这种情况下，MinIO 会把对象拆分为 5 个数据分片和 3 个校验分片。 MinIO 会将这 8 个分片分布到纠删码集合中的各块驱动器上。 不会有某一块驱动器只包含校验分片或只包含数据分片。 相反，MinIO 会以随机化方式写入每个对象的分片，以便将读取均匀分散到各块驱动器上。
+
+  当 MinIO 需要返回该对象时，它会查找对象对应的数据分片。 如果某些数据分片丢失或损坏，MinIO 会使用一个或多个校验分片来恢复对象。 如果在查找校验分片时发现某些校验分片也丢失或损坏，只要仍有足够的其他分片可供返回对象，MinIO 也会一并恢复这些校验分片。 在上述场景中，即使最多有 3 个数据分片丢失或损坏，MinIO 仍然可以成功恢复并返回该对象。
+
+  保留对象完整数据分片或校验分片的可用驱动器数量，必须大于或等于该纠删码集合中用于数据分片的驱动器数量。 在上述场景中，至少需要 5 块保留完整分片的驱动器在线且可用，MinIO 才能成功返回该对象。
+
+## MinIO 何时对对象执行自愈？ {#minio}
+
+MinIO 提供了一套健壮的对象自愈机制。
+
+### 在 `GET` 请求期间自愈 {#get}
+
+每当你通过 `GET` 或 `HEAD` 请求对象时，MinIO 都会自动检查该对象数据分片的一致性。 对于启用了版本控制的存储桶，MinIO 在 `PUT` 操作期间也会执行一致性检查。
+
+如果所有数据分片都完好无损，MinIO 会直接从数据分片返回对象，而不会检查对应的校验分片。
+
+如果对象存在丢失或损坏的数据分片，MinIO 会先使用可用的校验分片对对象执行自愈，然后再作为本次操作的一部分返回。 每个丢失或损坏的数据分片都 **必须** 有一个完好的校验分片可用，否则对象无法恢复。 如果某些校验分片丢失或损坏，只要仍有足够的其他校验分片可用于返回对象，MinIO 也会恢复这些校验分片。
+
+### 通过对象扫描器自愈 {#id5}
+
+MinIO 使用 [对象扫描器](/docs/operations/concepts/scanner/#minio-concepts-scanner) 执行多项与对象相关的任务。 其中一项任务就是检查对象完整性，并在发现损坏或损毁时执行自愈。
+
+在每一轮扫描中，MinIO 会根据对象名称的哈希值，从每 1,024 个对象中选择 1 个进行检查。
+
+如果发现对象存在分片丢失，MinIO 会使用可用分片对对象执行自愈。 默认情况下，MinIO *不会* 使用扫描器检查 [bit rot](/zh/glossary/#term-bit-rot) 损坏。 这类操作的成本较高，而多个磁盘同时发生 bit rot 的概率较低。
+
+### 通过手动请求自愈 {#id6}
+
+管理员可以使用 [`mc admin heal`](/docs/reference/minio-mc-admin/mc-admin-heal/#command-mc.admin.heal) 发起一次全系统自愈。 该过程会大量消耗资源，通常并非必需。
+
+在部署上手动启动自愈流程之前，请先与 MinIO 工程师沟通。
+
+## 自愈指标 {#id7}
+
+MinIO 提供了若干[自愈指标（英文）](https://silo.pgsty.com/operations/monitoring/metrics-v2/#healing-metrics)，用于监控部署中的自愈过程状态。
+
+有关可用 endpoint 和配置的更多信息，请参阅 [指标与告警](/docs/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
