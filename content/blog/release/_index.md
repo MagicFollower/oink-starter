@@ -3,7 +3,7 @@ title: 版本动态
 linkTitle: 版本动态
 description: 站点的版本发布记录，追踪功能演进与问题修复。
 type: blog
-weight: 30
+weight: 40
 blog_index: table
 ---
 
