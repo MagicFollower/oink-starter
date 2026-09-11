@@ -53,6 +53,7 @@ params:
     section_index: cards
     blog_index: cards
     sidebar_menu_foldable: true
+    sidebar_expand_levels: 4
     sidebar_icon_policy: groups
     backlinks: true
     # theme_color: '#245f94'
