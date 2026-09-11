@@ -7,6 +7,7 @@ icon: fa-solid fa-book-open
 book_kind: book
 sidebar_root_for: self
 sidebar_root_link_self: true
+sidebar_root_menu: false
 outputs: [HTML, print, markdown]
 menus:
   main:

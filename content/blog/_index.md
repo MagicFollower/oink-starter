@@ -5,6 +5,7 @@ type: blog
 icon: fa-solid fa-blog
 sidebar_root_for: self
 sidebar_root_link_self: true
+sidebar_root_menu: false
 menus:
   main:
     identifier: blog
