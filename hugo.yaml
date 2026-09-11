@@ -3,8 +3,16 @@
 
 title: &siteTitle Project Name # CHANGE ME: one shared title for every language
 baseURL: https://example.org/ # CHANGE ME: canonical production URL
-defaultContentLanguage: zh  # 默认的语言
-enableGitInfo: true
+defaultContentLanguage: zh
+enableGitInfo: false
+  # 说明：enableGitInfo 用于从 Git 提交记录中读取每页的最后修改时间。
+  # 设为 false 的场景：
+  #   1. 内网/离线环境：项目未纳入 Git 版本管理，或 Git 无法正常运行
+  #   2. 避免报错：当 Git 检测到目录所有权问题时（dubious ownership）会导致构建失败
+  # 如需启用，请确保：
+  #   - 项目已通过 git init 初始化
+  #   - 执行过 git config --global --add safe.directory '<项目路径>'
+  #   - 将下方值改为 true
 enableRobotsTXT: true
 enableEmoji: true
 timeZone: UTC
@@ -104,6 +112,7 @@ params:
 module:
   imports:
     - path: github.com/pgsty/oink
+      replacement: ./oink-main/oink-main
   hugoVersion:
     extended: true
     min: 0.160.1

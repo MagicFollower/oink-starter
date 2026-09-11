@@ -4,7 +4,6 @@ description: 替换身份与示例内容，无需重新构建主题。
 book_kind: chapter
 book_number: 3
 weight: 30
-upstream_link: ""
 ---
 
 大多数项目只需要修改内容，以及两处配置值。

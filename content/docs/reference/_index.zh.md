@@ -1,11 +1,15 @@
 ---
 title: 参考
-linkTitle: 参考
-description: Kubernetes、裸金属、S3 API、集成、发行与安全参考资料。
-
+description: 不必重读教程，直接查询配置与命令。
 weight: 40
-cascade:
-  type: docs
-icon: fa-solid fa-book
-sidebar_expanded: true
+icon: fa-solid fa-book-open
+menus:
+  main:
+    identifier: docs-reference
+    parent: docs
+    weight: 40
+    params:
+      icon: fa-solid fa-book-open
 ---
+
+当你已经知道自己要查什么时，请使用这一栏目。

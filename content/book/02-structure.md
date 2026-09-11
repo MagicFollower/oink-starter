@@ -4,7 +4,6 @@ description: Know which small set of files owns configuration, content, and depl
 book_kind: chapter
 book_number: 2
 weight: 20
-upstream_link: ""
 ---
 
 The starter keeps each responsibility in one obvious place.

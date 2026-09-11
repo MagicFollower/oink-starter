@@ -13,7 +13,6 @@ cascade:
   type: blog
   footer_style: slim
   reading_time: true
-upstream_link: ""
 ---
 
 Follow the project through articles, design decisions, and release notes.

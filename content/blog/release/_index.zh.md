@@ -11,5 +11,4 @@ menus:
     weight: 30
     params:
       icon: fa-solid fa-tags
-upstream_link: ""
 ---

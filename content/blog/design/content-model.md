@@ -3,7 +3,6 @@ title: A small content model that can grow
 date: 2026-01-10
 description: Why this starter separates updates, reference material, and tutorials.
 tags: [design, information-architecture]
-upstream_link: ""
 ---
 
 This starter gives each kind of writing one obvious home. The separation keeps navigation predictable without locking the project into a large taxonomy.

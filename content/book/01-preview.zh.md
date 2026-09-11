@@ -4,7 +4,6 @@ description: 用三条命令克隆仓库并打开本地首页。
 book_kind: chapter
 book_number: 1
 weight: 10
-upstream_link: ""
 ---
 
 OINK Starter 是一个 Hugo Module 站点。Git 下载源码，Go 解析锁定版本的主题，Hugo 负责完成全部构建。

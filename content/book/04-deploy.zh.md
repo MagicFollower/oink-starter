@@ -4,7 +4,6 @@ description: 使用任一内置 workflow，并验证真实部署路由。
 book_kind: chapter
 book_number: 4
 weight: 40
-upstream_link: ""
 ---
 
 生成的 `public/` 目录是一份静态站点。仓库内置两条彼此独立的部署路径。

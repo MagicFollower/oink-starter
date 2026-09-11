@@ -4,7 +4,6 @@ description: Use either supplied workflow and verify the real deployed routes.
 book_kind: chapter
 book_number: 4
 weight: 40
-upstream_link: ""
 ---
 
 The generated `public/` directory is a static site. The repository includes two independent deployment paths.

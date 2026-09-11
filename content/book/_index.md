@@ -16,7 +16,6 @@ cascade:
   type: book
   footer_style: slim
   sidebar_headings: 3
-upstream_link: ""
 ---
 
 This short book explains the starter itself. Read it once from beginning to end, then replace it with the long-form guide your project needs.

@@ -13,7 +13,6 @@ cascade:
   type: blog
   footer_style: slim
   reading_time: true
-upstream_link: ""
 ---
 
 通过文章、设计决策与版本说明了解项目进展。
