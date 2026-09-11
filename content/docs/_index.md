@@ -26,4 +26,5 @@ cascade:
 - [中间件](/docs/07-middleware/)
 - [开发工具](/docs/08-dev-tools/)
 - [设计与实践](/docs/09-design/)
+- [算法与数据结构](/docs/10-algorithms/)
 {.cards}

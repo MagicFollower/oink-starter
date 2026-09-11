@@ -21,4 +21,5 @@ cascade:
 - **Git** — 分支策略、Rebase、冲突解决、工作流
 - **日志框架** — SLF4J、Logback、Log4j2 配置与调优
 - **单元测试** — JUnit 5、Mockito、测试策略与最佳实践
+- **构建与打包** — 可运行 JAR 打包、Fat JAR vs Nested JAR、插件对比与排错
 - **IDE 技巧** — IntelliJ IDEA 快捷键、调试技巧、代码模板
