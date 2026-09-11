@@ -25,11 +25,9 @@ Java-Doc-Site/
 │   │   ├── 09-design/          # 设计与实践
 │   │   ├── 10-algorithms/      # 算法与数据结构
 │   │   └── ...                 # 可按需新增（编号递增）
-│   ├── blog/                   # 博客（预留，当前为空）
-│   │   ├── _index.md
-│   │   └── post/_index.md
-│   └── book/                   # 书籍（预留，当前为空）
-│       └── _index.md
+│   └── blog/                   # 博客（时间线文章，post/ 下平铺）
+│       ├── _index.md
+│       └── post/              # 博客文章
 ├── data/home/zh.yaml           # 首页数据（hero、卡片、CTA）
 ├── hugo.yaml                   # 站点唯一配置文件
 ├── go.mod                      # Go 模块依赖
@@ -265,7 +263,7 @@ cascade:
 
 | 来源 | 说明 | 当前条目 |
 |------|------|--------|
-| 顶层内容目录 | `content/` 下的一级目录（`blog/`、`book/`、`docs/`） | 博客、书籍、笔记 |
+| 顶层内容目录 | `content/` 下的一级目录（`blog/`、`docs/`） | 博客、笔记 |
 | `sidebar_root_for: self` | 在 `_index.md` front matter 中声明的自根页面 | 10 个 docs 子分类 |
 
 ### 卡片内容取自 front matter
