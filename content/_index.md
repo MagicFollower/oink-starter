@@ -1,4 +1,4 @@
 ---
-title: Project Name
-description: Documentation, updates, and a practical guide for your project.
+title: Java 笔记
+description: 系统化整理 Java 知识，从基础到架构的学习笔记。
 ---

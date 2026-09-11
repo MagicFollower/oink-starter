@@ -1,6 +1,7 @@
 ---
-title: Docs
-description: Learn the project, install it, follow a tutorial, and look up exact behavior.
+title: 笔记
+linkTitle: 笔记
+description: 系统化整理 Java 知识体系，从语言基础到框架实战。
 type: docs
 icon: fa-solid fa-book
 sidebar_root_for: self
@@ -14,10 +15,15 @@ cascade:
   footer_style: slim
 ---
 
-The documentation follows four familiar paths: understand the project, get it running, learn by doing, then consult the reference.
+笔记按知识模块组织，从语言基础出发，逐步深入到并发、JVM 与框架生态。
 
-- [Introduction](/docs/introduction/)
-- [Get Started](/docs/get-started/)
-- [Tutorial](/docs/tutorial/)
-- [Reference](/docs/reference/)
+- [Java 基础](/docs/01-java-base/)
+- [集合框架](/docs/02-collections/)
+- [并发编程](/docs/03-concurrency/)
+- [JVM](/docs/04-jvm/)
+- [Spring 生态](/docs/05-spring/)
+- [数据访问](/docs/06-data-access/)
+- [中间件](/docs/07-middleware/)
+- [开发工具](/docs/08-dev-tools/)
+- [设计与实践](/docs/09-design/)
 {.cards}

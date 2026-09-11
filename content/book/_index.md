@@ -1,7 +1,7 @@
 ---
-title: Using OINK Starter
-linkTitle: Book
-description: A short, sequential guide from clone to publication.
+title: Java 进阶指南
+linkTitle: 书籍
+description: 一份从基础到进阶的系统学习指南。
 type: book
 icon: fa-solid fa-book-open
 book_kind: book
@@ -18,8 +18,8 @@ cascade:
   sidebar_headings: 3
 ---
 
-This short book explains the starter itself. Read it once from beginning to end, then replace it with the long-form guide your project needs.
+这本书系统梳理 Java 核心知识，从语言基础到框架实战，帮助构建完整的技术体系。
 
-## Contents {#contents}
+## 目录 {#contents}
 
 {{< book-toc depth=2 >}}
