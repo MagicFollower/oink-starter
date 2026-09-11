@@ -1,0 +1,45 @@
+name: Bug report
+description: Report a reproducible OINK theme problem.
+title: '[Bug] '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value:
+        Thanks for helping improve OINK. Please include a minimal reproduction
+        when possible.
+  - type: input
+    id: oink-version
+    attributes:
+      label: OINK version
+      description: Release tag or commit SHA used by the consuming site.
+    validations:
+      required: true
+  - type: input
+    id: hugo-version
+    attributes:
+      label: Hugo version
+      placeholder: hugo v0.164.0+extended
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description:
+        Include configuration, content, commands, and a minimal repository or
+        snippet.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
