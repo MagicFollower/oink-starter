@@ -1,0 +1,47 @@
+{{- /*
+  侧边栏根选择器 — 条目收集器
+
+  【存在意义】
+  为侧边栏顶部的下拉卡片列表收集所有候选条目。该列表让读者在不同顶级栏目
+  （博客、书籍、笔记及其子分类）之间一键切换。
+
+  【数据来源】
+  1. 顶层内容目录：content/ 下的一级目录（blog/、book/、docs/），按 weight 排序
+  2. 自根页面：front matter 中声明 sidebar_root_for: self 的页面（如 10 个 docs 子分类）
+
+  【解决的问题】
+  主题原版 root-menu-roots.html 在收集「自根页面」时未检查 sidebar_root_menu 字段，
+  导致即使设置了 sidebar_root_menu: false 也无法从下拉列表中隐藏该条目。
+  本覆盖文件在第二个循环中补充了 (ne .Params.sidebar_root_menu false) 判断，
+  使 sidebar_root_menu: false 对两类来源均生效。
+
+  【放置位置】
+  站点 layouts/ 目录优先于主题 oink-main/ 目录，因此本文件会自动覆盖主题同名 partial，
+  无需修改主题源码。
+*/ -}}
+{{- $site := . -}}
+{{- $entries := slice -}}
+{{- $seen := newScratch -}}
+
+{{- range $site.Home.Sections.ByWeight -}}
+  {{- if ne .Params.sidebar_root_menu false -}}
+    {{- $key := .RelPermalink -}}
+    {{- if not ($seen.Get $key) -}}
+      {{- $entries = $entries | append . -}}
+      {{- $seen.Set $key true -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $selfRoots := where $site.Pages "Params.sidebar_root_for" "self" -}}
+{{- range $selfRoots.ByWeight -}}
+  {{- if and .IsSection (ne .Params.sidebar_root_menu false) -}}
+    {{- $key := .RelPermalink -}}
+    {{- if not ($seen.Get $key) -}}
+      {{- $entries = $entries | append . -}}
+      {{- $seen.Set $key true -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return $entries -}}
