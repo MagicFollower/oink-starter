@@ -209,6 +209,44 @@ System.out.println(kept);    // 输出: [李四]
 System.out.println(fixed);   // 输出: [张三, 李四]（原集合没动）
 ```
 
+**含重复元素 + null 时的基数行为详解**：
+
+上面的坑一示例元素都不重复，看不出 `retainAll` 对重复元素的处理逻辑。下面用含重复 + null 的数据彻底拆解：
+
+```java
+List<String> strings  = new ArrayList<>(Arrays.asList("hello", "aworld", "aworld", "aworld", null, "full"));
+List<String> strings1 = Arrays.asList("aworld", "aworld", null, "full", "full");
+
+// ===== retainAll：保留 strings 中「也在 strings1 里」的元素 =====
+strings.retainAll(strings1);
+System.out.println("strings = " + strings);
+// 输出: strings = [aworld, aworld, aworld, null, full]
+
+// ===== removeAll：删除 strings 中「在 strings1 里出现过」的元素 =====
+strings  = new ArrayList<>(Arrays.asList("hello", "aworld", "aworld", "aworld", null, "full"));
+strings1 = Arrays.asList("aworld", "aworld", null, "full", "full");
+strings.removeAll(strings1);
+System.out.println("strings = " + strings);
+// 输出: strings = [hello]
+```
+
+**逐元素拆解**：
+
+| 元素 | strings 基数 | strings1 基数 | retainAll 结果 | removeAll 结果 |
+|------|-------------|--------------|---------------|---------------|
+| `"hello"` | 1 | 0（不在） | 移除（strings1 没有） | **保留**（strings1 没有） |
+| `"aworld"` | 3 | 2 | **全部保留** 3 个（contains 返回 true） | **全部移除**（contains 返回 true） |
+| `null` | 1 | 1 | **保留** 1 个 | **移除** |
+| `"full"` | 1 | 2 | **保留** 1 个 | **移除** |
+
+**规律总结**：
+
+- **`retainAll`** 的判断逻辑是 `contains()`——只要元素在目标集合中**存在**，源集合中该元素的**所有副本全部保留**，不管目标集合里有几个。所以 3 个 "aworld" 全留、1 个 "full" 也留。这和 `CollectionUtils.intersection` 的 min 基数规则**不同**——intersection 会取 min(3,2)=2 个 "aworld"，retainAll 直接留 3 个
+- **`removeAll`** 的判断逻辑同样是 `contains()`——只要元素在目标集合中**出现过**，源集合中该元素的**所有副本全部删除**。和 `CollectionUtils.subtract` 的基数相减也**不同**——subtract 会用 3−2=1 还剩 1 个 "aworld"，removeAll 直接清零
+- **null 安全**：两者都能处理 null 元素（`contains(null)` 返回 true），不会 NPE
+
+> 与 CollectionUtils 代数方法对照：`retainAll` ≠ `intersection`（retainAll 按存在性全留，intersection 按 min 基数截取）；`removeAll` ≠ `subtract`（removeAll 按存在性清零，subtract 按基数相减）。JDK 原生方法只看「在不在」，CollectionUtils 代数方法看「有几个」。需要精确基数语义时，用 CollectionUtils。
+
 **参数解释**：四个代数方法的参数都**不允许为 null**（javadoc 标注 must not be null）——上游可能给 null 时，先 `emptyIfNull` 兜一层再运算。`retainAll(collection, retain)` 与 `removeAll(collection, remove)` 是 JDK `List.retainAll/removeAll` 的「无副作用版」，官方 javadoc 原话：适用于「不想修改原集合、因此没法调 collection.removeAll」的场景。
 
 **顺序提示**：union/intersection/disjunction 的返回集合**不保证保持输入顺序**——上面示例的输出按语义书写，需要稳定顺序时把结果转入 `TreeSet` 或自行排序后再使用。
