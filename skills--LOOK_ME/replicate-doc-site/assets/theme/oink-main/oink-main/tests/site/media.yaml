@@ -1,0 +1,8 @@
+# Mount only fixture media. Synthetic checks that replace contentDir or
+# layoutDir merge this config after the fixture's primary config.
+module:
+  mounts:
+    - source: assets
+      target: assets
+    - source: static
+      target: static

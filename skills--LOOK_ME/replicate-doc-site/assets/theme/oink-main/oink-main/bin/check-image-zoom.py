@@ -1,0 +1,436 @@
+#!/usr/bin/env python3
+"""Validate Image Zoom gating, output isolation, and runtime contracts."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+import re
+import subprocess
+import tempfile
+
+from runtime_assets import chunk
+from test_site import build_fixture_public, run_hugo_process
+
+
+ROOT = Path(__file__).resolve().parents[1]
+FIXTURE = ROOT / "tests/site"
+def require(condition: bool, message: str, errors: list[str]) -> None:
+    if not condition:
+        errors.append(message)
+
+
+def enclosing_selectors(styles: str, position: int) -> list[str]:
+    """Return the selector text of every SCSS block that encloses ``position``."""
+    selectors: list[str] = []
+    depth = 0
+    index = position
+    while index > 0:
+        index -= 1
+        char = styles[index]
+        if char == "}":
+            depth += 1
+        elif char == "{":
+            if depth:
+                depth -= 1
+                continue
+            start = max(styles.rfind("}", 0, index), styles.rfind("{", 0, index), styles.rfind(";", 0, index))
+            selectors.append(styles[start + 1 : index].strip())
+    return selectors
+
+
+def run_hugo(hugo: str, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    return run_hugo_process(
+        [hugo, *args],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        env=env,
+    )
+
+
+def bundle_path(public: Path, page: str) -> tuple[Path | None, str]:
+    source = (public / page).read_text()
+    runtime = chunk(public, source, "image-zoom")
+    return (runtime.path if runtime else None), source
+
+
+def check_outputs(public: Path) -> list[str]:
+    errors: list[str] = []
+    zoom_path, zoom = bundle_path(public, "fixtures/image-zoom/index.html")
+    disabled_path, disabled = bundle_path(public, "fixtures/image-zoom-disabled/index.html")
+    excluded_path, excluded = bundle_path(public, "fixtures/image-zoom-exclusions/index.html")
+    plain_path, plain = bundle_path(public, "fixtures/content-primitives/index.html")
+    markdown = (public / "fixtures/image-zoom/index.md").read_text()
+    print_page = (public / "_print/fixtures/index.html").read_text()
+    media = (public / "fixtures/media-primitives/index.html").read_text()
+    blog_path, blog = bundle_path(public, "blog/index.html")
+
+    for marker in (
+        'class="td-image-zoom d-print-none"',
+        "data-td-image-zoom-dialog",
+        'aria-label="Image preview"',
+        'data-td-open-label="Open image preview"',
+        "data-td-image-zoom-close",
+        "data-td-image-zoom-image",
+        "data-td-image-zoom-caption",
+        "Blue and gold standalone preview",
+        "Green and violet processed preview",
+        # One marker for every path: the value is the full-size original.
+        'data-td-image-zoom="/media/content-primitives-global.png"',
+        # A decorative processed image is simply not marked: an empty alt is
+        # already disqualifying, so no explicit opt-out is emitted for it.
+        '<img src="/fixtures/image-zoom/legacy-empty_hu_',
+        "Linked image remains a link",
+    ):
+        require(marker in zoom, f"enabled Zoom fixture missing {marker}", errors)
+    require(zoom.count("data-td-image-zoom-dialog") == 1, "enabled page emitted more than one dialog", errors)
+    require(zoom_path is not None and zoom_path.exists(), "enabled page has no local image-zoom chunk", errors)
+    if zoom_path and zoom_path.exists():
+        zoom_bundle = zoom_path.read_text()
+        require("data-td-image-zoom-dialog" in zoom_bundle, "enabled bundle omits Image Zoom", errors)
+        require("HTMLDialogElement" in zoom_bundle, "enabled bundle lacks dialog feature detection", errors)
+
+    for label, page, path in (
+        ("page-disabled", disabled, disabled_path),
+        ("excluded-only", excluded, excluded_path),
+        ("candidate-free", plain, plain_path),
+    ):
+        require("data-td-image-zoom-dialog" not in page, f"{label} page emitted a dialog", errors)
+        require(path is None, f"{label} page loaded the Zoom runtime", errors)
+
+    zoom_runtime = chunk(public, zoom, "image-zoom")
+    require(zoom_runtime is not None, "enabled page lacks its image-zoom chunk", errors)
+    if zoom_runtime:
+        require('integrity="sha256-' in zoom_runtime.tag, "Zoom chunk is not fingerprinted with SRI", errors)
+        require("http://" not in zoom_runtime.tag and "https://" not in zoom_runtime.tag, "Zoom chunk is not local", errors)
+    require(
+        zoom.index("data-td-image-zoom-dialog") < zoom_runtime.start if zoom_runtime else False,
+        "dialog is not present before the runtime executes",
+        errors,
+    )
+    require(not re.search(r"\son[a-z]+\s*=", zoom, re.I), "Zoom markup contains an inline event handler", errors)
+
+    for marker in ("<dialog", "td-image-zoom", "data-td-image-zoom"):
+        require(marker not in markdown, f"Markdown output contains Zoom marker {marker}", errors)
+        require(marker not in print_page, f"print output contains Zoom marker {marker}", errors)
+    require("![Blue and gold standalone preview]" in markdown, "Markdown lost the standalone image", errors)
+    # Markdown output is the page source now that every image form is a hook.
+    require("![](legacy-empty.png)" in markdown, "Markdown lost the legacy empty-alt image", errors)
+    require('data-td-image-zoom' not in media.split("legacy-empty")[1][:200] if "legacy-empty" in media else True,
+            "a decorative image was marked for Zoom", errors)
+    require("data-td-image-zoom-dialog" in blog, "blog content candidate did not request Zoom", errors)
+    # The fixture shows both list forms on purpose -- the blog root is a card
+    # grid and its child sections keep the row form -- and they mark the
+    # featured image differently: a row labels it, a card renders it decorative
+    # because the title beside it is the link. Either satisfies the fixture.
+    require("td-blog-posts-list__thumbnail" in blog or "td-blog-card__image" in blog,
+            "blog scope fixture lacks a featured thumbnail", errors)
+    require(blog_path is not None and blog_path.exists(), "blog scope fixture lacks the image-zoom chunk", errors)
+    return errors
+
+
+def site_config(value: str | None) -> str:
+    config = (
+        "baseURL: https://example.org/\n"
+        "title: Zoom gate fixture\n"
+        f"theme: {ROOT.name}\n"
+        "disableKinds: [RSS, sitemap, taxonomy, term]\n"
+        "markup:\n  goldmark:\n    renderer:\n      unsafe: true\n"
+    )
+    if value is not None:
+        config += "params:\n  ui:\n    image_zoom: " + value + "\n"
+    return config
+
+
+def page_front_matter(value: str | None) -> str:
+    front = "---\ntitle: Zoom gate\n"
+    if value is not None:
+        # A value that starts with a newline is a raw front matter fragment
+        # (used to exercise the legacy-shape detection).
+        front += value.lstrip("\n") + "\n" if value.startswith("\n") else "image_zoom: " + value + "\n"
+    return front + "---\n\n"
+
+
+def build_gate_case(
+    hugo: str,
+    *,
+    site_value: str | None,
+    page_value: str | None,
+    body: str,
+    panic_on_warning: bool = False,
+) -> tuple[subprocess.CompletedProcess[str], str]:
+    with tempfile.TemporaryDirectory(prefix="oink-image-zoom-gate-") as temp:
+        site = Path(temp)
+        (site / "content/docs").mkdir(parents=True)
+        (site / "static").mkdir()
+        (site / "hugo.yaml").write_text(site_config(site_value))
+        (site / "content/docs/index.md").write_text(page_front_matter(page_value) + body)
+        (site / "static/image.svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="40">'
+            '<rect width="64" height="40" fill="#1677ff"/></svg>\n'
+        )
+        destination = site / "public"
+        arguments = [
+            hugo,
+            "--source",
+            str(site),
+            "--themesDir",
+            str(ROOT.parent),
+            "--destination",
+            str(destination),
+            "--logLevel",
+            "warn",
+        ]
+        if panic_on_warning:
+            arguments.append("--panicOnWarning")
+        result = run_hugo(*arguments)
+        page = ""
+        output = destination / "docs/index.html"
+        if result.returncode == 0 and output.exists():
+            page = output.read_text()
+        return result, page
+
+
+def check_config_matrix(hugo: str) -> list[str]:
+    errors: list[str] = []
+    candidate = "![Gate candidate](/image.svg)\n"
+    cases = (
+        ("default-off", None, None, candidate, False),
+        ("page-on", None, "true", candidate, True),
+        ("site-on", "true", None, candidate, True),
+        ("page-false-wins", "true", "false", candidate, False),
+        ("no-candidate", "true", None, "No image here.\n", False),
+    )
+    for name, site_value, page_value, body, expected_zoom in cases:
+        result, page = build_gate_case(
+            hugo,
+            site_value=site_value,
+            page_value=page_value,
+            body=body,
+        )
+        if result.returncode != 0:
+            errors.append(f"Zoom config case {name} failed: {result.stdout}{result.stderr}")
+            continue
+        actual = "data-td-image-zoom-dialog" in page
+        require(actual == expected_zoom, f"Zoom config case {name} resolved to {actual}", errors)
+
+    invalid = (
+        ("site-string", '"true"', None, "params.ui.image_zoom must be true or false"),
+        ("site-number", "1", None, "params.ui.image_zoom must be true or false"),
+        ("page-string", None, '"false"', "front matter image_zoom must be true or false"),
+    )
+    strict_canaries = {"site-string", "page-string"}
+    for name, site_value, page_value, expected in invalid:
+        result, page = build_gate_case(
+            hugo,
+            site_value=site_value,
+            page_value=page_value,
+            body="No image required.\n",
+        )
+        output = result.stdout + result.stderr
+        require(expected in output, f"invalid Zoom config {name} did not report its boolean path", errors)
+        # A bad value warns and Zoom stays off, which is the shipped default
+        # anyway; only --panicOnWarning turns that into a failure.
+        require(result.returncode == 0,
+                f"invalid Zoom config {name} stopped the build instead of warning", errors)
+        require(bool(page), f"invalid Zoom config {name} emitted no safe page output", errors)
+        if name in strict_canaries:
+            strict, _ = build_gate_case(
+                hugo,
+                site_value=site_value,
+                page_value=page_value,
+                body="No image required.\n",
+                panic_on_warning=True,
+            )
+            require(strict.returncode != 0,
+                    f"invalid Zoom config {name} survived --panicOnWarning", errors)
+        if name.startswith("page"):
+            require("/docs" in output, "invalid page Zoom config omitted its page", errors)
+    return errors
+
+
+def check_candidate_exclusions(hugo: str) -> list[str]:
+    errors: list[str] = []
+    excluded_cases = (
+        ("empty-alt", '<p><img src="/image.svg" alt=""></p>\n'),
+        ("role-none", '<p><img src="/image.svg" alt="" role="none"></p>\n'),
+        ("role-presentation-uppercase", '<p><img src="/image.svg" alt="Decorative" role="PRESENTATION"></p>\n'),
+        ("aria-hidden-uppercase", '<p><img src="/image.svg" alt="Hidden" aria-hidden="TRUE"></p>\n'),
+    )
+    for name, body in excluded_cases:
+        result, page = build_gate_case(
+            hugo,
+            site_value="true",
+            page_value=None,
+            body=body,
+        )
+        if result.returncode != 0:
+            errors.append(f"Zoom exclusion case {name} failed: {result.stdout}{result.stderr}")
+            continue
+        raw_target = re.search(rf'<img\b[^>]*\bsrc="/image\.svg"[^>]*>', page)
+        if not raw_target:
+            errors.append(f"Zoom exclusion case {name} did not render its target image")
+            continue
+        require(
+            "data-td-image-zoom-dialog" not in page,
+            f"Zoom exclusion case {name} requested the runtime",
+            errors,
+        )
+
+    result, page = build_gate_case(
+        hugo,
+        site_value="true",
+        page_value=None,
+        body='<p><img src="/image.svg" alt="Informative image"></p>\n',
+    )
+    if result.returncode != 0:
+        errors.append(f"Zoom informative candidate failed: {result.stdout}{result.stderr}")
+    else:
+        require(
+            "data-td-image-zoom-dialog" in page,
+            "Zoom informative candidate did not request the runtime",
+            errors,
+        )
+    return errors
+
+
+def check_template_contracts() -> list[str]:
+    errors: list[str] = []
+    scripts = (ROOT / "layouts/_partials/scripts.html").read_text()
+    config = (ROOT / "layouts/_partials/content/image-zoom-config.html").read_text()
+    render = (ROOT / "layouts/_partials/content/render.html").read_text()
+    derived = (ROOT / "layouts/_partials/content/register-derived.html").read_text()
+    candidate = (ROOT / "layouts/_partials/content/image-zoom-candidate.html").read_text()
+    dialog = (ROOT / "layouts/_partials/content/image-zoom-dialog.html").read_text()
+    runtime = (ROOT / "assets/js/image-zoom.js").read_text()
+    styles = (ROOT / "assets/scss/td/shortcodes/_content-primitives.scss").read_text()
+
+    for path in (ROOT / "layouts").rglob("*.html"):
+        relative = path.relative_to(ROOT).as_posix()
+        if relative in {
+            "layouts/_partials/content/render.html",
+            "layouts/_partials/print/content.html",
+            "layouts/_partials/print/render.html",
+        }:
+            continue
+        require(
+            not re.search(r"{{-?\s*(?:with\s+)?\.Content\b", path.read_text()),
+            f"{relative} bypasses content/render.html",
+            errors,
+        )
+
+    require(
+        "$hasImageZoom -}}" in scripts
+        and 'js/image-zoom.js' in scripts
+        and '"target" "js/chunks/image-zoom.js"' in scripts,
+        "Zoom runtime is not gated as its stable capability chunk",
+        errors,
+    )
+
+    require('resources.Get "js/image-zoom.js"' in scripts, "scripts.html does not append Zoom", errors)
+    require('partial "content/image-zoom-dialog.html"' in scripts, "scripts.html does not emit the dialog", errors)
+    require(scripts.index('partial "content/image-zoom-dialog.html"') < scripts.index("range $jsChunks"), "dialog renders after the runtime chunks", errors)
+    require('partial "content/register-derived.html"' in render, "content renderer bypasses derived runtime registration", errors)
+    require('partial "content/image-zoom-candidate.html"' in derived, "derived runtime registration does not scan Zoom candidates", errors)
+    require('.Store.Set "hasImageZoom" true' in derived, "derived runtime registration does not set the Zoom flag", errors)
+    require(".Content" not in scripts, "scripts.html forces page content rendering", errors)
+    # The type check moved into the shared validator; what has to hold here is
+    # that both levels go through it and that the fallback is off.
+    require(config.count('partial "validate.html"') == 2
+            and '"kind" "bool"' in config
+            and '"key" "params.ui.image_zoom"' in config
+            and '"key" "front matter image_zoom"' in config
+            and '"fallback" false' in config,
+            "Zoom config is not a strict boolean through the shared validator", errors)
+    # The scan answers "did the theme mark anything?" first and only falls back
+    # to structure for images a site wrote as raw HTML; that fallback keeps the
+    # exclusions so a page of decorative images pulls in no runtime.
+    require('strings.Contains $html "data-td-image-zoom"' in candidate, "candidate scan does not test the marker first", errors)
+    require("data-no-zoom" in candidate and "aria-hidden" in candidate and "role" in candidate, "candidate scan lost its raw-HTML exclusions", errors)
+    require("standaloneParagraph" not in candidate, "candidate scan still re-derives the runtime eligibility rules", errors)
+    require("<dialog" in dialog and "data-td-image-zoom-close" in dialog, "Zoom dialog lacks native markup", errors)
+    require(not re.search(r"\son[a-z]+\s*=", dialog, re.I), "dialog partial contains inline handlers", errors)
+
+    for marker in (
+        "HTMLDialogElement",
+        "showModal",
+        "data-no-zoom",
+        "dataset.tdImageZoom",
+        "currentSrc",
+        "event.target === dialog",
+        "backdropPressed",
+        "origin.focus",
+        "document.createElement('button')",
+    ):
+        require(marker in runtime, f"Zoom runtime lacks {marker}", errors)
+    require("role === 'none'" in runtime, "Zoom runtime does not exclude role=none", errors)
+    require("alt?.trim()" in runtime, "Zoom runtime does not exclude empty-alt images", errors)
+    require("style.inlineSize" not in runtime, "Zoom runtime freezes trigger width in pixels", errors)
+    for forbidden in ("eval(", "new Function", ".innerHTML"):
+        require(forbidden not in runtime, f"Zoom runtime contains {forbidden}", errors)
+    require("Open image preview" not in runtime, "Zoom runtime contains an unlocalized visible fallback", errors)
+    require("#td-main-content img" not in runtime, "Zoom runtime scans theme chrome outside content", errors)
+    for marker in ("forced-colors", "::backdrop", "@media print"):
+        require(marker in styles, f"Zoom styles lack {marker}", errors)
+    require(".td-image-zoom:not([open])" in styles, "Zoom lacks an unsupported-dialog closed fallback", errors)
+    # Zoom itself must not animate. content-primitives.scss also hosts other
+    # primitives, so scope the motion assertion to rule blocks whose selector
+    # names the Zoom, and separately require a reduced-motion path for any
+    # motion the rest of the file declares.
+    for match in re.finditer(r"^\s*(?:transition|animation)\s*:", styles, re.M):
+        selectors = " ".join(enclosing_selectors(styles, match.start()))
+        require("td-image-zoom" not in selectors, "Zoom adds motion without a reduction path", errors)
+    motion = list(re.finditer(r"^\s*(?:transition|animation)\s*:(.*?);", styles, re.M | re.S))
+    if motion:
+        reduce_block = re.search(r"@media \(prefers-reduced-motion: reduce\)\s*\{(.*?)\n\}", styles, re.S)
+        tokens = (ROOT / "assets/scss/td/shell/_tokens.scss").read_text()
+        shared_reduce = re.search(
+            r"@media \(prefers-reduced-motion: reduce\).*?"
+            r"--td-motion-duration-fast:\s*0ms;.*?"
+            r"--td-motion-duration:\s*0ms;.*?"
+            r"--td-motion-duration-slow:\s*0ms;",
+            tokens,
+            re.S,
+        )
+        uses_shared_duration = all("var(--td-motion-duration" in item.group(0) for item in motion)
+        require(
+            (reduce_block is not None and "transition: none" in reduce_block.group(1))
+            or (uses_shared_duration and shared_reduce is not None),
+            "content primitives declare motion without a prefers-reduced-motion path",
+            errors,
+        )
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--public", type=Path)
+    parser.add_argument("--hugo", default="hugo")
+    args = parser.parse_args()
+
+    public = args.public
+    if public is None:
+        public, result = build_fixture_public(args.hugo)
+        if result.returncode != 0:
+            print(f"private fixture build failed: {result.stdout}{result.stderr}")
+            return 1
+
+    errors = (
+        check_outputs(public)
+        + check_config_matrix(args.hugo)
+        + check_candidate_exclusions(args.hugo)
+        + check_template_contracts()
+    )
+    if errors:
+        print("Image Zoom checks failed:")
+        for error in errors:
+            print(f"  {error}")
+        return 1
+    print("Image Zoom checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

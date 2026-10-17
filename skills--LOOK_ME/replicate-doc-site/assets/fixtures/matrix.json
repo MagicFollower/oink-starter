@@ -1,0 +1,264 @@
+{
+ "prefixes": {
+  "4x": "docs",
+  "50": "v2"
+ },
+ "categories": [
+  {
+   "dir": "01-分类",
+   "title": "分类",
+   "icon": "fa-solid fa-flask",
+   "weight": 1,
+   "desc": "夹具分类，用来验证判据。",
+   "sections": [
+    {
+     "dir": "合规板块",
+     "title": "合规板块",
+     "weight": 1,
+     "desc": "不该报任何问题的样本。",
+     "articles": [
+      {
+       "file": "good-1.md",
+       "title": "合规样本一",
+       "weight": 1,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:合规板块--good-1.md",
+        "50:合规板块--good-1.md"
+       ]
+      },
+      {
+       "file": "good-2.md",
+       "title": "合规样本二",
+       "weight": 2,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:合规板块--good-2.md",
+        "50:合规板块--good-2.md"
+       ]
+      },
+      {
+       "file": "unmapped.md",
+       "title": "产物缺失样本",
+       "weight": 3,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:合规板块--unmapped.md"
+       ]
+      }
+     ]
+    },
+    {
+     "dir": "缺陷板块",
+     "title": "缺陷板块",
+     "weight": 2,
+     "desc": "每个文件只触发一类判据。",
+     "articles": [
+      {
+       "file": "short.md",
+       "title": "篇幅不足样本",
+       "weight": 1,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--short.md"
+       ]
+      },
+      {
+       "file": "nomermaid.md",
+       "title": "缺图样本",
+       "weight": 2,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--nomermaid.md"
+       ]
+      },
+      {
+       "file": "nocode.md",
+       "title": "缺代码样本",
+       "weight": 3,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--nocode.md"
+       ]
+      },
+      {
+       "file": "box.md",
+       "title": "框线字符样本",
+       "weight": 4,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--box.md"
+       ]
+      },
+      {
+       "file": "skip.md",
+       "title": "省略语样本",
+       "weight": 5,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--skip.md"
+       ]
+      },
+      {
+       "file": "scratch.md",
+       "title": "暂存路径样本",
+       "weight": 6,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--scratch.md"
+       ]
+      },
+      {
+       "file": "newbie.md",
+       "title": "小结不足样本",
+       "weight": 7,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--newbie.md"
+       ]
+      },
+      {
+       "file": "summary.md",
+       "title": "缺总结样本",
+       "weight": 8,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--summary.md"
+       ]
+      },
+      {
+       "file": "painopen.md",
+       "title": "开头不是痛点",
+       "weight": 9,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--painopen.md"
+       ]
+      },
+      {
+       "file": "image.md",
+       "title": "断图样本",
+       "weight": 10,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--image.md"
+       ]
+      },
+      {
+       "file": "dupweight.md",
+       "title": "权重重复样本",
+       "weight": 1,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--dupweight.md"
+       ]
+      },
+      {
+       "file": "selfcheck.md",
+       "title": "判据词泄漏样本",
+       "weight": 12,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺陷板块--selfcheck.md"
+       ]
+      }
+     ]
+    },
+    {
+     "dir": "无索引板块",
+     "title": "无索引板块",
+     "weight": 3,
+     "desc": "目录缺 _index.md。",
+     "articles": [
+      {
+       "file": "orphan.md",
+       "title": "无索引样本",
+       "weight": 1,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:无索引板块--orphan.md"
+       ]
+      }
+     ]
+    },
+    {
+     "dir": "缺文件板块",
+     "title": "缺文件板块",
+     "weight": 4,
+     "desc": "矩阵列了但磁盘没有。",
+     "articles": [
+      {
+       "file": "listed-missing.md",
+       "title": "缺文件样本",
+       "weight": 1,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺文件板块--listed-missing.md"
+       ]
+      }
+     ]
+    },
+    {
+     "dir": "元数据板块",
+     "title": "元数据板块",
+     "weight": 5,
+     "desc": "front matter 字段类判据。",
+     "articles": [
+      {
+       "file": "thindesc.md",
+       "title": "描述过短样本",
+       "weight": 1,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:元数据板块--thindesc.md"
+       ]
+      },
+      {
+       "file": "enhead.md",
+       "title": "英文标题样本",
+       "weight": 2,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:元数据板块--enhead.md"
+       ]
+      }
+     ]
+    },
+    {
+     "dir": "无头板块",
+     "title": "无头板块",
+     "weight": 6,
+     "desc": "没有 front matter 的样本。",
+     "articles": [
+      {
+       "file": "nofm.md",
+       "title": "无 front matter 样本",
+       "weight": 1,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:无头板块--nofm.md"
+       ]
+      }
+     ]
+    },
+    {
+     "dir": "缺字段板块",
+     "title": "缺字段板块",
+     "weight": 7,
+     "desc": "缺 weight 字段的样本。",
+     "articles": [
+      {
+       "file": "fmfield.md",
+       "title": "缺 weight 样本",
+       "weight": 1,
+       "desc": "夹具用合规样本，用来证明判据不会对正常文档误报，长度刻意压到门槛附近。",
+       "sources": [
+        "4x:缺字段板块--fmfield.md"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
