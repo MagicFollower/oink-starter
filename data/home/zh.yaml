@@ -2,36 +2,36 @@ sections: [hero, cards, cta]
 
 hero:
   align: center
-  eyebrow: 开源项目起步模板
+  eyebrow: Apache RocketMQ 中文文档
   title_lines:
-    - words: [{ text: 你的项目， }]
-    - words: [{ text: 清楚讲明白。 }]
-  lead: 一个可以直接修改的项目首页，容纳文档、动态与长篇指南。
+    - words: [{ text: 吃透 RocketMQ， }]
+    - words: [{ text: 从领域模型到生产运维。 }]
+  lead: 一份按知识板块重组的 RocketMQ 中文文档：5.0 与 4.x 全量内容、四类消息机制、消费行为、部署容灾、mqadmin 命令与生态组件。
   actions:
-    - { label: 阅读文档, url: docs/, icon: fa-solid fa-book, style: primary }
-    - { label: 跟随教程, url: book/, icon: fa-solid fa-arrow-right, style: ghost }
+    - { label: 开始阅读, url: docs/01-overview/, icon: fa-solid fa-book, style: primary }
+    - { label: 浏览全部文档, url: docs/, icon: fa-solid fa-layer-group, style: ghost }
 
 cards:
-  eyebrow: 从清晰结构开始
-  title: 每类内容都有自己的位置
+  eyebrow: 内容体系
+  title: 按板块逐步深入
   columns: 3
   items:
-    - title: 博客
-      desc: 发布文章、设计记录与版本公告。
-      icon: fa-solid fa-pen-nib
-      url: blog/
-    - title: 文档
-      desc: 按简介、快速上手、教程与参考组织资料。
-      icon: fa-solid fa-book-open
-      url: docs/
-    - title: 书籍
-      desc: 用连续的阅读体验讲清一套完整工作流。
-      icon: fa-solid fa-graduation-cap
-      url: book/
+    - title: 核心概念与领域模型
+      desc: 主题、队列、轻量主题、消息属性与订阅分组的行为约束。
+      icon: fa-solid fa-cubes
+      url: docs/02-core-concepts/
+    - title: 消息类型与发送
+      desc: 普通、定时、顺序、事务四类消息的原理、限制与代码。
+      icon: fa-solid fa-paper-plane
+      url: docs/04-message-features/
+    - title: 部署与运维
+      desc: 集群部署、DLedger 与 Controller 容灾、mqadmin 与监控指标。
+      icon: fa-solid fa-server
+      url: docs/06-operations/
 
 cta:
-  title: 把这个模板变成你的站点。
-  text: 修改项目名称与网址，替换示例文案，然后发布。
-  label: 开始使用
-  url: docs/get-started/
+  title: 从第一条消息开始。
+  text: 先跑通本地二进制收发，再回到领域模型理解每一条约束的来处。
+  label: 快速开始
+  url: docs/03-quickstart/
   style: primary
