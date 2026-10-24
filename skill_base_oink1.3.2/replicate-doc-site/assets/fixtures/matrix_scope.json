@@ -1,0 +1,34 @@
+{
+ "categories": [
+  {
+   "dir": "01-分类",
+   "title": "分类",
+   "icon": "fa-solid fa-flask",
+   "weight": 1,
+   "desc": "夹具分类，用来验证判据。",
+   "sections": [
+    {
+     "dir": "合规板块",
+     "title": "合规板块",
+     "weight": 1,
+     "desc": "不该报任何问题的样本。",
+     "articles": [
+      {
+       "file": "good-1.md",
+       "title": "合规样本一",
+       "weight": 1,
+       "desc": "这一篇同时认领一个上游源与一个上游文档树之外的源，用来验证 --skip-prefix。",
+       "sources": [
+        "4x:合规板块--good-1.md",
+        "local:springboot-demo/order/src/main/java/Demo.java"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "prefixes": {
+  "4x": "docs"
+ }
+}

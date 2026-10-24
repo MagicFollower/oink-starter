@@ -1,0 +1,167 @@
+{{/* cSpell:ignore docsearch opengraph outputformat */ -}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+{{ $darkMode := partialCached "dark-mode-config.html" "dark-mode-global" -}}
+{{ $preset := partialCached "preset-config.html" "preset-global" -}}
+{{- $canvases := partialCached "_funcs/preset-canvases.html" "preset-canvases" -}}
+{{- $site := index $canvases $preset.preset -}}
+{{/* Browser hints before CSS loads */ -}}
+{{ if $darkMode.enable -}}
+<meta name="color-scheme" content="light dark">
+{{ end -}}
+<meta name="theme-color" content="{{ $site.light }}" data-td-canvas-light="{{ $site.light }}" data-td-canvas-dark="{{ $site.dark }}">
+
+{{/* Canvas colors before the stylesheet arrives, keyed on the same
+     attributes the stylesheet uses, so the first frame already shows the
+     preset and mode the head scripts below select. */ -}}
+<style>
+  html { background: {{ $site.light }}; color: {{ $site.lightInk }}; }
+  {{- if $darkMode.enable }}
+  html[data-bs-theme='dark'] { background: {{ $site.dark }}; color: {{ $site.darkInk }}; }
+  {{- end }}
+  {{- range $preset.offered }}{{ if ne . $preset.preset }}{{ $c := index $canvases . }}
+  html[data-td-preset='{{ . }}'] { background: {{ $c.light }}; color: {{ $c.lightInk }}; }
+  {{- if $darkMode.enable }}
+  html[data-td-preset='{{ . }}'][data-bs-theme='dark'] { background: {{ $c.dark }}; color: {{ $c.darkInk }}; }
+  {{- end }}{{ end }}{{ end }}
+  {{- if $darkMode.enable }}
+  {{/* Avoid transitions until theme CSS is loaded */ -}}
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+  {{- end }}
+</style>
+
+{{ if $preset.menu -}}
+{{/* Apply a reader's stored preset before the stylesheet paints. Only the
+     presets this site offers are accepted; anything else is removed so the
+     site default reaches the reader again. appearance.js owns later changes. */ -}}
+<script>
+  (function() {
+    var root = document.documentElement;
+    var allowed = {{ $preset.offered | jsonify | safeJS }};
+    var canvases = {{ $canvases | jsonify | safeJS }};
+    var preset = null;
+    try {
+      preset = localStorage.getItem('td-preset');
+      if (preset !== null && allowed.indexOf(preset) < 0) {
+        preset = null;
+        localStorage.removeItem('td-preset');
+      }
+    } catch (_) {
+      // Storage blocked: the server-rendered site default stays.
+    }
+    if (preset) root.setAttribute('data-td-preset', preset);
+    var c = canvases[root.getAttribute('data-td-preset')];
+    if (!c) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('data-td-canvas-light', c.light);
+      meta.setAttribute('data-td-canvas-dark', c.dark);
+      meta.setAttribute('content', c.light);
+    });
+  })();
+</script>
+{{ end -}}
+
+{{ if $darkMode.enable -}}
+{{/* Set theme attribute before CSS loads to prevent flash */ -}}
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      // Storage can be blocked by browser or embedding policy. System color
+      // preference remains a safe first-paint fallback.
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    {{/* Swagger UI and Algolia DocSearch carry their own dark palettes keyed
+         on their own switch; mirror the resolved theme before first paint so
+         neither flashes its light palette. dark-mode.js keeps them in sync. */ -}}
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+{{ end -}}
+
+{{ range .AlternativeOutputFormats -}}
+<link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .Permalink | safeURL }}">
+{{ end -}}
+{{- $outputFormat := lower (.Store.Get "tdOutputFormat" | default "html") -}}
+{{- $pager := partialCached "pager-state.html" . .Site.BaseURL .Site.Language.Lang .RelPermalink $outputFormat -}}
+{{- with $pager.prev }}
+<link rel="prev" href="{{ .RelPermalink }}">
+{{- end -}}
+{{- with $pager.next }}
+<link rel="next" href="{{ .RelPermalink }}">
+{{- end -}}
+
+{{/* Every baseof template records the format in the page store before head is
+rendered, so read that instead of re-deriving it from the output-format lists. */ -}}
+{{ if and hugo.IsProduction (ne $outputFormat "print") (ne .Site.Language.Name "xx") -}}
+<meta name="robots" content="index, follow">
+{{ else -}}
+<meta name="robots" content="noindex, nofollow">
+{{ end -}}
+
+{{ partialCached "favicons.html" . }}
+<title>
+  {{- if .IsHome -}}
+    {{ .Site.Title -}}
+  {{ else -}}
+    {{ with .Title }}{{ . }} | {{ end -}}
+    {{ .Site.Title -}}
+  {{ end -}}
+</title>
+<meta name="description" content="{{ partial "page-description.html" . }}">
+{{ partial "seo-alternates.html" . -}}
+{{ partial "opengraph.html" . -}}
+{{ partial "schema.html" . -}}
+{{ partial "twitter_cards.html" . -}}
+{{ partialCached "head-css.html" . (printf "head-css-%s" .Site.Language.Direction) -}}
+{{ partialCached "font-roles.html" . (printf "font-roles-%s" .Site.Language.Lang) -}}
+{{ partial "theme-color.html" . -}}
+{{ partial "shell/prepaint.html" . -}}
+{{ if partial "shell/search-enabled.html" . -}}
+{{ $lunr := resources.Get "js/third_party/lunr.min.js" -}}
+{{ if hugo.IsProduction }}{{ $lunr = $lunr | fingerprint }}{{ end -}}
+<script defer src="{{ $lunr.RelPermalink }}"
+  {{- with $lunr.Data.Integrity }} integrity="{{ . }}" crossorigin="anonymous"{{ end }}></script>
+{{ end -}}
+
+{{ template "algolia/head" . -}}
+
+{{ partial "hooks/head-end.html" . -}}
+
+{{/* To comply with GDPR, cookie consent scripts places in head-end must execute before Google Analytics is enabled */ -}}
+{{ if and hugo.IsProduction (eq $outputFormat "html") -}}
+  {{ partial "google_analytics.html" . -}}
+{{ end -}}
+
+{{ define "algolia/head" -}}
+
+{{ if partialCached "search/algolia-enabled.html" . .Site.Language.Lang .Site.BaseURL -}}
+{{ $docsearchCSS := resources.Get "third_party/docsearch/docsearch.css" -}}
+{{ if hugo.IsProduction }}{{ $docsearchCSS = $docsearchCSS | fingerprint }}{{ end -}}
+<link rel="stylesheet" href="{{ $docsearchCSS.RelPermalink }}"
+  {{- with $docsearchCSS.Data.Integrity }} integrity="{{ . }}" crossorigin="anonymous"{{ end }}>
+{{ end -}}
+
+{{ end -}}
