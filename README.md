@@ -96,7 +96,12 @@ git show 'ac422c2~1:.github/workflows/cloudflare-pages.yaml' > .github/workflows
 
 ## 附带技能
 
-`skills--LOOK_ME/replicate-doc-site/` 是本仓库自加的一份技能（上游没有），把既有文档站（Docusaurus、VitePress、GitBook、自站）整站复刻成本地 Hugo + OINK 站点。`SKILL.md` 是流程主文；`scripts/` 下是 `scaffold.py`、`check_coverage.py`、`audit_structure.py`、`matrix_check.py`、`verify_all.py` 等判据脚本；`references/` 是写作规范、覆盖矩阵口径与主题能力清单；`assets/` 带骨架模板、六份体裁样章、会自己失败的夹具，以及一份离线主题副本。用之前先跑 `python scripts/verify_all.py --selftest`——判据要先证明会红，它的绿色才算结论。
+仓库内附两份 `replicate-doc-site` 技能（上游没有，本仓库自加），把既有文档站（Docusaurus、VitePress、GitBook、自站）整站复刻成本地 Hugo + OINK 站点。两份结构完全相同，只是内置的 OINK 主题副本与版本相关事实不同，按目标主题版本二选一：
+
+- `skill_base_oink1.3.2/` —— **OINK v1.3.2 基线（新项目默认）**：Hugo Extended ≥0.166.0、Go 1.27.0。
+- `skill_base_oink1.0.0/` —— OINK v1.0.0 基线：Hugo Extended ≥0.160.1，需要旧版主题行为时用。
+
+每份技能里：`SKILL.md` 是流程主文；`scripts/` 下是 `scaffold.py`、`check_coverage.py`、`audit_structure.py`、`matrix_check.py`、`verify_all.py` 等判据脚本；`references/` 是写作规范、覆盖矩阵口径与主题能力清单；`assets/` 带骨架模板、六份体裁样章、会自己失败的夹具，以及一份离线主题副本。用之前先跑 `python scripts/verify_all.py --selftest`——判据要先证明会红，它的绿色才算结论。两份技能各自的版本口径见其目录下 `README.md`。
 
 ## 什么叫做完了
 
