@@ -45,12 +45,13 @@
 ```yaml
 params:
   ui:
-    preset: slate      # 1.0.0/1.1 的技术风外观
-    # preset_menu: [paper, slate]   # 可选：让读者自己切换
+    preset: slate      # 1.0.0/1.1 的技术风外观（预设菜单骨架已默认开 4 套，不用另加）
 ```
 
 外观支持**页面上一键切换**：`preset_menu` 开启后读者可在导航栏/页脚的 Appearance 面板即时切换视觉预设（明暗切换则由 `dark_mode: true` 单独开启，骨架已默认开），选择写入 localStorage 跨页记住、首帧前应用无闪烁；面板是配置门控的，`preset_menu: false`（主题默认）且未开 `dark_mode` 时整个按钮不渲染。`preset_menu: [paper, slate, ink, terminal]` 全开放（列表必须含站点默认 `preset`）。机制细节见 `references/oink-theme-capabilities.md` 第 8 节「外观一键切换」。
 
-本基线已落好：`assets/scaffold/hugo.yaml` 的 `ui:` 段带 `preset: slate` / `preset_menu` 注释项（默认不启用、走 Paper），`references/oink-theme-capabilities.md` 开头「与 1.0.0 的主要差异」一节写明四种预设与 Expo 相册用法。
+本基线已落好：`assets/scaffold/hugo.yaml` 的 `ui:` 段把 `preset: paper` 与 `preset_menu: [paper, slate, ink, terminal]` 写成**实值默认**（2026-10-24 更正：此前是注释项，导致新站静默只带明暗两挡），`references/oink-theme-capabilities.md` 开头「与 1.0.0 的主要差异」一节写明四种预设与 Expo 相册用法。技能的 Step 0 会就「视觉预设」向用户确认，**用户没回答就按默认 4 套全开**，不按主题的 `preset_menu: false`。
+
+一条配套的硬前提：视觉预设是 **OINK 1.2+ 才有的**。把 `preset_menu` 配在 1.0.0 的主题副本（1,196 文件 / `min_version = 0.160.1`，无 `_presets.scss` 与 `preset-config.html`）上完全不生效，且构建一句错都不报——判据看产物：`public/index.html` 的 `<html>` 标签要带 `data-td-preset=`。
 
 上游 OINK 的完整变更史见 `replicate-doc-site/assets/theme/oink-main/oink-main/CHANGELOG.md`（1.1.0 界面目录与导航修复、1.2.0 视觉预设、1.3.0 Expo 相册、1.3.1 可读性修复、1.3.2 恢复纯 LibSass 构建）。

@@ -53,16 +53,31 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 | 要求「覆盖率可证明」「离线能打开」 | 只要一个能搜的 wiki（现成 SSG 默认结构更快） |
 | 交付要能被下一个人机检验收 | 一次性交付、无人复核（判据的成本收不回来） |
 
-## Step 0 先把三个口径问死（用户没拍板前不动手）
+## Step 0 先把四个口径问死（用户没拍板前不动手）
 
-这三项决定后面所有工作量，**必须用选项形式（AskUserQuestion）让用户拍板**。
+这四项决定后面所有工作量，**必须用选项形式（AskUserQuestion）让用户拍板**。
 在他选定之前不要建骨架、不要取源、更不要开始写正文——第一项选错，后面全部返工。
+**例外是「视觉预设」：问到就停，没答也不等**，按它的默认值（4 套全开）继续，见下表最后一行。
 
 | 口径 | 选项 | 影响 |
 |------|------|------|
 | **内容形态** | ① **完整复制**：逐字搬运原文，只补 front matter、改站内链接与图片路径<br>② **按规范重写**：按知识板块合并（N 篇碎文 → 20~35 篇长文），套 `assets/scaffold/doc/技术文档编写规范.md` 的体裁 | 决定矩阵形状、总工作量，以及**哪些判据适用** |
 | 版本盘子 | ① 最新版 ② 最新版 + 历史版全量 | 决定取源范围与查重工作量 |
 | 交付形态 | ① 只要内容 ② 独立可构建站 + 构建验证 | 决定是否装工具链 |
+| **视觉预设**（读者可切换的主题） | ① **4 套全开**（`preset_menu: [paper, slate, ink, terminal]`，**默认**）② 1 套（`preset_menu: false`）③ Paper+Slate 两套 ④ 用户点名的其它列表 | 只改 `hugo.yaml` 的 `ui.preset` / `ui.preset_menu` 两行，不影响正文与判据 |
+
+**视觉预设这一项的三条硬规矩**（历史上它是静默失效的，别再看错一遍）：
+
+- **无回答 = 全部 4 套**，不是「维持主题默认」。主题的默认是 `preset_menu: false`（只有一个预设），
+  而 `assets/scaffold/hugo.yaml` 已把 4 套写成实值默认——**不要把它改回注释**，也不要把「用户没提」当成「只要 1 套」。
+- `preset`（站点默认观感，`paper` 或 `slate`）必须出现在 `preset_menu` 列表里；漏了主题只 warn 不报错。
+  想要 1.0/1.1 的技术风就写 `preset: slate`，但列表照旧 4 套。
+- 预设体系是 **OINK 1.2+ 才有的**。`preset_menu` 配在 1.0/1.1 的主题副本上完全不生效，
+  而且**构建照样通过、一个错都不报**（那份副本连 `_presets.scss` 与 `preset-config.html` 都没有，
+  产物的 `<html>` 上也就没有 `data-td-preset`）。所以 Step 3 之后必须按这条核：
+  副本内要有 `assets/scss/td/_presets.scss`、`_experimental-presets.scss`、`layouts/_partials/preset-config.html`，
+  构建产物里 `data-td-preset` 要能在 `public/index.html` 上读到值。1.3.2 副本实测 1,273 个文件、
+  `theme.toml` 的 `min_version = 0.166.0`；1,196 文件 / `0.160.1` 那份是 1.0.0，没有这套能力。
 
 **提问时必须把判据差别一起讲清楚**，否则用户会以为「完整复制」也能拿到同一套质量结论：
 
@@ -77,7 +92,8 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 两种模式的判据互为补集，自证实测 `文体判据沉默=10/10 结构判据仍生效=12/12`，10+12 正好等于
 rewrite 模式的可达判据代码总数 22——划错边界会当场报出来。
 
-参考答案（本项目 119 篇 → 31 篇，10 分类 20 板块，选 ②重写 + 历史版全量 + 独立可构建站）。
+参考答案（本项目 119 篇 → 31 篇，10 分类 20 板块，选 ②重写 + 历史版全量 + 独立可构建站 + 预设 4 套全开——
+最后这项用户没点名，就走默认，不追问第二轮）。
 若上游之外还有素材（同级示例工程、二进制发行包、本地附件），此时就要问清是否纳入矩阵——
 纳入的话它们的 source 前缀走 `--skip-prefix`（见 Step 2）。
 
@@ -155,7 +171,7 @@ python scripts/gen_skeleton.py --site <新站目录> --matrix matrix.json
 ```
 
 `scaffold.py` 实测：`copied=1273`（主题）+ `copied=14`（模板）+ `placeholders_remaining=71`（分布在 6 个文件）。
-然后手工做四件事：
+然后手工做五件事：
 
 1. 把全角中括号占位换成真实内容，直到 `scaffold.py` 报 `placeholders_remaining=0`。
    `assets/scaffold/hugo.yaml` 的 goldmark 三项与 `relativeURLs: true` 不许删（作用见 `references/oink-theme-capabilities.md`）。
@@ -168,6 +184,11 @@ python scripts/gen_skeleton.py --site <新站目录> --matrix matrix.json
    拷进新站——那是给站点读者的**交付物**。写作子代理要读的是**技能目录里的那两份**，
    分派词里写技能内绝对路径，不要指向站点副本。
 4. 建 `doc/运行与构建（T0Level）.md`，逐条命令带**真实输出**（模板 `assets/scaffold/doc/运行与构建（T0Level）.md` 已给结构）。
+5. 核一遍 `hugo.yaml` 的两行预设配置还活着——`preset: paper` 与 `preset_menu: [paper, slate, ink, terminal]` 是
+   **实值不是注释**，占位批量替换正则会顺手吃掉整行的历史毛病就落在这一带。判据两条，缺一都不算数：
+   `grep` 站点 `hugo.yaml` 要能读到这两行且行首不带 `#`；构建产物 `public/index.html` 的 `<html>` 标签上
+   要带 `data-td-preset=`（1.3.2 副本实测值 `paper`）。只查配置不查产物，等于没查——配置写对而主题副本是旧的
+   那一站，产物上根本没有这个属性，而 `hugo build` 一句错都不报。
 
 构建验证需要 Hugo Extended ≥0.166.0 与对齐 `go.mod`（`go 1.27.0`）的 Go，且**两者都要能被找到**：
 
@@ -302,6 +323,7 @@ SELFTEST_PASS
 | 子代理报告与自己数出来的不一致 | 谁的正则口径 | 以脚本实测为准，逐条复核它给的 `file:line` |
 | 数出来的文件数比实际少 | 是否用 `glob` 数载荷 | `glob` 跳过点开头的文件，数目录一律用 `os.walk` |
 | 侧边栏/下拉的自定义 partial 不生效 | 文件名是否与主题调用的模板名**逐字相同** | 带说明性后缀的文件名是死文件，Hugo 按精确名解析 |
+| 外观面板只有亮/暗两挡、没有 Paper/Slate/Ink/Terminal | 站点 `hugo.yaml` 的 `preset_menu` 是否为实值；`public/index.html` 的 `<html>` 上有没有 `data-td-preset` | 配置是注释 → 改回实值即可。配置对而产物没 `data-td-preset` → **主题副本是 1.0/1.1**（1,196 文件 / `min_version 0.160.1`，无 `_presets.scss`），换 1,273 文件的 1.3.2 副本，改配置救不了 |
 
 ---
 

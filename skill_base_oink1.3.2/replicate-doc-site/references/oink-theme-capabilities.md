@@ -167,7 +167,16 @@ markup:
 - **Expo 图片相册**（1.3.0）：front matter `type: expo` 的页面（通常做成 leaf bundle），bundle 内 `images/*`（可用 front matter `expo.images` 改 glob）渲染成 wall/cards/seamless 三种布局（`expo.mode`，tile 尺寸 `expo.size` 160-360），带原图查看器（拖拽/WASD 平移、QE/HL 前后张、JK 缩放、R 重置、F 扩展）。站点级默认在 `params.ui.expo`。相册与元数据保留在 Print/Markdown/LLMSFULL/RSS 输出里。
 - **视觉预设**（1.2.0，非正文语法但影响观感）：`params.ui.preset: paper`（默认暖纸面）/`slate`（1.1 及以前的技术风）；实验项 `ink`（黑白红）/`terminal`（等宽琥珀）需显式点名。字体本地 IBM Plex Sans，无额外字体文件下载。
 
-**外观一键切换（Appearance 菜单，1.2.0+）**：读者可在最终页面上切换视觉预设与明暗模式，即时生效、不刷新、跨页记住。实现链：`layouts/_partials/shell/appearance-menu.html`（面板，导航栏/页脚/移动端抽屉三处入口）+ `assets/js/appearance.js`（改 `<html data-td-preset>` 换肤、写 `localStorage['td-preset']`、storage 事件跨标签页同步；明暗由 `dark-mode.js` 独立管理）+ `layouts/_partials/head.html` 第 42-66 行内联脚本（首帧渲染前应用存储的预设，无闪烁；非法存储值按白名单清除）。选回站点默认预设会删存储键，站点日后改默认能到达读者；存储被禁用时面板提示「仅本页生效」；无 JS 则面板不渲染、站点默认观感照常。**门控**：面板的渲染条件是 `dark_mode.showMenu` 或 `preset.menu` 二者其一（`preset.menu` = `preset_menu` 提供的选项多于 1 个，`preset-config.html` 第 70 行）。主题默认 `preset_menu: false`——单观感站没有 Style 组；`preset_menu: true` 给 Paper+Slate+站点默认；`preset_menu: [paper, slate, ink, terminal]` 全开放（列表必须含站点默认 `preset`，缺了 WARN 自动补）。骨架 `dark_mode: true` 已默认开明暗切换，预设组开不开在 `preset_menu` 一行。
+**外观一键切换（Appearance 菜单，1.2.0+）**：读者可在最终页面上切换视觉预设与明暗模式，即时生效、不刷新、跨页记住。实现链：`layouts/_partials/shell/appearance-menu.html`（面板，导航栏/页脚/移动端抽屉三处入口）+ `assets/js/appearance.js`（改 `<html data-td-preset>` 换肤、写 `localStorage['td-preset']`、storage 事件跨标签页同步；明暗由 `dark-mode.js` 独立管理）+ `layouts/_partials/head.html` 第 42-66 行内联脚本（首帧渲染前应用存储的预设，无闪烁；非法存储值按白名单清除）。选回站点默认预设会删存储键，站点日后改默认能到达读者；存储被禁用时面板提示「仅本页生效」；无 JS 则面板不渲染、站点默认观感照常。**门控**：面板的渲染条件是 `dark_mode.showMenu` 或 `preset.menu` 二者其一（`preset.menu` = `preset_menu` 提供的选项多于 1 个，`preset-config.html` 第 70 行）。主题默认 `preset_menu: false`——单观感站没有 Style 组；`preset_menu: true` 给 Paper+Slate+站点默认；`preset_menu: [paper, slate, ink, terminal]` 全开放（列表必须含站点默认 `preset`，缺了 WARN 自动补）。骨架 `dark_mode: true` 已默认开明暗切换，`preset_menu: [paper, slate, ink, terminal]` 也已写成实值（4 套默认全开，2026-10-24 更正）。
+
+**版本对照实测**（同一份骨架 `hugo.yaml`，只换主题副本，Hugo v0.168.0 Extended）：
+
+| 主题副本 | `hugo build` | 产物 `<html>` | `data-td-preset` 次数 | Appearance 类名 |
+|---|---|---|---|---|
+| 1.3.2（1,273 文件 / `min_version 0.166.0`） | 通过，Pages 15 / Static 34 / 1292 ms | 带 `data-td-preset="paper" data-td-site-preset="paper"` | 21，四个名字 paper/slate/ink/terminal 全在，预烤样式含 `[data-td-preset='ink'|'slate'|'terminal']` | 164 |
+| 1.0.0（1,196 文件 / `min_version 0.160.1`） | **照样通过**，Pages 15 / Static 22 / 1090 ms | 只有 `data-td-typography="technical"`，**无 `data-td-preset`** | **0** | **0** |
+
+第二行就是这条约束存在的全部理由：**旧副本 + 正确的 `preset_menu` = 静默失效**，构建零报错，配置层 grep 全绿。所以判据必须落在产物层（读 `public/index.html` 的 `<html>` 属性），只读 `hugo.yaml` 的那一条会假绿。
 
 ## 9. 首页数据文件
 
@@ -221,13 +230,14 @@ cta:
 | `params.ui.sidebar_expand_levels` / `sidebar_menu_foldable` / `sidebar_icon_policy: groups` | 按需 | 默认只展开 2 层、图标全显 |
 | `params.ui.backlinks` | 按需 | 右栏无反向链接组 |
 | `params.ui.dark_mode` | 按需 | 无明暗切换 |
-| `params.ui.preset` / `preset_menu` | paper（默认）/ 按需开放菜单 | 只有单一视觉预设，读者不能自选外观 |
-| `params.ui.preset_menu` | `[paper, slate, ink, terminal]`（按需） | 页面上没有外观一键切换面板的 Style 组（`dark_mode: true` 只开明暗切换） |
+| `params.ui.preset` | `paper`（骨架已写成实值） | 站点默认观感；漏写回退主题默认 paper |
+| `params.ui.preset_menu` | `[paper, slate, ink, terminal]`（**骨架默认，4 套全开**） | 写成 `false` 或注释 = 只有单一视觉预设，读者不能自选外观（`dark_mode: true` 只带明暗切换）。**注意：配在 OINK <1.2 的主题副本上完全不生效且构建不报错**——判据看产物 `public/index.html` 的 `<html data-td-preset=…>`，对照实测见第 8 节 |
 
 ## 未在主题副本中找到、需实测的项
 
 - `params.mermaid.securityLevel` 等自定义注入：机制在（`oink-main/oink-main/assets/js/mermaid.js` 的 PARAMS/norm），但主题与骨架均未写任何实例配置；实际传参大小写行为需自建一个 `params.mermaid` 验证。
 - `LLMSFULL`、`NAVJSON`、`BookManifest` 三个输出的真实产物：本骨架未启用，`public/` 里没有对应文件；只有模板（`oink-main/oink-main/layouts/list.llmsfull.txt`、`oink-main/oink-main/layouts/index.navjson.json`、`oink-main/oink-main/layouts/book/list.bookmanifest.json`）与 `oink-main/oink-main/schema/nav.v1.schema.json` 可读，渲染效果需实测。
 - `print` 输出对 mermaid/echarts 围栏的静态分支呈现（`_print/` 里应看到源码块）：本次只验证了构建，未逐页核对渲染质量。
-- expo 相册的浏览器端交互（原图查看器手势、键盘流、记忆布局）与 ink/terminal 实验预设的实际观感：实现文件俱在（`assets/js/expo.js`、`assets/scss/td/_experimental-presets.scss`），骨架站没有 expo 页面也没开实验预设，效果需实测。
+- expo 相册的浏览器端交互（原图查看器手势、键盘流、记忆布局）：实现文件俱在（`assets/js/expo.js`），骨架站没有 expo 页面，效果需实测。
+- ink / terminal 两个实验预设的**实际观感与可读性**：机制层已实测（骨架 4 套全开，产物里四个预设名与样式选择器都在，见第 8 节对照表），但没有逐页人眼核对过正文/代码块/表格在这两套配色下的观感，也没在本副本复跑上游 `bin/check-presets.py`（它自称验过 Paper/Ink/Terminal 三面的 AA 对比度与令牌对齐——那是上游脚本的声明，不是本技能的实测）。默认观感仍是 paper，把实验项摆进读者菜单要意识到这一层。
 - 骨架 `content/docs/_index.md` 里 `menus.main.identifier: docs` 与主题自动挂的 docs 入口在构建时报 `duplicate menu entry` WARN（实测，Hugo 0.168.0 + 本主题副本）：普通构建无害，但说明主题 1.3.x 会自己把 `docs_section` 挂进顶栏——新站点若不需要显式菜单项可删掉 front matter 里的 `menus` 块再验证顶栏（此点为观察记录，顶栏最终形态需浏览器实测）。
