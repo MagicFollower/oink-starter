@@ -1,4 +1,5 @@
-{{- $page := .page -}}{{- $ok := true -}}{{- $data := .data -}}{{- $id := .id -}}{{- $items := $data.items | default (slice) -}}
+{{- $page := .page -}}{{- $ok := true -}}{{- $data := .data -}}{{- $id := .id -}}
+{{- $scope := printf "landing-%s" $id -}}{{- $items := $data.items | default (slice) -}}
 {{- $interactive := eq (lower ($page.Store.Get "tdOutputFormat" | default "html")) "html" -}}
 {{- if or (not (reflect.IsSlice $items)) (not $items) }}{{ warnf "%s: bar-chart.items must be a non-empty array; skipping the section" $page.Path }}{{ $ok = false }}{{ end -}}
 {{- $values := slice -}}{{- $max := 0.0 -}}
@@ -18,10 +19,10 @@
 <section id="{{ $id }}" class="td-landing-section td-landing-bar-chart-section{{ with $data.class }} {{ . }}{{ end }}"{{ with $data.title }} aria-labelledby="{{ $id }}-title"{{ end }}>
   <div class="td-site-container">
     {{- partial "landing/heading.html" (dict "page" $page "data" $data "id" $id) }}
-    <div class="td-landing-bar-chart"{{ if $interactive }} data-td-reveal{{ end }}>{{ range $index, $entry := $values }}{{ $percent := mul (div $entry.value $max) 100.0 }}<div class="td-landing-bar-chart__row td-landing-bar-chart__row--{{ mod $index 4 }}">
+    <div class="td-landing-bar-chart"{{ if $interactive }} data-td-reveal{{ end }}>{{ range $index, $entry := $values }}{{- $scope := printf "%s-item-%v" $scope $index -}}{{ $percent := mul (div $entry.value $max) 100.0 }}<div class="td-landing-bar-chart__row td-landing-bar-chart__row--{{ mod $index 4 }}">
       <div class="td-landing-bar-chart__label"><span>{{ $entry.item.label }}</span><strong>{{ $entry.item.value }}{{ with $data.unit }} {{ . }}{{ end }}</strong></div>
       <div class="td-landing-bar-chart__track" aria-hidden="true"><i style="--td-bar-width: {{ printf "%.4f%%" $percent }}"></i></div>
-      {{ with $entry.item.note }}<small>{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</small>{{ end }}
+      {{ with $entry.item.note }}<small>{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-bar-chart-field-1" $scope) "value" .) }}</small>{{ end }}
     </div>{{ end }}</div>
   </div>
 </section>

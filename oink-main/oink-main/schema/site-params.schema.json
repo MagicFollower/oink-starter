@@ -100,10 +100,7 @@
           }
         },
         "print": {
-          "type": [
-            "boolean",
-            "object"
-          ],
+          "type": "object",
           "additionalProperties": true,
           "properties": {
             "toc": {
@@ -260,8 +257,43 @@
             },
             "dark_mode": {
               "description": "Dark palette and theme menu: `dark_mode: true` is the shorthand for `dark_mode: { enable: true, show_menu: true }`.",
-              "type": "boolean",
+              "type": [
+                "boolean",
+                "object"
+              ],
               "default": false
+            },
+            "preset": {
+              "description": "Visual preset: the site's default look. paper (warm editorial reading, the default) | slate (the technical look of OINK 1.1 and earlier). Experimental, explicitly selected: ink | terminal. Reserved: folio | canvas.",
+              "type": "string",
+              "default": "paper",
+              "enum": [
+                "paper",
+                "slate",
+                "ink",
+                "terminal"
+              ]
+            },
+            "preset_menu": {
+              "description": "Reader choice of preset in the Appearance menu: false (site preset only) | true (Paper, Slate and the site default) | an explicit list. Ink and Terminal are experimental: opt in with preset: ink/terminal or preset_menu: [paper, slate, ink, terminal]. No additional fonts. Lists must include `preset`. The menu also hosts the dark_mode switch.",
+              "default": false,
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "paper",
+                      "slate",
+                      "ink",
+                      "terminal"
+                    ]
+                  }
+                }
+              ]
             },
             "typography": {
               "type": "string",
@@ -273,8 +305,28 @@
                 "docs",
                 "book",
                 "blog",
-                "swagger"
+                "swagger",
+                "expo"
               ]
+            },
+            "expo": {
+              "description": "Image albums. Page front matter `expo` overrides this map.",
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "images": {
+                  "type": "string",
+                  "default": "images/*"
+                },
+                "mode": {
+                  "type": "string",
+                  "default": "wall"
+                },
+                "size": {
+                  "type": "integer",
+                  "default": 240
+                }
+              }
             },
             "docs_section": {
               "type": "string",
@@ -319,8 +371,11 @@
               ]
             },
             "sidebar_headings": {
-              "description": "Book pages may opt into an h2-h4 branch beneath the active sidebar row.",
-              "type": "boolean",
+              "description": "Book headings beneath the active sidebar row are off by default. Opt in with true (h2 only) or 2, 3, 4 (deepest heading level). Page front matter or a section cascade can override this site setting.",
+              "type": [
+                "boolean",
+                "integer"
+              ],
               "default": false
             },
             "sidebar_cache_limit": {

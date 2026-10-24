@@ -69,10 +69,12 @@
   // The theme accent. It defaults to the brand link color, and a published
   // `theme_color` redeclares just these three in the head -- never the
   // Bootstrap link family, so prose links and external URLs keep the brand
-  // blue in every section. The accent's job is grounds and hovers.
-  --td-accent: var(--bs-link-color);
-  --td-accent-rgb: var(--bs-link-color-rgb);
-  --td-accent-hover: var(--bs-link-hover-color);
+  // blue in every section. The accent's job is grounds and hovers. A visual
+  // preset that wants an accent apart from its links sets the optional
+  // `--td-preset-accent` trio, as the Ink and Terminal experiments do.
+  --td-accent: var(--td-preset-accent, var(--bs-link-color));
+  --td-accent-rgb: var(--td-preset-accent-rgb, var(--bs-link-color-rgb));
+  --td-accent-hover: var(--td-preset-accent-hover, var(--bs-link-hover-color));
   // Keyboard focus rides the accent instead of Bootstrap's stock blue.
   --bs-focus-ring-color: rgba(var(--td-accent-rgb), 0.4);
   // Inline code ink, shared by prose (through --td-code-inline-fg) and by
@@ -123,9 +125,9 @@
   --bs-link-color-rgb: 93, 162, 221;
   --bs-link-hover-color: #7fb8e8;
   --bs-link-hover-color-rgb: 127, 184, 232;
-  --td-accent: var(--bs-link-color);
-  --td-accent-rgb: var(--bs-link-color-rgb);
-  --td-accent-hover: var(--bs-link-hover-color);
+  --td-accent: var(--td-preset-accent, var(--bs-link-color));
+  --td-accent-rgb: var(--td-preset-accent-rgb, var(--bs-link-color-rgb));
+  --td-accent-hover: var(--td-preset-accent-hover, var(--bs-link-hover-color));
   --bs-focus-ring-color: rgba(var(--td-accent-rgb), 0.55);
   --bs-code-color: #f0899a;
   --td-pre-bg: #0a0f16;

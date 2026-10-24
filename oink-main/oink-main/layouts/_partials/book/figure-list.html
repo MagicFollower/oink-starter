@@ -4,7 +4,7 @@
 {{- $aggregate := and (eq $format "print") ($page.Store.Get "tdBookAggregate") -}}
 {{- $entries := slice -}}
 {{- $root := partial "shell/sidebar-root.html" $page -}}
-{{- $sequence := partialCached "shell/nav-flatten.html" (dict "page" $page "root" $root) $root.Path $page.Site.Language.Lang -}}
+{{- $sequence := partialCached "shell/nav-flatten.html" (dict "page" $page "root" $root) $root.RelPermalink $page.Site.Language.Lang $page.Type -}}
 {{- range $sequence -}}
   {{- if eq . $page }}{{ continue }}{{ end -}}
   {{- $discard := .Content -}}

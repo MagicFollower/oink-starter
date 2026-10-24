@@ -4,6 +4,7 @@
 {{- $node := .node -}}
 {{- $currentURL := .currentURL -}}
 {{- $activeURLs := .activeURLs -}}
+{{- $activePages := .activePages -}}
 {{- $shouldDelayActive := .shouldDelayActive -}}
 {{- $ulNr := .ulNr -}}
 {{- $iconPolicy := .iconPolicy -}}
@@ -12,9 +13,9 @@
 {{- $s := $p.Site.GetPage $node.page -}}
 {{- if not $s -}}
   {{- warnf "docs navigation: page %s was not found; skipping the entry" $node.page -}}
-{{- else -}}
-  {{- $active := and (not $shouldDelayActive) (eq $node.url $currentURL) -}}
-  {{- $activePath := and (not $shouldDelayActive) (in $activeURLs $node.url) -}}
+{{- else if not $s.Params.toc_hide -}}
+  {{- $active := and (not $shouldDelayActive) (or (eq $s $p) (eq $node.url $currentURL)) -}}
+  {{- $activePath := and (not $shouldDelayActive) (or (eq $s $p) ($p.IsDescendant $s) (in $activePages $s) (in $activeURLs $node.url)) -}}
   {{- $forceExpanded := $s.Params.sidebar_expanded | default false -}}
   {{- $shouldExpand := or $activePath $forceExpanded -}}
   {{- /* A tree node may omit children entirely; nil must not crash the
@@ -32,6 +33,7 @@
           "node" .
           "currentURL" $currentURL
           "activeURLs" $activeURLs
+          "activePages" $activePages
           "shouldDelayActive" $shouldDelayActive
           "ulNr" $childUlNr
           "iconPolicy" $iconPolicy

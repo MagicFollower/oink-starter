@@ -5,9 +5,9 @@ licenselink = "https://github.com/pgsty/oink/blob/main/LICENSE"
 description = "A local-first Hugo theme for engineering documentation and knowledge publishing"
 homepage = "https://github.com/pgsty/oink"
 demosite = "https://oink.pgsty.com/"
-tags = ["documentation", "multilingual", "local-first", "responsive", "docs", "book", "blog"]
-features = ["offline search", "command palette", "dark mode", "Book publishing", "diagrams", "API documentation", "agent-friendly outputs"]
-min_version = "0.160.1"
+tags = ["documentation", "multilingual", "local-first", "responsive", "docs", "book", "blog", "expo", "gallery"]
+features = ["offline search", "command palette", "dark mode", "Book publishing", "Expo image albums", "diagrams", "API documentation", "agent-friendly outputs"]
+min_version = "0.166.0"
 
 [author]
   name = "PGSTY contributors"

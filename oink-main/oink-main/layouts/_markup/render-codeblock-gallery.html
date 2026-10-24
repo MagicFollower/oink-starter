@@ -18,7 +18,7 @@
 {{- $rows := slice -}}
 {{- range $item := $parsed.items -}}
   {{- $img := printf `<img class="td-gallery__image" src="%s" alt="%s"%s%s loading="lazy" decoding="async"%s>`
-    ($item.src | safeURL) (htmlEscape $item.alt)
+    (htmlEscape $item.src) (htmlEscape $item.alt)
     (cond (gt $item.width 0) (printf ` width="%d"` $item.width) "")
     (cond (gt $item.height 0) (printf ` height="%d"` $item.height) "")
     (cond (and $item.zoomable (eq $format "html")) " data-td-image-zoom" "")

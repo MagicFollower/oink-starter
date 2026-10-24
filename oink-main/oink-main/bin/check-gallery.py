@@ -158,9 +158,10 @@ def check_escaping_and_forms(hugo: str) -> list[str]:
         f'![A "quoted" & image]({VALID_IMAGE}) # a & *description* with `backticks`',
         f"![Image only]({TALL_IMAGE})",
         f"![Issue #42 dashboard]({VALID_IMAGE}) # tracked in \\#42",
+        '![Quoted URL](https://example.invalid/image.svg?x="data-injected="yes&copy;=1)',
         attrs='{class="site-gallery" data-fixture="gallery" aria-label="Gallery"}',
     )
-    result, html, markdown = temp_page_build(hugo, body)
+    result, html, markdown = temp_page_build(hugo, body, panic_on_warning=True)
     if result.returncode != 0:
         errors.append(f"Gallery escaping fixture failed to build: {result.stdout}{result.stderr}")
         return errors
@@ -175,7 +176,9 @@ def check_escaping_and_forms(hugo: str) -> list[str]:
     # alt text is ordinary text; `\#` escapes a hash inside the description.
     require('alt="Issue #42 dashboard"' in gallery, "a hash in the alt text was treated as a description marker", errors)
     require("tracked in #42" in gallery, "an escaped hash did not survive in the description", errors)
-    require(gallery.count("<img") == 3, "Gallery escaping fixture lost an item", errors)
+    require('src="https://example.invalid/image.svg?x=&#34;data-injected=&#34;yes&amp;copy;=1"' in gallery,
+            "Gallery URL was not escaped as a single HTML attribute", errors)
+    require(gallery.count("<img") == 4, "Gallery escaping fixture lost an item", errors)
     require(gallery.count('<p class="td-gallery__description">') == 2, "Gallery description count changed", errors)
     require("```gallery" in markdown, "Gallery Markdown output is not the fence source", errors)
     return errors

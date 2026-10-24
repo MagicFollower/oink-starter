@@ -1,6 +1,6 @@
 # RocketMQ 文档站复刻 — AI Agent 操作规范
 
-本项目是基于 [Hugo](https://gohugo.io/) + [OINK](https://oink.psty.com/) 主题的 **Apache RocketMQ 中文文档复刻站**。仅简体中文，主题本地化在 `oink-main/`，可完全离线构建。
+本项目是基于 [Hugo](https://gohugo.io/) + [OINK](https://oink.psty.com/) v1.3.2 主题的 **Apache RocketMQ 中文文档复刻站**。仅简体中文，主题本地化在 `oink-main/`，可完全离线构建。
 
 内容来源为 `apache/rocketmq-site`（分支 `new-official-website`）的官方中文文档：**5.0 版 69 篇 + 4.x 版 50 篇，共 119 篇**，按知识板块重组为 **38 篇**重写文档（24,548 行 / 1,813,304 字节，行数按 `\n` 计数）。逐篇归属见 [doc/复刻覆盖矩阵.md](doc/复刻覆盖矩阵.md)，写作风格契约见 [doc/技术文档编写规范.md](doc/技术文档编写规范.md)，环境与构建的逐步操作见 [doc/运行与构建（T0Level）.md](doc/运行与构建（T0Level）.md)。
 
@@ -35,8 +35,7 @@ rocket-mq-docs/
 ├── data/home/zh.yaml              # 首页数据（hero、cards、cta）
 ├── hugo.yaml                      # 站点唯一配置文件
 ├── go.mod / go.sum                # Go 模块（主题走 replace 本地化）
-├── oink-main/oink-main/           # 本地化主题（勿修改）
-├── layouts/_partials/             # 站点级局部覆盖（侧边栏根选择器）
+├── oink-main/oink-main/           # 本地化主题（勿修改；OINK v1.3.2）
 ├── doc/                           # 写作规范与复刻映射
 └── README.md                      # 本文件
 ```
@@ -121,7 +120,7 @@ weight: 1
 | 工具 | 版本 | 本机路径 |
 |------|------|--------|
 | Hugo | v0.168.0 **Extended** | `C:\Users\webtu\tools\hugo\hugo.exe` |
-| Go | 1.25.4 | `C:\Users\webtu\tools\go\bin\go.exe` |
+| Go | 1.27.2 | `C:\Users\webtu\tools\go\bin\go.exe` |
 
 ```powershell
 # PowerShell

@@ -73,10 +73,12 @@ FALLBACK_MARKERS = (
     "Replace these values with reviewed translations when available.",
     "Explicit English fallbacks for untranslated OINK UI strings.",
 )
-UNIVERSAL_IDENTICAL = {"ui_preview_source", "ui_list_separator"}
+# Visual preset names are product names, like OINK itself: every locale keeps
+# them as written.
+UNIVERSAL_IDENTICAL = {"ui_preview_source", "ui_list_separator", "ui_preset_paper", "ui_preset_slate", "ui_preset_ink", "ui_preset_terminal"}
 REVIEWED_IDENTICAL = {
     "de": {"callout_details", "ui_theme_auto", "post_meta_in"},
-    "es": {"post_translated_original", "post_reading_minutes", "feedback_negative"},
+    "es": {"ui_preset_experimental", "post_translated_original", "post_reading_minutes", "feedback_negative"},
     "et": {"post_reading_minutes"},
     "fi": {"post_reading_minutes"},
     "fr": {
@@ -84,7 +86,7 @@ REVIEWED_IDENTICAL = {
         "ui_palette_actions", "ui_palette_pages", "ui_modules_title",
         "ui_module_title", "ui_page_actions", "ui_release_source",
         "post_upstream_notice", "post_translated_original", "post_reading_minutes",
-        "book_figure", "ui_taxonomies_title",
+        "book_figure", "ui_taxonomies_title", "ui_appearance_style",
     },
     "it": {
         "ui_home", "ui_tag_title", "ui_share_email", "ui_assets_file",
@@ -98,12 +100,14 @@ REVIEWED_IDENTICAL = {
     },
     "no": {"ui_theme_auto", "post_reading_minutes"},
     "oc": {
+        "ui_preset_experimental",
         "callout_important", "callout_question", "post_translated_original",
         "post_reading_minutes", "contributors_count",
     },
     "pl": {"ui_tag_title", "ui_theme_auto", "post_reading_minutes"},
-    "pt-br": {"post_translated_original", "post_reading_minutes"},
+    "pt-br": {"ui_preset_experimental", "post_translated_original", "post_reading_minutes"},
     "ro": {
+        "ui_preset_experimental",
         "callout_important", "ui_share_email", "post_translated_original",
         "post_reading_minutes",
     },
@@ -294,14 +298,10 @@ def check_hugo_runtime(
         )
         language_lines: list[str] = []
         for weight, locale in enumerate(["en", *sorted(OINK_LOCALES - {"en"})], 1):
-            # Hugo 0.160.x cannot resolve a bare `locale: zh` while the regional
-            # Chinese catalogs are present. A concrete locale is also what the
-            # public OINK examples use for their generic `zh` language key.
-            runtime_locale = "zh-CN" if locale == "zh" else locale
             language_lines.extend(
                 [
                     f"  {locale}:\n",
-                    f"    locale: {runtime_locale}\n",
+                    f"    locale: {locale}\n",
                     f"    label: {locale}\n",
                     f"    weight: {weight}\n",
                 ]

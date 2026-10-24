@@ -1,24 +1,27 @@
-// Theme toggles show the target mode: moon in light mode, sun in dark mode.
-[data-td-theme-toggle] {
+// Theme toggles and the Appearance trigger show the resolved mode: sun in
+// light mode, moon in dark mode. `[data-td-theme-icon]` is the icon slot of the
+// Appearance trigger, which opens a menu instead of toggling.
+[data-td-theme-toggle],
+[data-td-theme-icon] {
   > [hidden] {
     display: none !important;
   }
 
   > .td-shell-icon--moon {
-    display: inline-block !important;
+    display: none !important;
   }
 
   > .td-shell-icon--sun {
-    display: none !important;
+    display: inline-block !important;
   }
 }
 
-html[data-bs-theme='dark'] [data-td-theme-toggle] {
+html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) {
   > .td-shell-icon--moon {
-    display: none !important;
+    display: inline-block !important;
   }
 
   > .td-shell-icon--sun {
-    display: inline-block !important;
+    display: none !important;
   }
 }

@@ -18,6 +18,9 @@
   {{- else if findRE `[\x00-\x20\x7f]` $raw -}}
     {{- warnf "%s: %s must not contain whitespace or control characters at %s; dropping it" $label $parameter $position -}}
     {{- $ok = false -}}
+  {{- else if strings.Contains $raw `\` -}}
+    {{- warnf "%s: %s must not contain backslashes at %s; dropping it" $label $parameter $position -}}
+    {{- $ok = false -}}
   {{- else if hasPrefix $raw "//" -}}
     {{- warnf "%s: %s must not use a protocol-relative URL at %s; dropping it" $label $parameter $position -}}
     {{- $ok = false -}}

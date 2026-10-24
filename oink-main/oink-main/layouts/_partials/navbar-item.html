@@ -17,7 +17,7 @@
   {{- if not $target.Host -}}
     {{- $targetPage := $page.Site.GetPage $target.Path -}}
     {{- if and (not $targetPage) $page.Site.LanguagePrefix
-          (hasPrefix $target.Path $page.Site.LanguagePrefix) -}}
+          (or (eq $target.Path $page.Site.LanguagePrefix) (hasPrefix $target.Path (printf "%s/" $page.Site.LanguagePrefix))) -}}
       {{- $targetPage = $page.Site.GetPage
           (strings.TrimPrefix $page.Site.LanguagePrefix $target.Path) -}}
     {{- end -}}

@@ -1,0 +1,33 @@
+/* Local experimental palette; no font or network imports. */
+main {
+  --color-fg-default: #1d211f;
+  --color-fg-muted: #4a514d;
+  --color-fg-subtle: #606b63;
+  --color-canvas-default: #f4f5f2;
+  --color-canvas-overlay: #f8f9f6;
+  --color-canvas-inset: #ffffff;
+  --color-canvas-subtle: #e9ebe6;
+  --color-border-default: rgba(29, 33, 31, 0.32);
+  --color-border-muted: rgba(29, 33, 31, 0.32);
+  --color-neutral-muted: rgba(29, 33, 31, 0.05);
+  --color-accent-fg: #0a6560;
+  --color-accent-emphasis: #935400;
+  --color-accent-muted: rgba(29, 33, 31, 0.32);
+  --color-accent-subtle: rgba(29, 33, 31, 0.05);
+  --color-btn-text: #1d211f;
+  --color-btn-bg: #e9ebe6;
+  --color-btn-hover-bg: #f8f9f6;
+  --color-btn-active-bg: #ffffff;
+  --color-btn-border: rgba(29, 33, 31, 0.55);
+  --color-btn-primary-text: #ffffff;
+  --color-btn-primary-bg: #935400;
+  --color-btn-primary-hover-bg: #935400;
+  --color-btn-primary-hover-border: #935400;
+  --color-btn-primary-selected-bg: #935400;
+  --color-btn-primary-border: #935400;
+  --color-segmented-control-bg: #e9ebe6;
+  --color-segmented-control-button-bg: #f8f9f6;
+  --color-scale-gray-1: #e9ebe6;
+  --oink-comment-border: rgba(29, 33, 31, 0.55);
+  --oink-comment-shadow: none;
+}

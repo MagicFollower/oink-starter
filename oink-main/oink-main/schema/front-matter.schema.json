@@ -56,17 +56,23 @@
     "description": {
       "description": "Front matter key read by the theme's templates."
     },
+    "expo": {
+      "description": "Image albums. Page front matter `expo` overrides this map."
+    },
     "featured_image": {
       "description": "How a blog page presents the featured image `images` selects: none | banner (a framed figure above the title) | wash (the image behind the article header at a low opacity) | hero (the immersive presentation: the blog shell paints the image as its own full-bleed backdrop and moves the opening down — on single pages and section indexes alike). Front matter `featured_image` overrides it for one page or, in a cascade, one section. A page that carries no image renders nothing either way."
     },
     "feedback": {
-      "description": "One-click structured docs feedback. The theme calls the site's existing gtag integration when present; no endpoint or free-text form is used."
-    },
-    "feedback.enable": {
-      "description": "Front matter key read by the theme's templates."
-    },
-    "feedback.reasons": {
-      "description": "Front matter key read by the theme's templates."
+      "description": "One-click structured docs feedback. The theme calls the site's existing gtag integration when present; no endpoint or free-text form is used.",
+      "additionalProperties": true,
+      "properties": {
+        "enable": {
+          "description": "Front matter key read by the theme's templates."
+        },
+        "reasons": {
+          "description": "Front matter key read by the theme's templates."
+        }
+      }
     },
     "footer_style": {
       "description": "Front matter key read by the theme's templates."
@@ -177,7 +183,7 @@
       "description": "Front matter key read by the theme's templates."
     },
     "sidebar_headings": {
-      "description": "Book pages may opt into an h2-h4 branch beneath the active sidebar row."
+      "description": "Book headings beneath the active sidebar row are off by default. Opt in with true (h2 only) or 2, 3, 4 (deepest heading level). Page front matter or a section cascade can override this site setting."
     },
     "sidebar_item_overflow": {
       "description": "Front matter key read by the theme's templates."

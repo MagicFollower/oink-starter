@@ -1,6 +1,7 @@
 {{- $page := .page -}}
 {{- $data := .data -}}
 {{- $id := .id -}}
+{{- $scope := printf "landing-%s" $id -}}
 {{- $items := $data.items | default (slice) -}}
 {{- with $data.rows -}}
   {{- if reflect.IsSlice . -}}
@@ -18,10 +19,10 @@
     {{- partial "landing/heading.html" (dict "page" $page "data" $data "id" $id) }}
     {{- with $items }}
     {{- if eq $layout "marquee" }}
-      {{- partial "landing/marquee.html" (dict "page" $page "data" $data "items" . "template" "landing/items/logo.html" "direction" $data.direction "speed" $data.speed "rows" $data.rows) }}
+      {{- partial "landing/marquee.html" (dict "page" $page "scope" $scope "data" $data "items" . "template" "landing/items/logo.html" "direction" $data.direction "speed" $data.speed "rows" $data.rows) }}
     {{- else }}
     <div class="td-landing-logo-wall" style="--td-columns: {{ $data.columns | default 5 }}">
-      {{- range . }}{{ partial "landing/items/logo.html" (dict "page" $page "data" $data "item" .) }}{{ end }}
+      {{- range $scopeIndex3, $scopeItem3 := . }}{{- $scope := printf "%s-item-%v" $scope $scopeIndex3 -}}{{ partial "landing/items/logo.html" (dict "page" $page "scope" $scope "data" $data "item" .) }}{{ end }}
     </div>
     {{- end }}
     {{- end }}

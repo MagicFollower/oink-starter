@@ -3,28 +3,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 {{ $darkMode := partialCached "dark-mode-config.html" "dark-mode-global" -}}
-{{ if $darkMode.enable -}}
+{{ $preset := partialCached "preset-config.html" "preset-global" -}}
+{{- $canvases := partialCached "_funcs/preset-canvases.html" "preset-canvases" -}}
+{{- $site := index $canvases $preset.preset -}}
 {{/* Browser hints before CSS loads */ -}}
+{{ if $darkMode.enable -}}
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
-<meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#000000">
+{{ end -}}
+<meta name="theme-color" content="{{ $site.light }}" data-td-canvas-light="{{ $site.light }}" data-td-canvas-dark="{{ $site.dark }}">
 
-{{/* Styles to set canvas colors and avoid transitions */ -}}
+{{/* Canvas colors before the stylesheet arrives, keyed on the same
+     attributes the stylesheet uses, so the first frame already shows the
+     preset and mode the head scripts below select. */ -}}
 <style>
-  {{/* Set system colors as default */ -}}
-  html { background: Canvas; color: CanvasText; }
-  {{/* Define reasonable dark defaults */ -}}
-  @media (prefers-color-scheme: dark) {
-    html { background: #0b0d12; color: #e6e6e6; }
-  }
+  html { background: {{ $site.light }}; color: {{ $site.lightInk }}; }
+  {{- if $darkMode.enable }}
+  html[data-bs-theme='dark'] { background: {{ $site.dark }}; color: {{ $site.darkInk }}; }
+  {{- end }}
+  {{- range $preset.offered }}{{ if ne . $preset.preset }}{{ $c := index $canvases . }}
+  html[data-td-preset='{{ . }}'] { background: {{ $c.light }}; color: {{ $c.lightInk }}; }
+  {{- if $darkMode.enable }}
+  html[data-td-preset='{{ . }}'][data-bs-theme='dark'] { background: {{ $c.dark }}; color: {{ $c.darkInk }}; }
+  {{- end }}{{ end }}{{ end }}
+  {{- if $darkMode.enable }}
   {{/* Avoid transitions until theme CSS is loaded */ -}}
   html[data-td-theme-init] * { transition: none !important; }
-  [data-td-theme-toggle] > .td-shell-icon--sun { display: none !important; }
-  [data-td-theme-toggle] > [hidden] { display: none !important; }
-  html[data-bs-theme='dark'] [data-td-theme-toggle] > .td-shell-icon--moon { display: none !important; }
-  html[data-bs-theme='dark'] [data-td-theme-toggle] > .td-shell-icon--sun { display: inline-block !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+  {{- end }}
 </style>
 
+{{ if $preset.menu -}}
+{{/* Apply a reader's stored preset before the stylesheet paints. Only the
+     presets this site offers are accepted; anything else is removed so the
+     site default reaches the reader again. appearance.js owns later changes. */ -}}
+<script>
+  (function() {
+    var root = document.documentElement;
+    var allowed = {{ $preset.offered | jsonify | safeJS }};
+    var canvases = {{ $canvases | jsonify | safeJS }};
+    var preset = null;
+    try {
+      preset = localStorage.getItem('td-preset');
+      if (preset !== null && allowed.indexOf(preset) < 0) {
+        preset = null;
+        localStorage.removeItem('td-preset');
+      }
+    } catch (_) {
+      // Storage blocked: the server-rendered site default stays.
+    }
+    if (preset) root.setAttribute('data-td-preset', preset);
+    var c = canvases[root.getAttribute('data-td-preset')];
+    if (!c) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('data-td-canvas-light', c.light);
+      meta.setAttribute('data-td-canvas-dark', c.dark);
+      meta.setAttribute('content', c.light);
+    });
+  })();
+</script>
+{{ end -}}
+
+{{ if $darkMode.enable -}}
 {{/* Set theme attribute before CSS loads to prevent flash */ -}}
 <script>
   (function() {
@@ -32,6 +74,10 @@
     let storedTheme = null;
     try {
       storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
     } catch (_) {
       // Storage can be blocked by browser or embedding policy. System color
       // preference remains a safe first-paint fallback.
@@ -43,6 +89,9 @@
     }
 
     document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
     {{/* Swagger UI and Algolia DocSearch carry their own dark palettes keyed
          on their own switch; mirror the resolved theme before first paint so
          neither flashes its light palette. dark-mode.js keeps them in sync. */ -}}

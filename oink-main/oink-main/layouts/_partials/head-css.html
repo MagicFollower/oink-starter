@@ -1,8 +1,9 @@
 {{ $scssMain := "scss/main.scss" -}}
+{{/* Use Hugo Extended's built-in compiler; consumers need no external Sass
+     executable. Hugo 0.168 may report its upstream LibSass deprecation. */ -}}
 {{ $scss := resources.Get $scssMain
       | toCSS (dict "enableSourceMap" (not hugo.IsProduction)) -}}
-{{/* Font Awesome 7's source SCSS requires Dart Sass, while Hugo Extended
-     uses LibSass. Concatenate its official compiled CSS into one stable vendor
+{{/* Concatenate Font Awesome's official compiled CSS into one stable vendor
      resource. Keep it separate from consumer SCSS so an ordinary theme or site
      style edit does not invalidate the icon distribution. The target remains
      under scss/ so Font Awesome's ../webfonts URLs keep their public shape. */ -}}

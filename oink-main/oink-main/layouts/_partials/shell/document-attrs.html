@@ -2,9 +2,14 @@
 {{- $page := .page -}}
 {{- $themeInit := ne .theme_init false -}}
 {{- $darkMode := partialCached "dark-mode-config.html" "dark-mode-global" -}}
-{{- $attrs := printf ` itemscope itemtype="http://schema.org/WebPage" dir="%s" lang="%s" data-td-typography="%s"`
+{{- $preset := partialCached "preset-config.html" "preset-global" -}}
+{{- /* data-td-preset is the live preset (the head script may replace it with a
+     reader's stored choice); data-td-site-preset keeps the site default so the
+     Appearance menu can mark it and restore it. */ -}}
+{{- $attrs := printf ` itemscope itemtype="http://schema.org/WebPage" dir="%s" lang="%s" data-td-typography="%s" data-td-preset="%s" data-td-site-preset="%s"`
     ($page.Site.Language.Direction | default "ltr")
     (partial "language-tag.html" $page)
-    (partial "typography-preset.html" $page.Site) -}}
+    (partial "typography-preset.html" $page.Site)
+    $preset.preset $preset.preset -}}
 {{- if and $themeInit $darkMode.enable }}{{ $attrs = printf "%s data-td-theme-init" $attrs }}{{ end -}}
 {{- return ($attrs | safeHTMLAttr) -}}

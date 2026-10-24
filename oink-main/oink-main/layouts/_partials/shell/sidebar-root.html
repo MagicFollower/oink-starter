@@ -31,7 +31,9 @@
   {{- with $page.Site.GetPage (printf "/%s" $config.docsSection) }}{{ $root = . }}{{ end -}}
 {{- end -}}
 
-{{- if and (eq $page.Type "book") (eq $root $page.Site.Home) -}}
+{{- /* Book chapters and Expo albums browse their own collection. Without this,
+       the root switcher would label the home tree with its first entry. */ -}}
+{{- if and (in (slice "book" "expo") $page.Type) (eq $root $page.Site.Home) -}}
   {{- with $page.FirstSection }}{{ $root = . }}{{ end -}}
 {{- end -}}
 

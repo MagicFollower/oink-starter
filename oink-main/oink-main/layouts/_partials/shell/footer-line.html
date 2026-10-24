@@ -10,7 +10,6 @@
   {{- $collapsible = .collapsible | default false -}}
 {{- end -}}
 {{- with $p -}}
-{{- $darkMode := partialCached "dark-mode-config.html" "dark-mode-global" -}}
 {{- $center := "Powered by [Oink](https://oink.pgsty.com)" -}}
 {{- if isset .Site.Params "footer_center_info" -}}
   {{- $center = strings.TrimSpace (printf "%v" .Site.Params.footer_center_info) -}}
@@ -44,26 +43,7 @@
       title="{{ .label }}" aria-label="{{ .label }}">{{ partialCached "shell/icon.html" "languages" "footer-alt-language" }}</a>
       {{- end }}
     {{- end }}
-    {{- if $darkMode.showMenu }}
-    <div class="td-shell-footline__theme td-nav-hover-menu" data-td-nav-hover>
-      <button type="button" class="td-shell-iconbtn" data-td-nav-hover-trigger data-td-theme-toggle
-        title="{{ T "ui_theme_toggle" }}" aria-label="{{ T "ui_theme_toggle" }}" aria-expanded="false">
-        {{- partialCached "shell/icon.html" "moon" "footer-moon" -}}
-        {{- partialCached "shell/icon.html" "sun" "footer-sun" -}}
-      </button>
-      <div class="td-nav-hover-menu__pop" role="group" aria-label="{{ T "ui_theme_toggle" }}">
-        <button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="light" aria-pressed="false">
-          {{- partialCached "shell/icon.html" "sun" "footer-theme-light" -}}<span>{{ T "ui_theme_light" }}</span>
-        </button>
-        <button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="dark" aria-pressed="false">
-          {{- partialCached "shell/icon.html" "moon" "footer-theme-dark" -}}<span>{{ T "ui_theme_dark" }}</span>
-        </button>
-        <button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="auto" aria-pressed="false">
-          {{- partialCached "shell/icon.html" "contrast" "footer-theme-auto" -}}<span>{{ T "ui_theme_auto" }}</span>
-        </button>
-      </div>
-    </div>
-    {{- end }}
+    {{ partial "shell/appearance-menu.html" (dict "page" . "context" "footer" "class" "td-shell-footline__theme td-appearance--up" "trigger" "td-shell-iconbtn") }}
     {{ partial "shell/keyboard-help.html" . }}
     {{- if $collapsible }}
     {{- /* Collapses the fat footer above this line; footer-collapse.js owns the

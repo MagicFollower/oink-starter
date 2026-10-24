@@ -31,6 +31,60 @@ def run(text: str, only: list[str] | None = None):
 class TransformationCase(unittest.TestCase):
     maxDiff = None
 
+    def test_list_and_quote_fences_preserve_code_and_still_migrate_following_content(self):
+        for opener, indent in (("- ```text", "  "), ("1. ```text", "   "),
+                               ("3) ~~~text", "   "), ("> - ```text", ">   "),
+                               ("- > ```text", "  > ")):
+            with self.subTest(opener=opener):
+                marker = "~~~" if "~~~" in opener else "```"
+                fenced = f'{opener}\n{indent}{{{{< readfile file="example.md" >}}}}\n{indent}{marker}\n'
+                source = fenced + '\n{{< readfile file="after.md" >}}\n'
+                final, counts, findings = run(source, ["include"])
+                self.assertEqual(final, fenced + '\n{{< include file="after.md" >}}\n')
+                self.assertEqual(counts["readfile"], 1)
+                self.assertFalse(findings)
+                self.assertFalse(residual_findings("test.md", final))
+
+    def test_text_tab_preserves_list_and_quote_containers_around_code(self):
+        for prefix, indent in (("- ", "  "), ("1. ", "   "), ("> ", "> ")):
+            with self.subTest(prefix=prefix):
+                body = f"{prefix}```sql\n{indent}SELECT 1;\n{indent}```"
+                source = '{{< tabpane text=true >}}\n{{< tab header="SQL" >}}\n' + body + '\n{{< /tab >}}\n{{< /tabpane >}}\n'
+                final, counts, findings = run(source, ["tabs"])
+                self.assertIn(body, final)
+                self.assertIn('{{< tabs', final)
+                self.assertNotIn('```sql {tab=', final)
+                self.assertFalse(findings)
+                self.assertEqual(migrate_text("t.md", final, load(["tabs"]))[0], final)
+
+    def test_fence_body_quote_marker_does_not_close_plain_or_container_fence(self):
+        for opener, indent in (("```text", ""), ("- ```text", "  "),
+                               ("1. ```text", "   "), ("> ```text", "> "),
+                               ("> - ```text", ">   "), ("- > ```text", "  > "),
+                               ("> > ```text", "> > ")):
+            with self.subTest(opener=opener):
+                fenced = (f'{opener}\n{indent}> ```\n'
+                          f'{indent}{{{{< readfile file="example.md" >}}}}\n{indent}```\n')
+                source = fenced + '\n{{< readfile file="after.md" >}}\n'
+                final, counts, findings = run(source, ["include"])
+                self.assertEqual(final, fenced + '\n{{< include file="after.md" >}}\n')
+                self.assertEqual(counts["readfile"], 1)
+                self.assertFalse(findings)
+                self.assertFalse(residual_findings("test.md", final))
+
+    def test_datafence_does_not_unwrap_list_or_quote_container(self):
+        for prefix, indent in (("- ", "  "), ("> ", "> ")):
+            with self.subTest(prefix=prefix):
+                source = '{{< echarts >}}\n' + f'{prefix}```json\n{indent}{{"series": []}}\n{indent}```\n' + '{{< /echarts >}}\n'
+                final, counts, findings = run(source, ["datafence"])
+                self.assertEqual(final, source)
+                self.assertTrue(findings)
+
+    def test_list_fence_filename_rewrite_preserves_container_and_body(self):
+        before = '- ```sql {filename="query.sql"}\n  SELECT 1;\n  ```\n'
+        after = '- ```sql {title="query.sql"}\n  SELECT 1;\n  ```\n'
+        self.assertMigrates(before, after, ["fencetitle"])
+
     def assertMigrates(self, before: str, after: str, only: list[str] | None = None, findings: int = 0):
         final, counts, found = run(before, only)
         self.assertEqual(final, textwrap.dedent(after))

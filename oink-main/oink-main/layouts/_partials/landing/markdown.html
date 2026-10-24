@@ -1,3 +1,10 @@
 {{- if and (isset . "value") (ne .value nil) -}}
-  {{- .page.RenderString (dict "display" "inline") (printf "%v" .value) -}}
+  {{- $content := printf "%v" .value -}}
+  {{- $scope := .scope | default (printf "landing-text-%s" (md5 $content)) -}}
+  {{- $html := partial "content/render-block.html" (dict
+    "page" .page "scope" $scope "content" $content "display" "inline"
+    "origin" (printf "%s: landing %s" .page.Path $scope)
+  ) -}}
+  {{- partial "content/register-derived.html" (dict "page" .page "html" $html "raw" $content) -}}
+  {{- $html -}}
 {{- end -}}

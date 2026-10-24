@@ -51,6 +51,12 @@ params:
     sidebar_expand_levels: 4
     sidebar_icon_policy: groups
     backlinks: true
+    # 视觉预设（OINK 1.2+）：读者在页面 Appearance 面板一键切换，选择写入
+    # localStorage 跨页记住、首帧前应用无闪烁。`preset` 是站点默认观感，必须出现在
+    # `preset_menu` 里（漏了主题会 warn 并自动补上）。明暗切换由上面的 `dark_mode` 单独管。
+    # 想要单一外观：把 preset_menu 改成 false（只留 preset）或缩成 [paper]。
+    preset: paper                              # 默认观感；要 1.0/1.1 的技术风改成 slate
+    preset_menu: [paper, slate, ink, terminal] # 4 套全开（技能默认交付）
 
 module:
   imports:
@@ -58,4 +64,4 @@ module:
       replacement: ./oink-main/oink-main
   hugoVersion:
     extended: true
-    min: 0.160.1
+    min: 0.166.0

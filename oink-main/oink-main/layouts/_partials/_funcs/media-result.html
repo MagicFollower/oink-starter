@@ -50,7 +50,9 @@
     {{- with index . "alt" -}}
       {{- if eq (printf "%T" .) "string" }}{{ $alt = strings.TrimSpace . }}{{ end -}}
     {{- end -}}
-    {{- with index . "byline" }}{{ $byline = strings.TrimSpace (printf "%v" .) }}{{ end -}}
+    {{- with index . "byline" -}}
+      {{- if eq (printf "%T" .) "string" }}{{ $byline = strings.TrimSpace . }}{{ end -}}
+    {{- end -}}
   {{- end -}}
   {{- $result = dict
       "src" .RelPermalink

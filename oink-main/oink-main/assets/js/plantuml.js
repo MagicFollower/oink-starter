@@ -1,5 +1,3 @@
-{{ with .Site.Params.plantuml }}
-{{ if and (reflect.IsMap .) (partial "config-enabled.html" (dict "value" . "key" "params.plantuml")) }}
 (function () {
     'use strict';
 
@@ -38,7 +36,7 @@
         return result;
     }
 
-    const imageURL = {{ .svg_image_url | jsonify | safeJS }};
+    const imageURL = {{ .server | jsonify | safeJS }};
     Array.prototype.forEach.call(
         document.querySelectorAll('.language-plantuml'),
         function (code) {
@@ -59,5 +57,3 @@
         },
     );
 })();
-{{ end }}
-{{ end }}

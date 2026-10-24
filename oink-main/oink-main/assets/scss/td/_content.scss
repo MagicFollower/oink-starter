@@ -86,18 +86,6 @@
     margin-bottom: 0.5rem;
   }
 
-  // Markdown links carry no class. Colour alone is thin affordance in running
-  // text, so they underline on hover/focus; component links (cards, pager,
-  // badges, buttons) keep their own treatment.
-  :where(p, li, dd, dt, td, th, blockquote, figcaption, .lead) a:not([class]) {
-    text-underline-offset: 0.16em;
-
-    &:hover,
-    &:focus-visible {
-      text-decoration: underline;
-    }
-  }
-
   img {
     @extend .img-fluid;
   }
@@ -206,19 +194,74 @@
       margin-bottom: 0;
     }
 
+    @media screen {
+      // Structural guards must not raise the cost of consumer overrides.
+      &:where(:not(.td-table-scroll--static)) > table:where(.td-table--wide) {
+        // Preserve ordinary tables. Authors opt technical identifiers into a
+        // wider measure; the wrapper still contains any horizontal overflow.
+        width: max-content;
+        max-width: none;
+
+        > :where(thead, tbody, tfoot) > :where(tr) > :is(th, td) {
+          // Unlike anywhere, break-word keeps technical tokens in the
+          // intrinsic minimum width, with an escape hatch for very long ones.
+          overflow-wrap: break-word;
+          word-break: normal;
+
+          a,
+          code {
+            overflow-wrap: inherit;
+            word-break: inherit;
+          }
+        }
+
+        > :where(thead, tbody, tfoot) > :where(tr) > td {
+          // Bound prose's preferred measure instead of making a long
+          // description one enormous line. Auto layout may distribute extra
+          // space; matrix headers keep their explicit nowrap behavior.
+          max-width: 40ch;
+        }
+      }
+    }
+
     &--full {
       width: 100%;
       max-width: none;
     }
 
-    // Print and RSS get the same box without the viewport: the render hook
-    // marks it rather than leaving the behavior to a media query, so a feed or
-    // a consumer stylesheet sees the intent in the markup.
-    &--static {
+    // RSS is a plain static box. Print also carries the static-output marker,
+    // but its focusable on-screen viewport must still contain wide tables.
+    // The print media rule below expands every table only for paper output.
+    &--static:not([tabindex]) {
       max-width: none;
       overflow: visible;
+      // A nested static viewport must not inherit an outer screen cell's rule.
+      overflow-wrap: anywhere;
     }
   }
+}
+
+// Keep the skip-link destination visible without framing the whole article.
+#td-main-content:focus-visible:not([data-td-pointer-focus]):has(h1) {
+  outline: none;
+
+  h1:first-of-type {
+    outline: 2px solid var(--bs-link-color);
+    outline-offset: 4px;
+  }
+}
+
+.td-content pre[tabindex]:focus-visible {
+  outline: 2px solid var(--bs-link-color);
+  outline-offset: 3px;
+}
+
+// Only a pointer-origin focus on these reading containers suppresses the
+// browser's later keyboard heuristic. Controls and Tab focus are unaffected.
+#td-main-content[data-td-pointer-focus]:focus,
+.td-content .td-table-scroll[data-td-pointer-focus]:focus,
+.td-content pre[tabindex][data-td-pointer-focus]:focus {
+  outline: none;
 }
 
 @media print {
@@ -230,6 +273,8 @@
 }
 
 @media (forced-colors: active) {
+  #td-main-content:focus-visible:not([data-td-pointer-focus]) h1:first-of-type,
+  .td-content pre[tabindex]:focus-visible,
   .td-content .katex-display:focus-visible,
   .td-content .td-table-scroll:focus-visible {
     outline-color: Highlight;
@@ -390,12 +435,12 @@
   }
 
   &.td-is-submitted &__choice[aria-pressed='true'] {
-    color: var(--bs-primary);
+    color: var(--bs-link-color);
     opacity: 1;
   }
 
   &__reason[aria-pressed='true'] {
-    color: var(--bs-primary);
+    color: var(--bs-link-color);
     opacity: 1;
   }
 
@@ -431,6 +476,13 @@
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
+
+  a {
+    // The global link treatment removes decoration with !important. Metadata
+    // is inline prose and needs a visible distinction beyond link color.
+    text-decoration: underline !important;
+    text-underline-offset: 0.15em;
+  }
 }
 
 .td-page-meta__icon {

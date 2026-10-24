@@ -59,6 +59,8 @@
   {{- $childMarkup = printf "<ul class=\"td-shell-tree__list td-shell-tree__list--%d\">%s</ul>" $childUlNr $rows | safeHTML -}}
 {{- end -}}
 
+{{/* In a foldable tree the parent disclosure owns child visibility. Leaves
+     have no toggle of their own, but must remain visible inside an open branch. */ -}}
 {{- partial "shell/sidebar-node.html" (dict
   "page" $p
   "section" $s
@@ -69,7 +71,7 @@
   "withChild" $withChild
   "foldable" $foldable
   "shouldExpand" $shouldExpand
-  "hidden" (not (or $show $foldable))
+  "hidden" (not (or $show $foldableEnabled))
   "iconPolicy" $iconPolicy
   "overflow" $overflow
   "children" $childMarkup

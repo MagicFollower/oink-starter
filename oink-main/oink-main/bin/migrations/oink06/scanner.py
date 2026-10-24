@@ -17,7 +17,10 @@ import re
 from typing import Iterator
 
 
-FENCE_OPEN_RE = re.compile(r"^(?P<indent>(?:[ \t]*>)*[ \t]*)(?P<fence>`{3,}|~{3,})(?P<info>.*)$")
+FENCE_OPEN_RE = re.compile(
+    r"^(?P<indent>(?:[ \t]*(?:>|[-+*][ \t]+|\d{1,9}[.)][ \t]+))*[ \t]*)"
+    r"(?P<fence>`{3,}|~{3,})(?P<info>.*)$"
+)
 FRONT_MATTER_DELIMS = ("---", "+++")
 
 # Leaf shortcodes that never have a closing tag even without a trailing `/`.
@@ -291,7 +294,10 @@ class Document:
             if match and (match.group("fence")[0] == "~" or "`" not in match.group("info")):
                 marker = match.group("fence")
                 indent = match.group("indent")
-                closer = re.compile(r"^(?:[ \t]*>)*[ \t]*" + re.escape(marker[0]) + "{" + str(len(marker)) + ",}[ \t]*$")
+                # Only the opener's quote containers may prefix its closer;
+                # an extra `>` inside the fence is literal code.
+                closer = re.compile(r"^(?:[ \t]*>){" + str(indent.count(">")) + r"}[ \t]*"
+                                    + re.escape(marker[0]) + "{" + str(len(marker)) + ",}[ \t]*$")
                 end = index + 1
                 while end < len(self.lines) and not closer.match(self.lines[end]):
                     end += 1

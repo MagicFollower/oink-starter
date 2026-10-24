@@ -1,6 +1,7 @@
 {{- $page := .page -}}
 {{- $hero := .data -}}
 {{- $id := .id -}}
+{{- $scope := printf "landing-%s" $id -}}
 {{- $titleLines := index $hero "title_lines" -}}
 {{- $lead := $hero.lead | default $hero.desc | default $hero.text -}}
 {{- $image := $hero.image -}}
@@ -66,44 +67,44 @@
       {{- with $hero.eyebrow }}
       <p class="td-landing-hero__eyebrow">
         <span class="td-landing-status-dot" aria-hidden="true"></span>
-        <span>{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</span>
+        <span>{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-hero-field-1" $scope) "value" .) }}</span>
       </p>
       {{- end }}
       <h1 class="td-landing-hero__title" id="{{ $id }}-title">
         {{- with $titleLines -}}
-          {{- range . }}
+          {{- range $scopeIndex1, $scopeItem1 := . }}{{- $scope := printf "%s-item-%v" $scope $scopeIndex1 -}}
         <span>
             {{- if reflect.IsMap . -}}
-              {{- range $word := .words -}}
+              {{- range $scopeIndex2, $word := .words -}}{{- $scope := printf "%s-item-%v" $scope $scopeIndex2 -}}
                 {{- with $word.mark }}<b class="td-landing-initial{{ with $word.color }} td-landing-initial--{{ . }}{{ end }}">{{ . }}</b>{{ end -}}
-                {{- partial "landing/markdown.html" (dict "page" $page "value" $word.text) -}}{{ " " -}}
+                {{- partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-hero-field-2" $scope) "value" $word.text) -}}{{ " " -}}
               {{- end -}}
             {{- else -}}
-              {{- partial "landing/markdown.html" (dict "page" $page "value" .) -}}
+              {{- partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-hero-field-3" $scope) "value" .) -}}
             {{- end -}}
         </span>
           {{- end -}}
         {{- else -}}
-          {{- partial "landing/markdown.html" (dict "page" $page "value" ($hero.title | default $page.Site.Title)) -}}
+          {{- partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-hero-field-4" $scope) "value" ($hero.title | default $page.Site.Title)) -}}
         {{- end -}}
       </h1>
-      {{- with $lead }}<p class="td-landing-hero__lead">{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</p>{{ end }}
+      {{- with $lead }}<p class="td-landing-hero__lead">{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-hero-field-5" $scope) "value" .) }}</p>{{ end }}
       {{- with $hero.note }}
-      <p class="td-landing-hero__note"><i class="{{ $hero.note_icon | default "fa-solid fa-circle-check" }}" aria-hidden="true"></i><span>{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</span></p>
+      <p class="td-landing-hero__note"><i class="{{ $hero.note_icon | default "fa-solid fa-circle-check" }}" aria-hidden="true"></i><span>{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-hero-field-6" $scope) "value" .) }}</span></p>
       {{- end }}
       {{- with $hero.actions }}
       <div class="td-landing-hero__actions">
-        {{- range . }}
+        {{- range $scopeIndex3, $scopeItem3 := . }}{{- $scope := printf "%s-item-%v" $scope $scopeIndex3 -}}
           {{- $url := .url | default .href -}}
           {{- if $url }}
         <a class="td-landing-button td-landing-button--{{ .style | default "ghost" }}" href="{{ $url | relLangURL }}"{{ if .external }} target="_blank" rel="noopener noreferrer"{{ end }}>
           {{- with .icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}
-          <span>{{ partial "landing/markdown.html" (dict "page" $page "value" .label) }}</span>
+          <span>{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-hero-field-7" $scope) "value" .label) }}</span>
         </a>
           {{- else }}
         <span class="td-landing-button td-landing-button--{{ .style | default "ghost" }}">
           {{- with .icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}
-          <span>{{ partial "landing/markdown.html" (dict "page" $page "value" .label) }}</span>
+          <span>{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-hero-field-8" $scope) "value" .label) }}</span>
         </span>
           {{- end }}
         {{- end }}
@@ -113,7 +114,7 @@
       {{- $url := .url | default .href -}}
       <p class="td-landing-hero__detail">
         {{- if $url }}<a href="{{ $url | relLangURL }}"{{ if .external }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ else }}<span>{{ end -}}
-        {{ with .icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ partial "landing/markdown.html" (dict "page" $page "value" .label) }} <span aria-hidden="true">→</span>
+        {{ with .icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-hero-field-9" $scope) "value" .label) }} <span aria-hidden="true">→</span>
         {{- if $url }}</a>{{ else }}</span>{{ end -}}
       </p>
       {{- end }}

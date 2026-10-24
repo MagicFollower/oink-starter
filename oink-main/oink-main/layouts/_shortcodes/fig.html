@@ -9,8 +9,7 @@
 {{- $caption := "" -}}
 {{- if isset .Params "caption" }}{{ $caption = .Get "caption" }}{{ end -}}
 {{- if isset .Params "title" -}}
-  {{- if $caption }}{{ warnf "shortcode %q: title and caption are mutually exclusive at %s; using caption" .Name .Position }}{{ end -}}
-  {{- $caption = .Get "title" -}}
+  {{- if $caption }}{{ warnf "shortcode %q: title and caption are mutually exclusive at %s; using caption" .Name .Position }}{{ else }}{{ $caption = .Get "title" }}{{ end -}}
 {{- end -}}
 {{- if ne (printf "%T" $caption) "string" }}{{ warnf "shortcode %q: caption/title must be a string at %s; dropping it" .Name .Position }}{{ $caption = "" }}{{ end -}}
 {{- $caption = strings.TrimSpace $caption -}}

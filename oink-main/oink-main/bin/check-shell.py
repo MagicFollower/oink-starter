@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from html.parser import HTMLParser
 
 from test_site import fixture_config_args, run_hugo_process
 from pathlib import Path
@@ -34,6 +35,15 @@ def check_sources() -> list[str]:
     docs_node = (ROOT / "layouts/_partials/shell/docs-sidebar-node.html").read_text()
     sidebar_node = (ROOT / "layouts/_partials/shell/sidebar-node.html").read_text()
     sidebar_nav = (ROOT / "assets/js/sidebar-nav.js").read_text()
+    sidebar_state = (ROOT / "assets/js/sidebar-state.js").read_text()
+    shell_js = (ROOT / "assets/js/docs-shell.js").read_text()
+    scripts = (ROOT / "layouts/_partials/scripts.html").read_text()
+    require(scripts.index('js/sidebar-state.js') < scripts.index('js/sidebar-nav.js'),
+            "disclosure controller must load before cached-path hydration", errors)
+    require("OinkSidebar.setExpanded" in sidebar_nav and "OinkSidebar.setExpanded" in shell_js
+            and "oink:sidebar-disclosure" in sidebar_state
+            and "function initTreeToggles" not in shell_js,
+            "sidebar disclosure writers bypass their committed-state controller", errors)
     page_end = (ROOT / "layouts/_partials/page-end.html").read_text()
     annotation = (ROOT / "layouts/_partials/page-annotation.html").read_text()
     pager = (ROOT / "layouts/_partials/pager.html").read_text()
@@ -41,6 +51,7 @@ def check_sources() -> list[str]:
     content_styles = (ROOT / "assets/scss/td/_content.scss").read_text()
     comments_styles = (ROOT / "assets/scss/td/_giscus.scss").read_text()
     blog_list = (ROOT / "layouts/blog/list.html").read_text()
+    blog_state = (ROOT / "layouts/_partials/shell/blog-index-state.html").read_text()
     blog_card = (ROOT / "layouts/_partials/shell/blog-card.html").read_text()
     blog_styles = (ROOT / "assets/scss/td/shell/_blog.scss").read_text()
     page_context_styles = (ROOT / "assets/scss/td/shell/_page-context.scss").read_text()
@@ -87,10 +98,10 @@ def check_sources() -> list[str]:
             and '"front matter sidebar_root_link_self must be a boolean' in sidebar_node
             and "$rootLinkSelf := true" in sidebar_node,
             "self-root links do not default to their own landing with an explicit legacy escape", errors)
-    require('"node" (dict "page" $sidebarRootURL' in docs_tree,
+    require('"node" (dict "page" $sidebarRootPage' in docs_tree,
             "explicit docs sidebar does not prepend a missing root row", errors)
-    require("continue" not in docs_tree.split('index $docsNav "sections"', 1)[1].split("partial", 1)[0],
-            "docs sidebar still skips its root row", errors)
+    # check-reading.py exercises root inclusion and scoped explicit order in
+    # rendered sidebars, pagers and navigation JSON (including custom URLs).
     require(all('data-td-sidebar-hydrate-active' in source and "d-none" not in source
                 for source in (generic_tree, docs_tree)),
             "a cached sidebar is hidden until JavaScript instead of exposing a hydration marker", errors)
@@ -238,10 +249,12 @@ def check_sources() -> list[str]:
             "bottom-bar language control is expanded or no longer opens upward", errors)
     require("dropdown.show()" in base_js and "menu.addEventListener('pointerenter'" in base_js,
             "bottom-bar version menu no longer opens on pointer hover", errors)
-    require(all(f'data-bs-theme-value="{value}"' in footer_line
-                for value in ("light", "dark", "auto"))
-            and "data-td-nav-hover" in footer_line,
-            "bottom-bar theme trigger no longer exposes its three-mode menu", errors)
+    appearance = (ROOT / "layouts/_partials/shell/appearance-menu.html").read_text()
+    require('shell/appearance-menu.html' in footer_line
+            and 'type="radio"' in appearance and '<fieldset' in appearance
+            and 'slice "light" "sun"' in appearance and 'slice "dark" "moon"' in appearance
+            and 'slice "auto" "contrast"' in appearance,
+            "bottom-bar Appearance control lost its native three-mode group", errors)
     require('data-td-nav-hover-open' in keyboard_help
             and 'class="td-kbd-sequence"' in keyboard_help
             and all(key in keyboard_help for key in ('<kbd>W</kbd>', '<kbd>/</kbd>', '<kbd>H</kbd>')),
@@ -269,6 +282,14 @@ def check_sources() -> list[str]:
     alignment = "var(--td-shell-nav-h) + var(--td-shell-content-top, 2.5rem)"
     require(alignment in layout_styles and alignment in toc_styles,
             "collapsed rail controls no longer align with the article topline", errors)
+    require(not re.search(r"\b(?:width|flex-basis)\s+var\(--td-motion-", toc_styles),
+            "responsive TOC widths must not animate and make the article rebound during resizing", errors)
+    fixed_toc = scss_block(toc_styles, "\n.td-shell-toc__panel {")
+    flow_toc = scss_block(toc_styles, "  .td-shell-layout--toc-flow .td-shell-toc__panel {")
+    require("inset-block-end: var(--td-shell-footer-offset, 0px)" in fixed_toc
+            and "position: sticky" in flow_toc
+            and "inset-block-end: auto" in flow_toc,
+            "fixed TOC must avoid the visible footer while flow keeps its sticky boundary", errors)
     require("@media (min-width: 768px) and (hover: hover) and (pointer: fine)" in navbar_styles,
             "drawer-width viewports no longer disable auto-hide", errors)
     require("@media (max-width: 767.98px)" in navbar_styles
@@ -283,7 +304,6 @@ def check_sources() -> list[str]:
             and "margin-inline-start: auto" not in navbar_styles,
             "compact navbar no longer true-centers its generated menu", errors)
     require("> .td-nav-version-menu" in navbar_styles
-            and "> .td-nav-theme-menu" in navbar_styles
             and "> .td-nav-github" in navbar_styles
             and ".td-site-header .td-site-drawer-toggle {\n    display: inline-flex;\n  }"
             in navbar_styles,
@@ -359,12 +379,12 @@ def check_sources() -> list[str]:
     require("key === 'l' || key === 'y'" in keyboard,
             "y is no longer the l language alias", errors)
     # Blog form and width remain page-overridable parameters.
-    require('partial "ui-param.html" (dict "page" . "key" "blog_index")' in blog_list
-            and 'partial "ui-param.html" (dict "page" . "key" "blog_index_columns")' in blog_list,
+    require('partial "ui-param.html" (dict "page" . "key" "blog_index")' in blog_state
+            and 'partial "ui-param.html" (dict "page" . "key" "blog_index_columns")' in blog_state,
             "blog index form or column count is not a ui-param with a front matter override", errors)
-    require('"allowed" (slice "list" "cards" "table")' in blog_list
-            and '"key" "params.ui.blog_index"' in blog_list
-            and '"fallback" "list"' in blog_list,
+    require('"allowed" (slice "list" "cards" "table")' in blog_state
+            and '"key" "params.ui.blog_index"' in blog_state
+            and '"fallback" "list"' in blog_state,
             "blog index form is not validated against its enum with a documented fallback", errors)
 
     # The switch renders every form and records the published default.
@@ -436,8 +456,8 @@ def check_sources() -> list[str]:
             "the card order is no longer date, tags, description", errors)
     require(".Description | default" in blog_card,
             "the card summarises the body where the author wrote a description", errors)
-    require('"key" "blog_index_size"' in blog_list
-            and "$blogPages.ByDate.Reverse) $size" in blog_list,
+    require('"key" "blog_index_size"' in blog_state
+            and "$blogPages.ByDate.Reverse) $size" in blog_state,
             "the blog index no longer passes its own pager size, which Hugo ignores from a theme", errors)
     require("td-blog-cards" in blog_styles and "forced-colors: active" in blog_styles,
             "blog card styles lost the shared grid or forced-colours support", errors)
@@ -960,7 +980,7 @@ def build_example(hugo: str) -> list[str]:
             footline = source.find('class="td-shell-footline d-print-none"')
             require(footline >= 0
                     and source.find("td-shell-footline__language", footline) >= 0
-                    and source.find('class="td-shell-footline__theme', footline) >= 0
+                    and source.find('td-shell-footline__theme', footline) >= 0
                     and source.find('class="td-shell-keyboard td-nav-hover-menu"', footline) >= 0,
                     "rendered bottom bar lost its language/theme/help controls", errors)
             require('aria-label="breadcrumb"' in source,
@@ -1364,6 +1384,95 @@ params:
     return errors
 
 
+def build_root_menu_visibility(hugo: str) -> list[str]:
+    """Explicit false applies to both root sources, with a current-root fallback."""
+    errors: list[str] = []
+
+    class RootLinks(HTMLParser):
+        def __init__(self) -> None:
+            super().__init__()
+            self.links: list[str] = []
+
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            classes = attrs.get("class", "").split()
+            if tag == "a" and any(name in classes for name in
+                                  ("td-shell-root__item", "td-shell-root__trigger")):
+                self.links.append(attrs.get("href", ""))
+
+    with tempfile.TemporaryDirectory(prefix="oink-root-menu-") as temporary:
+        source = Path(temporary) / "site"
+        public = Path(temporary) / "public"
+        source.mkdir()
+        (source / "hugo.yaml").write_text(f"""baseURL: https://example.org/sub/
+title: Root menu visibility
+theme: {ROOT.name}
+defaultContentLanguage: en
+languages:
+  en:
+    locale: en-US
+  zh:
+    locale: zh-CN
+disableKinds: [RSS, sitemap, taxonomy, term]
+params:
+  offline_search: false
+  ui:
+    sidebar_root_menu: true
+""", encoding="utf-8")
+        (source / "layouts").mkdir()
+        (source / "layouts/home.html").write_text(
+            '<html><body>{{ partial "shell/root-menu.html" . }}</body></html>', encoding="utf-8")
+        pages = {
+            "docs/_index": "title: Docs\ntype: docs\nweight: 1\ncascade:\n  type: docs",
+            "docs/page": "title: Page",
+            "hidden/_index": "title: Hidden\ntype: docs\nsidebar_root_for: self\nsidebar_root_menu: false",
+            "hidden/page": "title: Hidden page\ntype: docs",
+            "docs/nested/_index": "title: Nested\nsidebar_root_for: self\nsidebar_root_menu: false",
+            "docs/nested/page": "title: Nested page",
+            "visible/_index": "title: Visible\ntype: docs\nweight: 2\nsidebar_root_for: self\nsidebar_root_menu: true",
+            "docs/default/_index": "title: Default\nsidebar_root_for: self",
+        }
+        for name, frontmatter in pages.items():
+            for suffix in (".md", ".zh.md"):
+                path = source / "content" / (name + suffix)
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(f"---\n{frontmatter}\n---\n\nContent.\n", encoding="utf-8")
+
+        for all_hidden in (False, True):
+            if all_hidden:
+                for path in (source / "content").rglob("_index*.md"):
+                    frontmatter = path.read_text().replace("sidebar_root_menu: true", "sidebar_root_menu: false")
+                    if "sidebar_root_menu:" not in frontmatter:
+                        frontmatter = frontmatter.replace("---\n", "---\nsidebar_root_menu: false\n", 1)
+                    path.write_text(frontmatter, encoding="utf-8")
+            result = run_hugo_process(
+                [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
+                 "--destination", str(public), "--panicOnWarning"],
+                cwd=ROOT, text=True, capture_output=True)
+            if result.returncode:
+                return ["root visibility fixture failed:\n" + result.stdout + result.stderr]
+            for language in ("", "zh/"):
+                prefix = "/sub/" + language
+                for page, current in (("docs/page", "docs/"), ("hidden/page", "hidden/"),
+                                      ("docs/nested/page", "docs/nested/")):
+                    html = (public / language / page / "index.html").read_text()
+                    parser = RootLinks()
+                    parser.feed(html)
+                    expected = ([prefix + current] if all_hidden else
+                                [prefix + name for name in ("docs/", "visible/", "docs/default/")])
+                    if not all_hidden and prefix + current not in expected:
+                        expected.append(prefix + current)
+                    require(parser.links == expected,
+                            f"{language}{page} roots {parser.links} != {expected}", errors)
+                    require(('td-shell-root--static' in html) == all_hidden,
+                            f"{language}{page} one-root switcher did not become a static link", errors)
+                if all_hidden:
+                    home = (public / language / "index.html").read_text()
+                    require('td-shell-root' not in home,
+                            f"{language} zero-entry root switcher emitted a control", errors)
+    return errors
+
+
 def build_featured_image_rejection(hugo: str) -> list[str]:
     """An unknown mode warns, uses `none`, and fails strict publication."""
     errors: list[str] = []
@@ -1480,6 +1589,76 @@ menus:
                     and "A retained mega-menu description" not in html
                     and 'class="td-nav-menu__panel"' in html,
                     "retired columns changed the single-column panel rendering", errors)
+    return errors
+
+
+def build_drawer_ownership(hugo: str) -> list[str]:
+    """Landing and 404 pages must not advertise an absent reading sidebar."""
+    errors: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="oink-shell-drawers-") as temporary:
+        root = Path(temporary)
+        source = root / "site"
+        (source / "content").mkdir(parents=True)
+        (source / "hugo.yaml").write_text(
+            f"baseURL: https://example.org/\ntitle: Drawer fixture\ntheme: {ROOT.name}\n"
+            "disableKinds: [RSS, sitemap, taxonomy, term]\n",
+            encoding="utf-8",
+        )
+        for route, kind, layout in [
+            ("_index", "book", "landing"),
+            ("book-landing", "book", "landing"),
+            ("docs-landing", "docs", "landing"),
+            ("chapter", "book", ""),
+        ]:
+            (source / "content" / f"{route}.md").write_text(
+                f"---\ntitle: {route}\ntype: {kind}\nlayout: {layout}\n"
+                + ("cascade:\n  type: docs\n" if route == "_index" else "")
+                +
+                "sections:\n  - type: markdown\n    content: Drawer fixture.\n---\n\nContent.\n",
+                encoding="utf-8",
+            )
+        result = run_hugo_process(
+            [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
+             "--destination", str(root / "public"), "--panicOnWarning"],
+            cwd=ROOT, text=True, capture_output=True,
+        )
+        require(result.returncode == 0,
+                "drawer fixture failed: " + (result.stdout + result.stderr)[-800:], errors)
+        if result.returncode:
+            return errors
+        for route in ("", "book-landing/", "docs-landing/"):
+            html = (root / "public" / route / "index.html").read_text()
+            require("data-td-landing-menu-toggle" in html
+                    and "data-td-shell-drawer-open" not in html
+                    and 'id="td-shell-sidebar"' not in html,
+                    f"{route or 'home'} exposes a shell drawer outside its Landing layout", errors)
+        chapter = (root / "public/chapter/index.html").read_text()
+        require("data-td-shell-drawer-open" in chapter
+                and 'id="td-shell-sidebar"' in chapter
+                and "data-td-landing-menu-toggle" not in chapter,
+                "ordinary Book chapter lost its sole sidebar drawer", errors)
+        not_found = (root / "public/404.html").read_text()
+        require('class="td-404"' in not_found and "td-site-header" in not_found
+                and "td-shell-sidebar" not in not_found
+                and "data-td-shell-drawer-open" not in not_found,
+                "stock 404 inherited a nonexistent sidebar from the Docs cascade", errors)
+        (source / "layouts").mkdir()
+        (source / "layouts/index.html").write_text(
+            '{{ define "main" }}<h1>Custom homepage</h1>{{ end }}', encoding="utf-8",
+        )
+        (source / "content/_index.md").write_text("---\ntitle: Custom homepage\n---\n", encoding="utf-8")
+        custom = run_hugo_process(
+            [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
+             "--destination", str(root / "public"), "--panicOnWarning"],
+            cwd=ROOT, text=True, capture_output=True,
+        )
+        require(custom.returncode == 0,
+                "custom homepage fixture failed: " + (custom.stdout + custom.stderr)[-800:], errors)
+        if custom.returncode == 0:
+            home = (root / "public/index.html").read_text()
+            require("Custom homepage</h1>" in home and "data-td-landing-menu-toggle" in home
+                    and "js/chunks/landing" in home,
+                    "custom homepage drawer omitted its Landing runtime", errors)
     return errors
 
 
@@ -1864,8 +2043,9 @@ def main() -> int:
     args = parser.parse_args()
     errors = (check_sources() + build_example(args.hugo) + build_footer_utilities_fixture(args.hugo)
               + build_self_root_fixture(args.hugo)
+              + build_root_menu_visibility(args.hugo)
               + build_featured_image_rejection(args.hugo)
-              + build_navbar_menu_columns(args.hugo)
+              + build_navbar_menu_columns(args.hugo) + build_drawer_ownership(args.hugo)
               + build_blog_index_forms(args.hugo) + build_blog_card_fixture(args.hugo)
               + build_share_fixture(args.hugo))
     if errors:

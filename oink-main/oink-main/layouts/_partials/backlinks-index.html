@@ -14,7 +14,7 @@
 {{- $site := . -}}
 {{- $siteHost := (urls.Parse $site.BaseURL).Host -}}
 {{- $prefix := $site.LanguagePrefix -}}
-{{- $backlinkIndex := dict -}}
+{{- $scratch := newScratch -}}
 {{- range $source := where $site.Pages "Kind" "in" (slice "home" "section" "page") -}}
   {{- if not $source.RelPermalink }}{{ continue }}{{ end -}}
   {{- $clean := $source.RawContent -}}
@@ -36,8 +36,8 @@
     {{- if and $u.Host (ne $u.Host $siteHost) }}{{ continue }}{{ end -}}
     {{- $path := $u.Path -}}
     {{- if not $path }}{{ continue }}{{ end -}}
-    {{- if and $prefix (hasPrefix $path $prefix) -}}
-      {{- $path = strings.TrimPrefix $prefix $path -}}
+    {{- if and $prefix (or (eq $path $prefix) (hasPrefix $path (printf "%s/" $prefix))) -}}
+      {{- $path = strings.TrimPrefix $prefix $path | default "/" -}}
     {{- end -}}
     {{- $lookup := strings.TrimSuffix "/" $path | default "/" -}}
     {{- /* GetPage errors on an ambiguous reference; an ambiguous or missing
@@ -49,8 +49,8 @@
     {{- if eq $target $source }}{{ continue }}{{ end -}}
     {{- if index $seen $target.Path }}{{ continue }}{{ end -}}
     {{- $seen = merge $seen (dict $target.Path true) -}}
-    {{- $existing := index $backlinkIndex $target.Path | default (slice) -}}
-    {{- $backlinkIndex = merge $backlinkIndex (dict $target.Path ($existing | append $source)) -}}
+    {{- $existing := index ($scratch.Get "index" | default dict) $target.Path | default (slice) -}}
+    {{- $scratch.SetInMap "index" $target.Path ($existing | append $source) -}}
   {{- end -}}
 {{- end -}}
-{{- return $backlinkIndex -}}
+{{- return ($scratch.Get "index" | default dict) -}}

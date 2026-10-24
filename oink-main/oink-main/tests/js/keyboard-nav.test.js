@@ -56,6 +56,8 @@ class Element {
     if (selector === '[data-td-shell-sidebar-toggle]') return this.hasAttribute('data-td-shell-sidebar-toggle');
     if (selector === '[role="dialog"]') return this.getAttribute('role') === 'dialog';
     if (selector === '.td-kbd-focus') return this.classList.contains('td-kbd-focus');
+    if (selector === '.td-shell-tree__row') return this.classList.contains('td-shell-tree__row');
+    if (selector === ':modal') return this.modal === true;
     if (selector === 'dialog[open]') return this.tagName === 'DIALOG' && this.hasAttribute('open');
     if (selector === '#TableOfContents') return this.id === 'TableOfContents';
     if (selector === 'link[rel="canonical"]') return this.tagName === 'LINK' && this.getAttribute('rel') === 'canonical';
@@ -91,6 +93,7 @@ class Element {
   click() { this.clicks += 1; if (this.onclick) this.onclick(); }
   scrollIntoView() {}
   getBoundingClientRect() { return { top: 0 }; }
+  getClientRects() { return this.hidden ? [] : [{}]; }
 }
 
 function link(href, className = '') {
@@ -101,10 +104,10 @@ function link(href, className = '') {
 
 // A foldable tree matching the sidebar markup: row + chevron + children div.
 // Chevron clicks mimic docs-shell.js (flip aria-expanded, toggle td-is-open).
-function treeItem({ href, className = '', expanded = null, children = [] }) {
+function treeItem({ href, className = '', expanded = null, children = [], groupOnly = false }) {
   const item = new Element('li', 'td-shell-tree__item ' + className);
   const row = new Element('div', 'td-shell-tree__row');
-  const anchor = link(href);
+  const anchor = groupOnly ? new Element('span', 'td-shell-tree__link td-shell-tree__group') : link(href);
   row.appendChild(anchor);
   item.appendChild(row);
   let childWrap = null;
@@ -342,6 +345,7 @@ function press(harness, values) {
 
   const ariaDialog = new Element('div');
   ariaDialog.setAttribute('role', 'dialog');
+  ariaDialog.offsetParent = null;
   guard.root.appendChild(ariaDialog);
   press(guard, { key: 'j' });
   assert.equal(guard.win.scrolled.length, 0, 'visible ARIA dialog did not suppress shortcuts');
@@ -529,6 +533,73 @@ function press(harness, values) {
     '/docs/b/one/',
     'd on an expanded item steps into the first child',
   );
+
+  // Non-link groups participate in focus navigation through their disclosure
+  // button, while q/e continue to visit only page links.
+  const grouped = setup({ withTree: false });
+  const groupedMenu = new Element('div');
+  groupedMenu.id = 'td-sidebar-menu';
+  const groupedList = new Element('ul');
+  const beforeGroup = treeItem({ href: '/docs/before/' });
+  const firstGrouped = treeItem({ href: '/docs/group/one/' });
+  const secondGrouped = treeItem({ href: '/docs/group/two/' });
+  const groupOnly = treeItem({ groupOnly: true, expanded: true, children: [firstGrouped, secondGrouped] });
+  const afterGroup = treeItem({ href: '/docs/after/' });
+  [beforeGroup, groupOnly, afterGroup].forEach(item => groupedList.appendChild(item));
+  groupedMenu.appendChild(groupedList);
+  grouped.root.appendChild(groupedMenu);
+  (function own(node) {
+    node.ownerDocument = grouped.doc;
+    node.children.forEach(own);
+  })(groupedMenu);
+  const groupToggle = groupOnly.querySelector('[data-td-shell-tree-toggle]');
+  groupToggle.id = 'group-toggle';
+  const groupedFirstLink = firstGrouped.querySelector('a.td-shell-tree__link');
+  const groupedSecondLink = secondGrouped.querySelector('a.td-shell-tree__link');
+  groupedSecondLink.classList.add('active');
+  grouped.win.location.href = 'https://example.test/docs/group/two/';
+
+  for (const [dir, collapseKey, expandKey] of [
+    ['ltr', 'ArrowLeft', 'ArrowRight'],
+    ['ltr', 'a', 'd'],
+    ['rtl', 'ArrowRight', 'ArrowLeft'],
+  ]) {
+    grouped.html.setAttribute('dir', dir);
+    groupedSecondLink.focus();
+    press(grouped, { key: collapseKey });
+    assert.equal(grouped.doc.activeElement.id, 'group-toggle', `${collapseKey} returns to the direct parent group`);
+    press(grouped, { key: collapseKey });
+    assert.equal(groupToggle.getAttribute('aria-expanded'), 'false', `${collapseKey} collapses a non-link group`);
+    press(grouped, { key: expandKey });
+    assert.equal(groupToggle.getAttribute('aria-expanded'), 'true', `${expandKey} expands a non-link group`);
+    press(grouped, { key: expandKey });
+    assert.equal(grouped.doc.activeElement, groupedFirstLink, `${expandKey} enters the first group child`);
+  }
+  grouped.html.setAttribute('dir', 'ltr');
+  press(grouped, { key: 'w' });
+  assert.equal(grouped.doc.activeElement.id, 'group-toggle', 'w visits the non-link group before its first child');
+  press(grouped, { key: 'w' });
+  assert.equal(grouped.doc.activeElement.getAttribute('href'), '/docs/before/', 'w leaves the group for the preceding row');
+  press(grouped, { key: 's' });
+  assert.equal(grouped.doc.activeElement.id, 'group-toggle', 's includes the group disclosure in focus order');
+  press(grouped, { key: 'ArrowDown' });
+  assert.equal(grouped.doc.activeElement, groupedFirstLink, 'ArrowDown enters an expanded group');
+  press(grouped, { key: 'ArrowDown' });
+  assert.equal(grouped.doc.activeElement, groupedSecondLink, 'ArrowDown preserves child order');
+  press(grouped, { key: 'a' });
+  press(grouped, { key: 'a' });
+  press(grouped, { key: 's' });
+  assert.equal(grouped.doc.activeElement.getAttribute('href'), '/docs/after/', 's skips the closed group children');
+  press(grouped, { key: 'w' });
+  assert.equal(grouped.doc.activeElement.id, 'group-toggle', 'w can reach the collapsed group again');
+  press(grouped, { key: 'd' });
+  assert.deepEqual(nav.visibleTreeLinks(groupedMenu).map(el => el.getAttribute('href')),
+    ['/docs/before/', '/docs/group/one/', '/docs/group/two/', '/docs/after/'],
+    'the page chain never includes the group disclosure');
+  press(grouped, { key: 'q' });
+  press(grouped, { key: 'e' });
+  assert.deepEqual(grouped.win.assigned, ['/docs/group/one/', '/docs/after/'],
+    'q/e preserve page order even when the non-link group has focus');
 
   // ------------------------------------------------- activate and escape
   press(fold, { key: ' ' });
@@ -775,6 +846,19 @@ function press(harness, values) {
   assert.deepEqual(opens, [undefined, '>'], 'c opens the palette in command mode');
   assert.equal(cEvent.defaultPrevented, true, 'c swallows the literal character');
 
+  const fixedDialog = new Element('div');
+  fixedDialog.setAttribute('role', 'dialog');
+  fixedDialog.offsetParent = null;
+  fc.root.appendChild(fixedDialog);
+  for (const key of ['f', 'c']) {
+    const ignored = press(fc, { key });
+    assert.notEqual(ignored.defaultPrevented, true, `${key} stole a fixed dialog's shortcut`);
+  }
+  assert.equal(opens.length, 2, 'f/c opened the Palette through a fixed dialog');
+  fixedDialog.hidden = true;
+  press(fc, { key: 'f' });
+  assert.equal(opens.length, 3, 'a hidden fixed dialog blocked f');
+
   const noPalette = setup();
   const idle = press(noPalette, { key: 'f' });
   assert.notEqual(idle.defaultPrevented, true, 'f without a palette stays inert');
@@ -917,6 +1001,25 @@ function press(harness, values) {
   assert.equal(resumed.win.sessionStorage.getItem('td-kbd-palette'), null, 'a pending palette mode is consumed once');
   resumed.timeouts.splice(0).forEach((callback) => callback());
   assert.deepEqual(resumedOpens, ['>'], 'the destination resumes command mode after its runtime initializes');
+
+  const appearanceKeys = setup({ withTree: false, shell: false });
+  const appearanceBridge = new Element('button');
+  appearanceBridge.setAttribute('data-td-theme-toggle', '');
+  appearanceKeys.root.appendChild(appearanceBridge);
+  const appearanceDialog = new Element('dialog', 'td-appearance__panel');
+  appearanceDialog.setAttribute('open', '');
+  appearanceKeys.root.appendChild(appearanceDialog);
+  press(appearanceKeys, { key: 't' });
+  assert.equal(appearanceBridge.clicks, 1, 'nonmodal Appearance blocked reading shortcuts');
+  appearanceDialog.modal = true;
+  press(appearanceKeys, { key: 't' });
+  assert.equal(appearanceBridge.clicks, 1, 'modal Appearance lost shortcut ownership');
+  appearanceDialog.modal = false;
+  const secondDialog = new Element('dialog');
+  secondDialog.setAttribute('open', '');
+  appearanceKeys.root.appendChild(secondDialog);
+  press(appearanceKeys, { key: 't' });
+  assert.equal(appearanceBridge.clicks, 1, 'a second native dialog was ignored');
 
   // -------------------------------------------------- collapsed desktop tree
   const collapsed = setup({ sidebarToggle: true });

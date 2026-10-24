@@ -1,22 +1,19 @@
 <!doctype html>
-<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-theme-init>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="en-US" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
 <head>
 <meta name="generator" content="Hugo <version>">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
-<meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#000000">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
 <style>
-html { background: Canvas; color: CanvasText; }
-@media (prefers-color-scheme: dark) {
-html { background: #0b0d12; color: #e6e6e6; }
-}
+html { background: #f7f6f3; color: #21201c; }
+html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
 html[data-td-theme-init] * { transition: none !important; }
-[data-td-theme-toggle] > .td-shell-icon--sun { display: none !important; }
-[data-td-theme-toggle] > [hidden] { display: none !important; }
-html[data-bs-theme='dark'] [data-td-theme-toggle] > .td-shell-icon--moon { display: none !important; }
-html[data-bs-theme='dark'] [data-td-theme-toggle] > .td-shell-icon--sun { display: inline-block !important; }
+:is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+:is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
 </style>
 <script>
 (function() {
@@ -24,6 +21,10 @@ const themeKey = 'td-color-theme';
 let storedTheme = null;
 try {
 storedTheme = localStorage.getItem(themeKey);
+if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+storedTheme = null;
+localStorage.removeItem(themeKey);
+}
 } catch (_) {
 }
 let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -31,6 +32,9 @@ if (theme === 'auto') {
 theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 document.documentElement.setAttribute('data-bs-theme', theme);
+document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+});
 document.documentElement.classList.toggle('dark-mode', theme === 'dark');
 document.documentElement.setAttribute('data-theme', theme);
 })();
@@ -147,17 +151,40 @@ aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="f
 <a class="td-language-selector__item" href="/zh/" lang="zh-CN" hreflang="zh-CN" dir="ltr">简体中文</a>
 </li>
 </ul>
-</div><div class="td-nav-hover-menu td-nav-theme-menu" data-td-nav-hover>
-<button type="button" class="td-nav-util" data-td-nav-hover-trigger data-td-theme-toggle
-title="Toggle color theme" aria-label="Toggle color theme" aria-expanded="false"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></button>
-<div class="td-nav-hover-menu__pop" role="group" aria-label="Toggle color theme">
-<button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="light" aria-pressed="false"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
-</button>
-<button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="dark" aria-pressed="false"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
-</button>
-<button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="auto" aria-pressed="false"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
-</button>
+</div><div class="td-appearance td-nav-appearance" data-td-appearance>
+<button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+<dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="Appearance">
+<div class="td-appearance__head">
+<span class="td-appearance__title" aria-hidden="true">Appearance</span>
+<button type="button" class="td-appearance__close" data-td-appearance-close
+title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
 </div>
+<fieldset class="td-appearance__group">
+<legend class="td-appearance__legend">Light</legend>
+<div class="td-appearance__modes">
+<label class="td-appearance__mode">
+<input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+data-bs-theme-value="light">
+<span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+</span>
+</label>
+<label class="td-appearance__mode">
+<input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+data-bs-theme-value="dark">
+<span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+</span>
+</label>
+<label class="td-appearance__mode">
+<input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+data-bs-theme-value="auto" checked>
+<span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+</span>
+</label>
+</div>
+</fieldset>
+<p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+</dialog>
 </div>
 <a href="https://github.com/pgsty/oink" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub"><i class="td-shell-icon td-shell-icon--github fa-brands fa-github" aria-hidden="true"></i><span class="td-nav-count" data-td-github-stars>2.2k</span></a>
 <button class="td-nav-util td-site-drawer-toggle" type="button" data-td-landing-menu-toggle
@@ -213,6 +240,41 @@ data-td-navbar-external="true" target="_blank" rel="noopener noreferrer">
 <button type="button" class="td-site-nav__menu-link td-site-nav__menu-link--button" data-td-shell-search-open data-td-landing-menu-dismiss
 aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>Search…</span></button>
 <a class="td-site-nav__menu-link" href="https://github.com/pgsty/oink" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github" aria-hidden="true"></i><span>GitHub · 2.2k</span></a>
+<div class="td-appearance td-site-drawer__appearance" data-td-appearance data-td-appearance-modal>
+<button type="button" class="td-appearance__trigger td-site-nav__menu-link td-site-nav__menu-link--button" data-td-appearance-trigger
+aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-drawer"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span><span>Appearance</span></button>
+<dialog class="td-appearance__panel" id="td-appearance-drawer" aria-label="Appearance">
+<div class="td-appearance__head">
+<span class="td-appearance__title" aria-hidden="true">Appearance</span>
+<button type="button" class="td-appearance__close" data-td-appearance-close
+title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+</div>
+<fieldset class="td-appearance__group">
+<legend class="td-appearance__legend">Light</legend>
+<div class="td-appearance__modes">
+<label class="td-appearance__mode">
+<input class="td-appearance__input" type="radio" name="td-mode-drawer" value="light"
+data-bs-theme-value="light">
+<span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+</span>
+</label>
+<label class="td-appearance__mode">
+<input class="td-appearance__input" type="radio" name="td-mode-drawer" value="dark"
+data-bs-theme-value="dark">
+<span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+</span>
+</label>
+<label class="td-appearance__mode">
+<input class="td-appearance__input" type="radio" name="td-mode-drawer" value="auto"
+data-bs-theme-value="auto" checked>
+<span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+</span>
+</label>
+</div>
+</fieldset>
+<p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+</dialog>
+</div>
 </nav>
 </div>
 <div class="container-fluid td-default td-outer">
@@ -225,9 +287,7 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 <span class="td-landing-status-dot" aria-hidden="true"></span>
 <span>Hugo-only · Local-first · Zero npm</span>
 </p>
-<h1 class="td-landing-hero__title" id="hero-title">
-<span>Plain Markdown in.</span>
-<span>Modern docs out.</span></h1><p class="td-landing-hero__lead">Search, i18n, versioning, charts, and math — built into the theme. The entire build step is one command: <code>hugo</code>.</p>
+<h1 class="td-landing-hero__title" id="hero-title"><span>Plain Markdown in.</span><span>Modern docs out.</span></h1><p class="td-landing-hero__lead">Search, i18n, versioning, charts, and math — built into the theme. The entire build step is one command: <code>hugo</code>.</p>
 <p class="td-landing-hero__note"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span>No npm, CDN, or JavaScript framework required.</span></p>
 <div class="td-landing-hero__actions">
 <a class="td-landing-button td-landing-button--primary" href="/docs/"><i class="fa-solid fa-book-open" aria-hidden="true"></i>
@@ -246,14 +306,10 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 <h2 id="metrics-title">What this page cost</h2>
 <p class="td-landing-section__description">Four numbers, all of them checkable against the repository.</p>
 </header>
-<div class="td-landing-metric-grid" style="--td-columns: 4">
-<div class="td-landing-metric"><i class="fa-solid fa-file-code" aria-hidden="true"></i><strong>1</strong><span>Data file</span><small><code>data/home/en.yaml</code></small>
-</div>
-<div class="td-landing-metric"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><strong>14</strong><span>Blocks on this page</span><small>from a registry of 22 section types</small>
-</div>
-<div class="td-landing-metric"><i class="fa-solid fa-code" aria-hidden="true"></i><strong>0</strong><span>Templates edited</span><small>order is data, not markup</small>
-</div>
-<div class="td-landing-metric"><i class="fa-solid fa-plug" aria-hidden="true"></i><strong>0</strong><span>Runtime dependencies</span><small>no npm, no CDN, no PostCSS</small>
+<div class="td-landing-metric-grid" style="--td-columns: 4"><div class="td-landing-metric"><i class="fa-solid fa-file-code" aria-hidden="true"></i><strong>1</strong><span>Data file</span><small><code>data/home/en.yaml</code></small>
+</div><div class="td-landing-metric"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><strong>14</strong><span>Blocks on this page</span><small>from a registry of 22 section types</small>
+</div><div class="td-landing-metric"><i class="fa-solid fa-code" aria-hidden="true"></i><strong>0</strong><span>Templates edited</span><small>order is data, not markup</small>
+</div><div class="td-landing-metric"><i class="fa-solid fa-plug" aria-hidden="true"></i><strong>0</strong><span>Runtime dependencies</span><small>no npm, no CDN, no PostCSS</small>
 </div>
 </div>
 </div>
@@ -271,7 +327,7 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 </div>
 <div class="td-landing-codeplate" data-bs-theme="dark" aria-label="Landing page section configuration">
 <div class="td-landing-codeplate__head"><span><i></i><i></i><i></i></span><b>data/home/en.yaml</b></div>
-<pre><code><span class="c"># </span>this page
+<pre tabindex="0"><code><span class="c"># </span>this page
 <span class="p">- </span>hero
 <span class="ok">- </span>metrics
 <span class="ok">- </span>capabilities
@@ -286,17 +342,14 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 <h2 id="cards-title">Three map entries, three cards</h2>
 <p class="td-landing-section__description">The general-purpose collection — features, benefits, services, any short list of things.</p>
 </header>
-<div class="td-landing-card-grid" style="--td-columns: 3">
-<article class="td-landing-card"><div class="td-landing-card__media"><i class="fa-brands fa-markdown" aria-hidden="true"></i></div><p class="td-landing-card__meta">Rich text</p><h3>Markdown-aware</h3><div class="td-landing-card__description"><p>Descriptions carry <strong>emphasis</strong>, <code>code</code>, and <a href="https://commonmark.org/">links</a>.</p>
-</div><a class="td-landing-card-link" href="https://commonmark.org/" target="_blank" rel="noopener noreferrer">Learn more
+<div class="td-landing-card-grid" style="--td-columns: 3"><article class="td-landing-card"><div class="td-landing-card__media"><i class="fa-brands fa-markdown" aria-hidden="true"></i></div><p class="td-landing-card__meta">Rich text</p><h3>Markdown-aware</h3><div class="td-landing-card__description"><div class="td-content"><p>Descriptions carry <strong>emphasis</strong>, <code>code</code>, and <a href="https://commonmark.org/">links</a>.</p>
+</div></div><a class="td-landing-card-link" href="https://commonmark.org/" target="_blank" rel="noopener noreferrer">Learn more
 <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
 </a>
-</article>
-<article class="td-landing-card"><div class="td-landing-card__media"><i class="fa-solid fa-link-slash" aria-hidden="true"></i></div><p class="td-landing-card__meta">Robust data</p><h3>Link-optional</h3><div class="td-landing-card__description"><p>This card has no <code>url</code>, and is still valid, readable content.</p>
-</div>
-</article>
-<article class="td-landing-card"><div class="td-landing-card__media"><i class="fa-solid fa-repeat" aria-hidden="true"></i></div><p class="td-landing-card__meta">Multiple instances</p><h3>Reusable</h3><div class="td-landing-card__description"><p>Two entries, one <code>type</code>, different <code>key</code> — the pattern used three times below.</p>
-</div>
+</article><article class="td-landing-card"><div class="td-landing-card__media"><i class="fa-solid fa-link-slash" aria-hidden="true"></i></div><p class="td-landing-card__meta">Robust data</p><h3>Link-optional</h3><div class="td-landing-card__description"><div class="td-content"><p>This card has no <code>url</code>, and is still valid, readable content.</p>
+</div></div>
+</article><article class="td-landing-card"><div class="td-landing-card__media"><i class="fa-solid fa-repeat" aria-hidden="true"></i></div><p class="td-landing-card__meta">Multiple instances</p><h3>Reusable</h3><div class="td-landing-card__description"><div class="td-content"><p>Two entries, one <code>type</code>, different <code>key</code> — the pattern used three times below.</p>
+</div></div>
 </article>
 </div>
 </div>
@@ -473,22 +526,22 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 </header>
 <div class="td-landing-gallery" style="--td-columns: 3"><article class="td-landing-gallery-card">
 <div class="td-landing-gallery-card__media"><i class="fa-solid fa-book" aria-hidden="true"></i></div>
-<div class="td-landing-gallery-card__body"><p class="td-landing-gallery-card__badge">Information architecture</p><h3>Documentation portal</h3><div class="td-landing-gallery-card__description"><p>One deliberate route into the <a href="/docs/">documentation</a>.</p>
-</div><a class="td-landing-card-link" href="/docs/">Open example
+<div class="td-landing-gallery-card__body"><p class="td-landing-gallery-card__badge">Information architecture</p><h3>Documentation portal</h3><div class="td-landing-gallery-card__description"><div class="td-content"><p>One deliberate route into the <a href="/docs/">documentation</a>.</p>
+</div></div><a class="td-landing-card-link" href="/docs/">Open example
 <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
 </a>
 </div>
 </article>
 <article class="td-landing-gallery-card">
 <div class="td-landing-gallery-card__media"><i class="fa-solid fa-code" aria-hidden="true"></i></div>
-<div class="td-landing-gallery-card__body"><p class="td-landing-gallery-card__badge">OpenAPI</p><h3>API reference</h3><div class="td-landing-gallery-card__description"><p>Prose beside generated reference material.</p>
-</div>
+<div class="td-landing-gallery-card__body"><p class="td-landing-gallery-card__badge">OpenAPI</p><h3>API reference</h3><div class="td-landing-gallery-card__description"><div class="td-content"><p>Prose beside generated reference material.</p>
+</div></div>
 </div>
 </article>
 <article class="td-landing-gallery-card">
 <div class="td-landing-gallery-card__media"><i class="fa-solid fa-newspaper" aria-hidden="true"></i></div>
-<div class="td-landing-gallery-card__body"><p class="td-landing-gallery-card__badge">Updates</p><h3>Engineering blog</h3><div class="td-landing-gallery-card__description"><p>Releases, explanations, and the decisions behind them.</p>
-</div>
+<div class="td-landing-gallery-card__body"><p class="td-landing-gallery-card__badge">Updates</p><h3>Engineering blog</h3><div class="td-landing-gallery-card__description"><div class="td-content"><p>Releases, explanations, and the decisions behind them.</p>
+</div></div>
 </div>
 </article>
 </div>
@@ -500,16 +553,16 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 <h2 id="testimonials-title">Placeholder quotes, real markup</h2>
 <p class="td-landing-section__description">Both quotes below are sample data. Each one takes a name, an avatar or icon, a role, a source link, and a Markdown comment.</p>
 </header>
-<div class="td-landing-testimonial-grid" style="--td-columns: 2"><figure class="td-landing-testimonial"><blockquote><p>“The configuration is readable enough that <strong>content owners</strong> change the homepage themselves.”</p>
-</blockquote>
+<div class="td-landing-testimonial-grid" style="--td-columns: 2"><figure class="td-landing-testimonial"><blockquote><div class="td-content"><p>“The configuration is readable enough that <strong>content owners</strong> change the homepage themselves.”</p>
+</div></blockquote>
 <figcaption><div class="td-landing-testimonial__avatar"><span aria-hidden="true">A</span></div>
 <div><strong>Ada Example</strong><span>Documentation engineer</span></div><a class="td-landing-card-link" href="/" target="_blank" rel="noopener noreferrer">Source
 <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
 </a>
 </figcaption>
 </figure>
-<figure class="td-landing-testimonial"><blockquote><p>“We moved the gallery above the FAQ by moving two lines.”</p>
-</blockquote>
+<figure class="td-landing-testimonial"><blockquote><div class="td-content"><p>“We moved the gallery above the FAQ by moving two lines.”</p>
+</div></blockquote>
 <figcaption><div class="td-landing-testimonial__avatar"><span aria-hidden="true">L</span></div>
 <div><strong>Lin Example</strong><span>Open-source maintainer</span></div>
 </figcaption>
@@ -523,18 +576,15 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 <h2 id="contributors-title">Credit the people, not the tooling</h2>
 <p class="td-landing-section__description">Production sites point <code>icon</code> at an avatar image; single letters keep this example self-contained.</p>
 </header>
-<div class="td-landing-contributor-grid" style="--td-columns: 3">
-<article class="td-landing-contributor"><div class="td-landing-contributor__avatar"><span aria-hidden="true">A</span></div>
+<div class="td-landing-contributor-grid" style="--td-columns: 3"><article class="td-landing-contributor"><div class="td-landing-contributor__avatar"><span aria-hidden="true">A</span></div>
 <div class="td-landing-contributor__copy"><h3>Alex</h3><p>Theme architecture</p>
 </div><a class="td-landing-card-link" href="https://github.com/"><span class="visually-hidden">Alex</span>
 <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
 </a>
-</article>
-<article class="td-landing-contributor"><div class="td-landing-contributor__avatar"><span aria-hidden="true">B</span></div>
+</article><article class="td-landing-contributor"><div class="td-landing-contributor__avatar"><span aria-hidden="true">B</span></div>
 <div class="td-landing-contributor__copy"><h3>Bo</h3><p>Accessibility review</p>
 </div>
-</article>
-<article class="td-landing-contributor"><div class="td-landing-contributor__avatar"><span aria-hidden="true">C</span></div>
+</article><article class="td-landing-contributor"><div class="td-landing-contributor__avatar"><span aria-hidden="true">C</span></div>
 <div class="td-landing-contributor__copy"><h3>Casey</h3><p>Documentation and examples</p>
 </div>
 </article>
@@ -550,27 +600,31 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 <div class="td-landing-faq-list td-landing-faq-list--accordion">
 <details class="td-landing-faq" open>
 <summary><span>Is it really one file?</span><i class="fa-solid fa-plus" aria-hidden="true"></i></summary>
-<div class="td-landing-faq__answer"><p>Everything between the navbar and the footer is. Navigation comes from <code>hugo.yaml</code>, the footer from <code>data/footer/en.yaml</code>, and every block in between from <code>data/home/en.yaml</code>.</p>
+<div class="td-landing-faq__answer"><div class="td-content"><p>Everything between the navbar and the footer is. Navigation comes from <code>hugo.yaml</code>, the footer from <code>data/footer/en.yaml</code>, and every block in between from <code>data/home/en.yaml</code>.</p>
+</div>
 </div>
 </details>
 <details class="td-landing-faq">
 <summary><span>Does each language need its own file?</span><i class="fa-solid fa-plus" aria-hidden="true"></i></summary>
-<div class="td-landing-faq__answer"><p>A single-language site can use one <code>data/home.yaml</code>. This site is bilingual, so it uses <code>data/home/en.yaml</code> and <code>data/home/zh.yaml</code>.</p>
+<div class="td-landing-faq__answer"><div class="td-content"><p>A single-language site can use one <code>data/home.yaml</code>. This site is bilingual, so it uses <code>data/home/en.yaml</code> and <code>data/home/zh.yaml</code>.</p>
+</div>
 </div>
 </details>
 <details class="td-landing-faq">
 <summary><span>Can one section type appear more than once?</span><i class="fa-solid fa-plus" aria-hidden="true"></i></summary>
-<div class="td-landing-faq__answer"><p>Yes — give each entry a different <code>key</code>:</p>
+<div class="td-landing-faq__answer"><div class="td-content"><p>Yes — give each entry a different <code>key</code>:</p>
 <ul>
 <li><code>{ type: gallery, key: products }</code></li>
 <li><code>{ type: gallery, key: case_studies }</code></li>
 </ul>
 <p>The three logo walls on this page are one section type reading three different blocks.</p>
 </div>
+</div>
 </details>
 <details class="td-landing-faq">
 <summary><span>What happens when <code>url</code> is missing?</span><i class="fa-solid fa-plus" aria-hidden="true"></i></summary>
-<div class="td-landing-faq__answer"><p>The item renders as ordinary content — no empty link, no broken link. Two of the three cards above have no <code>url</code>.</p>
+<div class="td-landing-faq__answer"><div class="td-content"><p>The item renders as ordinary content — no empty link, no broken link. Two of the three cards above have no <code>url</code>.</p>
+</div>
 </div>
 </details>
 </div>
@@ -582,13 +636,13 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 <h2 id="markdown-title">The escape hatch</h2>
 <p class="td-landing-section__description">When no predefined collection fits, write Markdown straight into the data file.</p>
 </header>
-<div class="td-landing-markdown"><p>This paragraph is a <code>body:</code> string in the same YAML file as everything above it. It takes paragraphs, <a href="https://gohugo.io/">links</a>, and lists:</p>
+<div class="td-landing-markdown"><div class="td-content"><p>This paragraph is a <code>body:</code> string in the same YAML file as everything above it. It takes paragraphs, <a href="https://gohugo.io/">links</a>, and lists:</p>
 <ul>
 <li>no custom template;</li>
 <li>ordinary Goldmark rendering;</li>
 <li>the same width and vertical rhythm as every other block.</li>
 </ul>
-</div>
+</div></div>
 </div>
 </section>
 <section id="principles" class="td-landing-section td-landing-principles" aria-labelledby="principles-title">
@@ -596,18 +650,15 @@ aria-haspopup="dialog" aria-expanded="false"><i class="td-shell-icon td-shell-ic
 <p class="td-landing-section__eyebrow"><span>Principles</span><i aria-hidden="true"></i></p>
 <h2 id="principles-title">Predictable by design</h2>
 </header>
-<div class="td-landing-principle-grid" style="--td-columns: 3">
-<article>
+<div class="td-landing-principle-grid" style="--td-columns: 3"><article>
 <span>01</span>
 <div class="td-landing-principle__icon"><i class="fa-solid fa-sliders" aria-hidden="true"></i></div>
 <h3>Content first</h3><p>Most changes are plain text in a data file.</p>
-</article>
-<article>
+</article><article>
 <span>02</span>
 <div class="td-landing-principle__icon"><i class="fa-solid fa-universal-access" aria-hidden="true"></i></div>
 <h3>Accessible defaults</h3><p>Semantic sections, guarded external links, and native FAQ disclosure controls.</p>
-</article>
-<article>
+</article><article>
 <span>03</span>
 <div class="td-landing-principle__icon"><i class="fa-solid fa-code-branch" aria-hidden="true"></i></div>
 <h3>Backward compatible</h3><p>Home data without a <code>sections</code> list keeps the order it always had.</p>
@@ -790,17 +841,40 @@ aria-label="Switch language: 简体中文" aria-haspopup="true" aria-expanded="f
 </li>
 </ul>
 </div>
-<div class="td-shell-footline__theme td-nav-hover-menu" data-td-nav-hover>
-<button type="button" class="td-shell-iconbtn" data-td-nav-hover-trigger data-td-theme-toggle
-title="Toggle color theme" aria-label="Toggle color theme" aria-expanded="false"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></button>
-<div class="td-nav-hover-menu__pop" role="group" aria-label="Toggle color theme">
-<button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="light" aria-pressed="false"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
-</button>
-<button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="dark" aria-pressed="false"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
-</button>
-<button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="auto" aria-pressed="false"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
-</button>
+<div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+<button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="Appearance" aria-label="Appearance"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+<dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="Appearance">
+<div class="td-appearance__head">
+<span class="td-appearance__title" aria-hidden="true">Appearance</span>
+<button type="button" class="td-appearance__close" data-td-appearance-close
+title="Close appearance settings" aria-label="Close appearance settings"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
 </div>
+<fieldset class="td-appearance__group">
+<legend class="td-appearance__legend">Light</legend>
+<div class="td-appearance__modes">
+<label class="td-appearance__mode">
+<input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+data-bs-theme-value="light">
+<span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>Light</span>
+</span>
+</label>
+<label class="td-appearance__mode">
+<input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+data-bs-theme-value="dark">
+<span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>Dark</span>
+</span>
+</label>
+<label class="td-appearance__mode">
+<input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+data-bs-theme-value="auto" checked>
+<span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>System</span>
+</span>
+</label>
+</div>
+</fieldset>
+<p class="td-appearance__note" data-td-appearance-note hidden>Your browser is not saving settings, so this choice lasts only on this page.</p>
+</dialog>
 </div>
 <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
 <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
@@ -876,7 +950,7 @@ data-td-label-expand="Show footer links"><i class="td-shell-icon td-shell-icon--
 </div>
 </footer>
 </div>
-<script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://example.org/"},{"available":true,"description":"Open in ChatGPT","disabledReason":"","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":"https://chatgpt.com/?hints=search\u0026prompt=Read+from+https%3A%2F%2Fexample.org%2F+so+I+can+ask+questions+about+it."},{"available":true,"description":"Open in Claude","disabledReason":"","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":"https://claude.ai/new?q=Read+from+https%3A%2F%2Fexample.org%2F+so+I+can+ask+questions+about+it."},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/pgsty/oink/commits/main/tests/site/content/_index.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/pgsty/oink/edit/main/tests/site/content/_index.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/pgsty/oink/new/main/tests/site/content?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/pgsty/oink/issues/new?title=Oink+Example"},{"available":true,"description":"Create project issue","disabledReason":"","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":"https://github.com/pgsty/oink/issues/new"},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/"},{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/zh/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/pgsty/oink"}],"commands":[{"action":"","available":true,"description":"Open the example status page","disabledReason":"","icon":"fa-solid fa-signal","id":"example_status","keywords":["uptime","incident"],"kind":"url","placements":{"page":false,"palette":true},"target":"blank","title":"Example service status","url":"https://status.example.org/"},{"action":"print","available":true,"description":"","disabledReason":"","icon":"fa-solid fa-print","id":"print_example","keywords":["paper","pdf"],"kind":"builtin","placements":{"page":false,"palette":true},"target":"self","title":"Print this page","url":""},{"action":"","available":true,"description":"Navigate within the example site","disabledReason":"","icon":"fa-solid fa-puzzle-piece","id":"example_docs","keywords":["component","authoring"],"kind":"url","placements":{"page":false,"palette":true},"target":"self","title":"Open the callout page","url":"/docs/callout/"}],"language":"en","quickLinks":[{"available":true,"description":"Markdown Component Examples","disabledReason":"","icon":"fa-solid fa-cubes","id":"quick_docs","keywords":["Docs","docs"],"kind":"url","target":"self","title":"Docs","url":"/docs/"},{"available":true,"description":"Real OINK release notes and engineering posts, wired to every blog feature.","disabledReason":"","icon":"fa-solid fa-blog","id":"quick_blog","keywords":["Blog","blog"],"kind":"url","target":"self","title":"Blog","url":"/blog/"}],"rootOrder":["docs","blog","book","pigsty"],"version":1}</script>
+<script type="application/json" id="td-action-manifest">{"actions":[{"available":false,"description":"Copy Markdown","disabledReason":"Copy Markdown: unavailable","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["Copy Markdown","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Copy Markdown","url":""},{"available":true,"description":"Copy link","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["Copy link","Share","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Copy link","url":"https://example.org/"},{"available":true,"description":"Open in ChatGPT","disabledReason":"","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["Open in ChatGPT","Ask about this page","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in ChatGPT","url":"https://chatgpt.com/?hints=search\u0026prompt=Read+from+https%3A%2F%2Fexample.org%2F+so+I+can+ask+questions+about+it."},{"available":true,"description":"Open in Claude","disabledReason":"","icon":"fa-brands fa-claude","id":"open_claude","keywords":["Open in Claude","Ask about this page","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"promptTemplate":"Read from %s so I can ask questions about it.","target":"blank","title":"Open in Claude","url":"https://claude.ai/new?q=Read+from+https%3A%2F%2Fexample.org%2F+so+I+can+ask+questions+about+it."},{"available":false,"description":"View markdown","disabledReason":"View markdown: unavailable","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["View markdown","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View markdown","url":""},{"available":true,"description":"View edit history","disabledReason":"","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["View edit history","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"View edit history","url":"https://github.com/pgsty/oink/commits/main/tests/site/content/_index.md"},{"available":true,"description":"Edit this page","disabledReason":"","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["Edit this page","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Edit this page","url":"https://github.com/pgsty/oink/edit/main/tests/site/content/_index.md"},{"available":true,"description":"Create child page","disabledReason":"","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["Create child page","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create child page","url":"https://github.com/pgsty/oink/new/main/tests/site/content?filename=change-me.md\u0026value=---%0Atitle%3A+%22Long+Page+Title%22%0AlinkTitle%3A+%22Short+Nav+Title%22%0Aweight%3A+100%0Adescription%3A+%3E-%0A+++++Page+description+for+heading+and+indexes.%0A---%0A%0A%23%23+Heading%0A%0AEdit+this+template+to+create+your+new+page.%0A%0A%2A+Give+it+a+good+name%2C+ending+in+%60.md%60+-+e.g.+%60get-started.md%60%0A%2A+Edit+the+%22front+matter%22+section+at+the+top+of+the+page+%28weight+controls+how+its+ordered+amongst+other+pages+in+the+same+directory%3B+lowest+number+first%29.%0A%2A+Add+a+good+commit+message+at+the+bottom+of+the+page+%28%3C80+characters%3B+use+the+extended+description+field+for+more+detail%29.%0A%2A+Create+a+new+branch+so+you+can+preview+your+new+file+and+request+a+review+via+Pull+Request.%0A"},{"available":true,"description":"Create docs issue","disabledReason":"","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["Create docs issue","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create docs issue","url":"https://github.com/pgsty/oink/issues/new?title=Oink+Example"},{"available":true,"description":"Create project issue","disabledReason":"","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["Create project issue","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"Create project issue","url":"https://github.com/pgsty/oink/issues/new"},{"available":false,"description":"Print entire section","disabledReason":"Print entire section: unavailable","icon":"fa-solid fa-print","id":"print_section","keywords":["Print entire section","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"Print entire section","url":""},{"available":true,"description":"Print this page","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["Print this page","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"Print this page","url":""},{"available":false,"description":"Version","disabledReason":"Version: unavailable","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":true,"description":"Switch language","disabledReason":"","icon":"fa-solid fa-language","id":"switch_language","keywords":["Switch language","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"en-US","title":"English","url":"/"},{"active":false,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/zh/"}],"placements":{"page":false,"palette":true},"target":"self","title":"Switch language","url":""},{"available":false,"description":"Appearance","disabledReason":"unavailable","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Style"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"}],"placements":{"page":false,"palette":true},"target":"self","title":"Style","url":""},{"available":true,"description":"Toggle color theme","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["Toggle color theme","Light","Dark"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"System","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"Light","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"Dark","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"Toggle color theme","url":""},{"available":true,"description":"GitHub","disabledReason":"","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":"https://github.com/pgsty/oink"}],"commands":[{"action":"","available":true,"description":"Open the example status page","disabledReason":"","icon":"fa-solid fa-signal","id":"example_status","keywords":["uptime","incident"],"kind":"url","placements":{"page":false,"palette":true},"target":"blank","title":"Example service status","url":"https://status.example.org/"},{"action":"print","available":true,"description":"","disabledReason":"","icon":"fa-solid fa-print","id":"print_example","keywords":["paper","pdf"],"kind":"builtin","placements":{"page":false,"palette":true},"target":"self","title":"Print this page","url":""},{"action":"","available":true,"description":"Navigate within the example site","disabledReason":"","icon":"fa-solid fa-puzzle-piece","id":"example_docs","keywords":["component","authoring"],"kind":"url","placements":{"page":false,"palette":true},"target":"self","title":"Open the callout page","url":"/docs/callout/"}],"language":"en","quickLinks":[{"available":true,"description":"Markdown Component Examples","disabledReason":"","icon":"fa-solid fa-cubes","id":"quick_docs","keywords":["Docs","docs"],"kind":"url","target":"self","title":"Docs","url":"/docs/"},{"available":true,"description":"Real OINK release notes and engineering posts, wired to every blog feature.","disabledReason":"","icon":"fa-solid fa-blog","id":"quick_blog","keywords":["Blog","blog"],"kind":"url","target":"self","title":"Blog","url":"/blog/"}],"rootOrder":["docs","blog","book","pigsty"],"version":1}</script>
 <script src="/js/actions.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>
 <script src="/js/core.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>
 <div id="td-shell-search" class="td-shell-search" hidden
@@ -919,6 +993,6 @@ data-td-shell-search-status></div>
 <span><kbd>esc</kbd> Close</span>
 </div>
 </div>
-</div><script src="/js/chunks/keyboard.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/footer-collapse.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/local-search.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/dark-mode.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/landing.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>
+</div><script src="/js/chunks/keyboard.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/footer-collapse.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/local-search.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/dark-mode.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/appearance.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/landing.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>
 </body>
 </html>

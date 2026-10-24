@@ -39,6 +39,7 @@ BUILTINS = [
     "print",
     "switch_version",
     "switch_language",
+    "switch_preset",
     "switch_theme",
     "open_github",
 ]
@@ -242,6 +243,107 @@ def validate_external_mount_actions() -> None:
     )
     for marker in ("/Users/", "/home/runner/", "/private/tmp/", "/var/folders/"):
         require(marker not in html, f"external mount leaked machine path {marker}")
+
+
+def validate_source_paths(workspace: Path) -> None:
+    """Exercise source resolution on all hosts and real mounted page URLs."""
+
+    site = workspace / "source-paths"
+    mounted = (workspace / "mounted-sources").resolve()
+    for directory in (site / "content", site / "layouts", site / "assets", mounted):
+        directory.mkdir(parents=True)
+    cases = [
+        ("local", "/site/content/page.md", "/site", "", "content/page.md"),
+        ("sibling", "/site-other/page.md", "/site", "", ""),
+        ("local-map", "/site/content/page.md", "/site", {"from": "^content/", "to": "docs/"}, "docs/page.md"),
+        ("string-map", "/shared/page.md", "/site", "^/shared/", "page.md"),
+        ("windows-local", r"C:\site\content\page.md", r"C:\site", "", "content/page.md"),
+        ("windows-external", r"D:\shared\page.md", r"C:\site", "", ""),
+        ("windows-map", r"D:\shared\page.md", r"C:\site", {"from": "^D:/shared/", "to": "docs/"}, "docs/page.md"),
+        ("unc-local", r"\\server\site\content\page.md", r"\\server\site", "", "content/page.md"),
+        ("unc-external", r"\\server\shared\page.md", r"\\server\site", "", ""),
+        ("mapped-separators", "/shared/page.md", "/site", {"from": "^/shared/", "to": "docs\\"}, "docs/page.md"),
+        ("clean-relative", "/shared/page.md", "/site", {"from": "^/shared/", "to": "docs/../content/"}, "content/page.md"),
+    ]
+    for name, replacement in (
+        ("absolute", "/private/build/page.md"),
+        ("drive", r"C:\private\page.md"),
+        ("drive-relative", "C:page.md"),
+        ("unc", r"\\server\share\page.md"),
+        ("parent", "../page.md"),
+        ("bare-parent", ".."),
+        ("nested-parent", "docs/../../page.md"),
+        ("empty", ""),
+        ("dot", "."),
+    ):
+        cases.append((name, "/shared/page.md", "/site", {"from": "^.*$", "to": replacement}, ""))
+    (site / "assets/source-cases.json").write_text(json.dumps([
+        {"name": name, "filename": filename, "workingDir": working_dir, "pathBase": mapping}
+        for name, filename, working_dir, mapping, _expected in cases
+    ]), encoding="utf-8")
+
+    prefix = "^" + re.escape(mounted.resolve().as_posix() + "/")
+    mounted_cases = {
+        "unmapped": (None, ""),
+        "mapped": ({"from": prefix, "to": "shared/"}, "shared/mapped.md"),
+        "identity": ({"from": prefix, "to": mounted.resolve().as_posix() + "/"}, ""),
+        "no-match": ({"from": "^NEVER/", "to": "shared/"}, ""),
+    }
+    for name, replacement in (("absolute", "/private/"), ("parent", "../"),
+                              ("drive", "C:\\private\\"), ("unc", "\\\\server\\share\\")):
+        mounted_cases[name] = ({"from": prefix, "to": replacement}, "")
+    for name, replacement in (("empty", ""), ("dot", ".")):
+        mounted_cases[name] = ({"from": "^.*$", "to": replacement}, "")
+    for name, (mapping, _expected) in mounted_cases.items():
+        front_matter: dict[str, Any] = {"title": name}
+        if mapping is not None:
+            front_matter["path_base_for_github_subdir"] = mapping
+        (mounted / f"{name}.md").write_text(json.dumps(front_matter) + "\n\nBody.\n", encoding="utf-8")
+    (site / "content/local.md").write_text('---\ntitle: local\n---\n\nBody.\n', encoding="utf-8")
+    (site / "hugo.json").write_text(json.dumps({
+        "baseURL": "https://example.test/",
+        "theme": "oink",
+        "disableKinds": ["taxonomy", "term", "RSS", "sitemap", "robotsTXT", "404"],
+        "params": {"github_repo": "https://github.com/acme/docs", "github_branch": "release",
+                   "github_subdir": "website", "github_project_repo": "https://github.com/acme/project"},
+        "module": {"mounts": [{"source": "content", "target": "content"},
+                               {"source": str(mounted), "target": "content/mounted"}]},
+    }), encoding="utf-8")
+    (site / "layouts/home.html").write_text(
+        '{{ $paths := dict }}{{ range (resources.Get "source-cases.json" | transform.Unmarshal) }}'
+        '{{ $paths = merge $paths (dict .name (partial "actions/source-path.html" .)) }}{{ end }}'
+        '{{ $pages := dict }}{{ range .Site.RegularPages }}'
+        '{{ $pages = merge $pages (dict .Title (partial "actions/page-urls.html" .)) }}{{ end }}'
+        '{{ dict "paths" $paths "pages" $pages | jsonify | safeHTML }}', encoding="utf-8")
+    (site / "layouts/single.html").write_text('{{ .Title }}', encoding="utf-8")
+    (site / "layouts/list.html").write_text('{{ .Title }}', encoding="utf-8")
+    public = workspace / "source-paths-public"
+    result = run_hugo_process(
+        ["hugo", "--source", str(site), "--themesDir", str(ROOT.parent),
+         "--destination", str(public), "--cacheDir", str(workspace / "source-paths-cache"),
+         "--panicOnWarning"], text=True, capture_output=True, check=False,
+    )
+    require(result.returncode == 0, "source-path fixture failed:\n" + result.stdout + result.stderr)
+    output = json.loads((public / "index.html").read_text(encoding="utf-8"))
+    for name, _filename, _working_dir, _mapping, expected in cases:
+        require(output["paths"][name] == expected,
+                f"{name}: expected source path {expected!r}, found {output['paths'][name]!r}")
+    expected_pages = {name: expected for name, (_mapping, expected) in mounted_cases.items()}
+    expected_pages["local"] = "content/local.md"
+    for name, source in expected_pages.items():
+        urls = output["pages"][name]
+        repo_path = "release/website/" + source if source else ""
+        require(urls["repoPath"] == repo_path, f"{name} published an invalid repository path: {urls}")
+        for key, route in (("edit", "edit"), ("history", "commits")):
+            expected = f"https://github.com/acme/docs/{route}/{repo_path}" if source else ""
+            require(urls[key] == expected, f"{name} published an invalid {key} action: {urls[key]}")
+        child_prefix = f"https://github.com/acme/docs/new/{repo_path.rsplit('/', 1)[0]}?"
+        require(urls["createChild"].startswith(child_prefix) if source else urls["createChild"] == "",
+                f"{name} published an invalid create-child action: {urls['createChild']}")
+        require(urls["createIssue"] == f"https://github.com/acme/docs/issues/new?title={name}",
+                f"{name} lost its docs issue action")
+        require(urls["createProjectIssue"] == "https://github.com/acme/project/issues/new",
+                f"{name} lost its project issue action")
 
 
 def manifest_from(html: str) -> dict[str, Any]:
@@ -546,6 +648,7 @@ def main() -> int:
         validate_external_mount_actions()
         with tempfile.TemporaryDirectory(prefix="oink-actions-") as temp:
             workspace = Path(temp)
+            validate_source_paths(workspace)
             for deployment, subpath, prefix in (
                 ("root", False, "/"),
                 ("subpath", True, "/preview/"),

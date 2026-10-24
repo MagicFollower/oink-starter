@@ -609,7 +609,7 @@ def check_example(public: Path) -> list[str]:
         require(marker in source["root_md"], f"Markdown Book index lost {marker}", errors)
 
     require("td-table-scroll--static" in source["one_print"], "print Book table wrapper is not marked static", errors)
-    require(re.search(r'td-table-scroll[^>]*(tabindex|role=)', source["one_print"]) is None, "print Book table kept an interactive scroll viewport", errors)
+    require(re.search(r'td-table-scroll[^>]*tabindex="0"[^>]*role="region"', source["one_print"]) is not None, "Book Print preview lost its keyboard table scroll region", errors)
     for marker in (
         'id="fig-overview"',
         'id="tbl-baseline"',
@@ -675,10 +675,9 @@ def check_example(public: Path) -> list[str]:
         require(marker in source["book_print"], f"whole-Book print did not localize {marker}", errors)
     for marker in ("td-pager", "data-td-pager-prev", "data-td-pager-next"):
         require(marker not in source["book_print"], f"whole-Book print retained interactive marker {marker}", errors)
-    # The table wrapper stays in print (the caption/matrix/figure selectors hang
-    # off it) but must be marked static; the focusable viewport must not survive.
+    # Static content stays keyboard-scrollable in the browser's Print preview.
     require("td-table-scroll--static" in source["book_print"], "whole-Book print table wrapper is not marked static", errors)
-    require(re.search(r'td-table-scroll[^>]*(tabindex|role=)', source["book_print"]) is None, "whole-Book print kept an interactive table scroll viewport", errors)
+    require(re.search(r'td-table-scroll[^>]*tabindex="0"[^>]*role="region"', source["book_print"]) is not None, "whole-Book Print preview lost its keyboard table scroll region", errors)
     return errors
 
 
@@ -716,6 +715,60 @@ def create_site(root: Path, body: str, *, extra_ui: str = "", draft: bool = Fals
     )
     status = "book_status: draft\n" if draft else ""
     write(root / "content/book/page.md", f"---\ntitle: Page\n{status}---\n\n{body}\n")
+
+
+def check_sidebar_headings(hugo: str) -> list[str]:
+    """Headings are opt-in, page overrides win, and cached trees stay neutral."""
+    errors: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="oink-book-sidebar-") as temp:
+        source = Path(temp)
+        create_site(source, "")
+        pages = {
+            "default": ("", None),
+            "off": ("sidebar_headings: false\n", 0),
+            "two": ("sidebar_headings: true\n", 2),
+            "three": ("sidebar_headings: 3\n", 3),
+            "four": ("sidebar_headings: 4\n", 4),
+            "part/inherited": ("", 3),
+            "part/off": ("sidebar_headings: false\n", 0),
+        }
+        write(source / "content/book/part/_index.md",
+              "---\ntitle: Part\ncascade:\n  sidebar_headings: 3\n---\n")
+        for name, (settings, _) in pages.items():
+            write(source / f"content/book/{name}.md",
+                  f"---\ntitle: {name}\n{settings}---\n\n"
+                  "## Heading two {#h2}\n\nText.\n\n"
+                  "### Heading three {#h3}\n\nText.\n\n"
+                  "#### Heading four {#h4}\n\nText.\n")
+        # Exercise both navigation authorities and both sides of the cache
+        # threshold. Enabled pages must not leak headings into cached siblings.
+        for explicit in (False, True):
+            if explicit:
+                write(source / "data/docs_nav.json", json.dumps({"sections": [{
+                    "page": "/book", "children": [
+                        {"page": f"/book/{name}"} for name in pages
+                    ],
+                }]}))
+            for site_depth in (None, 4):
+                ui = "    sidebar_cache_limit: 1\n" if site_depth is None else "    sidebar_cache_limit: 500\n    sidebar_headings: 4\n"
+                write(source / "hugo.yaml", base_config(ui))
+                public = source / "public"
+                result = build(hugo, source, public, "--panicOnWarning")
+                if result.returncode:
+                    return [f"Book sidebar fixture failed: {result.stdout}{result.stderr}"]
+                for name, (_, depth) in pages.items():
+                    html = (public / f"book/{name}/index.html").read_text()
+                    branch = re.findall(r'<div[^>]*data-td-book-headings[^>]*>(.*?)</div>', html, re.S)
+                    expected = (site_depth or 0) if depth is None else depth
+                    label = f"{name} (explicit={explicit}, site={site_depth})"
+                    require(len(branch) == int(expected > 0), f"wrong Book heading branch count: {label}", errors)
+                    if branch:
+                        require(re.findall(r'href="#(h[234])"', branch[0]) ==
+                                [f"h{level}" for level in range(2, expected + 1)],
+                                f"wrong Book heading depth: {label}", errors)
+                    require('id="TableOfContents"' in html,
+                            f"Book sidebar setting removed the right TOC: {label}", errors)
+    return errors
 
 
 def check_toc_heading_entities(hugo: str) -> list[str]:
@@ -829,6 +882,27 @@ def check_print_store_isolation(hugo: str) -> list[str]:
     """Plain and aggregate Print may render one Book page concurrently."""
 
     errors: list[str] = []
+
+    def check_aggregate_tabs(html: str, sections: range, label: str) -> None:
+        ids = re.findall(r'\sid="([^"]+)"', html)
+        require(len(ids) == len(set(ids)), f"{label} contains duplicate IDs", errors)
+        for section in sections:
+            for page in range(3):
+                chapter = re.search(
+                    rf'<section[^>]*id="(pg-[^"]+)"[^>]*data-td-book-page="/book/s{section}/p{page}"[^>]*>([\s\S]*?)</section>',
+                    html,
+                )
+                require(chapter is not None, f"{label} lost chapter {section}-{page}", errors)
+                if chapter is None:
+                    continue
+                prefix, content = chapter.groups()
+                anchor = f"probe-{section}-{page}-one"
+                require(f'id="{prefix}--{anchor}"' in content
+                        and f'href="#{prefix}--{anchor}"' in content
+                        and f'id="{anchor}"' not in content
+                        and f'--probe-{section}-{page}-2-one"' not in content,
+                        f"{label} tab link does not target its own chapter {section}-{page}", errors)
+
     with tempfile.TemporaryDirectory(prefix="oink-book-print-store-") as temp:
         source = Path(temp)
         write(
@@ -838,6 +912,10 @@ title: Book Print store fixture
 theme: {ROOT.name}
 defaultContentLanguage: en
 disableKinds: [home, RSS, sitemap, taxonomy, term]
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
 outputs:
   page: [HTML, print]
   section: [HTML, print]
@@ -875,6 +953,7 @@ params:
                     "## Topic {#topic}\n\n"
                     "{{< xref anchor=\"topic\" >}}Self{{< /xref >}}\n\n"
                     f"{{{{< xref page=\"/book/s{section}/p{target}\" anchor=\"topic\" >}}}}Cross{{{{< /xref >}}}}\n\n"
+                    f'<a href="#probe-{section}-{page}-one">Self tab</a>\n\n'
                     f"{{{{< tabs group=\"probe-{section}-{page}\" >}}}}\n"
                     "{{< tab label=\"One\" value=\"one\" >}}One{{< /tab >}}\n"
                     "{{< tab label=\"Two\" value=\"two\" >}}Two{{< /tab >}}\n"
@@ -900,6 +979,7 @@ params:
                             and f'href="/book/s{section}/p{(page + 1) % 3}/#topic"' in plain,
                             f"plain Print xref or heading semantics changed on page {section}-{page}", errors)
                     require(f'id="probe-{section}-{page}-one"' in plain
+                            and f'href="#probe-{section}-{page}-one"' in plain
                             and f'id="probe-{section}-{page}-2-one"' not in plain,
                             f"plain Print tab anchors changed on page {section}-{page}", errors)
 
@@ -910,10 +990,8 @@ params:
                 require('id="topic"' not in aggregate and 'href="/book/' not in aggregate
                         and re.search(r'id="pg-[^"]+--topic"', aggregate) is not None,
                         f"nested Book Print xref or heading semantics changed in section {section}", errors)
-                require(all(f'id="probe-{section}-{page}-one"' in aggregate
-                            and f'id="probe-{section}-{page}-2-one"' not in aggregate
-                            for page in range(3)),
-                        f"nested Book Print tab anchors changed in section {section}", errors)
+                check_aggregate_tabs(aggregate, range(section, section + 1),
+                                     f"nested Book Print section {section}")
 
             whole = (public / "_print/book/index.html").read_text()
             rendered.append(whole)
@@ -922,10 +1000,7 @@ params:
             require('id="topic"' not in whole and 'href="/book/' not in whole
                     and len(re.findall(r'id="pg-[^"]+--topic"', whole)) == 6,
                     "whole-Book Print xref or heading semantics changed", errors)
-            require(all(f'id="probe-{section}-{page}-one"' in whole
-                        and f'id="probe-{section}-{page}-2-one"' not in whole
-                        for section in range(2) for page in range(3)),
-                    "whole-Book Print tab anchors changed", errors)
+            check_aggregate_tabs(whole, range(2), "whole-Book Print")
             signature = tuple(rendered)
             require(baseline is None or signature == baseline,
                     f"Book Print stress output changed between repeated builds on run {run + 1}", errors)
@@ -961,12 +1036,13 @@ def check_invalid_components(hugo: str) -> list[str]:
         ("duplicate-num", '{{< fig num="1" id="one" src="/x.png" />}}\n{{< fig num="1" id="two" src="/y.png" />}}', "duplicate fig number"),
         ("unsupported", '{{< fig num="1" src="/x.png" bogus="x" />}}', "unsupported parameter"),
         ("src-inner", '{{< fig num="1" src="/x.png" >}}body{{< /fig >}}', "mutually exclusive"),
+        ("fig-caption-title", '{{< fig num="1" src="/x.png" caption="Kept caption" title="Dropped title" />}}', "using caption"),
         ("empty-table", '{{< tbl num="1" >}}{{< /tbl >}}', "requires inner table content"),
         ("bad-width", '{{< fig num="1" src="/x.png" width="0" />}}', "must be a positive integer"),
         ("many-kinds", '{{< xref fig="1" tbl="1" />}}', "accepts only one"),
-        ("xref-empty", '{{< xref />}}', "requires fig, tbl, eq, eg, or anchor"),
+        ("xref-empty", '{{< xref >}}Kept reference{{< /xref >}}', "requires fig, tbl, eq, eg, or anchor"),
         ("xref-anchor-text", '{{< xref anchor="heading" />}}', "requires inner link text"),
-        ("xref-page", '{{< xref page="missing" anchor="heading" >}}text{{< /xref >}}', "was not found"),
+        ("xref-page", '{{< xref page="missing" anchor="heading" >}}Kept reference{{< /xref >}}', "was not found"),
         ("toc-depth", '{{< book-toc depth=4 >}}', "depth must be an integer from 1 through 3"),
         ("eg-caption", '{{< eg num="1" >}}```sql\nSELECT 1;\n```{{< /eg >}}', "requires parameter caption"),
         ("eg-num", '{{< eg num="1/2" caption="Bad" >}}x{{< /eg >}}', "num must match"),
@@ -998,6 +1074,8 @@ def check_invalid_components(hugo: str) -> list[str]:
         "duplicate-num",               # numbered-kind registry
         "unsupported",                 # shortcode parameter allowlist
         "src-inner",                   # source/body exclusivity
+        "fig-caption-title",           # caption/title conflict
+        "xref-empty",                  # missing target fallback
         "empty-table",                 # required body content
         "bad-width",                   # positive integer validation
         "many-kinds",                  # xref target selection
@@ -1013,6 +1091,9 @@ def check_invalid_components(hugo: str) -> list[str]:
         with tempfile.TemporaryDirectory(prefix=f"oink-components-book-invalid-{name}-") as temp:
             source = Path(temp)
             create_site(source, body)
+            if name in ("xref-empty", "xref-page", "fig-caption-title"):
+                config = source / "hugo.yaml"
+                config.write_text(config.read_text().replace("page: [HTML]", "page: [HTML, PRINT, MARKDOWN]"))
             result = build(hugo, source, source / "public")
             output = result.stdout + result.stderr
             require(result.returncode == 0,
@@ -1020,6 +1101,16 @@ def check_invalid_components(hugo: str) -> list[str]:
             require(expected in output, f"invalid Book case {name} did not report {expected!r}", errors)
             require((source / "public/book/page/index.html").is_file(),
                     f"invalid Book case {name} emitted no safe page output", errors)
+            if name in ("xref-empty", "xref-page", "fig-caption-title"):
+                for relative in ("book/page/index.html", "_print/book/page/index.html", "book/page/index.md"):
+                    rendered = (source / "public" / relative).read_text()
+                    if name == "fig-caption-title":
+                        require("Kept caption" in rendered and "Dropped title" not in rendered,
+                                f"{relative} did not prefer fig caption", errors)
+                    else:
+                        require("Kept reference" in rendered and "td-book-xref" not in rendered
+                                and "[Kept reference](" not in rendered,
+                                f"{relative} linked a missing xref target", errors)
             if name in strict_canaries:
                 require(build(hugo, source, source / "strict", "--panicOnWarning").returncode != 0,
                         f"invalid Book case {name} survived --panicOnWarning", errors)
@@ -1446,7 +1537,8 @@ def main() -> int:
         errors = check_example(args.public)
 
     errors += (
-        check_toc_heading_entities(args.hugo)
+        check_sidebar_headings(args.hugo)
+        + check_toc_heading_entities(args.hugo)
         + check_toc_drafts(args.hugo)
         + check_print_store_isolation(args.hugo)
         + check_home_manifest(args.hugo)

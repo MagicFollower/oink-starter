@@ -6,24 +6,23 @@
      the contract; weight is never serialized. See the agent-indexes
      proposal and schema/nav.v1.schema.json. */ -}}
 {{- $home := . -}}
-{{- $docsNav := index hugo.Data "docs_nav" | default dict -}}
-{{- $explicitSections := index $docsNav "sections" -}}
 {{- $children := slice -}}
 {{- range $section := partial "shell/nav-children.html" (dict "section" $home) -}}
-  {{- if and $explicitSections
-        (eq $section.Kind "section")
-        (in (slice "docs" "book") $section.Type) -}}
+  {{- $explicitSections := slice -}}
+  {{- if and (eq $section.Kind "section") (in (slice "docs" "book") $section.Type) -}}
+    {{- $sidebarRoot := partial "shell/sidebar-root.html" $section -}}
+    {{- if ne $sidebarRoot $home -}}
+      {{- $explicitSections = partialCached "shell/docs-nav-sections.html" (dict "page" $home "root" $section) $section.RelPermalink $home.Site.Language.Lang -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if $explicitSections -}}
     {{- /* The explicit tree owns this section's subtree. A top-level data
          node that is the section root itself contributes its children
          rather than nesting the root inside itself -- the same root
          handling the sidebar applies. */ -}}
-    {{- $rootURL := $section.RelPermalink -}}
-    {{- with $home.Site.LanguagePrefix -}}
-      {{- $rootURL = strings.TrimPrefix . $rootURL -}}
-    {{- end -}}
     {{- $subChildren := slice -}}
     {{- range $explicitSections -}}
-      {{- if eq (strings.TrimSuffix "/" (.url | default "")) (strings.TrimSuffix "/" $rootURL) -}}
+      {{- if eq ($home.Site.GetPage .page) $section -}}
         {{- range (.children | default (slice)) -}}
           {{- range partial "shell/nav-json-data-node.html" (dict "page" $home "node" .) -}}
             {{- $subChildren = $subChildren | append . -}}

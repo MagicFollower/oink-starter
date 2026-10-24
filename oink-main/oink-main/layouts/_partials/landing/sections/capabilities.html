@@ -1,25 +1,26 @@
 {{- $page := .page -}}
 {{- $data := .data -}}
 {{- $id := .id -}}
+{{- $scope := printf "landing-%s" $id -}}
 {{- $interactive := eq (lower ($page.Store.Get "tdOutputFormat" | default "html")) "html" -}}
 <section id="{{ $id }}" class="td-landing-section td-landing-capabilities{{ with $data.class }} {{ . }}{{ end }}"{{ with $data.title }} aria-labelledby="{{ $id }}-title"{{ end }}>
   <div class="td-site-container">
     {{- partial "landing/heading.html" (dict "page" $page "data" $data "id" $id) }}
-    {{- range $index, $module := $data.items }}
+    {{- range $index, $module := $data.items }}{{- $scope := printf "%s-item-%v" $scope $index -}}
     {{- $url := $module.url | default $module.href }}
     <article class="td-landing-module{{ if eq (mod $index 2) 1 }} td-landing-module--reverse{{ end }}">
       <div class="td-landing-module__copy">
-        {{- with $module.ref }}<p class="td-landing-module__ref">{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</p>{{ end }}
+        {{- with $module.ref }}<p class="td-landing-module__ref">{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-capabilities-field-1" $scope) "value" .) }}</p>{{ end }}
         <h3>
           {{- if $url }}<a href="{{ $url | relLangURL }}"{{ if $module.external }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ end -}}
-          {{- partial "landing/markdown.html" (dict "page" $page "value" ($module.title | default $module.name)) -}}
+          {{- partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-capabilities-field-2" $scope) "value" ($module.title | default $module.name)) -}}
           {{- if $url }}</a>{{ end -}}
         </h3>
-        {{- with $module.motto }}<p class="td-landing-module__motto">◇ {{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</p>{{ end }}
+        {{- with $module.motto }}<p class="td-landing-module__motto">◇ {{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-capabilities-field-3" $scope) "value" .) }}</p>{{ end }}
         {{- with $module.bullets }}
-        <ul>{{ range . }}<li>{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</li>{{ end }}</ul>
+        <ul>{{ range $scopeIndex2, $scopeItem2 := . }}{{- $scope := printf "%s-item-%v" $scope $scopeIndex2 -}}<li>{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-capabilities-field-4" $scope) "value" .) }}</li>{{ end }}</ul>
         {{- end }}
-        {{- with $module.value }}<p class="td-landing-module__value">{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</p>{{ end }}
+        {{- with $module.value }}<p class="td-landing-module__value">{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-capabilities-field-5" $scope) "value" .) }}</p>{{ end }}
       </div>
 
       {{- with $module.visual }}
@@ -32,7 +33,7 @@
         {{- if eq $visualType "code" }}
       <div class="td-landing-codeplate" data-bs-theme="dark" aria-label="{{ .aria_label | default .title }}">
         <div class="td-landing-codeplate__head"><span><i></i><i></i><i></i></span><b>{{ .title }}</b></div>
-        <pre><code>{{ partial "landing/code-lines.html" (dict "lines" .lines "position" (printf "%s: capabilities item %d visual" $page.Path (add $index 1))) }}</code></pre>
+        <pre{{ if $interactive }} tabindex="0"{{ end }}><code>{{ partial "landing/code-lines.html" (dict "lines" .lines "position" (printf "%s: capabilities item %d visual" $page.Path (add $index 1))) }}</code></pre>
       </div>
         {{- else if eq $visualType "shell" }}
       <div class="td-landing-shell-demo" aria-hidden="true">
@@ -109,8 +110,8 @@
           {{- if and (isset . "lines") (not (reflect.IsSlice .lines)) }}{{ warnf "%s: capabilities item %d card visual lines must be an array; dropping them" $page.Path (add $index 1) }}{{ end -}}
       <aside class="td-landing-visual-card" aria-label="{{ $title | plainify }}">
         {{- with .icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}
-        <h4>{{ partial "landing/markdown.html" (dict "page" $page "value" $title) }}</h4>
-        {{- with .lines }}{{ if reflect.IsSlice . }}<ul>{{ range . }}<li>{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</li>{{ end }}</ul>{{ end }}{{ end }}
+        <h4>{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-capabilities-field-6" $scope) "value" $title) }}</h4>
+        {{- with .lines }}{{ if reflect.IsSlice . }}<ul>{{ range $scopeIndex8, $scopeItem8 := . }}{{- $scope := printf "%s-item-%v" $scope $scopeIndex8 -}}<li>{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-capabilities-field-7" $scope) "value" .) }}</li>{{ end }}</ul>{{ end }}{{ end }}
       </aside>
         {{- end }}
       {{- end }}

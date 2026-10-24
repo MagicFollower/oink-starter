@@ -362,7 +362,7 @@
   position: fixed;
   inset: 0;
   z-index: 1040;
-  background: rgba(4, 10, 18, 0.45);
+  background: var(--td-shell-scrim);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   opacity: 0;

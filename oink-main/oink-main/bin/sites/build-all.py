@@ -29,6 +29,7 @@ _mb = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mb)  # type: ignore[union-attr]
 snapshot_site = _mb.snapshot_site
 prepare_workspace = _mb.prepare_workspace
+validate_snapshot_paths = _mb.validate_snapshot_paths
 
 
 def default_sites() -> list[Path]:
@@ -42,6 +43,7 @@ def default_sites() -> list[Path]:
 
 def snapshot_ref(site: Path, dest: Path, ref: str) -> dict:
     """Detached shared clone of `ref` (branch, tag or sha) — falls back to HEAD when absent."""
+    validate_snapshot_paths([dest], [site, ROOT])
     dest.mkdir(parents=True, exist_ok=True)
     shutil.rmtree(dest, ignore_errors=True)
     have = subprocess.run(["git", "-C", str(site), "rev-parse", "--verify", "--quiet", ref], capture_output=True, text=True)
@@ -127,6 +129,10 @@ def main() -> int:
 
     sites = [p.resolve() for p in args.sites] if args.sites else default_sites()
     work = args.keep.resolve() if args.keep else Path(tempfile.mkdtemp(prefix="oink-sites-"))
+    try:
+        validate_snapshot_paths([work / site.name for site in sites], [ROOT, *sites])
+    except ValueError as error:
+        parser.error(str(error))
     work.mkdir(parents=True, exist_ok=True)
     theme_sha = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
     report = {"generated_at": dt.datetime.now().astimezone().isoformat(timespec="seconds"), "theme": theme_sha, "hugo": args.hugo, "ref": args.ref, "sites": {}}

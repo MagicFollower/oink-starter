@@ -17,6 +17,32 @@ function classes() {
   const storage = new Map();
   const attributes = new Map([['data-td-theme-init', '']]);
   const callbacks = new Map();
+  const icon = () => ({
+    hidden: false, classList: classes(),
+    toggleAttribute(name, value) { assert.equal(name, 'hidden'); this.hidden = value; },
+  });
+  const themeControl = (paired = true) => ({
+    moon: paired ? icon() : null, sun: paired ? icon() : null, legacy: paired ? null : icon(),
+    attributes: new Map(), listeners: new Map(),
+    setAttribute(name, value) { this.attributes.set(name, value); },
+    addEventListener(name, callback) { this.listeners.set(name, callback); },
+    querySelector(selector) {
+      return selector === '.td-shell-icon--moon' ? this.moon
+        : selector === '.td-shell-icon--sun' ? this.sun : this.legacy || this.moon;
+    },
+  });
+  const slots = [themeControl(), themeControl()];
+  const toggles = [themeControl(), themeControl(false)];
+  const assertModeIcons = dark => {
+    for (const control of [...slots, toggles[0]]) {
+      assert.equal(control.moon.hidden, !dark);
+      assert.equal(control.sun.hidden, dark);
+    }
+    assert.equal(toggles[0].attributes.get('aria-pressed'), String(dark));
+    assert.equal(toggles[1].legacy.classList.has('fa-moon'), dark);
+    assert.equal(toggles[1].legacy.classList.has('fa-sun'), !dark);
+    assert.equal(toggles[0].moon.classList.has('fa-sun'), false);
+  };
   const light = {
     attributes: new Map([['data-bs-theme-value', 'light']]),
     classList: classes(), listeners: new Map(),
@@ -35,10 +61,13 @@ function classes() {
       setAttribute(name, value) { attributes.set(name, value); },
       getAttribute(name) { return attributes.get(name); },
       removeAttribute(name) { attributes.delete(name); },
+      hasAttribute(name) { return attributes.has(name); },
+      toggleAttribute(name, force) { if (force) attributes.set(name, ''); else attributes.delete(name); },
     },
     querySelectorAll(selector) {
       if (selector === '[data-bs-theme-value]') return [light];
-      if (selector === '[data-td-theme-toggle]') return [];
+      if (selector === '[data-td-theme-icon]') return slots;
+      if (selector === '[data-td-theme-toggle]') return toggles;
       return [];
     },
   };
@@ -78,6 +107,7 @@ function classes() {
   assert.equal(attributes.has('data-td-theme-init'), false);
   assert.equal(typeof registryExecutor, 'function');
   callbacks.get('DOMContentLoaded')();
+  assertModeIcons(false);
   light.listeners.get('click')();
   assert.equal(storage.get('td-color-theme'), 'light');
   assert.equal(attributes.get('data-bs-theme'), 'light');
@@ -90,13 +120,23 @@ function classes() {
   assert.equal(rootClasses.has('dark-mode'), true);
   assert.equal(attributes.get('data-theme'), 'dark');
   assert.equal(light.attributes.get('aria-pressed'), 'false');
+  assertModeIcons(true);
 
   storage.set('td-color-theme', 'auto');
+  callbacks.get('storage')({ key: 'td-color-theme' });
+  assertModeIcons(false);
   media.matches = true;
   callbacks.get('media:change')();
   assert.equal(attributes.get('data-bs-theme'), 'dark');
   assert.equal(rootClasses.has('dark-mode'), true);
   assert.equal(attributes.get('data-theme'), 'dark');
+  assertModeIcons(true);
+  media.matches = false;
+  callbacks.get('media:change')();
+  assertModeIcons(false);
+  toggles[0].listeners.get('click')();
+  assert.equal(attributes.get('data-bs-theme'), 'dark');
+  assertModeIcons(true);
 
   console.log('shared theme executor checks passed');
 })();

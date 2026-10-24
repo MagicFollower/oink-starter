@@ -22,6 +22,7 @@
   {{- $tag := $site.Language.Locale | default $site.Language.Lang | replaceRE "_" "-" -}}
   {{- $targets = $targets | append (dict
     "active" (eq $site.Language.Lang $.Language.Lang)
+    "translated" (isset $pages $site.Language.Lang)
     "code" $tag
     "direction" ($site.Language.Direction | default "ltr")
     "label" ($site.Language.Label | default $site.Language.Lang)

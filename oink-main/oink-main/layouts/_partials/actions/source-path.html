@@ -1,0 +1,31 @@
+{{- /* Resolve a physical filename to a repository-relative source path.
+     Keep path handling independent of Page so Windows and mounted sources
+     use the same containment and mapping checks on every build host. */ -}}
+{{- $filename := path.Clean (replace .filename `\` "/") -}}
+{{- $workingDir := strings.TrimSuffix "/" (path.Clean (replace .workingDir `\` "/")) -}}
+{{- $workingPrefix := printf "%s/" $workingDir -}}
+{{- $sourcePath := $filename -}}
+{{- $mapped := strings.HasPrefix $filename $workingPrefix -}}
+{{- if $mapped }}{{ $sourcePath = strings.TrimPrefix $workingPrefix $filename }}{{ end -}}
+{{- $pathBase := .pathBase -}}
+{{- $pathRename := "" -}}
+{{- if reflect.IsMap $pathBase -}}
+  {{- $pathRename = $pathBase.to -}}
+  {{- $pathBase = $pathBase.from -}}
+{{- end -}}
+{{- with $pathBase -}}
+  {{- if findRE . $sourcePath -}}
+    {{- $sourcePath = replaceRE . $pathRename $sourcePath -}}
+    {{- $mapped = true -}}
+  {{- end -}}
+{{- end -}}
+{{- $sourcePath = strings.TrimSpace (replace $sourcePath `\` "/") -}}
+{{- if $sourcePath }}{{ $sourcePath = path.Clean $sourcePath }}{{ end -}}
+{{- /* Matching a mapping is insufficient: its result must no longer name a
+     builder path or escape the repository-relative source directory. */ -}}
+{{- $absolutePath := or (strings.HasPrefix $sourcePath "/") (gt (len (findRE `^[A-Za-z]:` $sourcePath)) 0) -}}
+{{- $parentPath := or (eq $sourcePath "..") (strings.HasPrefix $sourcePath "../") -}}
+{{- if or (not $mapped) (not $sourcePath) (eq $sourcePath ".") $absolutePath $parentPath -}}
+  {{- $sourcePath = "" -}}
+{{- end -}}
+{{- return $sourcePath -}}

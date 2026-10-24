@@ -1,3 +1,4 @@
+{{- $scope := .scope | default (printf "landing-%s" (md5 (printf "%v" .item))) -}}
 {{- $page := .page -}}
 {{- $item := .item -}}
 {{- $url := $item.url | default $item.href -}}
@@ -6,7 +7,7 @@
   {{- $label := $.label | default $item.link_label -}}
 <a class="td-landing-card-link" href="{{ . | relLangURL }}"{{ if $item.external }} target="_blank" rel="noopener noreferrer"{{ end }}>
   {{- with $label -}}
-    {{- partial "landing/markdown.html" (dict "page" $page "value" .) -}}
+    {{- partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-action-field-1" $scope) "value" .) -}}
   {{- else -}}
   <span class="visually-hidden">{{ $name }}</span>
   {{- end }}

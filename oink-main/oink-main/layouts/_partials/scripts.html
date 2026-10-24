@@ -10,7 +10,6 @@
 {{ $plantumlEnabled := partial "config-enabled.html" (dict "value" .Site.Params.plantuml "key" "params.plantuml") -}}
 {{ $drawioEnabled := partial "config-enabled.html" (dict "value" .Site.Params.drawio "key" "params.drawio") -}}
 {{ $hasMarkmap := and $markmapEnabled (.Page.Store.Get "hasMarkmap") -}}
-{{ $hasPlantuml := and $plantumlEnabled (.Page.Store.Get "hasPlantuml") -}}
 {{ $hasGiscus := .Page.Store.Get "hasGiscus" | default false -}}
 {{ $interactiveOutput := eq (lower (.Page.Store.Get "tdOutputFormat" | default "html")) "html" -}}
 {{ $keyboardNavParam := (partial "ui-param.html" (dict "page" . "key" "keyboard_nav")) -}}
@@ -118,14 +117,25 @@ window.markmap = {
 {{ if and $plantumlEnabled (not $plantumlSVGURL) -}}
   {{ warnf "params.plantuml.enable requires an explicit params.plantuml.svg_image_url; the theme does not default to a public PlantUML service, so PlantUML stays off" -}}{{ $plantumlEnabled = false -}}
 {{ end -}}
+{{ if $plantumlEnabled -}}
+  {{ $endpoint := partial "content/url.html" (dict "label" "params.plantuml" "parameter" "svg_image_url" "position" "site configuration" "value" $plantumlSVGURL "kind" "image") -}}
+  {{ $plantumlEnabled = $endpoint.valid -}}
+  {{ $plantumlSVGURL = $endpoint.href -}}
+{{ end -}}
+{{ $hasPlantuml := and $interactiveOutput $plantumlEnabled (.Page.Store.Get "hasPlantuml") -}}
 {{ $drawioServer := "" -}}
 {{ if reflect.IsMap .Site.Params.drawio }}{{ $drawioServer = index .Site.Params.drawio "drawio_server" | default "" }}{{ end -}}
 {{ if and $drawioEnabled (not $drawioServer) -}}
   {{ warnf "params.drawio.enable requires an explicit params.drawio.drawio_server; the theme does not default to the public Draw.io service, so Diagrams.net stays off" -}}{{ $drawioEnabled = false -}}
 {{ end -}}
-{{ $drawioActive := and $drawioEnabled (.Store.Get "hasDrawio") -}}
+{{ if $drawioEnabled -}}
+  {{ $endpoint := partial "content/url.html" (dict "label" "params.drawio" "parameter" "drawio_server" "position" "site configuration" "value" $drawioServer "kind" "image") -}}
+  {{ $drawioEnabled = $endpoint.valid -}}
+  {{ $drawioServer = $endpoint.href -}}
+{{ end -}}
+{{ $drawioActive := and $interactiveOutput $drawioEnabled (.Store.Get "hasDrawio") -}}
 {{ if $drawioActive -}}
-<script type="application/json" id="td-drawio-config">{{ dict "server" $drawioServer | jsonify | safeJS }}</script>
+<script type="application/json" id="td-drawio-config">{{ dict "server" $drawioServer "close" (T "ui_search_close") | jsonify | safeJS }}</script>
 {{ end -}}
 
 {{/* The registry reads this manifest synchronously while js/actions.js loads,
@@ -151,6 +161,7 @@ window.markmap = {
     (resources.Get "third_party/bootstrap/dist/js/bootstrap.bundle.js")
     (resources.Get "js/base.js")
     (resources.Get "js/navbar-menu.js")
+    (resources.Get "js/sidebar-state.js")
     (resources.Get "js/sidebar-nav.js")
     | resources.Concat "js/core.js" -}}
   {{ if hugo.IsProduction -}}
@@ -167,7 +178,7 @@ window.markmap = {
 {{ if $hasPlantuml -}}
   {{ $jsPako := resources.Get "third_party/pako/pako_deflate.min.js" -}}
   {{ $jsSvgLoader := resources.Get "third_party/external-svg-loader/svg-loader.min.js" -}}
-  {{ $jsPlantuml := resources.Get "js/plantuml.js" | resources.ExecuteAsTemplate (printf "js/generated/plantuml-%s.js" .Site.Language.Lang) .Site.Home -}}
+  {{ $jsPlantuml := resources.Get "js/plantuml.js" | resources.ExecuteAsTemplate (printf "js/generated/plantuml-%s.js" .Site.Language.Lang) (dict "server" $plantumlSVGURL "svg" $plantumlSVG) -}}
   {{ $members := slice $jsPako -}}
   {{ if $plantumlSVG }}{{ $members = $members | append $jsSvgLoader }}{{ end -}}
   {{ $members = $members | append $jsPlantuml -}}
@@ -283,6 +294,11 @@ window.markmap = {
 {{ if and $interactiveOutput $darkMode.enable -}}
   {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/dark-mode.js" "members" (slice (resources.Get "js/dark-mode.js"))) -}}
 {{ end -}}
+{{- /* The Appearance menu (style and/or mode) renders only when the site offers
+     a choice; its runtime follows the same condition. */ -}}
+{{ if and $interactiveOutput (or $darkMode.showMenu (partialCached "preset-config.html" "preset-global").menu) -}}
+  {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/appearance.js" "members" (slice (resources.Get "js/appearance.js"))) -}}
+{{ end -}}
 {{ if and $interactiveOutput $hasGiscus -}}
   {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/giscus.js" "members" (slice (resources.Get "js/giscus.js"))) -}}
 {{ end -}}
@@ -318,6 +334,10 @@ window.markmap = {
   {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/authored-a11y.js" "members" (slice (resources.Get "js/authored-a11y.js"))) -}}
 {{ end -}}
 
+{{ if and $interactiveOutput (.Store.Get "hasExpo") -}}
+  {{ partial "expo/viewer.html" . }}
+  {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/expo.js" "members" (slice (resources.Get "js/expo-geometry.js") (resources.Get "js/expo.js"))) -}}
+{{ end -}}
 {{ if $hasImageZoom }}{{ partial "content/image-zoom-dialog.html" . }}{{ end -}}
 {{ if $hasMermaid }}{{ partial "content/diagram-zoom-dialog.html" . }}{{ end -}}
 {{ range $jsChunks -}}

@@ -16,7 +16,49 @@
   'use strict';
 
   var html = document.documentElement;
+  if (html.hasAttribute('data-td-shell-initialized')) return;
+  html.setAttribute('data-td-shell-initialized', '');
   var MD = '(min-width: 768px)';
+
+  // The panel itself remains a pointer sensor; only its content is inert.
+  function syncSidebarIsolation(preferredFocus) {
+    var sidebar = document.getElementById('td-shell-sidebar');
+    var panel = sidebar && sidebar.querySelector('.td-shell-sidebar__panel');
+    if (!panel) return;
+    var desktop = window.matchMedia(MD).matches;
+    var hidden = desktop
+      ? html.getAttribute('data-td-shell-sidebar') === 'collapsed' &&
+        !sidebar.classList.contains('td-shell-sidebar--overlay')
+      : !html.hasAttribute('data-td-shell-drawer');
+    if (hidden && panel.contains(document.activeElement)) {
+      var target = preferredFocus;
+      if (!target || panel.contains(target) || target.offsetParent === null) {
+        target = document.querySelector(desktop
+          ? '.td-shell-float [data-td-shell-sidebar-toggle]'
+          : '[data-td-shell-drawer-open]');
+      }
+      if (!target || target.offsetParent === null) target = document.getElementById('td-main-content');
+      if (target) target.focus();
+    }
+    Array.prototype.forEach.call(panel.children, function (child) { child.inert = hidden; });
+    if (hidden) panel.setAttribute('aria-hidden', 'true');
+    else panel.removeAttribute('aria-hidden');
+  }
+
+  // Isolate the rail panel, not the aside that moves into the mobile drawer.
+  function syncTocIsolation() {
+    var panel = document.querySelector('.td-shell-toc__panel');
+    if (!panel) return;
+    var hidden = html.getAttribute('data-td-shell-toc') === 'collapsed';
+    if (hidden && panel.contains(document.activeElement)) {
+      var target = document.querySelector('.td-shell-toc-float [data-td-shell-right-toggle]');
+      if (!target || target.offsetParent === null) target = document.getElementById('td-main-content');
+      if (target) target.focus();
+    }
+    panel.inert = hidden;
+    if (hidden) panel.setAttribute('aria-hidden', 'true');
+    else panel.removeAttribute('aria-hidden');
+  }
 
   /* ----------------------------------------------------------- focus trap */
 
@@ -29,6 +71,9 @@
     return Array.prototype.filter.call(
       container.querySelectorAll(FOCUSABLE),
       function (el) {
+        if (el.closest('[inert], [hidden]')) return false;
+        var visibility = window.getComputedStyle(el).visibility;
+        if (visibility === 'hidden' || visibility === 'collapse') return false;
         return el.offsetParent !== null || el === document.activeElement;
       },
     );
@@ -72,6 +117,11 @@
         } else {
           html.removeAttribute('data-td-shell-toc');
         }
+        syncTocIsolation();
+        if (!next && document.activeElement === btn && btn.offsetParent === null) {
+          var target = document.querySelector('.td-shell-toc__panel [data-td-shell-right-toggle]');
+          if (target && target.offsetParent !== null) target.focus();
+        }
         try {
           localStorage.setItem('td-shell-toc-collapsed', next ? '1' : '0');
         } catch (e) {
@@ -79,25 +129,26 @@
         }
       });
     });
+    syncTocIsolation();
   }
 
   /* --------------------------------------------------------- footerOffset */
 
-  // Shorten the fixed sidebar as the footer enters the viewport.
+  // Shorten fixed rails as the footer enters the viewport.
   function initFooterOffset() {
     var footer = document.querySelector('[data-td-shell-footer]');
-    var panel = document.querySelector('.td-shell-sidebar__panel');
+    var panel = document.querySelector(
+      '.td-shell-sidebar__panel, .td-shell-toc__panel',
+    );
     if (!footer || !panel) return;
     var frame = 0;
 
     function update() {
       frame = 0;
-      var viewportHeight = window.visualViewport
-        ? window.visualViewport.height
-        : window.innerHeight;
+      // Fixed rails and footer bounds both use layout-viewport coordinates.
       var offset = Math.max(
         0,
-        viewportHeight - footer.getBoundingClientRect().top,
+        window.innerHeight - footer.getBoundingClientRect().top,
       );
       if (offset > 0) offset += 1;
       html.style.setProperty('--td-shell-footer-offset', offset + 'px');
@@ -108,14 +159,21 @@
 
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
+    document.addEventListener('td:tab-shown', schedule);
     if (window.visualViewport) {
       window.visualViewport.addEventListener('scroll', schedule, {
         passive: true,
       });
       window.visualViewport.addEventListener('resize', schedule);
     }
-    if ('ResizeObserver' in window)
-      new ResizeObserver(schedule).observe(footer);
+    if ('ResizeObserver' in window) {
+      var observer = new ResizeObserver(schedule);
+      observer.observe(footer);
+      // Tabs, blog views and loaded media move the footer without resizing it.
+      // Observe normal-flow content; the fixed rails never size this element.
+      var main = document.getElementById('td-main-content');
+      if (main) observer.observe(main);
+    }
     update();
   }
 
@@ -163,14 +221,23 @@
       if (!root.contains(e.target)) close(false);
     }
     btn.addEventListener('click', function () {
-      if (pop.hidden) {
+      if (btn.getAttribute('aria-expanded') !== 'true') {
         open();
       } else {
         close(false);
       }
     });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !pop.hidden) close(true);
+    root.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && btn.getAttribute('aria-expanded') === 'true') {
+        e.preventDefault();
+        e.stopPropagation();
+        close(true);
+      }
+    });
+    root.addEventListener('focusout', function (e) {
+      if (!pop.hidden && e.relatedTarget && !root.contains(e.relatedTarget)) {
+        close(false);
+      }
     });
   }
 
@@ -189,12 +256,13 @@
         window.OinkSurfaceCoordinator.closeOthers('drawer');
       lastOpener = event.currentTarget;
       html.setAttribute('data-td-shell-drawer', 'open');
+      syncSidebarIsolation();
       openers.forEach(function (el) {
         el.setAttribute('aria-expanded', 'true');
       });
       if (closeButton)
         window.requestAnimationFrame(function () {
-          closeButton.focus();
+          if (html.hasAttribute('data-td-shell-drawer')) closeButton.focus();
         });
     }
     if (window.OinkSurfaceCoordinator)
@@ -206,6 +274,7 @@
         el.setAttribute('aria-expanded', 'false');
       });
       if (wasOpen && restoreFocus !== false && lastOpener) lastOpener.focus();
+      syncSidebarIsolation(lastOpener);
     }
     openers.forEach(function (el) {
       el.addEventListener('click', open);
@@ -231,7 +300,11 @@
     );
     // Clear drawer state across the md breakpoint to avoid a stale scroll lock.
     window.matchMedia(MD).addEventListener('change', function (mq) {
-      if (mq.matches) close(false);
+      close(false);
+      if (mq.matches && sidebar.contains(document.activeElement) && document.activeElement.offsetParent === null) {
+        var target = sidebar.querySelector('[data-td-shell-sidebar-toggle]');
+        if (target && target.offsetParent !== null) target.focus();
+      }
     });
   }
 
@@ -257,6 +330,7 @@
       } else {
         html.removeAttribute('data-td-shell-sidebar');
       }
+      syncSidebarIsolation();
       try {
         localStorage.setItem('td-shell-sidebar-collapsed', value ? '1' : '0');
       } catch (e) {
@@ -271,6 +345,10 @@
       .forEach(function (btn) {
         btn.addEventListener('click', function () {
           setCollapsed(!collapsed());
+          if (!collapsed() && !aside.contains(btn)) {
+            var innerToggle = panel.querySelector('[data-td-shell-sidebar-toggle]');
+            if (innerToggle) innerToggle.focus();
+          }
         });
       });
 
@@ -280,6 +358,7 @@
       if (!collapsed() || performance.now() < lockUntil) return;
       window.clearTimeout(closeTimer);
       aside.classList.add('td-shell-sidebar--overlay');
+      syncSidebarIsolation();
     });
     panel.addEventListener('pointerleave', function (e) {
       if (e.pointerType === 'touch' || !collapsed()) return;
@@ -290,6 +369,7 @@
       closeTimer = window.setTimeout(
         function () {
           aside.classList.remove('td-shell-sidebar--overlay');
+          syncSidebarIsolation();
           lockUntil = performance.now() + 150;
         },
         nearEdge ? 500 : 0,
@@ -298,6 +378,7 @@
 
     mdQuery.addEventListener('change', function (mq) {
       if (!mq.matches) aside.classList.remove('td-shell-sidebar--overlay');
+      syncSidebarIsolation();
     });
   }
 
@@ -369,32 +450,6 @@
     });
   }
 
-  /* ---------------------------------------------------------- treeToggles */
-
-  function initTreeToggles() {
-    document
-      .querySelectorAll('[data-td-shell-tree-toggle]')
-      .forEach(function (button) {
-        var target = document.getElementById(
-          button.getAttribute('aria-controls'),
-        );
-        if (!target) return;
-
-        function setExpanded(expanded) {
-          button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-          target.classList.toggle('td-is-open', expanded);
-          var label = expanded
-            ? button.dataset.tdLabelCollapse
-            : button.dataset.tdLabelExpand;
-          if (label) button.setAttribute('aria-label', label);
-        }
-
-        button.addEventListener('click', function () {
-          setExpanded(button.getAttribute('aria-expanded') !== 'true');
-        });
-      });
-  }
-
   /* ------------------------------------------------------------ treeScroll */
 
   function initTreeScroll() {
@@ -464,19 +519,12 @@
           '[data-td-shell-tree-toggle]:not([data-td-shell-aside-keep-open])',
         )
         .forEach(function (button) {
-          var target = document.getElementById(
-            button.getAttribute('aria-controls'),
-          );
-          if (!target) return;
           var shouldExpand =
             expanded &&
             !button.hasAttribute('data-td-shell-aside-default-collapsed');
-          button.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
-          target.classList.toggle('td-is-open', shouldExpand);
-          var label = shouldExpand
-            ? button.dataset.tdLabelCollapse
-            : button.dataset.tdLabelExpand;
-          if (label) button.setAttribute('aria-label', label);
+          if (window.OinkSidebar) window.OinkSidebar.setExpanded(
+            button.getAttribute('aria-controls'), shouldExpand, { source: 'responsive' },
+          );
         });
     }
 
@@ -485,6 +533,7 @@
       if (aside.parentElement !== parent) parent.appendChild(aside);
       slot.hidden = isWide;
       setGroups(isWide);
+      syncTocIsolation();
     }
 
     place(wide.matches);
@@ -806,7 +855,8 @@
       try {
         id = decodeURIComponent(hash.slice(1));
       } catch (e) {
-        return -1;
+        // Use the same literal-id fallback as the TOC's link map.
+        id = hash.slice(1);
       }
       var a = linkById.get(id);
       if (!a) return -1;
@@ -976,11 +1026,11 @@
   initDrawer();
   initCollapse();
   initResize();
-  initTreeToggles();
   initTreeScroll();
   // Before initToc: the table of contents measures geometry, so it should be
   // built where it will actually live.
   initAsideRelocate();
+  syncSidebarIsolation();
   initFlowRailAlign();
   initToc();
 

@@ -4,10 +4,14 @@
 from __future__ import annotations
 
 import argparse
+from html import unescape
+from html.parser import HTMLParser
+import json
 from pathlib import Path
 import re
 import subprocess
 import tempfile
+import xml.etree.ElementTree as ET
 
 from runtime_assets import chunk, combined_source, referenced_chunks
 from test_site import fixture_config_args, run_hugo_process
@@ -31,7 +35,7 @@ def write(path: Path, content: str) -> None:
 
 def run(
     hugo: str, source: Path, destination: Path | None = None,
-    panic_on_warning: bool = False,
+    panic_on_warning: bool = True,
 ) -> subprocess.CompletedProcess[str]:
     command = [hugo, "--source", str(source), "--logLevel", "warn"]
     if source == FIXTURE:
@@ -244,7 +248,7 @@ def check_sources() -> list[str]:
     require('printf "%s_%s" $key $primary' in field, "field helper lacks primary language fallback", errors)
     require("$hasLanding" in scripts and "js/landing.js" in scripts, "hasLanding assembly is incomplete", errors)
     require(
-        '$landingSurface := or .IsHome (eq .Layout "landing")' in navbar,
+        '$landingSurface := and (not $drawerMode) (or .IsHome $landingLayout)' in navbar,
         "the drawer entry must render on both navbar-only surfaces (Home and "
         "explicit Landing layouts)",
         errors,
@@ -394,7 +398,7 @@ def check_invalid(hugo: str) -> list[str]:
         with tempfile.TemporaryDirectory(prefix=f"td-landing-components-landing-{name}-") as temp:
             site = Path(temp)
             create_site(site, data)
-            result = run(hugo, site)
+            result = run(hugo, site, panic_on_warning=False)
             output = result.stdout + result.stderr
             # A malformed section warns and renders nothing while the rest of
             # the page survives; only --panicOnWarning turns that into failure.
@@ -531,6 +535,87 @@ echo preview
     return errors
 
 
+def check_metric_display(hugo: str) -> list[str]:
+    errors: list[str] = []
+    data = """sections:
+  - type: metrics
+    key: animated
+    data:
+      animate: true
+      items:
+        - {value: 2189, compact: true, label: Stars}
+        - {value: 32, suffix: '+', label: Languages}
+        - {value: '12.50', prefix: '$', suffix: '/day', label: Cost}
+  - type: metrics
+    key: static
+    data:
+      items:
+        - {value: 2189, compact: true, label: Stars}
+        - {value: 32, suffix: '+', label: Languages}
+        - {value: '12.50', prefix: '$', suffix: '/day', label: Cost}
+"""
+    with tempfile.TemporaryDirectory(prefix="oink-landing-metrics-") as temp:
+        site = Path(temp)
+        create_site(site, data)
+        result = run(hugo, site, panic_on_warning=True)
+        if result.returncode != 0:
+            return [f"metric display fixture failed: {result.stdout}{result.stderr}"]
+        source = (site / "public/test/index.html").read_text(encoding="utf-8")
+        for display in ("2.2k", "32+", "$12.50/day"):
+            require(unescape(source).count(f">{display}</strong>") == 2,
+                    f"static and animated metrics disagree on {display}", errors)
+            require(f'data-td-count-display="{display}"' in unescape(source),
+                    f"animated metric lost its final display {display}", errors)
+    return errors
+
+
+def check_code_focus(hugo: str) -> list[str]:
+    """Both line renderers expose HTML keyboard focus without changing Print."""
+    errors: list[str] = []
+    data = """sections:
+  - type: capabilities
+    data:
+      items:
+        - title: Repository server
+          visual:
+            type: code
+            title: Local HTTP server
+            lines:
+              - {prefix: '$ ', text: 'python3 -m http.server 8080 --bind 127.0.0.1 --directory /srv/repo'}
+  - type: code-plate
+    data:
+      title: Repository server
+      lines:
+        - {prefix: '$ ', text: 'python3 -m http.server 8080 --bind 127.0.0.1 --directory /srv/repo'}
+"""
+    with tempfile.TemporaryDirectory(prefix="td-landing-code-focus-") as temp:
+        site = Path(temp)
+        create_site(site, data)
+        config = (site / "hugo.yaml").read_text(encoding="utf-8")
+        write(site / "hugo.yaml", config.replace("page: [HTML]", "page: [HTML, print]"))
+        result = run(hugo, site, panic_on_warning=True)
+        if result.returncode != 0:
+            return [f"landing code focus fixture failed: {result.stdout}{result.stderr}"]
+        for output, relative in (
+            ("HTML", "test/index.html"),
+            ("Print", "_print/test/index.html"),
+        ):
+            path = site / "public" / relative
+            require(path.exists(), f"landing code focus {output} output is missing", errors)
+            if not path.exists():
+                continue
+            tags = re.findall(r"<pre\b([^>]*)>", path.read_text(encoding="utf-8"))
+            require(len(tags) == 2, f"landing code focus {output} lost a line renderer", errors)
+            for index, tag in enumerate(tags, 1):
+                if output == "HTML":
+                    require('tabindex="0"' in tag,
+                            f"landing code renderer {index} lacks HTML keyboard focus", errors)
+                else:
+                    require("tabindex=" not in tag,
+                            f"landing code renderer {index} added a Print focus target", errors)
+    return errors
+
+
 def check_rss(hugo: str) -> list[str]:
     errors: list[str] = []
     with tempfile.TemporaryDirectory(prefix="td-landing-components-landing-rss-") as temp:
@@ -539,20 +624,133 @@ def check_rss(hugo: str) -> list[str]:
         config = (site / "hugo.yaml").read_text(encoding="utf-8")
         write(
             site / "hugo.yaml",
-            config.replace("disableKinds: [home, RSS,", "disableKinds: [home,").replace("page: [HTML]", "page: [HTML, RSS]"),
+            config.replace("disableKinds: [home, RSS,", "disableKinds: [").replace(
+                "page: [HTML]", "page: [HTML, RSS]\n  section: [HTML, RSS]\n  home: [HTML, RSS]"
+            ),
         )
         page = (site / "content/test.md").read_text(encoding="utf-8")
-        write(site / "content/test.md", page.replace("---\n", "outputs: [HTML, RSS]\n---\n", 1))
+        write(site / "content/test.md", page.replace("landing: demo\n", "landing: demo\noutputs: [HTML, RSS]\n"))
+        write(site / "content/section/_index.md", page)
+        write(site / "content/section/child.md", "---\ntitle: Feed child\n---\n\nOrdinary child summary.\n")
+        write(site / "content/_index.md", "---\ntitle: Home\nlayout: landing\nlanding: demo\n---\n")
+        write(site / "data/home/en.yaml", "sections:\n  - type: markdown\n    data: {body: Home landing secret}\n")
         result = run(hugo, site)
         if result.returncode != 0:
             errors.append(f"landing RSS fixture failed: {result.stdout}{result.stderr}")
         else:
-            outputs = list((site / "public/test").glob("*.xml"))
-            require(len(outputs) == 1, "landing RSS fixture did not emit exactly one feed output", errors)
-            if outputs:
-                source = outputs[0].read_text(encoding="utf-8")
-                for marker in ("echo secret", "td-landing-", "data-td-landing"):
+            for route in ("", "test", "section"):
+                output = site / "public" / route / "index.xml"
+                require(output.is_file() and output.stat().st_size > 0,
+                        f"{route or 'home'} advertises a missing or empty Landing RSS output", errors)
+                if not output.is_file() or not output.stat().st_size:
+                    continue
+                source = output.read_text(encoding="utf-8")
+                try:
+                    feed = ET.fromstring(source)
+                except ET.ParseError as exc:
+                    errors.append(f"{route or 'home'} Landing RSS is not XML: {exc}")
+                    continue
+                require(feed.tag == "rss" and feed.find("channel") is not None,
+                        f"{route or 'home'} Landing RSS is not a feed document", errors)
+                html = unescape((output.parent / "index.html").read_text(encoding="utf-8"))
+                url = "https://example.org/" + (route + "/" if route else "") + "index.xml"
+                require(f'type="application/rss+xml" href="{url}"' in html,
+                        f"{route or 'home'} feed does not match HTML head discovery", errors)
+                require(f'href="{url}"' in source, f"{route or 'home'} feed self URL drifted", errors)
+                for marker in ("echo secret", "Home landing secret", "td-landing-", "data-td-landing"):
                     require(marker not in source, f"landing RSS leaked {marker}", errors)
+                if route == "section":
+                    require("Ordinary child summary." in source,
+                            "Landing section RSS lost its ordinary child summaries", errors)
+    return errors
+
+
+class LandingCodeParser(HTMLParser):
+    """Check each copy control against its enclosing block, not just any ID."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.stack: list[tuple[str, dict[str, str | None]]] = []
+        self.ids: list[str] = []
+        self.code_ids: list[str] = []
+        self.errors: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = dict(attrs)
+        if values.get("id"):
+            self.ids.append(values["id"])
+        if "data-td-code" in values:
+            self.code_ids.append(values.get("id", ""))
+            if not any("td-content" in (item.get("class") or "").split() for _, item in self.stack):
+                self.errors.append(f"code block lacks content styles: {values.get('id')}")
+        if "data-td-code-copy" in values:
+            root = next((item for _, item in reversed(self.stack) if "data-td-code" in item), {})
+            if values.get("data-td-code-target") != root.get("id"):
+                self.errors.append("copy control targets a different code root")
+        if tag not in {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}:
+            self.stack.append((tag, values))
+
+    def handle_endtag(self, tag: str) -> None:
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index][0] == tag:
+                del self.stack[index:]
+                break
+
+
+def check_markdown_scopes(hugo: str) -> list[str]:
+    """Every independently rendered body, repeated item and marquee copy is local."""
+    errors: list[str] = []
+    body = '```text {title="same.txt" collapse="2"}\none\ntwo\nthree\nfour\n```\n'
+    sections = [
+        {"type": "markdown", "key": key, "data": {"body": body}}
+        for key in ("first", "second")
+    ]
+    for kind, field in (("cards", "desc"), ("faq", "answer"), ("steps", "desc"), ("timeline", "desc")):
+        sections.append({"type": kind, "key": kind, "data": {"items": [
+            {"title": "Item", "question": "Question", "date": "2026", field: body},
+            {"title": "Item", "question": "Question", "date": "2026", field: body},
+        ]}})
+    for kind, field in (("gallery", "desc"), ("testimonials", "quote")):
+        for layout in ("grid", "marquee"):
+            sections.append({"type": kind, "key": f"{kind}-{layout}", "data": {
+                "layout": layout, "rows": 2, "items": [{"title": "Item", field: body}],
+            }})
+    sections.append({"type": "case-study", "key": "case", "data": {
+        "quote": body, "source": "Fixture", "stats": [{"value": "1", "label": "Fixture"}],
+    }})
+    with tempfile.TemporaryDirectory(prefix="oink-landing-markdown-scopes-") as temporary:
+        site = Path(temporary)
+        create_site(site, json.dumps({"sections": sections}))
+        config = (site / "hugo.yaml").read_text().replace("page: [HTML]", "page: [HTML, PRINT]")
+        write(site / "hugo.yaml", config)
+        result = run(hugo, site)
+        if result.returncode:
+            return [f"Landing Markdown scope fixture failed: {result.stdout}{result.stderr}"]
+        previous: dict[str, list[str]] = {}
+        for route in ("test/index.html", "_print/test/index.html"):
+            parser = LandingCodeParser()
+            parser.feed((site / "public" / route).read_text())
+            errors.extend(f"{route}: {error}" for error in parser.errors)
+            require(len(parser.code_ids) >= 15, f"{route} lost Markdown bodies", errors)
+            require(len(parser.ids) == len(set(parser.ids)), f"{route} contains repeated generated IDs", errors)
+            previous[route] = parser.code_ids
+        # The same source/output must keep the same IDs on a fresh Hugo render.
+        repeated = run(hugo, site)
+        require(repeated.returncode == 0, "repeated Landing build failed", errors)
+        if repeated.returncode == 0:
+            for route, expected in previous.items():
+                parser = LandingCodeParser()
+                parser.feed((site / "public" / route).read_text())
+                require(parser.code_ids == expected, f"{route} code scopes depend on render order", errors)
+        # Explicit IDs stay authored, but collisions across separate RenderString
+        # invocations must still fail the warning-strict publishing gate.
+        authored = body.replace('title="same.txt"', 'id="authored" title="same.txt"')
+        write(site / "data/landing/demo.yaml", json.dumps({"sections": [
+            {"type": "markdown", "key": key, "data": {"body": authored}} for key in ("first", "second")
+        ]}))
+        collision = run(hugo, site)
+        require(collision.returncode != 0 and 'duplicate id "authored"' in collision.stdout + collision.stderr,
+                "Landing kept duplicate explicit code IDs across independent bodies", errors)
     return errors
 
 
@@ -579,7 +777,10 @@ def main() -> int:
         + check_localized_fields(args.hugo)
         + check_centered_hero(args.hugo)
         + check_preview_scopes(args.hugo)
+        + check_metric_display(args.hugo)
         + check_rss(args.hugo)
+        + check_markdown_scopes(args.hugo)
+        + check_code_focus(args.hugo)
     )
     if errors:
         print("landing checks failed:")

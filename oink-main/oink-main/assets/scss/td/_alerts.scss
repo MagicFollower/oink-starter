@@ -3,7 +3,7 @@
 
 .td-callout {
   --td-callout-accent: var(--bs-primary);
-  --td-callout-bg: color-mix(in srgb, var(--td-callout-accent) 7%, var(--bs-body-bg));
+  --td-callout-bg: color-mix(in srgb, var(--td-callout-accent) var(--td-callout-tint, 7%), var(--bs-body-bg));
   // Titles use the Bootstrap *-text-emphasis tokens (contrast-safe on the
   // subtle tint in both colour modes), never the raw accent colour.
   --td-callout-title: var(--bs-primary-text-emphasis);

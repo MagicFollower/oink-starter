@@ -98,6 +98,8 @@ def main() -> int:
                         any("OinkCommandPalette =" in bundle for bundle in bundles),
                         f"{deployment}/{lang} referenced bundle omitted the controller",
                     )
+                    require(any("registerSearchTail" in bundle for bundle in bundles),
+                            f"{deployment}/{lang} Palette omitted the search-tail API")
 
             output, _ = actions.build(
                 helper,
@@ -120,6 +122,7 @@ def main() -> int:
                 )
 
         for script in (
+            "clipboard.test.js",
             "palette-model.test.js",
             "command-palette.test.js",
         ):

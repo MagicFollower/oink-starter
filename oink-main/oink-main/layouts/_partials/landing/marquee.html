@@ -1,3 +1,4 @@
+{{- $scope := .scope | default "landing-marquee" -}}
 {{- $page := .page -}}
 {{- $items := .items -}}
 {{- $template := .template -}}
@@ -21,10 +22,10 @@
   <div class="td-landing-marquee__row{{ if eq (mod $row 2) 0 }} td-landing-marquee__row--alternate{{ end }}"{{ if $interactive }} data-td-marquee-row{{ end }}>
     <div class="td-landing-marquee__track">
       <div class="td-landing-marquee__group">
-        {{- range $item := $items }}{{ partial $template (dict "page" $page "data" $data "item" $item "marquee" true) }}{{ end -}}
+        {{- range $itemIndex, $item := $items }}{{ partial $template (dict "page" $page "data" $data "item" $item "marquee" true "scope" (printf "%s-row-%d-item-%d" $scope $row $itemIndex)) }}{{ end -}}
       </div>
       {{- if $interactive }}<div class="td-landing-marquee__group" aria-hidden="true" inert>
-        {{- range $item := $items }}{{ partial $template (dict "page" $page "data" $data "item" $item "marquee" true "duplicate" true) }}{{ end -}}
+        {{- range $itemIndex, $item := $items }}{{ partial $template (dict "page" $page "data" $data "item" $item "marquee" true "duplicate" true "scope" (printf "%s-row-%d-copy-item-%d" $scope $row $itemIndex)) }}{{ end -}}
       </div>{{ end }}
     </div>
   </div>

@@ -6,9 +6,8 @@ Three rules shape every theme parameter (see CHANGELOG 0.5.0):
 1. A boolean switch is the bare feature name (`ui.annotation: true`), never a
    `*.enable` member or an `*_enabled` suffix. The only `_enabled` keys left
    are the ones whose bare name would collide with sibling keys.
-2. A single-key map is flattened to a scalar. A map survives only for a
-   feature that carries several settings, and that map also accepts a bare
-   boolean.
+2. A single-key map is flattened to a scalar. Multi-setting maps survive;
+   only maps listed in BOOLEAN_SHORTHAND_MAPS also accept a bare boolean.
 3. A front matter key is the site key with its `ui.` prefix dropped.
 
 Keys the theme invents are snake_case; camelCase survives only where a value
@@ -24,6 +23,7 @@ names the replacement (``--source-only`` skips the builds).
 from __future__ import annotations
 
 import argparse
+import json
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import re
@@ -45,6 +45,7 @@ KEPT_MAPS = {
     "ui.dark_mode",
     "ui.command_palette",
     "ui.alt_site",
+    "ui.expo",
     "taxonomy",
     "print",
     "search",
@@ -54,6 +55,18 @@ KEPT_MAPS = {
     "copyright",
     "ui.taxonomy_icons",
     "ui.fonts",
+}
+
+# Kept maps that also accept a bare-boolean shorthand (`comments: false`,
+# `ui.dark_mode: true`, etc.). Pure configuration maps such as `print` and
+# `ui.expo` stay objects in the generated schema.
+BOOLEAN_SHORTHAND_MAPS = {
+    "comments",
+    "ui.feedback",
+    "ui.page_context_menu",
+    "ui.dark_mode",
+    "plantuml",
+    "drawio",
 }
 
 # Values handed to an external runtime keep that runtime's key names.
@@ -75,9 +88,11 @@ PAGE_OVERRIDES = {
     "navbar_autohide": "ui.navbar_autohide",
     "footer_style": "ui.footer_style",
     "annotation": "ui.annotation",
+    "backlinks": "ui.backlinks",
     "feedback": "ui.feedback",
     "image_zoom": "ui.image_zoom",
     "featured_image": "ui.featured_image",
+    "expo": "ui.expo",
     "reading_time": "ui.reading_time",
     "page_context_menu": "ui.page_context_menu",
     "share": "ui.share",
@@ -87,6 +102,8 @@ PAGE_OVERRIDES = {
     "reading_width": "reading_width",
     "blog_index": "ui.blog_index",
     "blog_index_columns": "ui.blog_index_columns",
+    "blog_index_size": "ui.blog_index_size",
+    "blog_index_toggle": "ui.blog_index_toggle",
     "theme_color": "ui.theme_color",
     "theme_color_dark": "ui.theme_color_dark",
 }
@@ -128,9 +145,15 @@ COMPATIBILITY_NOOP_PAGE_KEYS = {"scroll_spy"}
 # The converged shapes must build; the bare-boolean shorthand of every kept
 # on/off map is part of the contract.
 ACCEPTED_SITE_CASES = [
+    "ui:\n  preset: slate\n  preset_menu: true",
+    "ui:\n  preset: ink\n  preset_menu: true",
+    "ui:\n  preset: terminal\n  preset_menu: [paper, slate, ink, terminal]",
+    "ui:\n  preset: paper\n  preset_menu: [paper, slate]\n  fonts:\n    brand: sans-serif",
+    "ui:\n  preset: slate\n  preset_menu: [slate]",
     "ui:\n  annotation: false\n  translation_notice: en\n  image_zoom: true\n  keyboard_nav: false\n  reading_time: true\n  typography: system\n  pager_types: [docs]\n  breadcrumb: false\n  scroll_spy: true\n  code_copy: false\n  docs_sidebar_root: home",
     "reading_width: slim\nmarkmap: false\nplantuml: false\ndrawio: false\ncomments: false\nprint:\n  toc: false",
     "ui:\n  dark_mode: true\n  feedback: true\n  page_context_menu: false",
+    "ui:\n  dark_mode: {enable: true, show_menu: true}\n  expo: {mode: cards, size: 200}",
     "ui:\n  share: [x, bluesky, mastodon, whatsapp, line, pinterest, chatgpt, claude, email, copy]",
     "ui:\n  toc_style: flow\n  toc_taxonomies: false\n  featured_image: hero",
     "ui:\n  theme_color: '#7c3aed'\n  theme_color_dark: '#a78bfa'",
@@ -163,6 +186,12 @@ ACCEPTED_PAGE_CASES = [
 ]
 
 INVALID_SITE_CASES = [
+    ("ui:\n  preset: folio", "reserved preset name"),
+    ("ui:\n  preset: unknown", "invalid params.ui.preset"),
+    ("ui:\n  preset: false", "invalid params.ui.preset"),
+    ("ui:\n  preset_menu: always", "params.ui.preset_menu must be a boolean or a list"),
+    ("ui:\n  preset_menu: [paper, canvas]", "not an available preset"),
+    ("ui:\n  preset_menu: [slate]", "must include the site preset"),
     ("comments: definitely", "params.comments must be a boolean or a map"),
     # Discord publishes no share-intent URL, so it stays outside the set no
     # matter how often it is asked for; WeChat below is the same case.
@@ -242,6 +271,29 @@ PAGE_MAP_READ = re.compile(r'(?:isset|index)\s+((?:\$[A-Za-z]+|\.Page|)\.Params(
 def require(condition: bool, message: str, errors: list[str]) -> None:
     if not condition:
         errors.append(message)
+
+
+def check_schema_contract() -> list[str]:
+    """Editor validation must accept supported shorthand and nest page fields."""
+    errors: list[str] = []
+    site = json.loads((ROOT / 'schema/site-params.schema.json').read_text())
+    params = site['properties']['params']
+    for dotted in BOOLEAN_SHORTHAND_MAPS | {'print', 'ui.expo'}:
+        node = params
+        for part in dotted.split('.'):
+            node = node['properties'][part]
+        types = node.get('type', [])
+        if isinstance(types, str):
+            types = [types]
+        expected = {'boolean', 'object'} if dotted in BOOLEAN_SHORTHAND_MAPS else {'object'}
+        require(set(types) == expected,
+                f'schema misrepresents params.{dotted}: {types}', errors)
+    front = json.loads((ROOT / 'schema/front-matter.schema.json').read_text())['properties']
+    require(not any('.' in key for key in front), 'front-matter schema exposes dotted literal keys', errors)
+    feedback = front.get('feedback', {}).get('properties', {})
+    require({'enable', 'reasons'} <= feedback.keys(), 'front-matter schema lost nested feedback fields', errors)
+    require('type' not in front.get('feedback', {}), 'front-matter schema rejects feedback boolean shorthand', errors)
+    return errors
 
 
 def scan_read_points() -> tuple[dict[str, set[str]], dict[str, set[str]], set[str]]:
@@ -628,6 +680,59 @@ def check_print_params(hugo: str) -> list[str]:
     return errors
 
 
+def check_diagram_endpoints(hugo: str) -> list[str]:
+    """Invalid integrations warn, retain source, and publish no runtime."""
+    errors: list[str] = []
+    cases = (
+        ("missing", "", "requires an explicit", False),
+        ("script", "javascript:alert(1)//", "unsupported", False),
+        ("type", "[https://example.org/]", "must be a string", False),
+        ("protocol-relative", "//example.org/", "protocol-relative", False),
+        ("mixed-slashes", r"'/\example.org/render/'", "must not contain backslashes", False),
+        ("backslashes", r"'\\example.org/render/'", "must not contain backslashes", False),
+        ("no-host", "https:///render/", "requires a host", False),
+        ("fragment", "'#render'", "requires an image path", False),
+        ("https", "https://example.org/render/", "", True),
+        ("local", "/render/", "", True),
+    )
+    with tempfile.TemporaryDirectory(prefix="oink-diagram-endpoints-") as temp:
+        source = Path(temp)
+        (source / "content/docs").mkdir(parents=True)
+        (source / "content/docs/page.md").write_text(
+            '---\ntitle: Diagrams\n---\n\n```plantuml\nAlice -> Bob: Hello\n```\n\n'
+            '![Diagram](/diagram.drawio.svg)\n', encoding="utf-8")
+        command = [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
+                   "--destination", str(source / "public"), "--logLevel", "warn"]
+        for name, value, warning, enabled in cases:
+            params = "plantuml:\n  enable: true\ndrawio:\n  enable: true"
+            if value:
+                params = (f"plantuml:\n  enable: true\n  svg_image_url: {value}\n"
+                          f"drawio:\n  enable: true\n  drawio_server: {value}")
+            (source / "hugo.yaml").write_text(site_config(params), encoding="utf-8")
+            result = run_hugo_process(command + (["--panicOnWarning"] if enabled else []),
+                                      capture_output=True, text=True, check=False)
+            log = result.stdout + result.stderr
+            require(result.returncode == 0, f"diagram {name} failed ordinary build: {log[-600:]}", errors)
+            page = source / "public/docs/page/index.html"
+            html = page.read_text() if page.exists() else ""
+            require('language-plantuml' in html, f"diagram {name} lost PlantUML source", errors)
+            for marker in ("js/chunks/plantuml-", "js/chunks/drawio", 'id="td-drawio-config"'):
+                require((marker in html) == enabled,
+                        f"diagram {name}: runtime marker {marker!r} enabled={enabled}", errors)
+            if enabled:
+                require("WARN" not in log, f"valid diagram {name} warned: {log[-600:]}", errors)
+                chunks = list((source / "public/js/chunks").glob("plantuml-*.js"))
+                require(any(value in path.read_text() for path in chunks),
+                        f"diagram {name} did not receive the validated endpoint", errors)
+            else:
+                require(warning in log and "params.plantuml" in log and "params.drawio" in log,
+                        f"diagram {name} did not name both invalid endpoints: {log[-600:]}", errors)
+                strict = run_hugo_process(command + ["--panicOnWarning"], capture_output=True,
+                                          text=True, check=False)
+                require(strict.returncode != 0, f"diagram {name} survived --panicOnWarning", errors)
+    return errors
+
+
 def check_no_errorf() -> list[str]:
     """Author input warns and falls back; strict publication rejects warnings."""
     errors: list[str] = []
@@ -656,10 +761,12 @@ def main() -> int:
         + check_page_parity(site, page, param_reads)
         + check_compatibility_noops(site, page)
         + check_documented_defaults()
+        + check_schema_contract()
     )
     if not args.source_only:
         errors += (check_builds(args.hugo) + check_blog_index_enum(args.hugo)
-                   + check_blog_numeric_params(args.hugo) + check_print_params(args.hugo))
+                   + check_blog_numeric_params(args.hugo) + check_print_params(args.hugo)
+                   + check_diagram_endpoints(args.hugo))
 
     if errors:
         print("Parameter contract check failed:")

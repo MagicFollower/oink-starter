@@ -26,15 +26,17 @@ MAC_CHROME = (
 )
 RESOURCE_LINK_RELS = {"icon", "modulepreload", "preload", "stylesheet"}
 REMOTE_MEDIA_TAGS = {"audio", "img", "source", "track", "video"}
-PUBLICATION_CSP = (
-    "default-src 'none'; "
-    "style-src 'self' 'unsafe-inline'; "
-    "font-src 'self' data:; "
-    "img-src 'self' data: http: https:; "
-    "media-src 'self' data: http: https:; "
-    "script-src 'none'; connect-src 'none'; frame-src 'none'; "
-    "object-src 'none'; base-uri 'none'"
-)
+
+
+def publication_csp(allow_remote_resources: bool) -> str:
+    # Apply the same opt-in to indirect CSS/SVG media requests as HTML attrs.
+    media = "'self' data:" + (" http: https:" if allow_remote_resources else "")
+    return (
+        "default-src 'none'; style-src 'self' 'unsafe-inline'; "
+        f"font-src 'self' data:; img-src {media}; media-src {media}; "
+        "script-src 'none'; connect-src 'none'; frame-src 'none'; "
+        "object-src 'none'; base-uri 'none'; form-action 'none'; sandbox allow-same-origin"
+    )
 
 
 def fail(message: str) -> NoReturn:
@@ -80,7 +82,7 @@ def print_document(public: Path, manifest: dict) -> tuple[Path, str, str]:
         served_path = "/" + served_path
     candidate = public_file(public, raw_path, base_path)
     if raw_path.endswith("/"):
-        candidate /= "index.html"
+        candidate = public_file(public, raw_path + "index.html", base_path)
     if not candidate.is_file():
         fail(f"whole-Book Print output is missing: {candidate}")
     return candidate, served_path, base_path
@@ -104,7 +106,12 @@ class PublicationResources(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         tag = tag.lower()
-        values = dict(attrs)
+        # Browsers keep the first occurrence of duplicate HTML attributes.
+        values: dict[str, str | None] = {}
+        for name, value in attrs:
+            values.setdefault(name, value)
+        if tag == "meta" and (values.get("http-equiv") or "").strip().lower() == "refresh":
+            fail("publication document must not navigate with meta refresh")
         for name in ("src", "poster"):
             value = values.get(name)
             if value:
@@ -169,8 +176,9 @@ def find_chrome(value: str | None) -> str:
 
 
 class QuietHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args: object, base_path: str = "", **kwargs: object) -> None:
+    def __init__(self, *args: object, base_path: str = "", allow_remote_resources: bool = False, **kwargs: object) -> None:
         self.base_path = base_path
+        self.allow_remote_resources = allow_remote_resources
         super().__init__(*args, **kwargs)
 
     def translate_path(self, path: str) -> str:
@@ -182,13 +190,30 @@ class QuietHandler(SimpleHTTPRequestHandler):
             route = route[len(self.base_path) :] or "/"
         if parsed.query:
             route += "?" + parsed.query
-        return super().translate_path(route)
+        candidate = Path(super().translate_path(route)).resolve()
+        candidate.relative_to(Path(self.directory).resolve())
+        return str(candidate)
+
+    def send_head(self):
+        # CSS and other indirect resources also go through this boundary.
+        try:
+            candidate = Path(self.translate_path(self.path))
+            if candidate.is_dir():
+                for name in ("index.html", "index.htm"):
+                    index = candidate / name
+                    if index.exists():
+                        index.resolve().relative_to(Path(self.directory).resolve())
+                        break
+        except ValueError:
+            self.send_error(404, "Resource is outside the public directory")
+            return None
+        return super().send_head()
 
     def log_message(self, _format: str, *_args: object) -> None:
         return
 
     def end_headers(self) -> None:
-        self.send_header("Content-Security-Policy", PUBLICATION_CSP)
+        self.send_header("Content-Security-Policy", publication_csp(self.allow_remote_resources))
         super().end_headers()
 
 
@@ -236,7 +261,8 @@ def main() -> int:
             fail(f"cannot read Chrome version: {version.stdout}{version.stderr}")
 
         output.parent.mkdir(parents=True, exist_ok=True)
-        handler = partial(QuietHandler, directory=str(public), base_path=base_path)
+        handler = partial(QuietHandler, directory=str(public), base_path=base_path,
+                          allow_remote_resources=args.allow_remote_resources)
         with ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
             thread = Thread(target=server.serve_forever, daemon=True)
             thread.start()

@@ -1,3 +1,4 @@
+{{- $scope := .scope | default (printf "landing-%s-heading" .id) -}}
 {{- $page := .page -}}
 {{- $data := .data -}}
 {{- $id := .id -}}
@@ -11,13 +12,13 @@
 {{- if or (index $data "eyebrow") (index $data "title") $description -}}
 <header class="td-landing-section__head{{ $compact }}">
   {{- with index $data "eyebrow" }}
-  <p class="td-landing-section__eyebrow"><span>{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</span><i aria-hidden="true"></i></p>
+  <p class="td-landing-section__eyebrow"><span>{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-heading-field-1" $scope) "value" .) }}</span><i aria-hidden="true"></i></p>
   {{- end }}
   {{- with index $data "title" }}
-  <h2 id="{{ $id }}-title">{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</h2>
+  <h2 id="{{ $id }}-title">{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-heading-field-2" $scope) "value" .) }}</h2>
   {{- end }}
   {{- with $description }}
-  <p class="td-landing-section__description">{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</p>
+  <p class="td-landing-section__description">{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-heading-field-3" $scope) "value" .) }}</p>
   {{- end }}
 </header>
 {{- end -}}

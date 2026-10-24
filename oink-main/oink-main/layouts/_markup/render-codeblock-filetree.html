@@ -1,11 +1,22 @@
 {{- $page := .PageInner | default .Page -}}
 {{- $format := lower ($page.Store.Get "tdOutputFormat" | default "html") -}}
 {{- $policy := partial "content/attributes.html" (dict
-  "attributes" .Attributes "allowed" (slice "title" "tab" "group" "value")
+  "attributes" .Attributes "allowed" (slice "title" "wrap" "tab" "group" "value")
   "position" .Position "kind" "filetree"
 ) -}}
 {{- $title := strings.TrimSpace (index $policy.consumed "title" | default "") -}}
 {{- if and (isset $policy.consumed "title") (not $title) }}{{ warnf "filetree: title must not be empty at %s; dropping it" .Position }}{{ end -}}
+{{- $wrap := false -}}
+{{- $wrapSet := isset $policy.consumed "wrap" -}}
+{{- if $wrapSet -}}
+  {{- $wrapValue := index $policy.consumed "wrap" -}}
+  {{- if in (slice "true" "false") $wrapValue -}}
+    {{- $wrap = eq $wrapValue "true" -}}
+  {{- else -}}
+    {{- warnf "filetree: wrap must be true or false; got %q at %s; keeping compact comments" $wrapValue .Position -}}
+    {{- $wrapSet = false -}}
+  {{- end -}}
+{{- end -}}
 {{- $tab := strings.TrimSpace (index $policy.consumed "tab" | default "") -}}
 {{- if and (isset $policy.consumed "tab") (not $tab) }}{{ warnf "filetree: tab label must not be empty at %s; ignoring tab" .Position }}{{ end -}}
 {{- $group := index $policy.consumed "group" | default "" -}}
@@ -20,8 +31,11 @@
 
 {{- if eq $format "markdown" -}}
   {{- /* re-emit the fence so the Markdown output stays valid source */ -}}
+  {{- $attrs := slice -}}
+  {{- with $title }}{{ $attrs = $attrs | append (printf `title=%q` .) }}{{ end -}}
+  {{- if $wrapSet }}{{ $attrs = $attrs | append (printf "wrap=%t" $wrap) }}{{ end -}}
   {{- $attrText := "" -}}
-  {{- with $title }}{{ $attrText = printf ` {title=%q}` . }}{{ end -}}
+  {{- with $attrs }}{{ $attrText = printf " {%s}" (delimit . " ") }}{{ end -}}
   {{- $html = printf "```filetree%s\n%s```\n" $attrText (strings.TrimRight "\n" $inner | printf "%s\n") -}}
 {{- else if eq $format "rss" -}}
   {{- $html = printf `<pre class="td-filetree-source"><code class="language-filetree">%s</code></pre>` (htmlEscape (strings.TrimRight "\n" $inner)) -}}
@@ -29,6 +43,7 @@
   {{- $id := printf "td-filetree-%s-f%d" (md5 $page.RelPermalink) .Ordinal -}}
   {{- $classes := slice "td-filetree" -}}
   {{- if $static }}{{ $classes = $classes | append "td-filetree--static" }}{{ end -}}
+  {{- if and $wrap (not $static) }}{{ $classes = $classes | append "td-filetree--wrap" }}{{ end -}}
   {{- if not $parsed.hasComments }}{{ $classes = $classes | append "td-filetree--plain" }}{{ end -}}
   {{- with $policy.class }}{{ $classes = $classes | append . }}{{ end -}}
   {{- $count := len $nodes -}}

@@ -62,7 +62,7 @@ function svgStub() {
   };
 }
 
-function build() {
+function build(options = {}) {
   const scroll = { y: 0 };
   const hash = { value: '' };
   const rafQueue = [];
@@ -84,8 +84,10 @@ function build() {
     },
   };
 
+  const ids = options.ids || HEADINGS.map((_docTop, i) => 'h' + i);
+  const hashes = options.hashes || ids.map((id) => '#' + id);
   const headings = HEADINGS.map((docTop, i) => ({
-    id: 'h' + i,
+    id: ids[i],
     getBoundingClientRect() {
       const top = docTop - scroll.y;
       return { top, bottom: top + 40 };
@@ -104,7 +106,7 @@ function build() {
     const attrs = new Map();
     const classes = new Set();
     return {
-      hash: '#h' + i,
+      hash: hashes[i],
       parentElement: parent,
       offsetTop: 12 + i * ROW,
       clientHeight: ROW,
@@ -425,4 +427,33 @@ test('each entry gets a pill offset that clears its own indent', () => {
     '26px',
     'nested entries indent 32px, so the pill starts at 26',
   );
+});
+
+test('encoded Unicode fragments resolve to their authored heading id', () => {
+  const ids = ['中文', 'h1', 'h2', 'h3', 'h4', 'h5'];
+  const hashes = ['#%E4%B8%AD%E6%96%87', '#h1', '#h2', '#h3', '#h4', '#h5'];
+  const toc = build({ ids, hashes });
+  toc.scrollTo(100);
+  assert.deepEqual(toc.state().current, ['#%E4%B8%AD%E6%96%87']);
+});
+
+test('malformed percent sequences do not disable the remaining TOC', () => {
+  for (const malformed of ['#bad%zz', '#bad%', '#%E4%B8']) {
+    const hashes = [malformed, '#h1', '#h2', '#h3', '#h4', '#h5'];
+    const toc = build({ hashes });
+    toc.scrollTo(600);
+    assert.deepEqual(toc.state().current, ['#h1']);
+  }
+});
+
+test('a malformed fragment can still address a literal percent id', () => {
+  for (const id of ['bad%zz', 'bad%', '%E4%B8']) {
+    const ids = ['h0', 'h1', 'h2', 'h3', 'h4', id];
+    const toc = build({ ids });
+    toc.setHash('#' + id);
+    toc.scrollTo(MAX_SCROLL);
+    assert.deepEqual(toc.state().current, ['#' + id]);
+    toc.scrollTo(600);
+    assert.deepEqual(toc.state().current, ['#h1']);
+  }
 });

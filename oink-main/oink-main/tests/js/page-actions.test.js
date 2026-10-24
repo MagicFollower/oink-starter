@@ -153,6 +153,7 @@ async function testTitleMenu() {
   };
   const root = {
     dataset: { tdTCopied: 'Markdown copied', tdTCopyError: 'Copy failed' },
+    addEventListener(name, handler) { menuListeners.set(`root:${name}`, handler); },
     classList: {
       add(value) { rootClasses.add(value); },
       remove(value) { rootClasses.delete(value); },
@@ -221,6 +222,16 @@ async function testTitleMenu() {
   // Outside pointerdown closes without stealing focus.
   docListeners.get('pointerdown')({ target: { inside: false } });
   assert.equal(rootClasses.has('td-is-open'), false);
+  assert.equal(toggle.focused, 0);
+
+  // Tab within the disclosure keeps it open; leaving it dismisses the menu
+  // without reclaiming focus from the reader's next destination.
+  menuListeners.get('toggle:click')();
+  menuListeners.get('root:focusout')?.({ relatedTarget: { inside: true } });
+  assert.equal(rootClasses.has('td-is-open'), true);
+  menuListeners.get('root:focusout')?.({ relatedTarget: { inside: false } });
+  assert.equal(rootClasses.has('td-is-open'), false, 'menu remained open after focus left');
+  assert.equal(toggleAttrs.get('aria-expanded'), 'false');
   assert.equal(toggle.focused, 0);
 
   // Escape closes and returns focus to the toggle.

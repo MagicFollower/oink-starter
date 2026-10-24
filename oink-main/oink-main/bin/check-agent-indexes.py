@@ -373,6 +373,79 @@ outputs:
                 f"    json:     {shape}\n    expected: {expected}", errors)
 
 
+def check_explicit_boundaries(hugo: str, errors: list[str]) -> None:
+    """The explicit tree retains content-tree visibility and link semantics."""
+    with tempfile.TemporaryDirectory(prefix="oink-nav-boundaries-") as temp:
+        site = Path(temp)
+        def write(relative: str, value: str) -> None:
+            path = site / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(value, encoding="utf-8")
+        write("hugo.yaml", f"""baseURL: https://example.org/manual/
+title: Navigation boundaries
+theme: {ROOT.name}
+disableKinds: [RSS, sitemap, taxonomy, term]
+outputs:
+  home: [HTML, NAVJSON]
+  section: [HTML]
+  page: [HTML]
+""")
+        write("layouts/index.html", "ok")
+        layout = ('{{ .Store.Set "tdOutputFormat" "html" }}'
+                  '{{ partial "shell/sidebar.html" . }}'
+                  '{{ $p := partial "pager-state.html" . }}'
+                  '{{ with $p.prev }}<a data-prev href="{{ .RelPermalink }}"></a>{{ end }}'
+                  '{{ with $p.next }}<a data-next href="{{ .RelPermalink }}"></a>{{ end }}')
+        write("layouts/docs/list.html", layout)
+        write("layouts/docs/single.html", layout)
+        write("content/docs/_index.md", "---\ntitle: Docs\noutputs: [HTML, LLMSFULL]\n---\n")
+        write("content/docs/a.md", "---\ntitle: A\nweight: 1\n---\nVisible A\n")
+        write("content/docs/b.md", "---\ntitle: B\nweight: 2\n---\nVisible B\n")
+        write("content/docs/alias.md", "---\ntitle: Alias\nmanual_link_relref: /docs/a\nweight: 3\n---\n")
+        write("content/docs/hidden/_index.md", "---\ntitle: Hidden group\ntoc_hide: true\n---\n")
+        write("content/docs/hidden/child.md", "---\ntitle: Hidden child\n---\nHidden body\n")
+        declared = [
+            {"page": "/docs/hidden", "url": "/docs/hidden/", "children": [
+                {"page": "/docs/hidden/child", "url": "/docs/hidden/child/"}]},
+            {"page": "/docs/b", "url": "/docs/b/"},
+            {"page": "/docs/alias", "url": "/docs/alias/"},
+            {"page": "/docs/a", "url": "/docs/a/"},
+        ]
+        for name, sections in (("declared", declared), ("empty", [])):
+            write("data/docs_nav.json", json.dumps({"sections": sections}))
+            destination = site / name
+            command = [hugo, "--source", str(site), "--themesDir", str(ROOT.parent),
+                       "--destination", str(destination), "--logLevel", "warn"]
+            result = subprocess.run(command + (["--panicOnWarning"] if sections else []),
+                                    capture_output=True, text=True, check=False, timeout=BUILD_TIMEOUT)
+            require(result.returncode == 0, f"{name} navigation build failed: {result.stdout}{result.stderr}", errors)
+            if result.returncode != 0:
+                continue
+            html = (destination / "docs/index.html").read_text()
+            nav = json.loads((destination / "navigation.json").read_text())
+            children = nav["root"]["children"][0]["children"]
+            bundle = (destination / "docs/llms-full.txt").read_text()
+            order = ["b", "a"] if sections else ["a", "b"]
+            require("Hidden group" not in html and "Hidden child" not in html,
+                    f"{name}: sidebar included a toc_hide subtree", errors)
+            require("hidden" not in json.dumps(children), f"{name}: NAVJSON included a toc_hide subtree", errors)
+            require(bundle_sources(bundle) == ["https://example.org/manual/docs/"] +
+                    [f"https://example.org/manual/docs/{page}/" for page in order],
+                    f"{name}: LLMSFULL visibility or reading order differs", errors)
+            alias = next((node for node in children if node["title"] == "Alias"), {})
+            require(alias == {"title": "Alias", "kind": "link", "url": "/manual/docs/a/"},
+                    f"{name}: internal alias lost its target: {alias}", errors)
+            first = (destination / f"docs/{order[0]}/index.html").read_text()
+            require(f'<a data-next href="/manual/docs/{order[1]}/">' in first,
+                    f"{name}: pager differs from visible reading order", errors)
+            if not sections:
+                require("falling back to the section tree" in result.stdout + result.stderr,
+                        "empty explicit navigation did not warn", errors)
+                strict = subprocess.run(command + ["--panicOnWarning"], capture_output=True,
+                                        text=True, check=False, timeout=BUILD_TIMEOUT)
+                require(strict.returncode != 0, "empty explicit navigation survived strict publication", errors)
+
+
 def check_nested_section(hugo: str, errors: list[str]) -> None:
     """Enabling LLMSFULL below the top level warns and blocks publication."""
 
@@ -444,6 +517,7 @@ def main() -> int:
     if args.public is None:
         check_determinism(args.hugo, public, errors)
         check_explicit_tree(args.hugo, errors)
+        check_explicit_boundaries(args.hugo, errors)
         check_nested_section(args.hugo, errors)
     else:
         print("  (reused build: determinism, explicit-tree, and "

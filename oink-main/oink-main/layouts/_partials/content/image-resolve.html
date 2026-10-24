@@ -72,8 +72,9 @@
         {{- $metadataAlt := index . "alt" -}}
         {{- if ne (printf "%T" $metadataAlt) "string" -}}
           {{- warnf "%s: image resource alt metadata must be a string at %s; ignoring it" $label $position -}}
+        {{- else -}}
+          {{- $resourceAlt = strings.TrimSpace $metadataAlt -}}
         {{- end -}}
-        {{- $resourceAlt = strings.TrimSpace $metadataAlt -}}
       {{- end -}}
       {{- with index . "byline" }}{{ $byline = strings.TrimSpace (printf "%v" .) }}{{ end -}}
     {{- end -}}

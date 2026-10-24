@@ -4,10 +4,12 @@
 from __future__ import annotations
 
 import argparse
+from html.parser import HTMLParser
 from pathlib import Path
 import re
 import shutil
 import subprocess
+import struct
 import tempfile
 
 from runtime_assets import combined_source
@@ -46,8 +48,6 @@ def check_outputs(public: Path) -> list[str]:
         # attribute line + {command=/options=}: processed figure, Zoom marker
         # carrying the full-size original
         '<figure class="td-figure">',
-        '<img src="/fixtures/media-primitives/page_hu_9fe7555f90baf6dd.png" alt="Blue and gold page-resource test pattern" width="48" height="30" data-td-image-zoom="/fixtures/media-primitives/page.png" loading="lazy" decoding="async">',
-        '<img src="/media/content-primitives-global_hu_aaa8925533bfdda.png" alt="Green and violet global-resource test pattern" width="32" height="20" data-td-image-zoom="/media/content-primitives-global.png" loading="lazy" decoding="async">',
         # resource metadata: alt from params.alt, byline inside the figcaption
         '<span class="td-fig-caption">Alt text and the byline come from the resource metadata.</span>',
         '<small class="td-figure__byline">OINK fixture byline</small>',
@@ -62,18 +62,26 @@ def check_outputs(public: Path) -> list[str]:
         '<span class="td-fig-caption">The attribute line can process too</span>',
     ):
         require(marker in page, f"HTML media fixture missing {marker}", errors)
-    # Hugo's image-processing cache key changed between supported releases for
-    # Crop. Assert the generated-resource shape and semantics, not one Hugo
-    # version's opaque hash.
-    require(
-        re.search(
-            r'<img class="td-image" src="/fixtures/media-primitives/page_hu_[0-9a-f]+\.png" alt="" width="24" height="24" loading="lazy" decoding="async">',
-            page,
-        )
-        is not None,
-        "HTML media fixture lacks the decorative processed image",
-        errors,
-    )
+    # Hugo owns derivative hashes. Pin source, markup, dimensions and a real
+    # generated PNG instead of one version's opaque processing cache key.
+    for prefix, alt, width, height, zoom, css in (
+        ("/fixtures/media-primitives/page", "Blue and gold page-resource test pattern", 48, 30, '/fixtures/media-primitives/page.png', ""),
+        ("/media/content-primitives-global", "Green and violet global-resource test pattern", 32, 20, '/media/content-primitives-global.png', ""),
+        ("/fixtures/media-primitives/page", "", 24, 24, "", ' class="td-image"'),
+    ):
+        zoom_attr = f' data-td-image-zoom="{zoom}"' if zoom else ""
+        pattern = (rf'<img{css} src="({re.escape(prefix)}_hu_[0-9a-f]+\.png)"'
+                   + re.escape(f' alt="{alt}" width="{width}" height="{height}"{zoom_attr} loading="lazy" decoding="async">'))
+        match = re.search(pattern, page)
+        require(match is not None, f"processed image lost its source or attributes: {prefix} {width}x{height}", errors)
+        if match:
+            generated = public / match.group(1).lstrip("/")
+            require(generated.is_file(), f"processed image was not published: {generated}", errors)
+            if generated.is_file():
+                data = generated.read_bytes()
+                require(data[:8] == b"\x89PNG\r\n\x1a\n" and len(data) >= 24
+                        and struct.unpack(">II", data[16:24]) == (width, height),
+                        f"processed image dimensions differ from its HTML: {generated}", errors)
     # The retired shortcode owned this class; nothing emits it any more.
     require("td-figure--processed" not in page, "the retired processed-figure class survived", errors)
     # The byline belongs to the resource, so every captioned figure built from
@@ -173,7 +181,7 @@ def check_resolver_matrix(hugo: str) -> list[str]:
 
 
 def check_image_hook_matrix(hugo: str) -> list[str]:
-    """render-image: block vs inline, title, caption, num, width/height, rss."""
+    """render-image: block vs inline, title, caption, num, dimensions, print, RSS."""
     errors: list[str] = []
     with tempfile.TemporaryDirectory(prefix="oink-media-hook-") as temp:
         temp_path = Path(temp)
@@ -183,7 +191,7 @@ def check_image_hook_matrix(hugo: str) -> list[str]:
         layouts.mkdir(parents=True)
         shutil.copyfile(PAGE_IMAGE, content / "page.png")
         (content / "index.md").write_text(
-            "---\ntitle: Image hook\noutputs: [HTML, markdown, RSS]\n---\n\n"
+            "---\ntitle: Image hook\noutputs: [HTML, markdown, RSS, print]\n---\n\n"
             "## Block image (page resource)\n\n"
             '![Page raster](page.png "Advisory title")\n\n'
             "## Inline image\n\n"
@@ -193,6 +201,8 @@ def check_image_hook_matrix(hugo: str) -> list[str]:
             "![Static SVG](/media/content-primitives-static.svg)\n\n"
             "## Remote\n\n"
             "![Remote raster](https://example.invalid/remote.png?fixture=1)\n\n"
+            '![Quoted URL](https://example.invalid/image.svg?x="data-injected="yes&copy;=1)\n\n'
+            'Inline ![Inline quoted URL](https://example.invalid/image.svg?x="data-injected="yes&copy;=1) image.\n\n'
             "## Caption figure and site class\n\n"
             "![Captioned](page.png)\n"
             '{caption="A plain caption" .wide data-fixture="figure"}\n\n'
@@ -209,16 +219,36 @@ def check_image_hook_matrix(hugo: str) -> list[str]:
         # A scoped render (like content/rss-description.html) re-runs the hooks with the RSS store flag.
         (layouts / "single.rss.xml").write_text('{{- .Store.Set "tdOutputFormat" "rss" -}}\n<fixture>{{ (.Markup "td-rss-check").Render.Content }}</fixture>\n')
         override = temp_path / "rss.yaml"
-        override.write_text("disableKinds: [sitemap, taxonomy, term]\noutputs:\n  home: [HTML]\n  section: [HTML]\n  page: [HTML, markdown, RSS]\n")
+        override.write_text("disableKinds: [sitemap, taxonomy, term]\noutputs:\n  home: [HTML]\n  section: [HTML]\n  page: [HTML, markdown, RSS, print]\n")
         destination = temp_path / "public"
-        result = run_hugo(hugo, "--source", str(FIXTURE), "--contentDir", str(temp_path / "content"), "--layoutDir", str(temp_path / "layouts"), "--destination", str(destination), "--config", fixture_media_config(override), "--logLevel", "warn")
+        result = run_hugo(hugo, "--source", str(FIXTURE), "--contentDir", str(temp_path / "content"), "--layoutDir", str(temp_path / "layouts"), "--destination", str(destination), "--config", fixture_media_config(override), "--logLevel", "warn", "--panicOnWarning")
         if result.returncode != 0:
             errors.append(f"image hook matrix failed to build: {result.stdout}{result.stderr}")
             return errors
         html = (destination / "docs/hook/index.html").read_text()
         markdown = (destination / "docs/hook/index.md").read_text()
+        print_html = (destination / "_print/docs/hook/index.html").read_text()
         rss_outputs = [path for path in destination.rglob("*.xml") if "hook" in path.parts]
         rss = rss_outputs[0].read_text() if rss_outputs else ""
+        class ImageAttributes(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.images = {}
+
+            def handle_starttag(self, tag, attrs):
+                if tag == "img":
+                    values = dict(attrs)
+                    self.images[values.get("alt")] = values
+
+        for output_name, output in (("HTML", html), ("Print", print_html), ("RSS", rss)):
+            parsed = ImageAttributes()
+            parsed.feed(output)
+            for alt in ("Quoted URL", "Inline quoted URL"):
+                attrs = parsed.images.get(alt, {})
+                require(attrs.get("src") == 'https://example.invalid/image.svg?x="data-injected="yes&copy;=1',
+                        f"{output_name}: image URL was truncated or entity-decoded", errors)
+                require("data-injected" not in attrs,
+                        f"{output_name}: image URL injected an HTML attribute", errors)
         for marker in (
             '<img class="td-image" src="/docs/hook/page.png" alt="Page raster" title="Advisory title" width="64" height="40" data-td-image-zoom loading="lazy" decoding="async">',
             'Text with <img src="/docs/hook/page.png" alt="inline raster" width="64" height="40" loading="lazy" decoding="async"> inside a sentence.',
@@ -419,6 +449,38 @@ def check_invalid_cases(hugo: str) -> list[str]:
     return errors
 
 
+def check_invalid_resource_alt(hugo: str) -> list[str]:
+    """Wrong metadata types warn without breaking an ordinary image render."""
+    errors: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="oink-media-alt-") as temp:
+        site = Path(temp)
+        bundle = site / "content/docs/image"
+        bundle.mkdir(parents=True)
+        shutil.copyfile(PAGE_IMAGE, bundle / "page.png")
+        (site / "hugo.yaml").write_text(
+            f"baseURL: https://example.org/\ntitle: Alt fixture\ntheme: {ROOT.name}\n"
+            "disableKinds: [RSS, sitemap, taxonomy, term]\n")
+        layouts = site / "layouts/docs"
+        layouts.mkdir(parents=True)
+        (layouts / "single.html").write_text("{{ .Content }}")
+        for value in ("{bad: type}", "[bad, type]"):
+            (bundle / "index.md").write_text(
+                "---\ntitle: Image\nresources:\n  - src: page.png\n    params:\n"
+                f"      alt: {value}\n---\n![Authored alt](page.png)\n")
+            command = ("--source", str(site), "--themesDir", str(ROOT.parent),
+                       "--destination", str(site / "public"), "--logLevel", "warn")
+            result = run_hugo(hugo, *command)
+            require(result.returncode == 0, f"invalid resource alt stopped ordinary build: {result.stdout}{result.stderr}", errors)
+            require("image resource alt metadata must be a string" in result.stdout + result.stderr,
+                    "invalid resource alt did not warn", errors)
+            if result.returncode == 0:
+                require('alt="Authored alt"' in (site / "public/docs/image/index.html").read_text(),
+                        "invalid resource alt displaced the authored alt", errors)
+            strict = run_hugo(hugo, *command, "--panicOnWarning")
+            require(strict.returncode != 0, "invalid resource alt survived strict publication", errors)
+    return errors
+
+
 def check_template_contracts() -> list[str]:
     errors: list[str] = []
     resolver = (ROOT / "layouts/_partials/content/image-resolve.html").read_text()
@@ -451,8 +513,11 @@ def check_template_contracts() -> list[str]:
     require(not (ROOT / "layouts/_shortcodes/imgproc.html").exists(), "imgproc.html must stay deleted", errors)
     static_output = 'partial "content/static-image-output.html"'
     rss_description = 'partial "content/rss-description.html"'
-    for relative in ("layouts/_default/rss.xml", "layouts/blog/rss.xml"):
+    for relative in ("layouts/_partials/content/rss.html", "layouts/blog/rss.xml"):
         require(rss_description in (ROOT / relative).read_text(), f"{relative} does not use the shared RSS description renderer", errors)
+    for relative in ("layouts/_default/rss.xml", "layouts/landing.rss.xml"):
+        require('partial "content/rss.html"' in (ROOT / relative).read_text(),
+                f"{relative} does not use the shared RSS document renderer", errors)
     require(static_output in (ROOT / "layouts/_partials/content/rss-description.html").read_text(), "RSS description renderer does not remove interaction-only image attributes", errors)
     # Every print aggregate renders page content through one cached partial,
     # which is where the static-image filter runs.
@@ -471,7 +536,7 @@ def main() -> int:
 
     public = args.public
     if public is None:
-        public, result = build_fixture_public(args.hugo)
+        public, result = build_fixture_public(args.hugo, "--panicOnWarning")
         if result.returncode != 0:
             print(f"private fixture build failed: {result.stdout}{result.stderr}")
             return 1
@@ -484,6 +549,7 @@ def main() -> int:
         + check_rss_output(args.hugo)
         + check_generic_rss_output(args.hugo)
         + check_invalid_cases(args.hugo)
+        + check_invalid_resource_alt(args.hugo)
         + check_template_contracts()
     )
     if errors:

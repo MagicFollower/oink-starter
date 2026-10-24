@@ -16,7 +16,7 @@
 .td-shell-search__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(4, 10, 18, 0.45);
+  background: var(--td-shell-scrim);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   opacity: 0;

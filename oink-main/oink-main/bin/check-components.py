@@ -9,6 +9,8 @@ the new templates use, and the removal of the legacy shortcodes.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
+from html.parser import HTMLParser
 from pathlib import Path
 import re
 import subprocess
@@ -515,6 +517,155 @@ def check_media_output_states(hugo: str) -> list[str]:
     return errors
 
 
+def check_empty_tabs(hugo: str) -> list[str]:
+    errors: list[str] = []
+    pages = {
+        "docs/_index.md": "---\ntitle: Docs\n---\n",
+        "docs/empty.md": '---\ntitle: Empty tabs\noutputs: [HTML, PRINT, MARKDOWN, RSS]\n---\n\nBefore.\n\n{{< tabs >}}{{< /tabs >}}\n\nAfter.\n',
+    }
+    for strict in (False, True):
+        result, destination, temp = build_site(
+            hugo, pages, prefix="oink-empty-tabs-", panic_on_warning=strict,
+        )
+        with temp:
+            output = result.stdout + result.stderr
+            require('requires at least one tab child' in output, "empty tabs lost its diagnostic", errors)
+            require((result.returncode != 0) == strict, "empty tabs violated the warning policy", errors)
+            if strict:
+                continue
+            for relative in ('docs/empty/index.html', '_print/docs/empty/index.html',
+                             'docs/empty/index.md', 'docs/empty/index.xml'):
+                rendered = (destination / relative).read_text()
+                require('Before.' in rendered and 'After.' in rendered,
+                        f"{relative} lost content around empty tabs", errors)
+                require('td-tabs' not in rendered and 'role="tablist"' not in rendered,
+                        f"{relative} rendered an empty tabs container", errors)
+    return errors
+
+
+def check_print_tab_namespaces(hugo: str) -> list[str]:
+    """Grouped tabs stay page-local in HTML/plain Print and unique in aggregates."""
+    class Anchors(HTMLParser):
+        def __init__(self, source: str):
+            super().__init__(convert_charrefs=True)
+            self.ids: list[str] = []
+            self.links: list[str] = []
+            self.tab_links: list[dict[str, str]] = []
+            self.feed(source)
+
+        def handle_starttag(self, tag, attributes):
+            attrs = dict(attributes)
+            if attrs.get("id"):
+                self.ids.append(attrs["id"])
+            if tag == "a" and attrs.get("href"):
+                self.links.append(attrs["href"])
+                if attrs.get("data-test-tab-link"):
+                    self.tab_links.append(attrs)
+
+    errors: list[str] = []
+    tabs = '''{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}Example.{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
+Syntax.
+
+{{< tabs group="platform" >}}
+{{< tab label="Unix" value="unix" >}}Unix syntax.{{< /tab >}}
+{{< tab label="Windows" value="windows" >}}Windows syntax.{{< /tab >}}
+{{< /tabs >}}
+{{< /tab >}}
+{{< /tabs >}}'''
+    pages: dict[str, str] = {}
+    for lang in ("", ".zh"):
+        for kind in ("docs", "book"):
+            pages[f"{kind}/_index{lang}.md"] = (
+                f"---\ntitle: {kind}\ntype: {kind}\noutputs: [HTML, PRINT]\n---\n"
+            )
+            for chapter in ("a", "b"):
+                pages[f"{kind}/{chapter}{lang}.md"] = (
+                    f"---\ntitle: Chapter {chapter}\ntype: {kind}\noutputs: [HTML, PRINT]\n---\n"
+                    '<a href="#example-syntax-syntax">Own syntax</a>\n\n'
+                    '<a data-test-tab-link="single" title="fake href=\'#example-syntax-syntax\'" href=\'#example-syntax-syntax\'>Single quote</a>\n\n'
+                    '<a data-test-tab-link="bare" title="fake href=#example-syntax-syntax > text" HREF = #example-syntax-syntax>Bare href</a>\n\n'
+                    '<a data-test-tab-link="double" title=\'fake href="#example-syntax-syntax"\' href="#example-syntax-syntax">Double quote</a>\n\n'
+                    '<a data-test-tab-link="entity" title="encoded fragment" href=\'&#35;example-syntax-syntax\'>Entity fragment</a>\n\n'
+                    f'<a data-test-tab-link="self" title="same page" href=\'__BASE__{"zh/" if lang else ""}{kind}/{chapter}/#example-syntax-syntax\'>Same page</a>\n\n'
+                    "[Own second example](#example-syntax-2-example)\n\n"
+                    "[Other chapter](../a/#example-syntax-syntax)\n\n"
+                    f'<span id="authored-{kind}-{chapter}"></span>\n\n'
+                    f"{tabs}\n\n{tabs}\n"
+                )
+    for base_url in ("https://example.org/", "https://example.org/manual/"):
+        base_path = "/manual/" if base_url.endswith("/manual/") else "/"
+        result, destination, temp = build_site(
+            hugo, {name: body.replace("__BASE__", base_path) for name, body in pages.items()},
+            prefix="oink-print-tabs-", base_url=base_url,
+            config="languages:\n  en:\n    weight: 1\n  zh:\n    weight: 2\n    locale: zh-CN\n",
+            panic_on_warning=True,
+        )
+        try:
+            require(result.returncode == 0, f"Print tabs fixture failed: {result.stdout}{result.stderr}", errors)
+            if result.returncode != 0:
+                continue
+            for language in ("", "zh/"):
+                for kind in ("docs", "book"):
+                    expected_ids = {"example-syntax-example", "example-syntax-syntax",
+                                    "example-syntax-2-example", "example-syntax-2-syntax",
+                                    "platform-unix", "platform-windows",
+                                    "platform-2-unix", "platform-2-windows"}
+                    aggregate = Anchors((destination / language / "_print" / kind / "index.html").read_text())
+                    duplicates = [key for key, count in Counter(aggregate.ids).items() if count > 1]
+                    require(not duplicates, f"{language}{kind} Print has duplicate IDs: {duplicates}", errors)
+                    require(not expected_ids.intersection(aggregate.ids),
+                            f"{language}{kind} aggregate kept unscoped tab IDs", errors)
+                    require(len(aggregate.tab_links) == 10,
+                            f"{language}{kind} lost authored fragment links", errors)
+                    for link in aggregate.tab_links:
+                        require(link["href"].startswith("#pg-") and link["href"][1:] in aggregate.ids,
+                                f"{language}{kind} left an authored fragment unresolved: {link}", errors)
+                        expected_title = {
+                            "single": "fake href='#example-syntax-syntax'",
+                            "bare": "fake href=#example-syntax-syntax > text",
+                            "double": 'fake href="#example-syntax-syntax"',
+                            "entity": "encoded fragment",
+                            "self": "same page",
+                        }[link["data-test-tab-link"]]
+                        require(link["title"] == expected_title,
+                                f"{language}{kind} rewrote href text inside title: {link}", errors)
+                    for suffix in expected_ids:
+                        targets = [key for key in aggregate.ids if key.endswith("--" + suffix)]
+                        require(len(targets) == 2, f"{language}{kind} lost a namespaced {suffix}", errors)
+                    for chapter in ("a", "b"):
+                        html = Anchors((destination / language / kind / chapter / "index.html").read_text())
+                        plain = Anchors((destination / language / "_print" / kind / chapter / "index.html").read_text())
+                        for name, document in (("HTML", html), ("single-page Print", plain)):
+                            duplicates = [key for key, count in Counter(document.ids).items() if count > 1]
+                            require(not duplicates, f"{language}{kind}/{chapter} {name} has duplicate IDs: {duplicates}", errors)
+                            require(expected_ids.issubset(document.ids),
+                                    f"{language}{kind}/{chapter} {name} changed grouped tab deep links", errors)
+                            require("#example-syntax-syntax" in document.links and
+                                    f"{base_path}{language}{kind}/{chapter}/#example-syntax-2-example" in document.links,
+                                    f"{language}{kind}/{chapter} {name} changed local tab links", errors)
+                            require(len(document.tab_links) == 5 and all(
+                                link["href"] == (
+                                    f"{base_path}{language}{kind}/{chapter}/#example-syntax-syntax"
+                                    if link["data-test-tab-link"] == "self" else "#example-syntax-syntax"
+                                ) for link in document.tab_links),
+                                f"{language}{kind}/{chapter} {name} changed authored fragment links", errors)
+                        require(f"authored-{kind}-{chapter}" in aggregate.ids,
+                                f"{language}{kind} rewrote an authored anchor", errors)
+                    for href in aggregate.links:
+                        if href.startswith("#") and "example-syntax" in href:
+                            require(href[1:] in aggregate.ids, f"{language}{kind} tab link has no target: {href}", errors)
+                    # Cross-page links continue to use the ordinary HTML destination.
+                    require(f"{base_path}{language}{kind}/a/#example-syntax-syntax" in aggregate.links,
+                            f"{language}{kind} changed a cross-page tab link", errors)
+                    local_links = [href for href in aggregate.links if href.startswith("#") and "example-syntax" in href]
+                    require(len(set(local_links)) == 4, f"{language}{kind} tab links share another chapter's target", errors)
+        finally:
+            temp.cleanup()
+    return errors
+
+
 def check_removed_shortcodes(hugo: str) -> list[str]:
     errors: list[str] = []
     for name in REMOVED_SHORTCODES:
@@ -598,6 +749,8 @@ def main() -> int:
         + check_steps_container(args.hugo)
         + check_openapi(args.hugo)
         + check_media_output_states(args.hugo)
+        + check_empty_tabs(args.hugo)
+        + check_print_tab_namespaces(args.hugo)
         + check_removed_shortcodes(args.hugo)
         + check_i18n()
         + check_template_contracts()

@@ -34,6 +34,14 @@
   max-width: none;
 }
 
+.td-book-content--normal .td-shell-layout--w-normal .td-shell-article {
+  max-width: var(--td-book-content-normal);
+}
+
+.td-book-content--wide .td-shell-layout--w-normal .td-shell-article {
+  max-width: none;
+}
+
 // The generic tree rule makes every child span flexible. Book numbers are an
 // atomic, right-aligned column; the following title owns the remaining row.
 body.td-book .td-shell-tree__link {
@@ -338,7 +346,13 @@ a > img.td-image {
 
 .td-shell-tree__headings {
   margin: 0.1rem 0 0.5rem;
-  padding-inline-start: 1.65rem;
+  // Follow the owning row's depth and its optional icon/number columns, then
+  // add one heading level. Logical spacing also preserves this hierarchy in RTL.
+  padding-inline-start: calc(
+    var(--td-shell-indent, 8px) + var(--td-book-heading-icon, 0px) +
+      var(--td-book-heading-number, 0px) + 1rem
+  );
+  padding-inline-end: 8px;
   color: var(--td-shell-muted-fg);
   font-size: 0.78rem;
 
@@ -369,12 +383,21 @@ a > img.td-image {
   }
 }
 
+.td-shell-tree__row:has(> .td-shell-tree__link > i) + .td-shell-tree__headings {
+  --td-book-heading-icon: 1.5rem;
+}
+
+.td-shell-tree__row:has(> .td-shell-tree__link > .td-book-number) + .td-shell-tree__headings {
+  --td-book-heading-number: calc(1.75rem + 8px);
+}
+
 @media (max-width: 575.98px) {
   .td-book-figure--eq {
     grid-template-columns: minmax(0, 1fr);
 
     figcaption {
       text-align: end;
+      white-space: normal;
     }
   }
 }

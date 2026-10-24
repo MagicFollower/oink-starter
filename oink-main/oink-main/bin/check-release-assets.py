@@ -31,6 +31,7 @@ def run(
     source: Path,
     destination: Path | None = None,
     panic_on_warning: bool = False,
+    extra_args: tuple[str, ...] = (),
 ) -> subprocess.CompletedProcess[str]:
     command = [hugo, "--source", str(source), "--logLevel", "warn"]
     if source == FIXTURE:
@@ -39,6 +40,7 @@ def run(
         command.extend(["--destination", str(destination)])
     if panic_on_warning:
         command.append("--panicOnWarning")
+    command.extend(extra_args)
     return run_hugo_process(
         command,
         cwd=ROOT,
@@ -240,48 +242,82 @@ def check_example(public: Path) -> list[str]:
 
 
 def check_releases_layout(hugo: str) -> list[str]:
-    """The releases layout: `project tag` naming, date-then-version order."""
+    """HTML keeps release ordering; multilingual Print keeps every child body."""
     errors: list[str] = []
     with tempfile.TemporaryDirectory(prefix="oink-components-release-index-") as temp:
         site = Path(temp)
-        create_site(site)
-        write(
-            site / "content/blog/releases/_index.md",
-            "---\ntitle: Releases\ntype: blog\nlayout: releases\ncascade:\n  type: blog\n---\n",
-        )
+        create_site(site, "languages:\n  en:\n    weight: 1\n  zh:\n    weight: 2\n")
         records = (
             ("oink-five", "https://github.com/pgsty/oink/releases/tag/v0.5.0", "2026-08-18"),
             ("mcli", "https://github.com/pgsty/mcli/releases/tag/RELEASE.2026-08-13T00-00-00Z", "2026-08-13"),
             ("pig-ten", "https://github.com/pgsty/pig/releases/tag/v1.10.0", "2026-08-12"),
             ("pig-nine", "https://github.com/pgsty/pig/releases/tag/v1.9.0", "2026-08-12"),
         )
-        for name, url, date in records:
-            write(
-                site / f"content/blog/releases/{name}.md",
-                f"---\ntitle: {name}\ndate: {date}\nrelease_url: {url}\n---\n",
-            )
-        write(
-            site / "content/blog/releases/plain.md",
-            "---\ntitle: A plain note between releases\ndate: 2026-08-09\n---\n",
-        )
-        result = run(hugo, site, panic_on_warning=True)
-        if result.returncode != 0:
-            errors.append(f"releases layout fixture failed: {result.stdout}{result.stderr}")
-            return errors
-        parser = ReleaseIndexParser()
-        parser.feed((site / "public/blog/releases/index.html").read_text(encoding="utf-8"))
-        actual = [(row["href"], row["name"]) for row in parser.rows]
+        # A blog-specific layout and the root fallback must both select the
+        # Print implementation. A layout without an output-format suffix can
+        # otherwise be selected differently as Hugo renders pages in parallel.
+        cases = []
+        for path, page_type in (("blog/releases", "blog"), ("updates/releases", "release-fixture")):
+            for language, prefix, suffix in (("en", "", ""), ("zh", "zh/", ".zh")):
+                write(
+                    site / f"content/{path}/_index{suffix}.md",
+                    f"---\ntitle: Releases {language}\ntype: {page_type}\n"
+                    "layout: releases\noutputs: [HTML, Print]\n"
+                    f"cascade:\n  type: {page_type}\n---\n",
+                )
+                markers = []
+                for name, url, date in (*records, ("plain", "", "2026-08-09")):
+                    marker = f"RELEASE-BODY-{page_type}-{language}-{name}"
+                    markers.append(marker)
+                    title = "A plain note between releases" if name == "plain" else name
+                    release = f"release_url: {url}\n" if url else ""
+                    write(
+                        site / f"content/{path}/{name}{suffix}.md",
+                        f"---\ntitle: {title}\ndate: {date}\n{release}---\n\n"
+                        f"## Release details\n\n{marker}\n",
+                    )
+                cases.append((path, prefix, markers))
         # Date first, then the tag's version within a date. Entries whose
         # release_url parses read as `project tag`; the plain note keeps its
         # own title and its place in the list, and warns about nothing.
-        expected = [
-            ("/blog/releases/oink-five/", "oink v0.5.0"),
-            ("/blog/releases/mcli/", "mcli RELEASE.2026-08-13T00-00-00Z"),
-            ("/blog/releases/pig-ten/", "pig v1.10.0"),
-            ("/blog/releases/pig-nine/", "pig v1.9.0"),
-            ("/blog/releases/plain/", "A plain note between releases"),
+        expected_names = [
+            ("oink-five", "oink v0.5.0"),
+            ("mcli", "mcli RELEASE.2026-08-13T00-00-00Z"),
+            ("pig-ten", "pig v1.10.0"),
+            ("pig-nine", "pig v1.9.0"),
+            ("plain", "A plain note between releases"),
         ]
-        require(actual == expected, f"releases layout entries are {actual}, expected {expected}", errors)
+        # One successful build did not catch the output-layout selection bug.
+        # Exercise fresh processes and destinations repeatedly in both modes.
+        for environment in ("development", "production"):
+            for attempt in range(3):
+                public = site / f"public-{environment}-{attempt}"
+                extra = ("--environment", environment, "--printPathWarnings")
+                extra += ("-DFE",) if environment == "development" else ("--minify",)
+                result = run(hugo, site, public, panic_on_warning=True, extra_args=extra)
+                label = f"releases {environment} attempt {attempt + 1}"
+                if result.returncode != 0:
+                    errors.append(f"{label} failed: {result.stdout}{result.stderr}")
+                    continue
+                for path, prefix, markers in cases:
+                    case = f"{label} /{prefix}{path}/"
+                    html_path = public / prefix / path / "index.html"
+                    require(html_path.is_file(), f"{case}: HTML output is missing", errors)
+                    if html_path.is_file():
+                        parser = ReleaseIndexParser()
+                        parser.feed(html_path.read_text(encoding="utf-8"))
+                        actual = [(row["href"], row["name"]) for row in parser.rows]
+                        expected = [(f"/{prefix}{path}/{name}/", title) for name, title in expected_names]
+                        require(actual == expected, f"{case}: entries are {actual}, expected {expected}", errors)
+                    print_path = public / prefix / "_print" / path / "index.html"
+                    require(print_path.is_file(), f"{case}: Print output is missing", errors)
+                    if not print_path.is_file():
+                        continue
+                    source = print_path.read_text(encoding="utf-8")
+                    require("td-print-document" in source, f"{case}: Print document shell is missing", errors)
+                    require("td-release-index" not in source, f"{case}: Print selected the HTML release index", errors)
+                    for marker in markers:
+                        require(source.count(marker) == 1, f"{case}: Print must contain child body {marker} exactly once", errors)
     return errors
 
 

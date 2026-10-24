@@ -4,7 +4,7 @@
 {{- $target := $page.Site.GetPage $node.page -}}
 {{- if not $target -}}
   {{- warnf "docs navigation: page %s was not found; skipping the entry" $node.page -}}
-{{- else -}}
+{{- else if not $target.Params.toc_hide -}}
   {{- if partial "shell/nav-page-enabled.html" $target -}}
     {{- $pages = $pages | append $target -}}
   {{- end -}}

@@ -13,14 +13,14 @@
 <figure class="{{ $class }}" style="width: {{ $image.Width }}px">
 <img src="{{ $image.RelPermalink }}" alt="Featured Image for {{ $p.Title }}" width="{{ $image.Width }}" height="{{ $image.Height }}" loading="lazy">
 {{ with $image.Params.byline }}
- <figcaption class="mt-2 mt-md-0"><small class="text-body-secondary">{{ . | html }}</small></figcaption>
+ <figcaption class="mt-2 mt-md-0"><small class="text-body-secondary">{{ . }}</small></figcaption>
 {{ end }}
 </figure>
 {{ else }}
 <figure class="{{ $class }}" style="width: {{ $w }}px">
 <img src="{{ .RelPermalink }}" alt="Featured Image for {{ $p.Title }}" width="{{ $w }}" height="{{ $h }}" style="object-fit: cover;" loading="lazy">
 {{ with .Params.byline }}
- <figcaption class="mt-2 mt-md-0"><small class="text-body-secondary">{{ . | html }}</small></figcaption>
+ <figcaption class="mt-2 mt-md-0"><small class="text-body-secondary">{{ . }}</small></figcaption>
 {{ end }}
 </figure>
 {{ end }}

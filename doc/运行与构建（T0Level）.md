@@ -10,8 +10,8 @@
 
 | 工具 | 版本 | 本机路径 | 为什么必须是它 |
 |------|------|---------|----------------|
-| Hugo | v0.168.0 **Extended** | `C:\Users\webtu\tools\hugo\hugo.exe` | 主题用 SCSS，标准版编译不了（`oink-starter/doc/问题004`）；`hugo.yaml` 里 `hugoVersion.min: 0.160.1` |
-| Go | 1.25.4 | `C:\Users\webtu\tools\go\bin\go.exe` | Hugo 模块系统需要 go；`go.mod` 声明 `go 1.25.4`，版本低了会触发联网下载工具链 |
+| Hugo | v0.168.0 **Extended** | `C:\Users\webtu\tools\hugo\hugo.exe` | 主题用 SCSS，标准版编译不了（`oink-starter/doc/问题004`）；OINK v1.3.2 要求 `hugo.yaml` 里 `hugoVersion.min: 0.166.0` |
+| Go | 1.27.2 | `C:\Users\webtu\tools\go\bin\go.exe` | Hugo 模块系统需要 go；`go.mod` 声明 `go 1.27.0`（OINK v1.3.2 的最低要求），版本低了会触发联网下载工具链 |
 
 ```powershell
 hugo version
@@ -21,8 +21,8 @@ go version
 实测输出：
 
 ```
-hugo v0.168.0-e27a6760c5547237f87d353aebe0580feadb20f4+extended windows/amd64 BuildDate=2026-10-13T16:42:50Z VendorInfo=gohugoio
-go version go1.25.4 windows/amd64
+hugo v0.168.0-e27a6760c5547237f87d353aebe0580feadb20f4+extended windows/amd64 BuildDate: 2026-10-13T16:42:50Z VendorInfo=gohugoio
+go version go1.27.2 windows/amd64
 ```
 
 两个环境变量是硬要求，不是优化：
@@ -43,14 +43,14 @@ cd "C:\Users\webtu\Desktop\RocketMQ文档站复刻\rocket-mq-docs"
 hugo --cleanDestinationDir
 ```
 
-实测输出（PowerShell，非 minify 档，本轮第 11 分类重建后复跑）：
+实测输出（PowerShell，非 minify 档，2026-10-24 OINK v1.3.2 升级后复跑）：
 
 ```
-hugo v0.168.0-e27a6760c5547237f87d353aebe0580feadb20f4+extended windows/amd64 BuildDate=2026-10-13T16:42:50Z VendorInfo=gohugoio
+hugo v0.168.0-e27a6760c5547237f87d353aebe0580feadb20f4+extended windows/amd64 BuildDate: 2026-10-13T16:42:50Z VendorInfo=gohugoio
 WARN  deprecated: css.Sass: libsass was deprecated in Hugo v0.153.0 and will be removed in a future release. Use dartsass instead.
  Pages            | 237
- Static files     | 172
-Total in 3344 ms
+ Static files     | 184
+Total in 4633 ms
 ```
 
 判据：**0 个 ERROR**；WARN 只允许上面那一条，它是主题侧对 Hugo 弃用告警的固有提示（`oink-starter` 基线构建同样出这一条），不是本工程引入。SCSS 确实被编译（产物里有 `public/scss/main.min.<hash>.css`），这一点同时反证必须用 Extended 版。
@@ -75,10 +75,10 @@ WARN_count=1
 hugo server --port 8770 --bind 127.0.0.1
 ```
 
-实测输出（节选，本轮复跑）：
+实测输出（节选；`.../layouts/_partials` 一段为升级前旧读数——OINK v1.3.2 升级时站点级 `layouts/` 覆盖已删除，当前 watch 列表里没有该目录）：
 
 ```
-Watching for changes in .../rocket-mq-docs/assets/icons, .../content/docs, .../data/home, .../layouts/_partials, ...
+Watching for changes in .../rocket-mq-docs/assets/icons, .../content/docs, .../data/home, ...
 Start building sites …
 hugo v0.168.0-...+extended windows/amd64
 Pages            │ 237
@@ -98,11 +98,11 @@ Web Server is available at http://localhost:8774/ (bind address 127.0.0.1)
 /docs/11-springboot-integration/                    HTTP 200
 /docs/11-springboot-integration/六种消息实战/定时消息与任意时刻投递/  HTTP 200（URL 编码后请求）
 /picture/Message.png                                HTTP 200
-/offline-search-index.zh.json                       HTTP 200（带 hash 的真身 2,066,238 字节）
+/offline-search-index.zh.json                       HTTP 200（带 hash 的真身 2,066,332 字节，OINK v1.3.2 升级后复测）
 /docs/nope/                                         HTTP 404
 ```
 
-浏览器实测（Chromium 内核，`hugo --gc --minify` 产物由 `python -m http.server 8773` 起服务后读取；第 11 分类重建后本轮复跑）：
+浏览器实测（Chromium 内核，`hugo --gc --minify` 产物由 `python -m http.server 8773` 起服务后读取；第 11 分类重建后本轮复跑。除「离线搜索」「视觉预设」两行为升级后复测外，其余为 OINK v1.3.2 升级前的历史读数——样式表条数与 `body` 背景色可能随 4 套视觉预设引入而变化）：
 
 | 判据 | 实测值 |
 |------|--------|
@@ -110,10 +110,11 @@ Web Server is available at http://localhost:8774/ (bind address 127.0.0.1)
 | 没有退化成源码块 | 新分类 10 个页面（7 文章 + 2 板块 + 1 分类）里 `code.language-mermaid` 命中数全为 0 |
 | 表格 / 代码块 / 💡 小结 | 逐篇读数见下表（活页 DOM 与 `fetch`+`DOMParser` 两取一致，`<article>` 范围内计数） |
 | 分类可达 | `/docs/` 页面上 13 个链接指向 `/docs/11-springboot-integration/` 及其子页；新分类文章页的侧栏里同前缀链接 23 个 |
-| 离线搜索 | 索引文件 `offline-search-index.zh.dc658a9500c57c9a75bb96687d159930.json` 2,066,238 字节 |
+| 离线搜索 | 索引文件 `offline-search-index.zh.10f82d5a4a7ea9b3e31b30480b80bad6.json` 2,066,332 字节（OINK v1.3.2 升级后复测） |
 | 图片落盘 | 新分类 7 篇**一张官方配图都没引用**：`grep -rn '!\[' content/docs/11-springboot-integration` 命中 0 处，页面上 `<img>` 数为 0。这一分类的图片判据是空集，`BROKEN_IMAGE` 检查仍由 01~10 的 38 篇承担，本轮 `problems=0` 里含该项 |
 | 控制台 | 顺序消息篇（HTTP 档）0 条消息 |
 | 主题样式生效 | 该页 5 张样式表且 `cssRules` 全部可读（两张内联 7 条、`fontawesome.min…css` 2,699 条、`main.min…css` 3,226 条、内联 59 条），`body` 背景 `rgb(11, 17, 25)`、`h1` 计算字体 `Inter` |
+| 视觉预设（1.3.2 新增） | `public/index.html` 的 `<html>` 带 `data-td-preset="paper"` 与 `data-td-site-preset="paper"`（升级后构建产物核对，2026-10-24）；4 套预设 Paper/Slate/Ink/Terminal 的面板交互未在浏览器逐项点过 |
 
 7 篇的逐篇结构读数。💡 只数正文含「新人小结」的 `blockquote > h3`；「首个 H2」取 `<article>` 内第一个 `h2` 的文本：
 
@@ -143,9 +144,9 @@ Web Server is available at http://localhost:8774/ (bind address 127.0.0.1)
 hugo --cleanDestinationDir --gc --minify
 ```
 
-实测输出：`Pages 237`、`Static files 172`、`Total in 3381 ms`，产物 `public/` 共 **424 个文件 / 47,088,984 字节**（minify 档口径）。同一目录树在**非 minify** 档下为 424 个文件 / 48,974,187 字节——两档文件数不变，体积差 1,885,203 字节全部来自 HTML/CSS/JS 空白压缩。两档本轮各跑一次，文件数一致。
+实测输出（2026-10-24 OINK v1.3.2 升级后复跑）：`Pages 237`、`Static files 184`、`Total in 4623 ms`，产物 `public/` 共 **437 个文件 / 48,437,278 字节**（minify 档口径）。同一目录树在**非 minify** 档下为 437 个文件 / 50,516,360 字节——两档文件数不变，体积差 2,079,082 字节全部来自 HTML/CSS/JS 空白压缩。两档本轮各跑一次，文件数一致。注：本轮 `--gc` 在构建完成后报 `failed to prune cache "getresource": mkdir C:\Users\webtu\AppData\Local\hugo_cache\oink-starter: Access is denied`，这是 Hugo 缓存目录的沙箱权限问题（站点产物已完整落盘、0 ERROR），不影响构建结论。
 
-第 11 分类重建带来的文件数变化：该分类在产物里落 26 个文件（`public/docs/11-springboot-integration/` 下 10 个 `index.html` + 10 个 `index.md` + 3 个 `index.xml`，加 `public/_print/docs/11-springboot-integration/` 下 3 个打印页）。上一轮记的是 28 个文件（当时该分类有 8 篇、含一个 8 图的照录篇），本轮是 7 篇，`Pages` 也从 225 变成 237——两个数不同档不同内容，不要跨轮相减当增量用。
+第 11 分类重建带来的文件数变化：该分类在产物里落 26 个文件（`public/docs/11-springboot-integration/` 下 10 个 `index.html` + 10 个 `index.md` + 3 个 `index.xml`，加 `public/_print/docs/11-springboot-integration/` 下 3 个打印页）。上一轮记的是 28 个文件（当时该分类有 8 篇、含一个 8 图的照录篇），本轮是 7 篇，`Pages` 也从 225 变成 237——两个数不同档不同内容，不要跨轮相减当增量用。OINK 1.3.2 升级后全站文件数从 424 变 437（主题自带资源入产物，含 4 套视觉预设的样式与脚本），同样不要把跨主题版本的数字相减当内容增量。
 
 `hugo.yaml` 里开了 `relativeURLs: true`，所以产物是**路径无关**的：既可以直接双击 `public/index.html` 用 `file://` 打开，也可以整目录丢进任意子路径的静态服务器。两条通道本轮都实测过：
 
@@ -206,7 +207,7 @@ hugo --cleanDestinationDir --gc --minify
 
 第三条只对本轮重建的第 11 分类生效：它是**官方取证专题**，不是上游复刻，也不是「跑一个工程把数字采回来」。矩阵里 sources 以 `ref:` 开头的文章，技术事实只有三处来源——`rocketmq-spring` 仓库 tag `rocketmq-spring-all-2.2.3` 的源码与 `rocketmq-spring-boot-samples` 官方示例（正文写文件相对路径 + tag + 行号）、上游 `apache/rocketmq-site` 的 4.x/5.0 中文文档、`rocketmq-all-4.9.8-bin-release` 发行包内 jar 的类结构与常量池静态取证；正文不写本地暂存目录路径，也不进 119 篇覆盖率统计。本轮**不搭建、不运行任何工程**：没有依赖安装、没有建库、没有起 Broker、没有打接口，因此正文里不允许出现运行读数（毫秒、吞吐、msgId 字面量、队列分布、回查秒数），代码块的输出行统一写 `// 预期输出:` 并注明推定依据；凡正文用到「实测」二字的篇章，开头都有一条 `[!NOTE] 证据口径` 声明「实测＝静态取证」（本轮命中的是集成基线、普通消息、定时消息、顺序消息 4 篇，另外 3 篇通篇不用「实测」二字）。上一轮那套「同级工程 `../springboot-rocketmq-demo/` + `_build/evidence/` 实测档」的口径随该工程被删除一起作废，`local:` 前缀在当前矩阵里已无使用者（脚本仍支持该前缀，`check_coverage.py` 会把它单独出一行「本地实战专题」）。
 
-### 8.2 四个验收脚本（都在仓库外 `_work/`，改内容后重跑）
+### 8.2 四个验收脚本（都在仓库外 `_work/`，改内容后重跑；下表读数为 OINK v1.3.2 升级前的历史实测——`_work/` 工作目录已不在本仓库内，升级轮未复跑，重跑需先按 `skill_base_oink1.3.2` 技能脚本重建 `_work/` 脚手架）
 
 | 脚本 | 判据 | 本轮实测 |
 |------|------|----------|
@@ -221,7 +222,7 @@ hugo --cleanDestinationDir --gc --minify
 
 ### 8.2.1 判据自己会红的三条证明
 
-绿值只有在判据会红时才有意义。本轮跑的三条：
+绿值只有在判据会红时才有意义。本轮跑的三条（均为 OINK v1.3.2 升级前的历史证明；升级只动了主题与配置、未动 `content/`，判据口径不受影响）：
 
 1. **mermaid 判据会红**：`python _work/validate_mermaid.py --selftest` 在真实 100 块前面插 1 好 1 坏两块（`blocks.json` 共 102 条），把 `_work/mermaid-harness/index.html` 起在 http 服务上用主题自带的 `mermaid.min.js` 真解析，页头读数原样：
 
@@ -285,10 +286,12 @@ hugo --cleanDestinationDir --gc --minify
 | starter 2.2.3 在 Boot 2.7.18 + JDK 8 上的实际装配结果 | 未验证 | 只有 `rocketmq-spring-boot-parent:2.2.3` 的 pom（构建基线 Boot 2.5.9 / Spring 5.3.20）与自动装配条件源码作依据；没跑过 `@ConditionalOnProperty` 的实际评估，也没看过一次启动日志 |
 | 「5.0.0 客户端连 4.9.8 Broker 时 `TIMER_*` 属性的服务端处理细节」 | 未验证 | 本机没有 5.0.0 客户端 jar 的正文可比对，只证到「4.9.8 侧 `Message`/`MessageConst` 无 `TIMER` 符号、官方 javadoc 声明该方法需 Broker 5.0+」；正文按「不成立/无入口」写，没写成「报错」或「静默丢弃」 |
 | 部署到真实 Web 服务器 / CDN | 未验证 | 本机无部署目标；仅验证 `public/` 在本地 HTTP 与 `file://` 相对路径下自洽 |
-| 深色/浅色主题切换、阅读进度、图片放大等主题交互 | 未验证 | 主题自带能力；本轮只在 `file://` 与 HTTP 两个深页上读到深色计算样式（`body` 背景 `rgb(11, 17, 25)`），没点过切换控件 |
+| 深色/浅色主题切换、阅读进度、图片放大等主题交互 | 未验证 | 主题自带能力；升级 OINK v1.3.2 前曾在 `file://` 与 HTTP 两个深页上读到深色计算样式（`body` 背景 `rgb(11, 17, 25)`），没点过切换控件；升级后 4 套视觉预设（Paper/Slate/Ink/Terminal）的面板交互同样未逐项点过，只在构建产物上核了 `data-td-preset="paper"` |
+| 视觉预设在浏览器里的切换/记忆/首帧无闪烁 | 未验证 | OINK 1.2+ 新增能力；本轮核对止于 `public/index.html` 的 `<html data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>` 与 `hugo.yaml` 的 `preset`/`preset_menu` 实值两行 |
 | 打印档 `_print/` 的图表呈现 | 未验证 | 主题对非交互输出走静态分支（mermaid 出源码块），未逐项核对；本轮只核出它的页数（新分类 3 个 `_print/*/index.html`） |
 | 非 Chromium 浏览器（Firefox / Safari） | 未验证 | 本机可用浏览器内核为 Chromium |
 | `file://` 档的离线搜索 | 未验证（且预期不可用） | 浏览器策略拦 `file://` 页面的 `fetch`/XHR，索引加载不成立；搜索只在 HTTP 档验过 |
 | 窄屏与横向溢出 | 本轮未复测 | 上一轮 1280×1024 视口实测 `scrollWidth > innerWidth` = false；本轮浏览器读数是隐藏页（`innerWidth`/`clientWidth` 均为 0），凡依赖布局视口的量一律没采，包括这条 |
-| Go 版本升级后的构建 | 未验证 | 当前锁 1.25.4；升级需同步 `go.mod` 的 `go` 指令，否则触发工具链下载 |
+| Go 版本升级后的构建 | 未验证 | 当前锁 1.27.2（`go.mod` 声明 `go 1.27.0`，随 OINK v1.3.2 一并升级）；再升级需同步 `go.mod` 的 `go` 指令，否则触发工具链下载 |
+| OINK 1.0.0 → 1.3.2 主题升级 | 已验证（2026-10-24） | `oink-main/oink-main/` 整目录替换为 1,273 文件副本；`go.mod`/`go.sum` 升 v1.3.2、`hugo.yaml` 升 `min: 0.166.0` 并新增 4 套视觉预设；`hugo --cleanDestinationDir` 0 ERROR，`public/index.html` 的 `<html>` 带 `data-td-preset="paper"`。原站点级 `layouts/_partials/shell/root-menu-roots.html` 覆盖已删除（其修复 `sidebar_root_menu: false` 的逻辑在 1.3.2 主题本体内置且带缓存）；带说明性后缀的 `root-menu-entries（…）.html` 一并删除（文件名与主题调用的精确名不符，Hugo 从未加载过它，属死文件）。升级后全站 437 文件 / 50,516,360 字节（非 minify），断链 0、图片引用 117 条全落盘 |
 | 审计骨架夹具的 217 条红值 | 上一轮读数，本轮未复跑 | 本轮改跑了「矩阵与磁盘交叉判据」的会红证明（8.2.1 第 2 条：改名一篇文章 → `problems` 从 0 变 2，改回 → 0）；`VERBATIM` 集合本轮为空，照录豁免的自证失去对象，骨架档复跑需要另建临时目录树 |

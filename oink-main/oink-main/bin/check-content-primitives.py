@@ -10,6 +10,7 @@ forms (`{.steps}`, `{.cards}`), the `filetree` fence, the table family (`.matrix
 from __future__ import annotations
 
 import argparse
+from html import escape, unescape
 from pathlib import Path
 import re
 import tempfile
@@ -42,6 +43,18 @@ def check_outputs(public: Path) -> list[str]:
     require(bool(chunks), "lists fixture has no runtime chunks", errors)
     require(all(item.path.is_file() for item in chunks), "lists runtime chunk is missing", errors)
     lists_bundle = combined_source(public, lists)
+
+    # The explicit width marker survives HTML rendering; Markdown preserves
+    # authored GFM and its attribute lines. Actual cell sizes and scroll behavior are tested in the site.
+    for prefix in ("", "zh/"):
+        technical = (public / f"{prefix}fixtures/table-layout-policy/index.html").read_text()
+        technical_md = (public / f"{prefix}fixtures/table-layout-policy/index.md").read_text()
+        require('id="wide-technical-table"' in technical and 'class="td-table--wide"' in technical,
+                f"{prefix} technical table lost its explicit width marker", errors)
+        require('class="matrix full-width td-table--wide td-table--matrix"' in technical,
+                f"{prefix} wide marker displaced existing table modifiers", errors)
+        require("HG_PD_GRPC_HOST" in technical_md and "{#wide-technical-table .td-table--wide}" in technical_md and "<table" not in technical_md,
+                f"{prefix} technical table Markdown lost authored content or acquired HTML", errors)
 
     # --- Badge / Kbd / Fields shortcode / full-width table -------------------
     for marker in (
@@ -147,13 +160,42 @@ def check_outputs(public: Path) -> list[str]:
         '<table class="full-width">',
     ):
         require(marker in print_page, f"print fixture missing {marker}", errors)
-    # The wrapper stays in print so the caption, matrix, and figure selectors keep
-    # working, but it must be marked static and must never be a focusable viewport.
+    # Print remains a browser document before printing. Keep complete static
+    # content and a labelled keyboard scroll region for the on-screen preview.
     require("td-table-scroll--static" in print_page, "print table wrapper is not marked static", errors)
-    require(re.search(r'td-table-scroll[^>]*(tabindex|role=)', print_page) is None, "print kept an interactive table scroll viewport", errors)
+    print_tables = re.findall(r'<div class="td-table-scroll[^>]*>', print_page)
+    require(bool(print_tables) and all('tabindex="0"' in wrapper and 'role="region"' in wrapper and 'aria-label=' in wrapper for wrapper in print_tables), "Print preview lost its accessible table scroll regions", errors)
     print_trees = re.findall(r'<div class="td-filetree td-filetree--static"[\s\S]*?</ul></div></div>', print_page)
     require(any(">Site tree</p>" in tree and "<details" not in tree and tree.count("<li ") == 17 for tree in print_trees), "print FileTree is not the static, fully expanded tree", errors)
     require(print_trees and all("<details" not in tree for tree in print_trees), "print FileTree still uses <details>", errors)
+
+    # Keep full descriptions in the actual row text in every output, including
+    # CJK and unbroken tokens. Layout/resize checks live in the sibling site's
+    # FileTree browser suite; text presence alone cannot detect CSS clipping.
+    for language, suffix in (("", ""), ("zh/", ".zh")):
+        source = (FIXTURE / f"content/fixtures/filetree-comments{suffix}.md").read_text()
+        comments = re.findall(r" # (.+)$", source, re.MULTILINE)
+        comment_page = (public / language / "fixtures/filetree-comments/index.html").read_text()
+        comment_markdown = (public / language / "fixtures/filetree-comments/index.md").read_text()
+        comment_print = (public / language / "_print/fixtures/index.html").read_text()
+        rendered = re.findall(r'<span class="td-filetree__comment-text">([^<]*)</span>', comment_page)
+        require(len(comments) == 8 and rendered == [escape(text) for text in comments],
+                f"{language}FileTree long comments are missing from row text", errors)
+        require(comment_page.count('data-td-filetree-divider') == 4,
+                f"{language}FileTree long-comment fixtures lost their native dividers", errors)
+        require(comment_page.count('class="td-filetree td-filetree--wrap"') == 2,
+                f"{language}FileTree wrap must opt in only the two wrap=true trees", errors)
+        require(comment_page.count('class="td-filetree"') == 2,
+                f"{language}FileTree missing/false wrap must retain compact markup", errors)
+        require(comment_markdown.count('wrap=true}') == 2 and comment_markdown.count('wrap=false}') == 1,
+                f"{language}FileTree Markdown lost explicit wrap values", errors)
+        require("td-filetree--wrap" not in comment_print,
+                f"{language}FileTree screen wrapping must not change static Print markup", errors)
+        for text in comments:
+            require(text in comment_markdown,
+                    f"{language}FileTree Markdown lost long comment {text}", errors)
+            require(f'<span class="td-filetree__comment-text">{escape(text)}</span>' in comment_print,
+                    f"{language}FileTree Print lost long comment {text}", errors)
 
     # --- Native list forms: cards / gallery + filetree fences (lists fixture) --
     for marker in (
@@ -339,6 +381,7 @@ def check_generic_rss_output(hugo: str) -> list[str]:
         (content / "_index.md").write_text("---\ntitle: Docs\n---\n")
         (content / "item.md").write_text(
             "---\ntitle: Primitive feed\ndate: 2026-08-11\n---\n\n"
+            "| Key | Value |\n| --- | --- |\n| Feed table | Complete static content |\n\n"
             "```filetree\n- closed/\n  - nested.md\n```\n\n"
             "1. first\n1. second\n{.steps}\n\n"
             "```go-html-template\n"
@@ -373,6 +416,8 @@ def check_generic_rss_output(hugo: str) -> list[str]:
             errors.append("generic RSS primitive fixture did not produce docs/index.xml")
             return errors
         source = output.read_text()
+        rss_tables = re.findall(r'<div class="td-table-scroll[^>]*>', unescape(source))
+        require(bool(rss_tables) and all('td-table-scroll--static' in wrapper and 'tabindex=' not in wrapper and 'role=' not in wrapper for wrapper in rss_tables), "RSS table acquired browser scroll focus semantics", errors)
         home_source = (destination / "index.xml").read_text()
         require("<title>Generic primitive feed</title>" in home_source, "generic RSS home title repeats the site title", errors)
         for marker in ('&lt;pre class=&#34;td-filetree-source&#34;&gt;', "nested.md", '&lt;ol class=&#34;steps&#34;&gt;', "Example only"):
@@ -709,6 +754,8 @@ INVALID_CASES = (
     ("filetree-empty", "```filetree\n\n```\n", "requires tree entries"),
     ("filetree-unknown-attr", "```filetree {label=\"x\"}\n- a\n```\n", "unknown attribute"),
     ("filetree-empty-title", "```filetree {title=\"\"}\n- a\n```\n", "title must not be empty"),
+    ("filetree-wrap-bad", "```filetree {wrap=yes}\n- a # comment\n```\n", "wrap must be true or false"),
+    ("filetree-wrap-empty", "```filetree {wrap=\"\"}\n- a # comment\n```\n", "wrap must be true or false"),
     ("filetree-bad-dedent", "```filetree\n- a/\n    - b\n  - c\n```\n", "dedents to an indentation level that was never opened"),
     ("filetree-unknown-key", "```filetree\n- a {label=x}\n```\n", "unknown attribute \"label\""),
     ("filetree-malformed-attrs", "```filetree\n- a {icon}\n```\n", "malformed attributes"),
@@ -756,6 +803,10 @@ def check_invalid_cases(hugo: str) -> list[str]:
             case_output = "\n".join(line for line in output.splitlines() if f"content/docs/{name}.md:" in line)
             require(expected in case_output, f"invalid case {name} did not report {expected!r} at its position: {case_output or output.strip()}", errors)
             require((temp_path / f"public/docs/{name}/index.html").is_file(), f"invalid case {name} lost its safe output", errors)
+        for name in ("filetree-wrap-bad", "filetree-wrap-empty"):
+            rendered = (temp_path / f"public/docs/{name}/index.html").read_text()
+            require("td-filetree--wrap" not in rendered,
+                    f"{name} must fall back to compact comments", errors)
         param_output = "\n".join(line for line in output.splitlines() if "content/docs/param-map.md:" in line)
         require("only scalar values" in param_output, f"param map did not report the scalar rule at its position: {param_output or output.strip()}", errors)
         param_page = temp_path / "public/docs/param-map/index.html"

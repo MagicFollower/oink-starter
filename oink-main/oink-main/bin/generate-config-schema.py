@@ -10,7 +10,8 @@ Their authorities are:
    consume, which is what keeps the schema honest about keys that carry no
    declared default; and
 3. its explicit 1.x compatibility no-op list, whose keys remain accepted but
-   deliberately have no template read point.
+   deliberately have no template read point; and
+4. ``preset-config.html`` -- available preset names for the preset/menu union.
 
 ``--check`` regenerates in memory and fails when the committed files drift,
 which is what keeps this a projection of the existing authorities rather than
@@ -184,7 +185,7 @@ def json_type(value) -> str:
     return "string"
 
 
-def to_schema(tree: dict, path: str, kept_maps: set[str]) -> dict:
+def to_schema(tree: dict, path: str, shorthand_maps: set[str]) -> dict:
     properties = {}
     for key, node in tree.items():
         dotted = f"{path}.{key}" if path else key
@@ -192,13 +193,13 @@ def to_schema(tree: dict, path: str, kept_maps: set[str]) -> dict:
         if node.get("description"):
             entry["description"] = node["description"]
         if "children" in node:
-            entry.update(to_schema(node["children"], dotted, kept_maps))
-            if dotted in kept_maps:
-                # A kept map also accepts the bare-boolean shorthand.
+            entry.update(to_schema(node["children"], dotted, shorthand_maps))
+            if dotted in shorthand_maps:
+                # A shorthand-capable map also accepts a bare boolean.
                 entry = {"type": ["boolean", "object"], **{k: v for k, v in entry.items() if k != "type"}}
         else:
             value = node["value"]
-            entry["type"] = json_type(value)
+            entry["type"] = ["boolean", "object"] if dotted in shorthand_maps else json_type(value)
             entry["default"] = value
         properties[key] = entry
     return {"type": "object", "additionalProperties": True, "properties": properties}
@@ -220,7 +221,7 @@ def build(check_params) -> dict[str, str]:
     tree = parse_params(lines)
     site_keys, page_keys, _ = check_params.scan_read_points()
 
-    params_schema = to_schema(tree, "", set(check_params.KEPT_MAPS))
+    params_schema = to_schema(tree, "", set(check_params.BOOLEAN_SHORTHAND_MAPS))
     # Keys the templates read without a declared default still belong to the
     # authoring surface; surface them rather than pretending they don't exist.
     # Nested ones (ui.breadcrumb, plantuml.svg) matter as much as top-level
@@ -240,15 +241,53 @@ def build(check_params) -> dict[str, str]:
             properties = node["properties"]
         properties.setdefault(parts[-1], {"description": read_only_note})
 
+    # The resolver owns the available names. Derive this union from its slices,
+    # rather than duplicating an enum in an authoring schema.
+    resolver = (ROOT / "layouts/_partials/preset-config.html").read_text()
+    presets = []
+    for group in ("stable", "experimental"):
+        names = re.search(r'\$' + group + r'\s*:=\s*slice((?:\s+"[a-z]+")+)', resolver)
+        if not names:
+            raise SystemExit(f"preset resolver has no {group}-name slice")
+        presets.extend(re.findall(r'"([a-z]+)"', names[1]))
+    ui = params_schema["properties"]["ui"]["properties"]
+    # Book headings also accept an integer depth; the false default alone
+    # must not make valid values such as sidebar_headings: 3 fail validation.
+    ui["sidebar_headings"]["type"] = ["boolean", "integer"]
+    ui["preset"]["enum"] = presets
+    ui["preset_menu"].pop("type", None)
+    ui["preset_menu"]["anyOf"] = [
+        {"type": "boolean"},
+        {"type": "array", "items": {"type": "string", "enum": presets}},
+    ]
+
     for key, reason in FRONT_SCHEMA_EXCLUDES.items():
         if key not in page_keys:
             raise SystemExit(
                 f"generate-config-schema: FRONT_SCHEMA_EXCLUDES entry {key!r} is no longer read anywhere; "
                 f"drop it ({reason})")
 
-    front_properties = {}
+    front_properties: dict = {}
     page_schema_keys = set(page_keys) | check_params.COMPATIBILITY_NOOP_PAGE_KEYS
     for key in sorted(k for k in page_schema_keys if k not in FRONT_SCHEMA_EXCLUDES):
+        if "." in key:
+            parts = key.split(".")
+            props = front_properties
+            for part in parts[:-1]:
+                parent = props.setdefault(
+                    part,
+                    {"description": "Front matter key read by the theme's templates."},
+                )
+                parent.setdefault("additionalProperties", True)
+                props = parent.setdefault("properties", {})
+            leaf_node = lookup(tree, f"ui.{key}") or lookup(tree, key)
+            leaf_entry: dict = {}
+            if leaf_node is not None and leaf_node.get("description"):
+                leaf_entry["description"] = leaf_node["description"]
+            else:
+                leaf_entry["description"] = "Front matter key read by the theme's templates."
+            props.setdefault(parts[-1], leaf_entry)
+            continue
         entry: dict = {}
         site_node = lookup(tree, f"ui.{key}") or lookup(tree, key)
         if site_node is not None:
@@ -259,7 +298,10 @@ def build(check_params) -> dict[str, str]:
             # theme_color: false), and a wrong squiggle is worse than none.
         if not entry:
             entry["description"] = "Front matter key read by the theme's templates."
-        front_properties[key] = entry
+        if key in front_properties:
+            front_properties[key].update(entry)
+        else:
+            front_properties[key] = entry
     front_schema = {"type": "object", "additionalProperties": True, "properties": front_properties}
 
     stamp = f"GENERATED by {GENERATOR} from hugo.yaml and check-params.py -- do not edit"

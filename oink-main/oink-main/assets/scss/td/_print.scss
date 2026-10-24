@@ -1,10 +1,70 @@
+:root {
+  --td-print-muted: #70757d;
+  --td-print-ink: #171717;
+  --td-print-strong: #111;
+  --td-print-line: #c9ced4;
+  --td-print-link: #174f78;
+  --td-print-code-bg: #f5f7f9;
+  --td-print-table-line: #b8bec5;
+  --td-print-quote-line: #8b5a2b;
+  --td-print-quote-bg: #faf7f3;
+  --td-print-quote-ink: #30343a;
+  --td-print-meta: #4e555c;
+  --td-print-header-bg: #edf0f3;
+}
+
+[data-td-preset='paper'] {
+  --td-print-ink: #21201c;
+  --td-print-strong: #1a1916;
+  --td-print-muted: #6b665d;
+  --td-print-line: #d4d0c7;
+  --td-print-link: #2b5f8c;
+  --td-print-code-bg: #f7f6f3;
+  --td-print-table-line: #c4bfb5;
+  --td-print-quote-line: #9c5530;
+  --td-print-quote-bg: #f7f6f3;
+  --td-print-quote-ink: #21201c;
+  --td-print-meta: #56534c;
+  --td-print-header-bg: #efede8;
+}
+
+[data-td-preset='ink'] {
+  --td-print-ink: #141414;
+  --td-print-strong: #000;
+  --td-print-muted: #636363;
+  --td-print-line: #bdbdbd;
+  --td-print-link: #141414;
+  --td-print-code-bg: #fafafa;
+  --td-print-table-line: #bdbdbd;
+  --td-print-quote-line: #c8102e;
+  --td-print-quote-bg: #fff;
+  --td-print-quote-ink: #141414;
+  --td-print-meta: #474747;
+  --td-print-header-bg: #f4f4f4;
+}
+
+[data-td-preset='terminal'] {
+  --td-print-ink: #1d211f;
+  --td-print-strong: #111713;
+  --td-print-muted: #606b63;
+  --td-print-line: #b0b7b2;
+  --td-print-link: #0a6560;
+  --td-print-code-bg: #f4f5f2;
+  --td-print-table-line: #b0b7b2;
+  --td-print-quote-line: #935400;
+  --td-print-quote-bg: #fff;
+  --td-print-quote-ink: #1d211f;
+  --td-print-meta: #4a514d;
+  --td-print-header-bg: #e9ebe6;
+}
+
 @page {
   size: A4;
   margin: 18mm 16mm 20mm;
 
   @bottom-center {
     content: counter(page);
-    color: #70757d;
+    color: var(--td-print-muted);
     font-family: var(--td-ui-font-family);
     font-size: 8pt;
   }
@@ -32,6 +92,7 @@
   html {
     font-size: 10.5pt;
     color-scheme: light;
+    background: #fff !important;
   }
 
   body,
@@ -44,7 +105,7 @@
 
     min-width: 0 !important;
     background: #fff !important;
-    color: #171717 !important;
+    color: var(--td-print-ink) !important;
     font-family: var(--td-print-font-family);
     line-height: 1.55;
     -webkit-print-color-adjust: exact;
@@ -77,7 +138,7 @@
   .td-content {
     max-width: none !important;
     overflow: visible !important;
-    color: #171717 !important;
+    color: var(--td-print-ink) !important;
 
     h1,
     h2,
@@ -86,7 +147,7 @@
     h5,
     h6 {
       break-after: avoid-page;
-      color: #111 !important;
+      color: var(--td-print-strong) !important;
     }
 
     h1 {
@@ -98,7 +159,7 @@
     h2 {
       margin-top: 1.6em;
       padding-bottom: 0.25em;
-      border-bottom: 0.6pt solid #c9ced4;
+      border-bottom: 0.6pt solid var(--td-print-line);
       font-size: 17pt;
     }
 
@@ -114,7 +175,7 @@
     }
 
     a {
-      color: #174f78 !important;
+      color: var(--td-print-link) !important;
       text-decoration: underline;
       text-underline-offset: 0.12em;
     }
@@ -123,10 +184,10 @@
     .highlight,
     .chroma {
       overflow: visible !important;
-      border: 0.6pt solid #c9ced4 !important;
+      border: 0.6pt solid var(--td-print-line) !important;
       border-radius: 4pt !important;
-      background: #f5f7f9 !important;
-      color: #111 !important;
+      background: var(--td-print-code-bg) !important;
+      color: var(--td-print-strong) !important;
       white-space: pre-wrap !important;
       overflow-wrap: anywhere;
       break-inside: avoid-page;
@@ -142,7 +203,7 @@
     }
 
     code {
-      color: #111 !important;
+      color: var(--td-print-strong) !important;
     }
 
     table,
@@ -172,14 +233,14 @@
 
     th,
     td {
-      border-color: #b8bec5 !important;
+      border-color: var(--td-print-table-line) !important;
       background: transparent !important;
     }
 
     blockquote {
-      border-inline-start: 2pt solid #8b5a2b;
-      background: #faf7f3 !important;
-      color: #30343a !important;
+      border-inline-start: 2pt solid var(--td-print-quote-line);
+      background: var(--td-print-quote-bg) !important;
+      color: var(--td-print-quote-ink) !important;
     }
 
     img,
@@ -194,8 +255,8 @@
   }
 
   .td-page-meta__footer {
-    border-color: #c9ced4 !important;
-    color: #4e555c !important;
+    border-color: var(--td-print-line) !important;
+    color: var(--td-print-meta) !important;
   }
 
   .td-heading-self-link,
@@ -209,14 +270,14 @@
   .td-code {
     max-height: none !important;
     overflow: visible !important;
-    border: 0.6pt solid #c9ced4 !important;
+    border: 0.6pt solid var(--td-print-line) !important;
     border-radius: 4pt !important;
     box-shadow: none !important;
     break-inside: auto !important;
 
     .td-code__header {
-      border-bottom: 0.6pt solid #c9ced4 !important;
-      background: #edf0f3 !important;
+      border-bottom: 0.6pt solid var(--td-print-line) !important;
+      background: var(--td-print-header-bg) !important;
     }
 
     // The utility cluster only ever holds interactive controls now; on paper

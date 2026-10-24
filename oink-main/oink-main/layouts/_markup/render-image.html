@@ -94,11 +94,11 @@
 {{- /* A processed derivative points Zoom at the full-size source. */ -}}
 {{- $zoomAttr := "" -}}
 {{- if $zoomable -}}
-  {{- $zoomAttr = cond (ne $fullSrc $src) (printf ` data-td-image-zoom="%s"` ($fullSrc | safeURL)) " data-td-image-zoom" -}}
+  {{- $zoomAttr = cond (ne $fullSrc $src) (printf ` data-td-image-zoom="%s"` (htmlEscape $fullSrc)) " data-td-image-zoom" -}}
 {{- end -}}
 {{- $img := printf `<img%s src="%s" alt="%s"%s%s%s%s loading="lazy" decoding="async"%s%s>`
   (cond $plainBlock (printf ` class="td-image%s"` (cond (gt (len $classes) 0) (printf " %s" (delimit $classes " ")) "")) "")
-  ($src | safeURL) (htmlEscape $image.alt)
+  (htmlEscape $src) (htmlEscape $image.alt)
   (cond (ne $title "") (printf ` title="%s"` (htmlEscape $title)) "")
   (cond (gt $width 0) (printf ` width="%d"` $width) "")
   (cond (gt $height 0) (printf ` height="%d"` $height) "")
