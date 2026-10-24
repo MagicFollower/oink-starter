@@ -1,6 +1,24 @@
+# Hugo 构建产物
 /public/
 /resources/
 /.hugo_cache/
 /.hugo_build.lock
+
+# 技能运行时临时目录(replicate-doc-site 判据脚本的 REPLICATE_TMP 落点)
+/.tmp/
+
+# 依赖与缓存
+node_modules/
+
+# 日志
+*.log
+
+# 操作系统
 .DS_Store
-.idea
+Thumbs.db
+desktop.ini
+
+# 编辑器与 IDE
+.idea/
+.vscode/
+*.swp

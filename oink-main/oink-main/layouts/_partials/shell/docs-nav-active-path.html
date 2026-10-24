@@ -1,0 +1,22 @@
+{{- /* Resolve the current branch from authored topology. Explicit children
+       need not be physical content descendants, and URL hints are optional. */ -}}
+{{- $page := .page -}}
+{{- $path := slice -}}
+{{- range .nodes -}}
+  {{- $node := . -}}
+  {{- with $target := $page.Site.GetPage .page -}}
+    {{- if not $target.Params.toc_hide -}}
+      {{- if eq $target $page -}}
+        {{- $path = $path | append $target -}}
+      {{- else -}}
+        {{- $children := partial "shell/docs-nav-active-path.html" (dict
+            "page" $page "nodes" ($node.children | default (slice))) -}}
+        {{- with $children -}}
+          {{- $path = $path | append $target -}}
+          {{- range . }}{{ $path = $path | append . }}{{ end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $path -}}

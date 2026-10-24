@@ -1,2 +1,3 @@
-github.com/pgsty/oink v1.0.0 h1:E+WHFP9zSRT+5RKoIkWNp+ASRGS1BKG+rDEi9by/BjE=
-github.com/pgsty/oink v1.0.0/go.mod h1:pHvbUhJCfseB41n5RGwsF7abT3i32VSTpofLQoq4b7Y=
+# 主题走 go.mod 的 replace 指向本地 ./oink-main/oink-main，离线构建（GOTOOLCHAIN=local GOPROXY=off）不校验 go.sum。
+# Hugo Module 约束保留版本行；联网解析 v1.3.2 时由 `go mod download github.com/pgsty/oink` 重写为真实哈希。
+github.com/pgsty/oink v1.3.2/go.mod h1:PLACEHOLDER-RUN-GO-MOD-DOWNLOAD-IF-YOU-NEED-ONLINE-RESOLUTION
