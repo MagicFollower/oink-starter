@@ -165,9 +165,9 @@ def check_example(public: Path) -> list[str]:
     ):
         require(marker in page, f"table output lost {marker}", errors)
     require('<table class="full-width">' in print_page, "print output lost the full-width table", errors)
-    # The wrapper survives in print, marked static; only the focusable viewport goes.
+    # Static Print content still needs a keyboard-scrollable browser preview.
     require("td-table-scroll--static" in print_page, "print table wrapper is not marked static", errors)
-    require(re.search(r'td-table-scroll[^>]*(tabindex|role=)', print_page) is None, "print table kept an interactive scroll viewport", errors)
+    require(re.search(r'td-table-scroll[^>]*tabindex="0"[^>]*role="region"', print_page) is not None, "Print preview lost the keyboard table scroll viewport", errors)
     require(
         "| Full table | 100% | Horizontal scroll | Complete table |" in markdown
         and "{.full-width}" in markdown,

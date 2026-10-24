@@ -1,0 +1,95 @@
+{{- /* The Appearance menu: one trigger and one panel holding up to two native
+     radio groups, Style (visual preset) and Light (light / dark / system).
+
+     Input: dict
+       page    -- the page;
+       context -- navbar | footer | drawer; names the ids and radio groups so
+                  several copies can share a page;
+       class   -- wrapper classes owned by the hosting surface;
+       trigger -- classes for the trigger button;
+       label   -- optional visible label (the drawer row); icon-only otherwise.
+
+     The panel is a <dialog>. appearance.js opens it with show() as an
+     anchored popover on wide screens and with showModal() as a bottom sheet on
+     narrow ones and in drawers: a modal dialog lives in the top layer, so a
+     sticky header's backdrop-filter or a drawer's stacking context cannot trap
+     it. Mode radios carry data-bs-theme-value and stay owned by dark-mode.js;
+     Style radios carry data-td-preset-value and are owned by appearance.js.
+     Without JavaScript the panel stays closed and the site default renders. */ -}}
+{{- $context := .context | default "navbar" -}}
+{{- $darkMode := partialCached "dark-mode-config.html" "dark-mode-global" -}}
+{{- $preset := partialCached "preset-config.html" "preset-global" -}}
+{{- if or $darkMode.showMenu $preset.menu -}}
+{{- $canvases := partialCached "_funcs/preset-canvases.html" "preset-canvases" -}}
+{{- $presetIcons := dict "paper" "file-lines" "slate" "layers" "ink" "pen-nib" "terminal" "terminal" -}}
+{{- $id := printf "td-appearance-%s" $context -}}
+{{- $title := T "ui_appearance" -}}
+<div class="td-appearance{{ with .class }} {{ . }}{{ end }}" data-td-appearance
+  {{- if eq $context "drawer" }} data-td-appearance-modal{{ end }}>
+  <button type="button" class="td-appearance__trigger{{ with .trigger }} {{ . }}{{ end }}" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="{{ $id }}"
+    {{- if not .label }} title="{{ $title }}" aria-label="{{ $title }}"{{ end }}>
+    {{- if $darkMode.showMenu -}}
+    <span class="td-appearance__icon" data-td-theme-icon>
+      {{- partialCached "shell/icon.html" "moon" "moon" -}}
+      {{- partialCached "shell/icon.html" "sun" "sun" -}}
+    </span>
+    {{- else -}}
+    {{- partialCached "shell/icon.html" "palette" "palette" -}}
+    {{- end -}}
+    {{- with .label }}<span>{{ . }}</span>{{ end -}}
+  </button>
+  <dialog class="td-appearance__panel" id="{{ $id }}" aria-label="{{ $title }}">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">{{ $title }}</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="{{ T "ui_appearance_close" }}" aria-label="{{ T "ui_appearance_close" }}">
+        {{- partialCached "shell/icon.html" "x" "x" -}}
+      </button>
+    </div>
+    {{- if $preset.menu }}
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">{{ T "ui_appearance_style" }}</legend>
+      <div class="td-appearance__presets">
+        {{- range $preset.offered }}
+        {{- $c := index $canvases . }}
+        <label class="td-appearance__preset"{{ if eq . $preset.preset }} title="{{ T "ui_preset_default" }}"{{ end }}>
+          <input class="td-appearance__input" type="radio" name="td-preset-{{ $context }}" value="{{ . }}"
+            data-td-preset-value="{{ . }}" data-td-canvas-light="{{ $c.light }}" data-td-canvas-dark="{{ $c.dark }}"
+            {{- if eq . $preset.preset }} checked{{ end }}>
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--{{ . }}" aria-hidden="true">
+              {{- partialCached "shell/icon.html" (index $presetIcons .) (index $presetIcons .) -}}
+            </span>
+            <span class="td-appearance__name">
+              <span>{{ T (printf "ui_preset_%s" .) }}</span>
+              {{- if eq . $preset.preset }}<span class="visually-hidden"> ({{ T "ui_preset_default" }})</span>{{ end -}}
+            </span>
+          </span>
+        </label>
+        {{- end }}
+      </div>
+    </fieldset>
+    {{- end }}
+    {{- if $darkMode.showMenu }}
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">{{ T "ui_appearance_mode" }}</legend>
+      <div class="td-appearance__modes">
+        {{- range slice (slice "light" "sun") (slice "dark" "moon") (slice "auto" "contrast") }}
+        {{- $value := index . 0 }}
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-{{ $context }}" value="{{ $value }}"
+            data-bs-theme-value="{{ $value }}"{{ if eq $value "auto" }} checked{{ end }}>
+          <span class="td-appearance__segment">
+            {{- partialCached "shell/icon.html" (index . 1) (printf "appearance-%s" $value) -}}
+            <span>{{ T (printf "ui_theme_%s" $value) }}</span>
+          </span>
+        </label>
+        {{- end }}
+      </div>
+    </fieldset>
+    {{- end }}
+    <p class="td-appearance__note" data-td-appearance-note hidden>{{ T "ui_appearance_unsaved" }}</p>
+  </dialog>
+</div>
+{{- end -}}

@@ -76,6 +76,7 @@ function element(overrides = {}) {
       offsetParent: {},
       textContent: '',
       hidden: false,
+      getClientRects() { return this.hidden ? [] : [{}]; },
       addEventListener(type, callback) {
         const callbacks = listeners.get(type) || [];
         callbacks.push(callback);
@@ -364,6 +365,7 @@ function testHoverTriggerClickAfterFocus() {
     },
   });
   global.document = {
+    addEventListener() {},
     querySelector() { return null; },
     querySelectorAll(selector) {
       return selector === '[data-td-nav-hover]' ? [menu] : [];
@@ -418,6 +420,7 @@ function testBootstrapVersionTriggerAfterFocus() {
     hide() { trigger.setAttribute('aria-expanded', 'false'); },
   };
   global.document = {
+    addEventListener() {},
     querySelector() { return null; },
     querySelectorAll(selector) {
       return selector === '[data-td-version-menu]' ? [menu] : [];

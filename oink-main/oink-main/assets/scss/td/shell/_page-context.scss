@@ -189,9 +189,10 @@
   visibility: hidden;
   pointer-events: none;
   transform: translateY(-4px);
+  // Visibility changes immediately so ArrowDown can focus the first row in
+  // the same event that opens the disclosure.
   transition:
     opacity var(--td-motion-duration-fast) ease,
-    visibility var(--td-motion-duration-fast) ease,
     transform var(--td-motion-duration-fast) ease;
 }
 

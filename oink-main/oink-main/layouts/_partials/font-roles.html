@@ -1,6 +1,6 @@
 {{- /* Emit `params.ui.fonts` as typography-role overrides.
 
-     The theme's seven text roles are CSS custom properties, so a site has
+     The theme's eight text roles are CSS custom properties, so a site has
      always been able to rewrite them from its own stylesheet. This key is the
      same seam reached from configuration, for the site that wants a different
      face without mounting SCSS or adding a CSS file:
@@ -14,8 +14,9 @@
      `ui` is the main face: `--td-body-font-family` and, unless the project
      assigned `$headings-font-family`, `--td-heading-font-family` both resolve
      through it, so one line changes chrome, prose and headings together. The
-     other keys -- body, heading, code, display, meta, print -- narrow from
-     there.
+     other keys -- body, heading, code, display, meta, brand, print -- narrow
+     from there. `brand` is the wordmark face; it follows `display` unless a
+     visual preset or this key separates them.
 
      Names only, never files. Setting a family the visitor does not have and
      the site has not declared in an `@font-face` of its own simply falls
@@ -28,11 +29,13 @@
      map still ships, because one bad line should not silently take the others
      with it. A site that sets nothing gets no `<style>` block at all, so an
      unconfigured head stays byte-identical. This must render after
-     `head-css.html`: `:root` here and `[data-td-typography='system']` in the
-     stylesheet carry the same specificity, so source order is what makes the
-     authored face win over the preset. */ -}}
-{{- $roles := slice "ui" "body" "heading" "code" "display" "meta" "print" -}}
+     `head-css.html`: `:root` here, `[data-td-preset=…]`, and
+     `[data-td-typography='system']` in the stylesheet carry the same
+     specificity, so source order is what makes the authored face win over
+     both the visual preset and the typography mode. */ -}}
+{{- $roles := slice "ui" "body" "heading" "code" "display" "meta" "brand" "print" -}}
 {{- $decls := slice -}}
+{{- $valid := slice -}}
 {{- with site.Params.ui.fonts -}}
   {{- if reflect.IsMap . -}}
     {{- range $key, $value := . -}}
@@ -50,6 +53,7 @@
         {{- end -}}
         {{- if $stack -}}
           {{- $decls = $decls | append (printf "--td-%s-font-family:%s" $role $stack) -}}
+          {{- $valid = $valid | append $role -}}
         {{- else -}}
           {{- warnidf (printf "font-roles:value:%s:%v" $role $value)
               "params.ui.fonts.%s %q is not a list of plain font family names -- ignored; quote any name with spaces and end the list with a generic family"
@@ -66,6 +70,12 @@
         "params.ui.fonts must be a map of typography role to font family list (allowed roles: %s) -- ignored"
         (delimit $roles " | ") -}}
   {{- end -}}
+{{- end -}}
+{{- /* An explicit UI face remains the main face even in Terminal, whose
+       default prose face differs from its mono controls. A valid body role
+       is more specific and must keep its own value. */ -}}
+{{- if and (in $valid "ui") (not (in $valid "body")) -}}
+  {{- $decls = $decls | append "--td-body-font-family:var(--td-ui-font-family)" -}}
 {{- end -}}
 {{- with $decls -}}
 <style>{{ printf ":root{%s}" (delimit . ";") | safeCSS }}</style>

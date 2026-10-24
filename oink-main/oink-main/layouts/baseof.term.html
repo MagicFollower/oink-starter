@@ -10,7 +10,7 @@
   {{ $navWrap := $sidebarMetrics.wrap -}}
   {{ $hasSidebar := partial "shell/sidebar-enabled.html" . -}}
   {{ $navbar := partial "shell/navbar-enabled.html" . -}}
-  {{ $pageWidth := .Param "page_width" | default "normal" -}}
+  {{ $pageWidth := partial "shell/page-width.html" . -}}
   <body class="td-{{ .Kind }} td-blog td-shell-chrome{{ if $navbar }} td-shell-chrome--navbar{{ end }}{{ with .Page.Params.body_class }} {{ . }}{{ end }}">
     {{ partial "skip-link.html" . }}
     {{ if $navbar }}{{ partial "navbar.html" . }}{{ else }}{{ partial "shell/subnav.html" . }}{{ end }}

@@ -1,5 +1,10 @@
-{{- $targets := partialCached "language-targets.html" . .Site.BaseURL .RelPermalink .Site.Language.Lang -}}
-<link rel="canonical" href="{{ .Permalink }}">
+{{- $targets := where (partialCached "language-targets.html" . .Site.BaseURL .RelPermalink .Site.Language.Lang) "translated" true -}}
+{{- $canonical := .Permalink -}}
+{{- if and (eq (.Store.Get "tdOutputFormat") "html") (.Store.Get "tdBlogPaginated") -}}
+  {{- $canonical = .Paginator.URL | absURL -}}
+  {{- if gt .Paginator.PageNumber 1 }}{{ $targets = slice }}{{ end -}}
+{{- end -}}
+<link rel="canonical" href="{{ $canonical }}">
 {{- range $targets }}
 <link rel="alternate" hreflang="{{ .code }}" href="{{ .permalink }}">
 {{- end }}

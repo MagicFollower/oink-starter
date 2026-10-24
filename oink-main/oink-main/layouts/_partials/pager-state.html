@@ -22,7 +22,7 @@
 {{- if isset $page.Params "pager" -}}
   {{- if ne (printf "%T" $page.Params.pager) "bool" -}}
     {{- warnf "front matter pager must be a boolean at %s; ignoring the override" $page.Path -}}
-  {{- else if not $page.Params.pager }}{{ $enabled = false }}{{ end -}}
+  {{- else }}{{ $enabled = and (eq $format "html") $page.Params.pager }}{{ end -}}
 {{- end -}}
 
 {{- $prev := false -}}

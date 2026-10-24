@@ -91,6 +91,18 @@ function memoryStorage() {
   return { getItem: (k) => (values.has(k) ? values.get(k) : null), setItem: (k, v) => values.set(k, String(v)), values };
 }
 
+test('activation announces a visible panel for dependent content measurement', () => {
+  const root = tabset({ values: ['a', 'b'] });
+  const panels = root.querySelectorAll(':scope > .td-tabs__panel');
+  const events = [];
+  panels.forEach(panel => {
+    panel.hidden = true;
+    panel.dispatchEvent = event => events.push({ type: event.type, bubbles: event.bubbles, hidden: panel.hidden });
+  });
+  tabs.activate(root, 'b');
+  assert.deepEqual(events, [{ type: 'td:tab-shown', bubbles: true, hidden: false }]);
+});
+
 function env(sets, { hash = '', dir = 'ltr' } = {}) {
   const byId = new Map();
   const walk = (n) => { if (n.getAttribute && n.getAttribute('id')) byId.set(n.getAttribute('id'), n); n.children.forEach(walk); };

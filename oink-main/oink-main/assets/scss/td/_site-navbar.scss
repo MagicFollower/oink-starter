@@ -170,7 +170,7 @@
     background: var(--td-brand-mark-gradient);
     background-clip: text;
     color: transparent;
-    font-family: var(--td-display-font-family);
+    font-family: var(--td-brand-font-family);
     font-size: 1.05rem;
     font-weight: 700;
     line-height: 1;
@@ -881,12 +881,12 @@
 
 // Below md the shell sidebar becomes a drawer; its toggle joins the icon row.
 @media (max-width: 767.98px) {
-  // Keep the content-generated menu on the physical center line. Equal outer
-  // tracks mean the larger search/menu cluster on the end edge cannot push
-  // these links to the right.
+  // Center the menu while both outer tracks have room. A longer menu must
+  // reserve the brand and utility controls' actual widths before distributing
+  // spare space, so its last link cannot hide underneath the search button.
   .td-site-header .td-site-nav {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
     column-gap: 4px;
   }
 
@@ -903,13 +903,12 @@
   }
 
   // Phone chrome has one deliberately small right-hand contract: search and
-  // the relevant drawer/menu opener. Version, language, theme, and GitHub
+  // appearance and the relevant drawer/menu opener. Version, language, and GitHub
   // remain available in the drawer footer instead of competing for this row.
   .td-site-header .td-nav-util-zone {
     > .td-nav-version-menu,
     > .td-site-nav__language,
     > .td-nav-alt-site,
-    > .td-nav-theme-menu,
     > .td-nav-github {
       display: none;
     }

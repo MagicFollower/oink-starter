@@ -1135,12 +1135,141 @@ def compare_or_write(observation: dict[str, Any], write_current: bool) -> None:
         )
 
 
+class ExplicitTreeParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.links: list[str] = []
+        self.current: list[str] = []
+        self.expanded: list[str] = []
+        self.pager: dict[str, str] = {}
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = dict(attrs)
+        if tag == "a" and "td-shell-tree__link" in values.get("class", "").split():
+            self.links.append(values["href"])
+            if values.get("aria-current") == "page":
+                self.current.append(values["href"])
+        if "data-td-shell-tree-toggle" in values and values.get("aria-expanded") == "true":
+            self.expanded.append(values.get("aria-controls", ""))
+        for direction in ("prev", "next"):
+            if f"data-td-pager-{direction}" in values:
+                self.pager[direction] = values["href"]
+
+
+def validate_explicit_navigation_ownership() -> None:
+    """A virtual Docs hierarchy can group physical root-level manuals."""
+    with tempfile.TemporaryDirectory(prefix="oink-explicit-ownership-") as directory:
+        source = Path(directory)
+
+        def write(name: str, text: str) -> None:
+            path = source / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+
+        config = f"""baseURL: https://example.org/sub/
+title: Root-level manuals
+theme: {ROOT.name}
+themesDir: {ROOT.parent}
+defaultContentLanguage: en
+languages:
+  en: {{locale: en-US}}
+  zh: {{locale: zh-CN}}
+disableKinds: [RSS, sitemap, taxonomy, term]
+outputs:
+  home: [HTML, NAVJSON]
+  section: [HTML]
+  page: [HTML]
+params:
+  offline_search: false
+  ui:
+    sidebar_root_enabled: true
+    sidebar_menu_compact: false
+"""
+        pages = {
+            "_index": "title: Home\ntype: home\ncascade:\n  type: docs",
+            "docs/_index": "title: Docs",
+            "intro": "title: Introduction",
+            "config": "title: Configuration",
+            "api": "title: API",
+            "docs/part/_index": "title: Part\nsidebar_root_for: self",
+            "docs/part/a": "title: Part A\nweight: 1",
+            "docs/part/b": "title: Part B\nweight: 2",
+            "book/_index": "title: Book\ntype: book\ncascade:\n  type: book",
+            "book/a": "title: Book A\nweight: 1",
+            "book/b": "title: Book B\nweight: 2",
+            "book/unlisted": "title: Unlisted Book page",
+        }
+        for language, suffix in (("", ".md"), ("zh/", ".zh.md")):
+            for name, frontmatter in pages.items():
+                if name == "config":
+                    frontmatter += f"\nurl: /{language}settings/"
+                write(f"content/{name}{suffix}", f"---\n{frontmatter}\n---\nManual.\n")
+        # No URL or active-path hints: topology and current state must come
+        # from resolved pages, including the virtual Configuration -> API edge.
+        write("data/docs_nav.json", json.dumps({"sections": [
+            {"page": "intro"},
+            {"page": "config", "children": [
+                {"page": "api"},
+                {"page": "docs/part", "children": [{"page": "docs/part/b"}, {"page": "docs/part/a"}]},
+            ]},
+            {"page": "book", "children": [{"page": "book/b"}, {"page": "book/a"}]},
+        ]}))
+        for cache_limit in (10000, 1):
+            write("hugo.yaml", config + f"    sidebar_cache_limit: {cache_limit}\n")
+            output = source / f"public-{cache_limit}"
+            environment = dict(os.environ, GOWORK="off", HUGO_MODULE_WORKSPACE="off",
+                               HUGO_RESOURCEDIR=str(source / "resources"))
+            result = run_hugo_process([
+                "hugo", "--source", str(source), "--destination", str(output),
+                "--cacheDir", str(source / "cache"), "--noBuildLock",
+                "--printPathWarnings", "--panicOnWarning",
+            ], env=environment, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            require(result.returncode == 0, f"explicit ownership fixture failed:\n{result.stdout}")
+            for language in ("", "zh/"):
+                prefix = "/sub/" + language
+
+                def parsed(route: str) -> ExplicitTreeParser:
+                    parser = ExplicitTreeParser()
+                    parser.feed((output / language / route / "index.html").read_text())
+                    return parser
+
+                api = parsed("api")
+                expected_docs = [prefix + route + "/" for route in (
+                    "docs", "intro", "settings", "api", "docs/part", "docs/part/b", "docs/part/a")]
+                require(api.links == expected_docs, f"{language} root-level Docs tree lost declared order or leaked Book entries")
+                require(api.pager == {"prev": prefix + "settings/", "next": prefix + "docs/part/"},
+                        f"{language} root-level manual pager lost explicit order")
+                if cache_limit == 10000:
+                    require(api.current == [prefix + "api/"], f"{language} root-level current page is absent")
+                    require(len(api.expanded) == 1 and "settings" in api.expanded[0],
+                            f"{language} explicit parent did not expand without URL hints")
+                    unlisted = parsed("book/unlisted")
+                    require(not unlisted.current and len(unlisted.expanded) == 1
+                            and "book" in unlisted.expanded[0],
+                            f"{language} unlisted page lost physical ancestor expansion")
+                else:
+                    require(not api.current, "cached explicit sidebar must remain neutral for runtime hydration")
+                require(parsed("book/b").links == [prefix + route + "/" for route in ("book", "book/b", "book/a")],
+                        f"{language} Docs ownership leaked into Book")
+                require(parsed("docs/part/b").links == [prefix + route + "/" for route in ("docs/part", "docs/part/b", "docs/part/a")],
+                        f"{language} nested root leaked outer manual entries")
+                navigation = json.loads((output / language / "navigation.json").read_text())["root"]["children"]
+                docs = next(node for node in navigation if node["id"] == prefix + "docs/")
+                require([node["id"] for node in docs["children"]] == [prefix + route + "/" for route in ("intro", "settings")],
+                        f"{language} navigation.json lost virtual Docs topology")
+                require(docs["children"][1]["children"][0]["id"] == prefix + "api/",
+                        f"{language} navigation.json lost the explicit parent-child relationship")
+                require(docs["children"][1]["children"][1]["id"] == prefix + "docs/part/",
+                        f"{language} navigation.json lost the nested root under its explicit parent")
+
+
 def main() -> int:
     args = parse_args()
     try:
         contract = load_json(CONTRACT_PATH)
         validate_contract(contract)
         validate_runtime_source_contract()
+        validate_explicit_navigation_ownership()
         observation = build_observation()
         validate_observation(observation, contract)
         compare_or_write(observation, args.write_current)

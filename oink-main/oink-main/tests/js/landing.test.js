@@ -44,6 +44,24 @@ assert.equal(landing.initReveal(
 assert.equal(reveal.classList.contains('td-is-revealed'), true);
 assert.equal(reveal.hasAttribute('data-td-revealed'), true);
 
+const pendingReveal = element();
+let revealEntries;
+const observed = [];
+landing.initReveal({ querySelectorAll() { return [pendingReveal]; } }, {
+  matchMedia() { return { matches: false }; },
+  IntersectionObserver: class {
+    constructor(callback) { revealEntries = callback; }
+    observe(target) { observed.push(target); }
+    unobserve(target) { observed.splice(observed.indexOf(target), 1); }
+  },
+});
+assert.equal(pendingReveal.hasAttribute('data-td-reveal-pending'), true);
+assert.deepEqual(observed, [pendingReveal]);
+revealEntries([{ target: pendingReveal, isIntersecting: true }]);
+assert.equal(pendingReveal.hasAttribute('data-td-reveal-pending'), false);
+assert.equal(pendingReveal.hasAttribute('data-td-revealed'), true);
+assert.deepEqual(observed, []);
+
 const count = element({ 'data-td-count': '2189', 'data-td-count-suffix': '+' });
 assert.equal(landing.initCounts(
   { querySelectorAll() { return [count]; } },
@@ -51,6 +69,13 @@ assert.equal(landing.initCounts(
 ), 1);
 assert.match(count.textContent, /^2[,\s.]?189\+$/);
 assert.equal(count.hasAttribute('data-td-count-complete'), true);
+
+for (const [value, display] of [['2189', '2.2k'], ['32', '32+'], ['12.50', '$12.50/day']]) {
+  const formatted = element({ 'data-td-count': value, 'data-td-count-display': display });
+  formatted.textContent = 'intermediate animation value';
+  assert.equal(landing.terminalCount(formatted), true);
+  assert.equal(formatted.textContent, display, 'terminal count changed the server-authored display');
+}
 
 (async () => {
   const writes = [];

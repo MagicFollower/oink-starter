@@ -4,7 +4,7 @@
 {{- $type := .Type | default "" -}}
 {{- $kind := .Kind | default "" -}}
 {{- $config := partialCached "shell/config.html" . .Site.Language.Lang -}}
-{{- return and (ne $format "print") (or
+{{- return and (ne $format "print") (ne $kind "404") (or
   (in $config.shellTypes $type)
   (in (slice "taxonomy" "term") $kind)
 ) -}}

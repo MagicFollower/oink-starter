@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 env:
-  GO_VERSION: 1.27.0
-  HUGO_VERSION: 0.165.0
+  GO_VERSION: stable
+  HUGO_VERSION: "0.166.0"
   GOTOOLCHAIN: local
 
 jobs:
@@ -42,6 +42,11 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.x'
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+          cache: false
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -50,6 +55,11 @@ jobs:
         with:
           hugo-version: ${{ env.HUGO_VERSION }}
           extended: true
+
+      - name: Record build tool versions
+        run: |
+          go version
+          hugo version
 
       - name: Install PDF inspection tools
         run: |
@@ -99,6 +109,9 @@ jobs:
           if [ -e "$userns" ]; then
             sudo sysctl --write kernel.apparmor_restrict_unprivileged_userns=0
           fi
+
+      - name: Check PDF publication isolation
+        run: python3 tests/test_book_pdf_safety.py
 
       - name: Package and validate the Book fixture
         shell: bash
@@ -168,9 +181,9 @@ jobs:
             --manifest "$subpath_public/book/book.json"
 
   build:
-    name: Hugo 0.165.0
+    name: Hugo theme checks
     runs-on: ubuntu-latest
-    # CI intentionally uses one pinned Hugo toolchain. A run that reaches this
+    # CI uses the minimum supported Hugo release. A run that reaches this
     # ceiling is hung infrastructure, and a cancelled six-hour job must never
     # again stand in for a release verdict.
     timeout-minutes: 60
@@ -183,11 +196,17 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: ${{ env.GO_VERSION }}
+          check-latest: true
           cache: false
       - uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: ${{ env.HUGO_VERSION }}
           extended: true
+
+      - name: Record build tool versions
+        run: |
+          go version
+          hugo version
 
       - name: Check translation key parity
         run: python3 bin/check-i18n.py
@@ -197,6 +216,9 @@ jobs:
 
       - name: Verify vendored dependency inventory
         run: python3 bin/check-vendor.py
+
+      - name: Check visual presets
+        run: python3 bin/check-presets.py
 
       - name: Check typography token boundaries
         run: python3 bin/check-font-tokens.py
@@ -280,6 +302,8 @@ jobs:
           YAML
           printf -- '---\ntitle: Docs\n---\n\nSection.\n' > "$site/content/docs/_index.md"
           printf -- 'included text\n' > "$site/content/snippets/part.md"
+          # Keep Markdown code fences literal, not shell substitutions.
+          # shellcheck disable=SC2016
           printf -- '---\ntitle: Page\n---\n\n{{< include file="/snippets/part.md" >}}\n\n```filetree\n- a/\n  - b.txt\n```\n' > "$site/content/docs/page.md"
           HUGO_MODULE_REPLACEMENTS="github.com/pgsty/oink -> $GITHUB_WORKSPACE" \
             hugo --source "$site" --destination "$RUNNER_TEMP/oink-module-public" \
@@ -303,11 +327,19 @@ jobs:
       - name: Check Gallery output and Zoom reuse
         run: python3 bin/check-gallery.py
 
+      - name: Check Expo album outputs
+        run: python3 bin/check-expo.py
+
       - name: Check v5 components (callouts, tabs, data fences, removed shortcodes)
         run: python3 bin/check-components.py
 
       - name: Check migration toolkit
         run: python3 -m unittest discover -s tests/migrations -t .
+
+      - name: Check snapshot and consumer tooling
+        run: |
+          python3 tests/test_snapshot_safety.py
+          python3 tests/test_update_consumers.py
 
       - name: Check output structure and security
         run: |
@@ -380,3 +412,27 @@ jobs:
             exit 1
           fi
           grep -q 'invalid params.ui.typography' "$RUNNER_TEMP/oink-invalid.log"
+
+  scss:
+    name: Built-in Sass (Hugo ${{ matrix.hugo }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        hugo: ['0.166.0', '0.168.0']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ matrix.hugo }}
+          extended: true
+      - name: Build without an external Sass executable
+        run: |
+          if [ '${{ matrix.hugo }}' = '0.168.0' ]; then
+            python3 bin/check-scss.py --allow-libsass-warning
+          else
+            python3 bin/check-scss.py
+          fi

@@ -12,7 +12,7 @@
         {{- $code := strings.TrimRight "\r\n" (printf "%v" $data.code) -}}{{- if not $code }}{{ warnf "%s: code-plate.code must not be empty; rendering an empty plate" $page.Path }}{{ end -}}
         {{- $lang := strings.TrimSpace (printf "%v" ($data.lang | default "text")) -}}
         {{- transform.Highlight $code $lang (dict "noClasses" false) -}}
-      {{- else }}<pre><code>{{ partial "landing/code-lines.html" (dict "lines" $data.lines "position" (printf "%s: code-plate" $page.Path)) }}</code></pre>{{ end -}}
+      {{- else }}<pre{{ if $interactive }} tabindex="0"{{ end }}><code>{{ partial "landing/code-lines.html" (dict "lines" $data.lines "position" (printf "%s: code-plate" $page.Path)) }}</code></pre>{{ end -}}
     </div>
   </div>
 </section>

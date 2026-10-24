@@ -186,7 +186,9 @@
     const limit = Number.parseInt(root.dataset.tdCollapseLines || '', 10);
     const viewport = root.querySelector('[data-td-code-viewport]');
     const button = root.querySelector('[data-td-code-expand]');
-    if (!limit || !viewport || !button || root.offsetParent === null) return;
+    if (!limit || !viewport || !button) return;
+    resizeObserver?.observe(viewport);
+    if (root.offsetParent === null) return;
 
     const lines = sourceLines(root);
     if (lines.length <= limit) return;
@@ -218,7 +220,6 @@
       setCollapsedFocus(root, true);
     }
     button.hidden = false;
-    resizeObserver?.observe(viewport);
   }
 
   const setExpanded = (root, expanded) => {
@@ -301,10 +302,8 @@
     }
   });
 
-  document.addEventListener('shown.bs.tab', (event) => {
-    const selector = event.target.getAttribute('data-bs-target');
-    if (!selector) return;
-    const panel = document.querySelector(selector);
+  document.addEventListener('td:tab-shown', (event) => {
+    const panel = event.target?.closest?.('.td-tabs__panel');
     if (panel) {
       window.requestAnimationFrame(() => {
         initialize(panel);

@@ -53,6 +53,22 @@
        stylesheet URL. */ -}}
 {{- $lightTheme := index $giscus "lighttheme" | default (resources.Get "css/giscus-light.css").Permalink -}}
 {{- $darkTheme := index $giscus "darktheme" | default (resources.Get "css/giscus-dark.css").Permalink -}}
+{{- $presetThemes := dict -}}
+{{- $preset := partialCached "preset-config.html" "preset-global" -}}
+{{- range union (slice "paper" "slate") $preset.offered -}}
+  {{- $name := . -}}
+  {{- $modes := dict -}}
+  {{- range slice "light" "dark" -}}
+    {{- $mode := . -}}
+    {{- $resource := resources.Get (printf "css/giscus-%s.css" $mode) -}}
+    {{- if ne $name "slate" -}}
+      {{- $resource = slice $resource (resources.Get (printf "css/giscus-%s-%s.css" $name $mode)) | resources.Concat (printf "css/giscus-%s-%s-bundle.css" $name $mode) -}}
+    {{- end -}}
+    {{- $url := index $giscus (printf "%stheme" $mode) | default $resource.Permalink -}}
+    {{- $modes = merge $modes (dict $mode $url) -}}
+  {{- end -}}
+  {{- $presetThemes = merge $presetThemes (dict $name $modes) -}}
+{{- end -}}
 <section id="td-comments" class="td-comments d-print-none"
   data-td-giscus
   data-repo="{{ $repo }}"
@@ -65,6 +81,7 @@
   data-emit-metadata="{{ $emitMetadata }}"
   data-input-position="{{ index $giscus "inputposition" | default "top" }}"
   data-theme="{{ $theme }}"
+  data-td-preset-themes="{{ $presetThemes | jsonify }}"
   data-td-theme-light="{{ $lightTheme }}"
   data-td-theme-dark="{{ $darkTheme }}"
   data-lang="{{ $lang }}"

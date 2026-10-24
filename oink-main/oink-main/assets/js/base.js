@@ -30,6 +30,45 @@ limitations under the License.
         update();
     }
 
+    // Reading containers can acquire focus from a click. A later unrelated
+    // key must not turn that click into an article-sized focus decoration.
+    // Tab and a new programmatic focus keep their normal keyboard indication.
+    function initReadingFocus() {
+        const selector = '#td-main-content, .td-table-scroll[tabindex], pre[tabindex]';
+        let pointerTarget = null;
+        function isContainer(el) {
+            return el && typeof el.matches === 'function' && el.matches(selector);
+        }
+        document.addEventListener('pointerdown', function(event) {
+            pointerTarget = event.target;
+            const active = document.activeElement;
+            if (isContainer(active) && active.contains(pointerTarget)) {
+                active.setAttribute('data-td-pointer-focus', '');
+            }
+        }, true);
+        document.addEventListener('pointerup', function() {
+            pointerTarget = null;
+        }, true);
+        document.addEventListener('pointercancel', function() { pointerTarget = null; }, true);
+        document.addEventListener('focusin', function(event) {
+            if (isContainer(event.target)) {
+                if (pointerTarget && event.target.contains(pointerTarget)) {
+                    event.target.setAttribute('data-td-pointer-focus', '');
+                } else event.target.removeAttribute('data-td-pointer-focus');
+            }
+            pointerTarget = null;
+        }, true);
+        document.addEventListener('focusout', function(event) {
+            if (isContainer(event.target)) event.target.removeAttribute('data-td-pointer-focus');
+        }, true);
+        document.addEventListener('keydown', function(event) {
+            pointerTarget = null;
+            if (event.key === 'Tab' && isContainer(document.activeElement)) {
+                document.activeElement.removeAttribute('data-td-pointer-focus');
+            }
+        }, true);
+    }
+
     function initLanguageMenus() {
         document.querySelectorAll('.td-language-selector--menu').forEach(function(menu, index) {
             const trigger = menu.querySelector('.td-language-selector__trigger');
@@ -145,9 +184,10 @@ limitations under the License.
         });
     }
 
-    // Hover popovers (theme, version): hover or focus reveals the options
-    // while the trigger keeps its own click action (dark-mode.js binds the
-    // theme toggle; the version trigger toggles the popover for touch).
+    // Hover popovers (version, keyboard help, and any site markup that still
+    // uses the pattern): hover or focus reveals the options while the trigger
+    // keeps its own click action. The Appearance menu is a click disclosure
+    // owned by appearance.js instead.
     function initThemeMenus() {
         document.querySelectorAll('[data-td-nav-hover]').forEach(function(menu, index) {
             const trigger = menu.querySelector('[data-td-nav-hover-trigger], .td-nav-util');
@@ -209,6 +249,7 @@ limitations under the License.
     }
 
     initHeaderScroll();
+    initReadingFocus();
     initLanguageMenus();
     initVersionMenus();
     initThemeMenus();

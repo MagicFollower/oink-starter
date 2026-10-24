@@ -276,7 +276,8 @@ class TabsTransformation(Transformation):
                 tab_indent = lines[tab.open_tag.line][: tab.open_tag.start]
                 code = dedent_lines(body, tab_indent) if all((not l.strip()) or l.startswith(tab_indent) for l in body) else body
                 # a raw-code tab whose body is itself a fence is treated as text
-                if code and FENCE_OPEN_RE.match(code[0]) and len(code) >= 2:
+                first = FENCE_OPEN_RE.match(code[0]) if code else None
+                if first and not first.group("indent").strip() and len(code) >= 2:
                     text_mode = True
                     body = code
                 else:
@@ -287,7 +288,9 @@ class TabsTransformation(Transformation):
                     code_only = False
                     break
                 first = FENCE_OPEN_RE.match(body[0])
-                if not first:
+                # List/quote containers are Markdown structure, not a wrapper
+                # that can be discarded when converting to adjacent code tabs.
+                if not first or first.group("indent").strip():
                     code_only = False
                     break
                 marker = first.group("fence")

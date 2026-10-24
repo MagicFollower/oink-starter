@@ -1,4 +1,5 @@
 {{- $page := .page -}}{{- $ok := true -}}{{- $data := .data -}}{{- $id := .id -}}
+{{- $scope := printf "landing-%s" $id -}}
 {{- $code := strings.TrimSpace (printf "%v" ($data.code | default "")) -}}
 {{- $interactive := eq (lower ($page.Store.Get "tdOutputFormat" | default "html")) "html" -}}
 {{- if not $code }}{{ warnf "%s: command-box.code is required; skipping the section" $page.Path }}{{ $ok = false }}{{ end -}}
@@ -13,7 +14,7 @@
       <button type="button" data-td-copy-text="{{ $code }}" data-td-label-copied="{{ T "ui_code_copied" }}" aria-label="{{ T "ui_code_copy_label" }}" title="{{ T "ui_code_copy_label" }}"><i class="fa-regular fa-copy" aria-hidden="true"></i><span data-td-copy-status aria-live="polite"></span></button>
       {{- end }}
     </div>
-    {{- with $data.note }}<p class="td-landing-command-box__note">{{ partial "landing/markdown.html" (dict "page" $page "value" .) }}</p>{{ end }}
+    {{- with $data.note }}<p class="td-landing-command-box__note">{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-command-box-field-1" $scope) "value" .) }}</p>{{ end }}
   </div>
 </section>
 {{- end -}}

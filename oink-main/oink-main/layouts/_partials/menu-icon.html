@@ -18,7 +18,11 @@
 {{- with .Page }}{{ $link = .RelPermalink }}{{ end -}}
 {{- with $link -}}
   {{- $path := (urls.Parse .).Path | default "" -}}
-  {{- with site.LanguagePrefix }}{{ $path = strings.TrimPrefix . $path }}{{ end -}}
+  {{- with site.LanguagePrefix -}}
+    {{- if or (eq $path .) (hasPrefix $path (printf "%s/" .)) -}}
+      {{- $path = strings.TrimPrefix . $path -}}
+    {{- end -}}
+  {{- end -}}
   {{- with index (split (strings.TrimPrefix "/" $path) "/") 0 -}}
     {{- $keys = $keys | append (lower .) -}}
   {{- end -}}
@@ -32,6 +36,6 @@
 {{- end -}}
 {{- if not $icon }}{{ $icon = "fa-solid fa-link" }}{{ end -}}
 
-{{- with .Params }}{{ with .icon }}{{ $icon = . }}{{ end }}{{ end -}}
 {{- with .Page }}{{ with .Params.icon }}{{ $icon = . }}{{ end }}{{ end -}}
+{{- with .Params }}{{ with .icon }}{{ $icon = . }}{{ end }}{{ end -}}
 {{- return $icon -}}

@@ -10,7 +10,7 @@
 {{- $target := $p.Site.GetPage $node.page -}}
 {{- if not $target -}}
   {{- warnf "docs navigation: page %s was not found; skipping the entry" $node.page -}}
-{{- else -}}
+{{- else if not $target.Params.toc_hide -}}
   {{- $childNodes := slice -}}
   {{- range ($node.children | default (slice)) -}}
     {{- range partial "shell/nav-json-data-node.html" (dict "page" $p "node" .) -}}
@@ -24,6 +24,14 @@
         "title" ($target.LinkTitle | default $target.Title | strings.TrimSpace)
         "url" $target.Params.manual_link
         "kind" "external"
+    -}}
+    {{- with $childNodes }}{{ $entry = merge $entry (dict "children" .) }}{{ end -}}
+    {{- $nodes = slice $entry -}}
+  {{- else if isset $target.Params "manual_link_relref" -}}
+    {{- $entry := dict
+        "title" ($target.LinkTitle | default $target.Title | strings.TrimSpace)
+        "url" (relref $target $target.Params.manual_link_relref)
+        "kind" "link"
     -}}
     {{- with $childNodes }}{{ $entry = merge $entry (dict "children" .) }}{{ end -}}
     {{- $nodes = slice $entry -}}

@@ -21,6 +21,7 @@
     'create_project_issue',
     'print_section',
     'print',
+    'switch_preset',
     'switch_theme',
     'switch_language',
     'switch_version',

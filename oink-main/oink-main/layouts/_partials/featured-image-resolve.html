@@ -5,16 +5,7 @@
 {{- $images := .Resources.ByType "image" -}}
 
 {{- $own := partial "images-param.html" .Params.images -}}
-{{- $inherited := false -}}
-{{- with $own -}}
-  {{- $mine := delimit . "\x1f" -}}
-  {{- range $.Ancestors -}}
-    {{- with partial "images-param.html" .Params.images -}}
-      {{- if eq (delimit . "\x1f") $mine }}{{ $inherited = true }}{{ end -}}
-      {{- break -}}
-    {{- end -}}
-  {{- end -}}
-{{- end -}}
+{{- $inherited := and $own (not (partialCached "images-authored.html" . .Path .Language.Lang)) -}}
 
 {{- if and $own (not $inherited) -}}
   {{- $path = index $own 0 -}}

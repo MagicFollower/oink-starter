@@ -133,6 +133,10 @@
       if (isOpen() && !root.contains(event.target)) close(false);
     });
 
+    root.addEventListener('focusout', function (event) {
+      if (isOpen() && !root.contains(event.relatedTarget)) close(false);
+    });
+
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && isOpen()) {
         event.preventDefault();

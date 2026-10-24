@@ -59,6 +59,17 @@ ui_theme_toggle: Toggle color theme
 ui_theme_auto: System
 ui_theme_light: Light
 ui_theme_dark: Dark
+ui_appearance: Appearance
+ui_appearance_style: Style
+ui_appearance_mode: Light
+ui_appearance_close: Close appearance settings
+ui_appearance_unsaved: Your browser is not saving settings, so this choice lasts only on this page.
+ui_preset_default: Default
+ui_preset_paper: Paper
+ui_preset_slate: Slate
+ui_preset_ink: "Ink"
+ui_preset_terminal: "Terminal"
+ui_preset_experimental: "Experimental"
 ui_toc_hide: Hide table of contents
 ui_toc_show: Show table of contents
 ui_language_select: Choose language
@@ -225,3 +236,18 @@ ui_series_part: Part {{ .Part }} of {{ .Total }}
 markdown_llms_index: "LLMS index:"
 markdown_section_pages: "Section pages:"
 markdown_backlinks: "Backlinks:"
+
+# Expo icon tooltips and accessible names.
+ui_expo_layout: "Image layout"
+ui_expo_wall: "Image wall"
+ui_expo_cards: "Image cards"
+ui_expo_seamless: "Seamless wall"
+ui_expo_size: "Image size"
+ui_expo_fit: "Original size or fit"
+ui_expo_expand: "Expand to fit"
+ui_expo_original: "Open original image"
+ui_expo_locate: "Locate in album"
+ui_expo_play: "Play animations"
+ui_expo_pause: "Pause animations"
+ui_expo_prev: "Previous image"
+ui_expo_next: "Next image"

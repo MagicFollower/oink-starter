@@ -726,6 +726,13 @@
 "url": "https://example.org/fixtures/download-demo/"
 },
 {
+"id": "/fixtures/filetree-comments/",
+"kind": "page",
+"markdown": "https://example.org/fixtures/filetree-comments/index.md",
+"title": "File tree comments",
+"url": "https://example.org/fixtures/filetree-comments/"
+},
+{
 "description": "Regression fixtures for a static-first responsive image Gallery.",
 "id": "/fixtures/gallery/",
 "kind": "page",
@@ -748,6 +755,13 @@
 "markdown": "https://example.org/fixtures/release-assets-base/index.md",
 "title": "Release assets with an explicit base",
 "url": "https://example.org/fixtures/release-assets-base/"
+},
+{
+"id": "/fixtures/table-layout-policy/",
+"kind": "page",
+"markdown": "https://example.org/fixtures/table-layout-policy/index.md",
+"title": "Table layout policy",
+"url": "https://example.org/fixtures/table-layout-policy/"
 },
 {
 "description": "Pinned release facts remain visible without exposing download actions.",

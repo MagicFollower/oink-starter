@@ -141,10 +141,10 @@
 {{- $wrapperClasses := slice "td-table-scroll" -}}
 {{- if $isFull }}{{ $wrapperClasses = $wrapperClasses | append "td-table-scroll--full" }}{{ end -}}
 {{- if $isMatrix }}{{ $wrapperClasses = $wrapperClasses | append "td-table-scroll--matrix" }}{{ end -}}
-{{- /* Print and RSS keep the wrapper — the caption, matrix, and Book figure
-       selectors hang off it — but it is a plain box there, never a viewport.
-       The modifier says so in the markup instead of leaving it to a media
-       query, the way FileTree marks its static rendering. */ -}}
+{{- /* Print and RSS keep the static-output marker and complete table. Print
+       is also a browser document: its viewport remains keyboard-scrollable
+       on screen and expands through print-media CSS when sent to paper.
+       RSS has no viewport focus semantics. */ -}}
 {{- if ne $format "html" }}{{ $wrapperClasses = $wrapperClasses | append "td-table-scroll--static" }}{{ end -}}
 {{- /* Author classes stay on <table> (markers included) so site CSS keyed on
        e.g. table.full-width keeps working; the wrapper carries the modifiers. */ -}}

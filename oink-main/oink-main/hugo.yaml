@@ -129,19 +129,34 @@ params:
     # Dark palette and theme menu: `dark_mode: true` is the shorthand for
     # `dark_mode: { enable: true, show_menu: true }`.
     dark_mode: false
+    # Visual preset: the site's default look. paper (warm editorial reading,
+    # the default) | slate (the technical look of OINK 1.1 and earlier).
+    # Experimental, explicitly selected: ink | terminal. Reserved: folio | canvas.
+    preset: paper
+    # Reader choice of preset in the Appearance menu: false (site preset
+    # only) | true (Paper, Slate and the site default) | an explicit list.
+    # Ink and Terminal are experimental: opt in with preset: ink/terminal
+    # or preset_menu: [paper, slate, ink, terminal]. No additional fonts.
+    # Lists must include `preset`. The menu also hosts the dark_mode switch.
+    preset_menu: false
     typography: technical # technical | system
     # Font faces by typography role, for a site that wants a different face
     # without mounting SCSS or adding a stylesheet. `ui` is the main face:
     # prose and headings resolve through it, so one line moves the whole site.
     # The rest narrow from there: body | heading | code | display | meta |
-    # print. Names only -- the theme never loads a font file, so a family here
+    # brand (the wordmark) | print. Names only -- the theme never loads a font file, so a family here
     # must be one the reader has or one the site declared in an `@font-face` of
     # its own, and every list should end in a generic family.
     # fonts:
     #   ui: "'Source Han Sans SC', sans-serif"
     #   code: "'Sarasa Mono SC', monospace"
 
-    shell_types: [docs, book, blog, swagger]
+    shell_types: [docs, book, blog, swagger, expo]
+    # Image albums. Page front matter `expo` overrides this map.
+    expo:
+      images: "images/*" # Bundle-resource glob, no remote fetching.
+      mode: wall # wall | cards | seamless
+      size: 240 # Target tile size in CSS pixels, 160 through 360.
     docs_section: docs
     blog_section: blog
     # How a blog page presents the featured image `images` selects:
@@ -177,7 +192,9 @@ params:
     # Sequential navigation is on by default for reading-oriented content.
     # Override this list site-wide, or set `pager: false` in front matter.
     pager_types: [docs, book, blog]
-    # Book pages may opt into an h2-h4 branch beneath the active sidebar row.
+    # Book headings beneath the active sidebar row are off by default.
+    # Opt in with true (h2 only) or 2, 3, 4 (deepest heading level).
+    # Page front matter or a section cascade can override this site setting.
     sidebar_headings: false
     # Cache neutral section trees once a site reaches this many pages. Variants
     # keep page-effective layout settings; JS adds active state without hiding it.
@@ -282,7 +299,7 @@ mediaTypes:
 module:
   hugoVersion:
     extended: true
-    min: 0.160.1
+    min: 0.166.0
   mounts:
     - source: assets
       target: assets

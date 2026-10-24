@@ -1,0 +1,29 @@
+/* Local experimental palette; no font or network imports. */
+main {
+  --color-fg-default: #d3dbd6;
+  --color-fg-muted: #9aa59f;
+  --color-fg-subtle: #8b9990;
+  --color-canvas-default: #0c0f0e;
+  --color-canvas-overlay: #18201c;
+  --color-canvas-inset: #0a0d0b;
+  --color-canvas-subtle: #141a18;
+  --color-border-default: rgba(211, 219, 214, 0.32);
+  --color-border-muted: rgba(211, 219, 214, 0.32);
+  --color-neutral-muted: rgba(211, 219, 214, 0.07);
+  --color-accent-fg: #4cc9bd;
+  --color-accent-emphasis: #f0a73a;
+  --color-accent-muted: rgba(211, 219, 214, 0.32);
+  --color-accent-subtle: rgba(211, 219, 214, 0.07);
+  --color-btn-text: #d3dbd6;
+  --color-btn-bg: #141a18;
+  --color-btn-hover-bg: #18201c;
+  --color-btn-active-bg: #0a0d0b;
+  --color-btn-border: rgba(211, 219, 214, 0.55);
+  --color-btn-primary-bg: #935400;
+  --color-btn-primary-border: #f0a73a;
+  --color-segmented-control-bg: #141a18;
+  --color-segmented-control-button-bg: #18201c;
+  --color-scale-gray-1: #141a18;
+  --oink-comment-border: rgba(211, 219, 214, 0.55);
+  --oink-comment-shadow: none;
+}

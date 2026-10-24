@@ -2,7 +2,7 @@
 <!doctype html>
 <html{{ partial "shell/document-attrs.html" (dict "page" .) }}>
   <head>
-    {{ partial "head.html" . }}
+    {{ block "head" . }}{{ partial "head.html" . }}{{ end }}
   </head>
   {{ $toc := "" -}}
   {{ if not .Params.notoc }}{{ $toc = .TableOfContents }}{{ end -}}

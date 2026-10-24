@@ -295,6 +295,24 @@
   text-overflow: ellipsis;
 }
 
+// Authors can trade compact rows for complete comments; names keep ellipsis.
+.td-filetree--wrap {
+  .td-filetree__row {
+    block-size: auto;
+    min-block-size: var(--td-filetree-row);
+  }
+
+  .td-filetree__comment {
+    white-space: normal;
+  }
+
+  .td-filetree__comment-text {
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+  }
+}
+
 // Narrow viewports: the comment drops under the name instead of truncating.
 @include media-breakpoint-down(sm) {
   .td-filetree__row {

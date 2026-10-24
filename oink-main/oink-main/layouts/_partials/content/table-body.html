@@ -2,7 +2,7 @@
        rows, optional matrix row headers, <caption>, id, generic attributes. */ -}}
 {{- $format := .format | default "html" -}}
 {{- $matrix := .matrix | default false -}}
-<div class="{{ delimit .wrapperClasses " " }}"{{ if eq $format "html" }} tabindex="0" role="region" aria-label="{{ T "ui_table_scroll" }}"{{ end }}>
+<div class="{{ delimit .wrapperClasses " " }}"{{ if in (slice "html" "print") $format }} tabindex="0" role="region" aria-label="{{ T "ui_table_scroll" }}"{{ end }}>
 <table{{ with .id }} id="{{ . }}"{{ end }}{{ with .tableClasses }} class="{{ delimit . " " }}"{{ end }}
   {{- partial "content/attrs.html" .generic }}>
   {{- with .caption }}

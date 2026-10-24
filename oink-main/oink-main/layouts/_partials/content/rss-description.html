@@ -5,4 +5,5 @@
 {{- $summary := $render.Summary -}}
 {{- $description := printf "%s" $summary.Text -}}
 {{- $description = partial "content/static-image-output.html" $description -}}
+{{- if eq $page.Type "expo" }}{{ $description = printf "%s%s" $description (partial "expo/static.html" $page) }}{{ end -}}
 {{- return $description -}}

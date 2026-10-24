@@ -52,14 +52,25 @@ default language's llms.txt even though Hugo publishes one per language. */ -}}
 
 {{/* Page content ------------------------------------------------------ */ -}}
 
-{{ with .RenderShortcodes | strings.TrimSpace -}}
+{{ $body := .RenderShortcodes | strings.TrimSpace -}}
+{{ $expoBody := "" -}}
+{{ if eq .Type "expo" }}{{ $expoBody = partial "expo/markdown.md" . | strings.TrimSpace }}{{ end -}}
+{{ if or $body $expoBody -}}
 {{ if $needSeparator }}
 ---
 
 {{ else }}
 {{ end -}}
 
-{{ . }}
+{{ if and $body $expoBody -}}
+{{ $body }}
+
+{{ $expoBody }}
+{{ else if $body -}}
+{{ $body }}
+{{ else -}}
+{{ $expoBody }}
+{{ end -}}
 {{ $needSeparator = true -}}
 {{ end -}}
 

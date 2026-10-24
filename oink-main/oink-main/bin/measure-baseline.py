@@ -328,8 +328,21 @@ def is_git_repo(site: Path) -> bool:
     return subprocess.run(["git", "-C", str(site), "rev-parse", "--git-dir"], capture_output=True).returncode == 0
 
 
+def validate_snapshot_paths(destinations: Iterable[Path], sources: Iterable[Path]) -> None:
+    """Reject overlap before any snapshot cleanup, including symlink aliases."""
+    protected = [path.resolve() for path in sources]
+    seen: list[Path] = []
+    for destination in destinations:
+        resolved = destination.resolve()
+        for source in [*protected, *seen]:
+            if resolved.is_relative_to(source) or source.is_relative_to(resolved):
+                raise ValueError(f"snapshot destination overlaps an input or another snapshot: {destination} -> {resolved}; {source}")
+        seen.append(resolved)
+
+
 def snapshot_site(site: Path, dest: Path, *, worktree: bool = False) -> dict:
     """Materialise HEAD (or the working tree for non-git dirs / --worktree) into dest."""
+    validate_snapshot_paths([dest], [site, ROOT])
     dest.mkdir(parents=True, exist_ok=True)
     if is_git_repo(site) and not worktree:
         head = git(site, "rev-parse", "HEAD")
@@ -802,6 +815,14 @@ def main() -> int:
             print(f"skip {raw}: not a directory", file=sys.stderr)
             continue
         targets.append((path.name, path, False))
+
+    destinations = [work_root / name for name, _, _ in targets]
+    if args.rtl:
+        destinations.extend(work_root / f"{name}-rtl" for name, _, fixture in targets if fixture)
+    try:
+        validate_snapshot_paths(destinations, [ROOT, theme, *(path for _, path, _ in targets)])
+    except ValueError as error:
+        parser.error(str(error))
 
     for name, path, fixture in targets:
         print(f"== {name}", file=sys.stderr, flush=True)

@@ -1,5 +1,5 @@
 {{- return partial "validate.html" (dict
-    "value" (.Param "page_width")
+    "value" (cond (isset .Params "page_width") .Params.page_width (.Param "page_width"))
     "kind" "enum"
     "allowed" (slice "normal" "wide" "full")
     "fallback" "normal"

@@ -11,7 +11,9 @@
 {{- $innerOutput := strings.TrimSpace (printf "%s" .Inner) -}}
 {{- if $innerOutput }}{{ warnf "shortcode %q accepts tab children only at %s; ignoring the stray content" .Name .Position }}{{ end -}}
 {{- $entries := .Scratch.Get "tabEntries" | default (dict) -}}
-{{- if eq (len $entries) 0 }}{{ warnf "shortcode %q requires at least one tab child at %s; rendering nothing" .Name .Position }}{{ end -}}
+{{- if eq (len $entries) 0 -}}
+  {{- warnf "shortcode %q requires at least one tab child at %s; rendering nothing" .Name .Position -}}
+{{- else -}}
 {{- $tabs := slice -}}
 {{- $seen := dict -}}
 {{- $i := 0 -}}
@@ -43,7 +45,7 @@
   {{- end -}}
   {{- delimit $chunks "\n\n" | safeHTML -}}
 {{- else -}}
-  {{- $base := printf "td-tabs-%s-%d" (md5 .Page.RelPermalink | truncate 8 "") .Ordinal -}}
+  {{- $base := printf "td-tabs-%s-%s" (md5 .Page.RelPermalink | truncate 8 "") (partial "content/shortcode-ordinal.html" .) -}}
   {{- /* Peer sets of one group on the same page: the first keeps `<group>-<value>`
          (deep-link target), later ones get a `-2`, `-3` … suffix so ids stay unique.
          Plain and Book Print are separate documents and count independently. */ -}}
@@ -75,4 +77,5 @@
   </div>
   {{- end }}
 </div>
+{{- end -}}
 {{- end -}}

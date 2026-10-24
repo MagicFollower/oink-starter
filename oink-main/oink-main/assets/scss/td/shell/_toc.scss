@@ -4,16 +4,22 @@
 // ============================================================
 
 // The column reserves width while the fixed, collapsible panel stays in place.
+.td-shell-layout {
+  // Keep compact desktops readable; share extra wide-screen space with the
+  // outline without letting it grow indefinitely on an ultrawide monitor.
+  --td-shell-toc-w: clamp(286px, 20vw, 420px);
+}
+
 .td-shell-toc {
   display: none;
 
   @include media-breakpoint-up(xl) {
     display: block;
-    flex: 0 0 286px;
-    width: 286px;
-    transition:
-      width var(--td-motion-duration) ease,
-      flex-basis var(--td-motion-duration) ease;
+    flex: 0 0 var(--td-shell-toc-w);
+    width: var(--td-shell-toc-w);
+    // Follow viewport resizing immediately. Interpolating this width makes the
+    // article shrink with each drag step, then widen as the rail catches up;
+    // text near a wrapping boundary can alternate between the two layouts.
   }
 }
 
@@ -23,9 +29,10 @@
   @include media-breakpoint-up(xl) {
     position: fixed;
     inset-block-start: var(--td-shell-nav-h);
-    inset-block-end: 0;
+    // Share the sidebar's available height when the footer enters view.
+    inset-block-end: var(--td-shell-footer-offset, 0px);
     inset-inline-end: 0;
-    width: 286px;
+    width: var(--td-shell-toc-w);
     z-index: 20;
     display: flex;
     flex-direction: column;
@@ -39,7 +46,7 @@
   }
 }
 
-// Collapsed state removes column width and slides the panel away.
+// Collapse releases layout width once; only the panel's slide/fade animates.
 @include media-breakpoint-up(xl) {
   [data-td-shell-toc='collapsed'] .td-shell-toc {
     width: 0;
@@ -86,8 +93,9 @@
 
 @include media-breakpoint-up(xl) {
   .td-shell-layout--toc-flow .td-shell-toc {
-    flex-basis: var(--td-shell-toc-flow-w, 340px);
-    width: var(--td-shell-toc-flow-w, 340px);
+    --td-shell-toc-w: var(--td-shell-toc-flow-w, clamp(340px, 22vw, 440px));
+    flex-basis: var(--td-shell-toc-w);
+    width: var(--td-shell-toc-w);
   }
 
   // Preserve the collapsed override against the later flow rule.

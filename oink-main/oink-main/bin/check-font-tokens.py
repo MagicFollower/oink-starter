@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCSS_ROOT = ROOT / "assets" / "scss"
 TD_ROOT = SCSS_ROOT / "td"
 LAYOUT_ROOT = ROOT / "layouts"
-FAMILIES = ("Chakra Petch", "IBM Plex Mono")
+FAMILIES = ("Chakra Petch", "IBM Plex Mono", "IBM Plex Sans")
 # Inter is matched only as a quoted family literal: the bare word is ordinary
 # English ("interactive", "internal") in comments and selectors.
 FAMILY_PATTERN = re.compile(
@@ -30,6 +30,7 @@ PUBLIC_ROLES = (
     "code-font-family",
     "display-font-family",
     "meta-font-family",
+    "brand-font-family",
     "print-font-family",
 )
 FONT_FAMILY_DECLARATION = re.compile(
@@ -88,12 +89,19 @@ def main() -> int:
                 f"{path.relative_to(ROOT)}: bundled text faces belong in "
                 "typography role defaults, not layouts"
             )
-        if re.search(r"<html(?:\s|>)", source, re.IGNORECASE) and (
-            "data-td-typography=" not in source
-        ):
+        if re.search(r"<html(?:\s|>)", source, re.IGNORECASE):
+            for attribute in ("data-td-typography=", "data-td-preset=", "data-td-site-preset="):
+                if attribute not in source:
+                    errors.append(
+                        f"{path.relative_to(ROOT)}: root layout missing "
+                        f"{attribute.removesuffix('=')}"
+                    )
+    attrs_source = (LAYOUT_ROOT / "_partials" / "shell" / "document-attrs.html").read_text()
+    for attribute in ("data-td-typography=", "data-td-preset=", "data-td-site-preset="):
+        if attribute not in attrs_source:
             errors.append(
-                f"{path.relative_to(ROOT)}: root layout missing "
-                "data-td-typography"
+                f"layouts/_partials/shell/document-attrs.html: shared root "
+                f"attributes missing {attribute.removesuffix('=')}"
             )
 
     token_path = TD_ROOT / "_tokens-typography.scss"
@@ -164,6 +172,7 @@ def main() -> int:
         "--bs-font-monospace:",
         "--td-display-font-family:",
         "--td-meta-font-family:",
+        "--td-brand-font-family:",
         "--td-print-font-family:",
     )
     if not system_match:
@@ -181,6 +190,35 @@ def main() -> int:
                     f"{token_path.relative_to(ROOT)}: system preset missing "
                     f"{requirement.removesuffix(':')}"
                 )
+
+    # Visual presets restate font roles in this file only, on the bare
+    # `[data-td-preset='X']` selector (0,1,0) and before the system block:
+    # `typography: system` must win in every preset, and `params.ui.fonts`
+    # (inline `:root`, later in the document) must win over both.
+    preset_blocks = list(re.finditer(
+        r"^(?P<selector>\[data-td-preset='[a-z]+'\][^{\n]*)\{", token_source, re.MULTILINE
+    ))
+    system_at = token_source.find("[data-td-typography='system']")
+    if not preset_blocks:
+        errors.append(f"{token_path.relative_to(ROOT)}: missing visual preset font roles")
+    for block in preset_blocks:
+        selector = block.group("selector").strip()
+        if not re.fullmatch(r"\[data-td-preset='[a-z]+'\]", selector):
+            errors.append(
+                f"{token_path.relative_to(ROOT)}: preset font roles must use the bare "
+                f"(0,1,0) selector, found {selector}"
+            )
+        if system_at >= 0 and block.start() > system_at:
+            errors.append(
+                f"{token_path.relative_to(ROOT)}: {selector} must precede the system "
+                "block so typography: system still wins"
+            )
+    presets_path = TD_ROOT / "_presets.scss"
+    if presets_path in sources and re.search(r"--td-[\w-]*font-family\s*:", sources[presets_path]):
+        errors.append(
+            f"{presets_path.relative_to(ROOT)}: font roles belong in "
+            "_tokens-typography.scss, before the system block"
+        )
 
     if errors:
         print("Typography token check failed:", file=sys.stderr)

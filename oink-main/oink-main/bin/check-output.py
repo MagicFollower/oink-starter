@@ -683,6 +683,128 @@ def check_config_image_policy(hugo: str) -> list[str]:
     return errors
 
 
+def check_featured_image_sources(hugo: str) -> list[str]:
+    """Explicit same-valued images win; source-free resolved images stay usable."""
+    errors: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="oink-featured-sources-") as temp:
+        site = Path(temp)
+        def write(relative: str, body: str) -> None:
+            path = site / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(body, encoding="utf-8")
+        write("hugo.yaml", f"""baseURL: https://example.org/
+title: Featured source fixture
+theme: {ROOT.name}
+disableKinds: [RSS, sitemap, taxonomy, term]
+cascade:
+  - params:
+      images: [/first.svg]
+    target:
+      path: /blog/site/**
+""")
+        write("layouts/index.html", "ok")
+        write("layouts/blog/list.html", "ok")
+        write("layouts/blog/single.html", '{{ (partial "featured-image-resolve.html" .).media.src }}')
+        write("content/blog/_index.md", "---\ntitle: Blog\nimages: [/first.svg]\n---\n")
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>'
+        write("static/first.svg", svg)
+        cases = {
+            "yaml": '---\ntitle: YAML\nimages: [/first.svg]\n---\nBody\n',
+            "toml": '+++\ntitle = "TOML"\n[params]\nimages = ["/first.svg"]\n+++\nBody\n',
+            "json": '{"title":"JSON","params":{"images":["/first.svg"]}}\nBody\n',
+            "empty": '---\ntitle: Empty\nimages: []\n---\nBody\n',
+            "bom": '\ufeff---\ntitle: BOM\nparams:\n  images: [/first.svg]\n---\nBody\n',
+            "inherited": '---\ntitle: Inherited\n---\nBody\n',
+            "same": '---\ntitle: Same inherited and authored\nimages: [/first.svg]\n---\nBody\n',
+            "site/inherited": '---\ntitle: Site inherited\n---\nBody\n',
+        }
+        write("content/blog/group/_index.md", "---\ntitle: Group\ncascade:\n  - params:\n      images: [/first.svg]\n    target:\n      kind: page\n---\n")
+        expected = {}
+        for name, source in cases.items():
+            path = f"blog/group/{name}" if name in ("inherited", "same") else f"blog/{name}"
+            write(f"content/{path}/index.md", source)
+            write(f"content/{path}/featured.svg", svg)
+            expected[path] = f"/{path}/featured.svg" if name in ("empty", "inherited", "site/inherited") else "/first.svg"
+        write("content/blog/_content.gotmpl", """{{ .AddPage (dict "path" "adapter" "title" "Adapter" "params" (dict "images" (slice "/first.svg"))) }}
+{{ .AddResource (dict "path" "adapter/featured.svg" "content" (dict "mediaType" "image/svg+xml" "value" `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>`)) }}""")
+        expected["blog/adapter"] = "/first.svg"
+        result = run_hugo_process([hugo, "--source", str(site), "--themesDir", str(ROOT.parent),
+                                   "--destination", str(site / "public"), "--panicOnWarning"],
+                                  cwd=ROOT, capture_output=True, text=True, check=False)
+        if result.returncode != 0:
+            return [f"featured source fixture failed: {result.stdout}{result.stderr}"]
+        for path, source in expected.items():
+            actual = (site / "public" / path / "index.html").read_text().strip()
+            if actual != source:
+                errors.append(f"{path}: expected featured source {source}, got {actual}")
+    return errors
+
+
+def check_seo_boundaries(hugo: str) -> list[str]:
+    """Pagination owns its canonical; only real translations are alternates."""
+    errors: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="oink-seo-boundaries-") as temp:
+        site = Path(temp)
+        def write(relative: str, body: str) -> None:
+            path = site / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(body, encoding="utf-8")
+        write("hugo.yaml", f"""baseURL: https://example.org/manual/
+title: SEO boundaries
+theme: {ROOT.name}
+defaultContentLanguage: en
+languages:
+  en:
+    weight: 1
+    locale: en-US
+  zh:
+    weight: 2
+    locale: zh-CN
+params:
+  ui:
+    blog_index_size: 1
+""")
+        for mode, toggle in (("list", False), ("cards", False), ("table", False), ("table-toggle", True)):
+            fm = f"title: {mode}\ntype: blog\nblog_index: {mode.split('-')[0]}\nblog_index_toggle: {str(toggle).lower()}\n"
+            for suffix in ("", ".zh"):
+                write(f"content/{mode}/_index{suffix}.md", f"---\n{fm}---\n")
+                for num in (1, 2):
+                    write(f"content/{mode}/post-{num}{suffix}.md",
+                          f"---\ntitle: Post {num}\ndate: 2026-01-0{num}\n---\nContent.\n")
+        write("content/list/untranslated.md", "---\ntitle: No translation\ndate: 2026-01-03\n---\nEnglish only.\n")
+        result = run_hugo_process([hugo, "--source", str(site), "--themesDir", str(ROOT.parent),
+                                   "--destination", str(site / "public"), "--panicOnWarning"],
+                                  cwd=ROOT, capture_output=True, text=True, check=False)
+        if result.returncode != 0:
+            return [f"SEO boundary fixture failed: {result.stdout}{result.stderr}"]
+        public = site / "public"
+        canonical = re.compile(r'<link rel="canonical" href="([^"]+)">')
+        alternate = re.compile(r'<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">')
+        for prefix in ("", "zh/"):
+            for mode in ("list", "cards", "table-toggle"):
+                relative = f"{prefix}{mode}/page/2/"
+                html = (public / relative / "index.html").read_text()
+                expected = f"https://example.org/manual/{relative}"
+                if canonical.findall(html) != [expected]:
+                    errors.append(f"{relative}: canonical is not this paginator URL")
+                if alternate.findall(html):
+                    errors.append(f"{relative}: pagination guessed translation boundaries")
+            if (public / prefix / "table/page/2/index.html").exists():
+                errors.append("standalone table acquired pagination from the SEO head")
+        lone = (public / "list/untranslated/index.html").read_text()
+        if alternate.findall(lone) != [("en-US", "https://example.org/manual/list/untranslated/")]:
+            errors.append("untranslated page emitted a language-home SEO alternate")
+        if 'href="/manual/zh/"' not in lone:
+            errors.append("untranslated page lost the language switcher's home fallback")
+        translated = (public / "list/post-1/index.html").read_text()
+        if set(alternate.findall(translated)) != {
+            ("en-US", "https://example.org/manual/list/post-1/"),
+            ("zh-CN", "https://example.org/manual/zh/list/post-1/"),
+        }:
+            errors.append("real translated pages lost their reciprocal alternates")
+    return errors
+
+
 def self_test() -> list[str]:
     """The structure parser must catch what it claims to catch."""
     errors: list[str] = []
@@ -746,8 +868,10 @@ def main() -> int:
     errors += check_security(public)
     errors += check_social_cards(public)
     errors += check_language_links(public)
+    errors += check_seo_boundaries(args.hugo)
     errors += check_markdown_localization(public)
     errors += check_featured_image_contract(args.hugo)
+    errors += check_featured_image_sources(args.hugo)
     errors += check_theme_color_contract(args.hugo)
     errors += check_config_image_policy(args.hugo)
     if errors:

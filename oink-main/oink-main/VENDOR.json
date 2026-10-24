@@ -1,12 +1,12 @@
 {
  "schema": 1,
- "generated": "2026-08-17",
+ "generated": "2026-10-05",
  "hash": "sha256",
  "trees": [
   {
    "path": "assets/third_party",
-   "files": 236,
-   "sha256": "a649f86c50dd04f7ae48bc201497eba2ad64f4006e4f48fb9544c1c91f212b12"
+   "files": 239,
+   "sha256": "ef4577f74516e879f7aed560505f0884ade04480446a8f25fbaf3b6f96643241"
   },
   {
    "path": "assets/js/third_party",
@@ -15,8 +15,8 @@
   },
   {
    "path": "static/webfonts",
-   "files": 21,
-   "sha256": "a224ce06f70c02655ea1959f6d6849b841c575781b663d10e2a20e3bf5cfd6bf"
+   "files": 33,
+   "sha256": "7f9841fe745d0f0036bcb7d48863ffec4ff31ad4eece5f77e99f9c9037e37722"
   }
  ],
  "dependencies": [
@@ -173,6 +173,73 @@
     {
      "path": "static/webfonts/inter/inter-vietnamese-wght-normal.woff2",
      "sha256": "5c66f9e07e90c6d4ac4922cc68d60de26c17b1858e677fb5e603fce3952b3ff2"
+    }
+   ]
+  },
+  {
+   "name": "@fontsource-variable/ibm-plex-sans",
+   "version": "5.3.0",
+   "source": "https://registry.npmjs.org/@fontsource-variable/ibm-plex-sans/-/ibm-plex-sans-5.3.0.tgz",
+   "license": "OFL-1.1",
+   "licenseFiles": [
+    "assets/third_party/ibm-plex-sans/LICENSE"
+   ],
+   "artifacts": [
+    {
+     "path": "assets/third_party/ibm-plex-sans/_normal.scss",
+     "sha256": "f942294a45203e0414036d964402c3661d28393ba350af2d08ecd558b33b7b1e"
+    },
+    {
+     "path": "assets/third_party/ibm-plex-sans/_italic.scss",
+     "sha256": "943002f526e34c6ad37eb0b2a2ded3fa1c315b39c300e2c4e73666f473689b42"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-cyrillic-ext-wght-italic.woff2",
+     "sha256": "a2d42695992c09c9ea546a48cbcae7b7d140d0e8e163c7cccf0e9bc86c54b5b3"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-cyrillic-ext-wght-normal.woff2",
+     "sha256": "7d0037a170882a49e65a45c38ef195237bb07b1cc791d078379f0ac0d7ae1935"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-cyrillic-wght-italic.woff2",
+     "sha256": "e71db60f3419842ad61305fcb22100fc0ea34f6aaa98d1f028de948751f08d88"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-cyrillic-wght-normal.woff2",
+     "sha256": "9409ee21811f0f5272b7e1d828fe8838005b0573481ef906e7e55b63f6610ab0"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-greek-wght-italic.woff2",
+     "sha256": "f1fae68d3ec66f93b54f951d1b1e3ff91250d0201c74d0904b9b76f842b6dcb1"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-greek-wght-normal.woff2",
+     "sha256": "f598dd0700f155e2facfaa8ecfacace397d4c2c153e9ce37ab7ad310e8505bc2"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-latin-ext-wght-italic.woff2",
+     "sha256": "bf44b77cc751203b2f0ce95c048a9d8f984313f84b58106c7c4410ca50314016"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-latin-ext-wght-normal.woff2",
+     "sha256": "d160e20920ae4d6556518d352d3af27a74e9b0de3d8fe17b1c1044fc75aa2f81"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-latin-wght-italic.woff2",
+     "sha256": "4363757d2695c7633f98472855849f7c30528eba869d7968ee35b58c87cf14c1"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-latin-wght-normal.woff2",
+     "sha256": "e2291e842cf5af167122a22881a740c7f2dda7716f1e8cd76680264f4a859470"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-vietnamese-wght-italic.woff2",
+     "sha256": "7077db90dd878de58b87c5d6762658b04ab940e644104211945b58203856a9ca"
+    },
+    {
+     "path": "static/webfonts/ibm-plex-sans/ibm-plex-sans-vietnamese-wght-normal.woff2",
+     "sha256": "73e7f7b1c980416ae0c2461268b14c7cfcce0668e683dc43fbb11a82a227b9f2"
     }
    ]
   },

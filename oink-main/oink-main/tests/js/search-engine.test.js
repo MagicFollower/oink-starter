@@ -85,6 +85,37 @@ assert.deepEqual(
 assert.equal(cjk[0].textScore, cjk[1].textScore);
 assert.ok(cjk[0].score > cjk[1].score);
 
+// Synonyms help discovery; a keyword-only match still describes the page.
+const keywordPages = [
+  {
+    ref: '/zh/config/',
+    title: 'Configuration',
+    keywords: ['配置', 'params', 'defaults'],
+    description: '查找站点参数的类型、默认值与用法。',
+    excerpt: 'A shorter fallback.',
+  },
+  {
+    ref: '/zh/fallback/',
+    title: 'Fallback',
+    keywords: '配置 params defaults',
+    excerpt: 'Site settings and examples.',
+  },
+  { ref: '/zh/no-summary/', title: 'No summary', keywords: ['配置'] },
+  {
+    ref: '/zh/body/',
+    title: 'Body match',
+    keywords: ['配置'],
+    body: '这里介绍配置步骤。',
+    description: 'Read the guide.',
+  },
+];
+const keywordResults = engineModule.create(keywordPages, lunr, 20).query('配置');
+const excerpts = new Map(keywordResults.map(({ doc, excerpt }) => [doc.ref, excerpt]));
+assert.equal(excerpts.get('/zh/config/'), keywordPages[0].description);
+assert.equal(excerpts.get('/zh/fallback/'), keywordPages[1].excerpt);
+assert.equal(excerpts.get('/zh/no-summary/'), '');
+assert.equal(excerpts.get('/zh/body/'), '这里介绍配置步骤。…');
+
 const tie = engine.queryLatin('tiequery');
 assert.deepEqual(
   tie.map((result) => result.doc.ref),

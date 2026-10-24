@@ -71,7 +71,6 @@
         : doc.keywords || '';
       return {
         title: (doc.title || '').toLowerCase(),
-        keywordText: keywordText,
         keywords: keywordText.toLowerCase(),
         headings: (doc.headings || '').toLowerCase(),
         description: (doc.description || '').toLowerCase(),
@@ -99,7 +98,6 @@
       docs.forEach(function (doc, docIndex) {
         var fields = folded[docIndex];
         var titleAt = fields.title.indexOf(needle);
-        var keywordText = fields.keywordText;
         var keywordAt = fields.keywords.indexOf(needle);
         var headingAt = fields.headings.indexOf(needle);
         var descAt = fields.description.indexOf(needle);
@@ -121,7 +119,7 @@
         } else if (descAt >= 0) {
           excerpt = doc.description;
         } else if (keywordAt >= 0) {
-          excerpt = keywordText;
+          excerpt = doc.description || doc.excerpt || '';
         }
         hits.push({
           doc: doc,

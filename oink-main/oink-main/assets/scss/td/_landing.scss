@@ -57,6 +57,14 @@
   --td-shadow-lg: 0 26px 70px rgba(1, 6, 14, 0.26);
   --td-radius-sm: 8px;
   --td-radius-md: 12px;
+  // Slate identity, kept as tokens so a visual preset can restate them
+  // without restating the rules: the hero glow and the primary action.
+  --td-glow-opacity: 1;
+  --td-primary-bg: #2f6793;
+  --td-primary-bg-hover: #275a82;
+  --td-primary-fg: #fff;
+  --td-primary-shadow: 0 6px 22px rgba(47, 103, 147, 0.3);
+  --td-primary-shadow-hover: 0 10px 30px rgba(47, 103, 147, 0.38);
   position: relative;
   overflow: hidden;
   background: var(--bs-body-bg);
@@ -119,6 +127,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
+    opacity: var(--td-glow-opacity);
     background:
       radial-gradient(
         52% 42% at 72% 18%,
@@ -393,14 +402,14 @@
   }
 
   &--primary {
-    background: #2f6793;
-    color: #fff;
-    box-shadow: 0 6px 22px rgba(47, 103, 147, 0.3);
+    background: var(--td-primary-bg);
+    color: var(--td-primary-fg);
+    box-shadow: var(--td-primary-shadow);
 
     &:hover {
-      background: #275a82;
-      color: #fff;
-      box-shadow: 0 10px 30px rgba(47, 103, 147, 0.38);
+      background: var(--td-primary-bg-hover);
+      color: var(--td-primary-fg);
+      box-shadow: var(--td-primary-shadow-hover);
     }
   }
 
@@ -513,15 +522,14 @@
 }
 
 [data-td-reveal] {
+  transition: opacity 480ms ease, transform 480ms ease;
+}
+
+// Only the running enhancement may hide content; no-JS and failed scripts
+// retain the complete static page.
+[data-td-reveal-pending] {
   opacity: 0;
   transform: translateY(18px);
-  transition: opacity 480ms ease, transform 480ms ease;
-
-  &.td-is-revealed,
-  &[data-td-revealed] {
-    opacity: 1;
-    transform: none;
-  }
 }
 
 [data-td-copy-text].td-is-copied {
@@ -850,7 +858,7 @@
 
   &__brand {
     color: var(--td-ink);
-    font-family: var(--td-display-font-family);
+    font-family: var(--td-brand-font-family);
     font-weight: 700;
     letter-spacing: 0.14em;
 

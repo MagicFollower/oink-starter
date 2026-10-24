@@ -180,7 +180,7 @@ search_keywords: [表格, Table, matrix, 矩阵, full-width, 全宽, caption, �
 | 输出 | 呈现 |
 | --- | --- |
 | HTML | `<div class="td-table-scroll">` 可聚焦滚动区 + `<table>`；矩阵与全宽是这个包装器上的修饰 class |
-| 打印 | 完整表格按页宽排版；包装器仍在，但标成 `td-table-scroll--static`，不再是可聚焦视口 |
+| 打印 | 保留完整静态内容；浏览器预览提供可键盘滚动的区域，打印媒体样式在实际打印时展开区域 |
 | Markdown | 原样输出源码表格与属性行 |
 | RSS | 完整静态表格 |
 

@@ -43,6 +43,9 @@
       if (active) panel.setAttribute('data-td-tabs-active', '');
       else panel.removeAttribute('data-td-tabs-active');
       panel.hidden = !active;
+      if (active && typeof panel.dispatchEvent === 'function' && typeof CustomEvent === 'function') {
+        panel.dispatchEvent(new CustomEvent('td:tab-shown', { bubbles: true }));
+      }
     });
     if (options.focus) {
       var target = tabs.filter(function (tab) { return valueOf(tab) === value; })[0];

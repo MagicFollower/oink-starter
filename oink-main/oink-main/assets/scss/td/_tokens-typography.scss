@@ -24,9 +24,61 @@
   --td-code-font-family: #{inspect($font-family-code)};
   --td-display-font-family: 'Chakra Petch', var(--td-ui-font-family);
   --td-meta-font-family: 'IBM Plex Mono', var(--td-code-font-family);
+  // The wordmark. It follows the display role unless a visual preset gives
+  // the wordmark its own face while display headings change.
+  --td-brand-font-family: var(--td-display-font-family);
   // Print keeps its own role so a site can give paper a different face, but
   // the theme ships no print-only font: it follows the body role.
   --td-print-font-family: var(--td-body-font-family);
+}
+
+// Visual presets restate font roles at (0,1,0). They precede the system
+// block, so `typography: system` still collapses every role to platform faces
+// in every preset, and `params.ui.fonts`, emitted inline after this
+// stylesheet, still beats both. Slate is the `:root` block above.
+[data-td-preset='paper'] {
+  // IBM Plex Sans for UI, prose, headings, and display; Latin first, then the
+  // platform CJK sans faces, so Chinese reads in PingFang/YaHei/Noto, never a
+  // synthesized fallback. The wordmark keeps the brand face.
+  @if $font-family-sans-serif == $_td-fonts-sans-default {
+    --td-ui-font-family:
+      'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC',
+      'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC',
+      'Segoe UI', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  } @else {
+    // A project that declared its own sans stack keeps exactly that stack.
+    --td-ui-font-family: var(--bs-body-font-family);
+  }
+  --td-body-font-family: var(--td-ui-font-family);
+  @if $headings-font-family == null {
+    --td-heading-font-family: var(--td-body-font-family);
+  }
+  --td-display-font-family: var(--td-ui-font-family);
+  --td-meta-font-family: var(--td-ui-font-family);
+  --td-brand-font-family: 'Chakra Petch', var(--td-ui-font-family);
+}
+
+[data-td-preset='ink'] {
+  --td-display-font-family: var(--td-heading-font-family);
+  --td-brand-font-family: var(--td-ui-font-family);
+  --td-meta-font-family: var(--td-ui-font-family);
+}
+
+[data-td-preset='terminal'] {
+  // Mono belongs to the controls and headings; prose keeps a reading face.
+  // Legacy Sass stacks and explicit YAML roles remain authoritative.
+  --td-ui-font-family: var(--td-code-font-family);
+  @if $font-family-sans-serif == $_td-fonts-sans-default {
+    --td-body-font-family: 'IBM Plex Sans', var(--bs-body-font-family);
+  } @else {
+    --td-body-font-family: var(--bs-body-font-family);
+  }
+  @if $headings-font-family == null {
+    --td-heading-font-family: var(--td-ui-font-family);
+  }
+  --td-display-font-family: var(--td-heading-font-family);
+  --td-brand-font-family: var(--td-ui-font-family);
+  --td-meta-font-family: var(--td-ui-font-family);
 }
 
 [data-td-typography='system'] {
@@ -42,8 +94,13 @@
   }
 
   --td-ui-font-family: var(--bs-body-font-family);
+  --td-body-font-family: var(--td-ui-font-family);
+  @if $headings-font-family == null {
+    --td-heading-font-family: var(--td-body-font-family);
+  }
   --td-display-font-family: var(--td-ui-font-family);
   --td-meta-font-family: var(--td-ui-font-family);
+  --td-brand-font-family: var(--td-display-font-family);
   --td-print-font-family: var(--td-body-font-family);
 }
 

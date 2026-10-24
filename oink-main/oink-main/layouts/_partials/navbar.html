@@ -1,17 +1,20 @@
 {{- $config := partialCached "shell/config.html" . .Site.Language.Lang -}}
-{{- $darkMode := partialCached "dark-mode-config.html" "dark-mode-global" -}}
 {{- $targets := partialCached "language-targets.html" . .Site.BaseURL .RelPermalink .Site.Language.Lang -}}
 {{- $localSearch := partial "shell/search-enabled.html" . -}}
 {{- /* On shell pages with a sidebar, the compact navbar gains one extra
        icon below md that opens the shell drawer (docs tree + relocated
        aside). */ -}}
-{{- $drawerMode := and (partial "shell/chrome-enabled.html" .) (partial "shell/sidebar-enabled.html" .) -}}
+{{- $landingLayout := eq .Layout "landing" -}}
+{{- $drawerMode := and (not $landingLayout) (partial "shell/chrome-enabled.html" .) (partial "shell/sidebar-enabled.html" .) -}}
 {{- /* Home and explicit Landing layouts render the drawer entry: these are
        the navbar-only surfaces with no sidebar drawer to fall back on. CSS
        gates the button to the below-md tier, where it joins search as the
        whole right-hand contract; the centered link tree stays at every
        width, so the drawer only restores the full labelled hierarchy. */ -}}
-{{- $landingSurface := or .IsHome (eq .Layout "landing") -}}
+{{- $landingSurface := and (not $drawerMode) (or .IsHome $landingLayout) -}}
+{{- /* The navbar owns this drawer even when the site replaces the main
+       Landing renderer with its own homepage template. */ -}}
+{{- if $landingSurface }}{{ .Page.Store.Set "hasLanding" true }}{{ end -}}
 {{- $githubStars := partial "landing/github-stars.html" . -}}
 {{- $altSite := false -}}
 {{- if le (len $targets) 1 }}{{ $altSite = partial "landing/alt-site.html" . }}{{ end -}}
@@ -90,28 +93,9 @@
            title="{{ .label }}" aria-label="{{ .label }}"><i class="fa-solid fa-language" aria-hidden="true"></i><span>{{ .label }}</span></a>
         {{- end }}
         {{- end }}
-        {{- if $darkMode.showMenu }}
-        {{- /* Click toggles light/dark; hovering reveals the three-mode
-             picker. dark-mode.js binds every [data-bs-theme-value]. */ -}}
-        <div class="td-nav-hover-menu td-nav-theme-menu" data-td-nav-hover>
-          <button type="button" class="td-nav-util" data-td-nav-hover-trigger data-td-theme-toggle
-            title="{{ T "ui_theme_toggle" }}" aria-label="{{ T "ui_theme_toggle" }}" aria-expanded="false">
-            {{- partialCached "shell/icon.html" "moon" "moon" -}}
-            {{- partialCached "shell/icon.html" "sun" "sun" -}}
-          </button>
-          <div class="td-nav-hover-menu__pop" role="group" aria-label="{{ T "ui_theme_toggle" }}">
-            <button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="light" aria-pressed="false">
-              {{- partialCached "shell/icon.html" "sun" "navbar-theme-light" -}}<span>{{ T "ui_theme_light" }}</span>
-            </button>
-            <button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="dark" aria-pressed="false">
-              {{- partialCached "shell/icon.html" "moon" "navbar-theme-dark" -}}<span>{{ T "ui_theme_dark" }}</span>
-            </button>
-            <button type="button" class="td-nav-hover-menu__option" data-bs-theme-value="auto" aria-pressed="false">
-              {{- partialCached "shell/icon.html" "contrast" "navbar-theme-auto" -}}<span>{{ T "ui_theme_auto" }}</span>
-            </button>
-          </div>
-        </div>
-        {{- end }}
+        {{- /* Style and color mode share one disclosure; it renders only when
+             the site offers a choice (dark_mode.show_menu or preset_menu). */ -}}
+        {{ partial "shell/appearance-menu.html" (dict "page" . "context" "navbar" "class" "td-nav-appearance" "trigger" "td-nav-util") }}
         {{- with $config.projectRepo }}
         <a href="{{ . }}" class="td-nav-github" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub">
           {{- partialCached "shell/icon.html" "github" "github" -}}
@@ -162,6 +146,7 @@
     {{- with $config.projectRepo }}
     <a class="td-site-nav__menu-link" href="{{ . }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github" aria-hidden="true"></i><span>GitHub{{ with $githubStars }} · {{ . }}{{ end }}</span></a>
     {{- end }}
+    {{ partial "shell/appearance-menu.html" (dict "page" $ "context" "drawer" "class" "td-site-drawer__appearance" "trigger" "td-site-nav__menu-link td-site-nav__menu-link--button" "label" (T "ui_appearance")) }}
   </nav>
 </div>
 {{- end }}

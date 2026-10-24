@@ -63,6 +63,13 @@ params:
     # feedback:
     #   enable: true
     #   reasons: true
+    # 视觉预设（OINK 1.2+，本站 2026-10-24 升到 1.3.2 后启用）：
+    # preset 是站点默认观感，必须出现在 preset_menu 里；preset_menu 决定读者
+    # 在页面 Appearance 面板能切哪几套（即时生效、写 localStorage 跨页记住）。
+    # dark_mode: true（上面已开）管的是明暗那一挡，与预设两个维度互不影响。
+    # 判据看产物：public/index.html 的 <html> 要带 data-td-preset="paper"。
+    preset: paper
+    preset_menu: [paper, slate, ink, terminal]
 
   # Optional repository links. Uncomment after creating your own repository.
   # github_repo: https://github.com/OWNER/REPOSITORY
@@ -100,4 +107,4 @@ module:
       replacement: ./oink-main/oink-main
   hugoVersion:
     extended: true
-    min: 0.160.1
+    min: 0.166.0

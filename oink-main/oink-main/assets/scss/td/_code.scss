@@ -7,10 +7,9 @@
 :root,
 [data-bs-theme='light'] {
   --td-code-inline-bg: rgba(var(--bs-body-color-rgb), 0.035);
-  // Inline code is crimson ink on a hairline wash, not a pill. `_brand.scss`
-  // owns the value per palette and keeps it AA on every painted canvas. It is
-  // deliberately fixed: a published theme color retints shell states but
-  // neither links nor code, so a token reads the same in every section.
+  // Slate uses crimson ink; Paper supplies neutral ink and a stronger wash.
+  // The preset owns this role. A published theme color retints shell states
+  // but neither links nor code, so a token reads the same in every section.
   --td-code-inline-fg: var(--bs-code-color);
   // Bold code is the author raising their voice inside a phrase of code, so
   // it deepens within the same crimson rather than changing hue: a second

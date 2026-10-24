@@ -28,6 +28,7 @@
 
 // Oink uses color, hover color, and visible focus states for links. Keep the
 // no-underline treatment consistent across content and component overrides.
+// Ink's scoped prose rule explicitly restores underlines as part of its identity.
 a,
 a:hover,
 a:focus,

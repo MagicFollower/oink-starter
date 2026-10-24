@@ -87,6 +87,10 @@ class DataFenceTransformation(Transformation):
         # unwrap a single ```yaml/```json wrapper
         if body and FENCE_OPEN_RE.match(body[0]):
             head = FENCE_OPEN_RE.match(body[0])
+            if head.group("indent").strip():
+                self.note(result, path, open_tag.line, self.key,
+                          f"{open_tag.name} body contains a list or quote around its fence", body[0])
+                return False
             info = head.group("info").strip()
             marker = head.group("fence")
             closer = re.compile(r"^[ \t]*" + re.escape(marker[0]) + "{" + str(len(marker)) + ",}[ \t]*$")
