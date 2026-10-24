@@ -211,6 +211,11 @@ links_checked=9 external_or_anchor=0 home_urls=6 broken=8 unmapped=0 uglyURLs=Fa
 python scripts/verify_all.py --selftest
 ```
 
+自证的临时目录在**当前工作目录的 `.tmp/`**（环境变量 `REPLICATE_TMP` 可改指他处）。别改回系统
+`%TEMP%`：Windows 沙箱（DSH 等）托管 Temp 根时，Python 在里面 `mkdir` 子目录会被直接拒绝
+（WinError 5，ACL 本身完好），selftest 第一步 `copytree` 就会炸；`--selftest` 失败且保留的
+夹具副本路径指向 `%TEMP%` 时，先怀疑这个再怀疑判据。
+
 要求末行是 `SELFTEST_PASS`，且这几组读数不能掉：`mismatch=0`、`其中被误报=0`、
 `可达判据代码=22`、matrix_check 红路 `codes=8`、`--skip-prefix` 的两对成对读数。
 数字掉了说明有判据变成死的了——**先修判据，再谈站点绿不绿**。

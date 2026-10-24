@@ -6,6 +6,8 @@
                        [--gate 0] [--hugo <hugo可执行文件>] [--go-bin <go的bin目录>]
                        [--skip-build] [--report out.md]
   python verify_all.py --selftest        # 用 assets/fixtures 证明每条判据都会红、合规样本都保持沉默
+                                        # 临时目录在工作区 .tmp/（或环境变量 REPLICATE_TMP 指定的目录），
+                                        # 不依赖系统 %TEMP%——Windows 沙箱下 %TEMP% 根常拒建子目录
 
 退出码：0 = 全部自动判据通过；1 = 有 FAIL；2 = 用法错。
 
@@ -29,6 +31,20 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.dirname(HERE)
 FIXTURES = os.path.join(SKILL, "assets", "fixtures")
+
+
+def scratch_root():
+    """自证/解析台的临时根：优先环境变量 REPLICATE_TMP，否则用工作区 .tmp/。
+
+    为什么不用系统 %TEMP%：Windows 沙箱（DSH 等）常把 Python 在其托管的
+    Temp 根里 mkdir 子目录直接拒掉（WinError 5，ACL 本身完好），selftest
+    第一步 copytree 就会炸；工作区内的目录没有这道闸。目录不存在则创建，
+    调用方只管往里 mkdtemp，清理责任在调用方。
+    """
+    root = os.environ.get("REPLICATE_TMP") or os.path.join(os.getcwd(), ".tmp")
+    root = os.path.abspath(root)
+    os.makedirs(root, exist_ok=True)
+    return root
 
 
 def run(cmd, cwd=None, extra_env=None):
@@ -142,7 +158,7 @@ def gates(args):
                  summary_line(out, ("links_checked=", "FAIL", "Traceback")) or "rc=%d" % rc))
 
     rc, out = run([sys.executable, script("validate_mermaid.py"), "--site", site, "--selftest",
-                   "--out", os.path.join(tempfile.gettempdir(), "replicate-mermaid-harness")])
+                   "--out", os.path.join(scratch_root(), "replicate-mermaid-harness")])
     blocks = summary_line(out, ("mode=", "FAIL"))
     rows.append(("validate_mermaid", "MANUAL", "GENERATED" if rc == 0 else "FAIL",
                  (blocks + "；按脚本输出的三步在浏览器里读回 REAL_FAIL").strip()))
@@ -204,7 +220,7 @@ def selftest():
     if not os.path.isdir(FIXTURES):
         print("SELFTEST_INVALID 缺夹具目录 %s" % FIXTURES)
         return 1
-    tmp = tempfile.mkdtemp(prefix="replicate-selftest-")
+    tmp = tempfile.mkdtemp(prefix="replicate-selftest-", dir=scratch_root())
     ok = True
     try:
         site = os.path.join(tmp, "site")

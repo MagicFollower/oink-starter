@@ -20,6 +20,8 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 本技能自带一套 mini 站点夹具（`assets/fixtures/`：31 个 content 页 + 26 个源文件 + 5 份矩阵），
 一条 `python scripts/verify_all.py --selftest` 就把「20 个红样本逐条报出、5 个合规样本一条不误报」钉成断言。
 不要拿真实站点的 `problems=0` 当结论——先跑自证。
+自证的临时目录落在**当前工作目录的 `.tmp/`**（可用环境变量 `REPLICATE_TMP` 改指他处；`.gitignore` 已忽略该目录）——
+不用系统 `%TEMP%`，因为 Windows 沙箱常把 Python 在托管 Temp 根里建子目录直接拒掉（WinError 5），selftest 第一步就会炸。
 
 **第二条纪律：技能只读自己目录里的文件。** 所有要「先读一遍」的材料——写作规范、体裁样章、
 主题能力清单、骨架模板——一律给技能内的路径（`assets/scaffold/…`、`assets/example-docs/…`、
