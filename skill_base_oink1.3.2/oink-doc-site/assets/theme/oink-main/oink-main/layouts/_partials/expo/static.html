@@ -1,0 +1,3 @@
+{{- range partialCached "expo/items.html" . .RelPermalink -}}
+<figure id="{{ .id }}"><a href="{{ .original }}"><img src="{{ .poster }}" alt="{{ .alt }}" loading="lazy"></a><figcaption><strong>{{ .title }}</strong>{{ with .caption }}<p>{{ . }}</p>{{ end }}{{ with .byline }}<small>{{ . }}</small>{{ end }}</figcaption></figure>
+{{- end -}}

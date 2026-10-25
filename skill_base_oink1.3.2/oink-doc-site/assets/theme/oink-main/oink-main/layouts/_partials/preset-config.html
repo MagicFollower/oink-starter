@@ -1,0 +1,70 @@
+{{- /* Resolve the visual preset: the site default (`params.ui.preset`) and the
+     presets a reader may choose (`params.ui.preset_menu`).
+
+     Returns a dict:
+       preset  -- the site default, always an available preset name;
+       offered -- the presets the Appearance menu offers, the default first
+                  when the menu is off (so `len offered` is 1 without a menu);
+       menu    -- true when the reader may choose between two or more presets.
+
+     `preset` falls back to paper. Ink and Terminal are experimental and need
+     an explicit preset or menu-list entry. `true` keeps the stable menu plus
+     the site default. Reserved names (folio, canvas) warn with their own
+     message and fall back. `preset_menu` is a boolean or a list of available
+     names; a list must contain the default, which is added when missing. */ -}}
+{{- $stable := slice "paper" "slate" -}}
+{{- $experimental := slice "ink" "terminal" -}}
+{{- $available := union $stable $experimental -}}
+{{- $reserved := slice "folio" "canvas" -}}
+{{- $fallback := "paper" -}}
+
+{{- $preset := $fallback -}}
+{{- $raw := site.Params.ui.preset -}}
+{{- if and (ne $raw nil) (in $reserved (printf "%v" $raw)) -}}
+  {{- warnidf (printf "validate:enum:params.ui.preset:%v" $raw)
+      "params.ui.preset %q is a reserved preset name that this OINK version does not ship (available: %s) -- using %q"
+      (printf "%v" $raw) (delimit $available " | ") $fallback -}}
+{{- else -}}
+  {{- $preset = partial "validate.html" (dict
+      "value" $raw "kind" "enum"
+      "allowed" $available
+      "fallback" $fallback
+      "key" "params.ui.preset") -}}
+{{- end -}}
+
+{{- $offered := slice $preset -}}
+{{- $menuRaw := site.Params.ui.preset_menu -}}
+{{- if ne $menuRaw nil -}}
+  {{- if eq (printf "%T" $menuRaw) "bool" -}}
+    {{- if $menuRaw -}}
+      {{- $offered = union $stable (slice $preset) -}}
+    {{- end -}}
+  {{- else if reflect.IsSlice $menuRaw -}}
+    {{- $list := slice -}}
+    {{- range $menuRaw -}}
+      {{- $name := printf "%v" . -}}
+      {{- if in $available $name -}}
+        {{- if not (in $list $name) }}{{ $list = $list | append $name }}{{ end -}}
+      {{- else -}}
+        {{- warnidf (printf "validate:enum:params.ui.preset_menu:%s" $name)
+            "params.ui.preset_menu entry %q is not an available preset (available: %s) -- ignoring it"
+            $name (delimit $available " | ") -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if not (in $list $preset) -}}
+      {{- warnidf (printf "validate:params.ui.preset_menu:missing:%s" $preset)
+          "params.ui.preset_menu must include the site preset %q -- adding it" $preset -}}
+      {{- $list = $list | append $preset -}}
+    {{- end -}}
+    {{- /* Keep the stable order so every site lists presets the same way. */ -}}
+    {{- $offered = slice -}}
+    {{- range $available -}}
+      {{- if in $list . }}{{ $offered = $offered | append . }}{{ end -}}
+    {{- end -}}
+  {{- else -}}
+    {{- warnidf (printf "validate:params.ui.preset_menu:%v" $menuRaw)
+        "params.ui.preset_menu must be a boolean or a list of presets; got %v -- using false" $menuRaw -}}
+  {{- end -}}
+{{- end -}}
+
+{{- return dict "preset" $preset "offered" $offered "experimental" $experimental "menu" (gt (len $offered) 1) -}}

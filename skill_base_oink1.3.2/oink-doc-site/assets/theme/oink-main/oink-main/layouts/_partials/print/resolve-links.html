@@ -1,0 +1,32 @@
+{{- /* Print relocates a page's body, sometimes into several aggregates.
+       Resolve authored relative links against the ordinary HTML page before
+       caching either Print variant. Fragment-only links stay local so the
+       aggregate heading/footnote pass can namespace them as usual. */ -}}
+{{- $page := .page -}}
+{{- $content := printf "%s" .content -}}
+{{- $base := urls.Parse $page.RelPermalink -}}
+{{- with $page.OutputFormats.Get "html" }}{{ $base = urls.Parse .RelPermalink }}{{ end -}}
+{{- range $tag := findRE `(?i)<a\s(?:[^>"']|"[^"]*"|'[^']*')*>` $content -}}
+  {{- /* Rebuild complete attribute tokens. A global token replacement could
+         also change identical href text inside a title or other attribute. */ -}}
+  {{- $chunks := slice -}}
+  {{- range $token := findRE `(?i)<a|\s+[^\s"'<>/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?|\s*/?>` $tag -}}
+    {{- $chunk := $token -}}
+    {{- range $match := findRESubmatch `(?i)^\s+href\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))$` $token -}}
+      {{- $value := htmlUnescape (or (index $match 1) (index $match 2) (index $match 3)) -}}
+      {{- if and $value (not (hasPrefix $value "#")) (not (hasPrefix $value "/")) -}}
+        {{- $parsed := try (urls.Parse $value) -}}
+        {{- if and (not $parsed.Err) (not $parsed.Value.IsAbs) -}}
+          {{- $href := ($base.ResolveReference $parsed.Value).String -}}
+          {{- $chunk = printf ` href="%s"` (htmlEscape $href) -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $chunks = $chunks | append $chunk -}}
+  {{- end -}}
+  {{- $resolved := delimit $chunks "" -}}
+  {{- if ne $tag $resolved -}}
+    {{- $content = replace $content $tag $resolved -}}
+  {{- end -}}
+{{- end -}}
+{{- return ($content | safeHTML) -}}
