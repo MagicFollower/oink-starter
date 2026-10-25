@@ -1,112 +1,95 @@
-# OINK Starter
+# ZooKeeper 文档 — 文档站操作规范
 
-用 [OINK](https://oink.pgsty.com/) 和 Hugo 给开源项目搭文档站的最小可用骨架：自带英文、简体中文、法文三套首页，Blog、Docs、Book 三类内容，以及一条严格的生产构建命令。
+本项目是基于 Hugo + OINK v1.3.2 的中文文档站，主题与运行时全部本地化，构建过程不联网。本文件说明目录约定、写作门槛与验收命令，读完即可接手维护。
 
-仓库里不含任何真实项目的品牌、文档、分析账号、评论仓库或回归套件。Google Analytics 与 Giscus 的配置整块保持注释状态，你不主动启用就一段都不会加载。
-
-> 本仓库是 [pgsty/oink-starter](https://github.com/pgsty/oink-starter) 的本地分叉，与上游有两处差异：部署工作流已删除（见「部署」一节），仓库内另附一份文档站复刻技能（见「附带技能」一节）。上游英文说明保留在 `README_en.md`。
-
-## 三步跑起来
-
-从你自己的仓库地址开始：
-
-```bash
-git clone https://github.com/YOU/YOUR-REPOSITORY.git
-cd YOUR-REPOSITORY
-hugo server
-```
-
-打开 <http://localhost:1313/>。首次构建会联网拉取钉住的 OINK Hugo Module（`go.mod` 里是 `github.com/pgsty/oink v1.0.0`）。
-
-构建需要 Git、Go 1.27 及以上（`go.mod` 声明 `go 1.27.0`）、Hugo Extended。Hugo 的硬下限写在 `hugo.yaml` 末尾的 `hugoVersion`（`extended: true`、`min: 0.160.1`），上游那两条工作流当年钉的是 0.165.0。不需要 Node.js 与 npm，仓库里没有 `package.json`。
-
-## 改成你自己的
-
-默认站点不改任何东西也能构建。真要做自己的项目，先只动这三处：
-
-1. `hugo.yaml` 顶部的 `Project Name` 与 `https://example.org/`。
-2. 替换 `data/home/` 下的 `en.yaml`、`zh.yaml`、`fr.yaml` 三份精简首页数据。
-3. 重写或删除 `content/` 下的示例页。
-
-站名只用了同一个 YAML 锚点（`title: &siteTitle`，三种语言各自 `title: *siteTitle`），改一次三语同变。导航跟着各栏目的译文 `_index` 页面走，重命名栏目不用另外维护第二份菜单树。`assets/icons/logo.svg` 与 `static/favicon.svg` 只在手上真有品牌素材时才替换。
-
-常用可选项已经在 `hugo.yaml` 里分组注释好：仓库链接（`github_repo`、`github_branch`）、Giscus（`comments`）、Google Analytics（`services.googleAnalytics`）、主题色（`ui.theme_color`）、字体（`ui.typography`）、图片缩放（`ui.image_zoom`）、分享（`ui.share`）、页脚反馈（`ui.feedback`）、logo 与 wordmark、页面宽度（`page_width`）。要真的运营那个第三方服务时，才把对应整块的注释去掉。
-
-## 内容地图
+## 一、项目结构
 
 ```text
-content/
-├── blog/
-│   ├── post/          文章
-│   ├── design/        设计说明与决策
-│   └── release/       发布公告
-├── docs/
-│   ├── introduction/
-│   ├── get-started/
-│   ├── tutorial/
-│   └── reference/
-└── book/              讲本模板自己的一本小书
+ZooKeeper 文档/
+├── content/_index.md              # 首页
+├── content/docs/                  # 文档主区域
+│   ├── _index.md                  # 文档总览（卡片导航）
+│   └── NN-分类/板块/文章.md
+├── static/images/                 # 配图（正文用 /images/xxx.png）
+├── data/home/zh.yaml              # 首页 hero / 卡片 / CTA
+├── hugo.yaml                      # 站点唯一配置
+├── go.mod                         # 主题走 replace 本地化
+├── oink-main/oink-main/           # OINK 主题（勿修改）
+├── doc/                           # 编写规范、运行与构建
+└── site.plan.json                 # 导航计划（生成导航的源数据）
 ```
 
-英文正文以 `.md` 结尾，中文与法文同名并排，后缀是 `.zh.md` 与 `.fr.md`。译文与原文放在一起，显式标题 ID（`## Tools {#tools}` 这种写法）要逐条对齐。
+## 二、内容分类（共 7 类 / 30 篇）
 
-## 语言配置档
+| 目录 | 分类 | 板块 |
+|------|------|------|
+| `01-overview/` | 概览 | 认识 ZooKeeper |
+| `02-getting-started/` | 快速开始 | 单机安装与首次操作 |
+| `03-cluster-operations/` | 集群与运维 | 集群与一致性、管理面与监控 |
+| `04-reference/` | 参考 | 配置与工具 |
+| `05-faq/` | 常见问题 | 端口与管理接口 |
+| `06-dubbo-integration/` | Dubbo 集成 | 架构与选型、注册与发现、集成实践 |
+| `07-dubbo-springboot-lab/` | Dubbo 实战 | 工程蓝图、契约与底座、服务实现、运行与交付 |
 
-根目录 `hugo.yaml` 同时启用英文、中文、法文。另备两份可直接覆盖的配置档：
+新增分类或文章：改 `site.plan.json`，再跑 `plan_site.py --site . --plan site.plan.json`。不要只手建目录，目录与 `_index.md` 必须成对。
+
+顶栏「文档」tab 由生成器写入 `hugo.yaml` 的 `menus.main`（`identifier: docs`、`pageRef: /docs`）。OINK 1.3.2 的顶栏只渲染这个配置，主题不会自动挂入口；重跑计划会保留该键。
+
+## 三、命名与 Front Matter
+
+| 层级 | 命名 | 示例 |
+|------|------|------|
+| 一级分类目录 | 小写字母/数字/短横线 | `01-overview/` |
+| 二级板块目录 | 中文或英文，不含空白与斜杠 | `核心概念/` |
+| 文章文件 | 中文或英文，不含空白与斜杠 | `一致性协议.md` |
+
+文章三字段缺一不可；`weight` 在同目录内 1..N 连续不重复：
+
+```yaml
+---
+title: 文章标题
+description: 一句话说明本文解决什么问题（至少 20 字，会进侧边栏卡片与 SEO）。
+weight: 1
+---
+```
+
+一级分类 `_index.md` 带 `type: docs`、`icon`、`weight`、`sidebar_root_for: self`、`sidebar_root_link_self: true` 与 `cascade`；板块 `_index.md` 只需 `title`/`linkTitle`/`description`/`weight`。这些文件由 `plan_site.py` 生成，手改后重跑计划会被覆盖。
+
+## 四、写作与事实来源
+
+正文按 `doc/技术文档编写规范.md` 写。机器门槛（`audit_content.py --mode full`）：
+
+- 首个真实 H2 以「为什么」开头；
+- 全文 ≥ 260 行、≥ 3 个「💡 新人小结」、≥ 1 个 mermaid、≥ 2 组表格、≥ 1 个带语言标注的代码块；
+- 必须有「要点总结」；description ≥ 20 字；
+- 禁止「限于篇幅 / 此处从略 / 自行查阅 / 待补充 / TODO / 感兴趣请 / 众所周知 / 不言而喻」；
+- 禁止用 `┌┐└┘├┤┬┴┼` 画图，结构化图用 mermaid。
+
+**技术事实只能来自可核验来源**：用户提供的材料、官方文档/仓库、真实命令输出。具体默认值、版本号、限制数值、异常语义查不到就不写，或明确写「上游未给出」。每批写作在 `doc/内容来源.md` 登记来源，交付时作为 MANUAL 项核对。
+
+## 五、构建与环境
+
+| 工具 | 版本 | 要求 |
+|------|------|------|
+| Hugo | ≥ 0.166.0 **Extended** | 标准版无法编译 SCSS；严格 `--panicOnWarning` 闸门用 0.166.0 |
+| Go | 与 `go.mod` 的 `go` 指令一致（1.27.0） | 版本不匹配会触发联网下载工具链；PATH 里有旧 Go 时用 `--go-bin` 指向 1.27.x 的 bin |
 
 ```bash
-cp examples/hugo.single.yaml hugo.yaml     # 只留英文（disableLanguages: [zh, fr]）
-cp examples/hugo.bilingual.yaml hugo.yaml  # 英文 + 中文（disableLanguages: [fr]）
+export GOTOOLCHAIN=local GOPROXY=off
+hugo --cleanDestinationDir          # 构建
+hugo server -D                      # 本地预览（推荐）
+python -m http.server 8766 --directory public   # 纯静态产物预览
+hugo --cleanDestinationDir --gc --minify   # 发布档
 ```
 
-两份都保留未启用语言的声明，Hugo 因此仍认得对应后缀并安全忽略其内容。下次换配置档前，先用 Git 把三语配置取回来。
+离线构建要同时满足：主题副本在 `oink-main/oink-main/`、`go.mod` 的 replace 指向它、Go 与 `go.mod` 指令对齐。Hugo 报 `failed to load modules` 时先查 Go 是否在 PATH，不是内容错误。验收时 Go 版本不对可用 `--go-bin` 指向正确 bin；如果 `go version` 打印 `go: downloading go1.27.0`，说明 PATH 选到了旧 Go。
 
-## 构建与验收
+**打开方式**：完整功能请走 HTTP（`hugo server` 或上面的 `python -m http.server`）。直接双击 `public/index.html` 只有无样式文字：OINK 产物的 CSS/JS 带 `integrity` + `crossorigin`，`file://` 的 origin 是 `null`，会被浏览器 CORS 拦截，Mermaid、离线搜索、Appearance 都不可用。
 
-写作时预览：
+## 六、约束
 
-```bash
-hugo server
-```
-
-本地跑一遍发布闸门（有告警即失败）：
-
-```bash
-hugo --cleanDestinationDir --gc --minify --environment production \
-  --printPathWarnings --panicOnWarning
-```
-
-产物 `public/` 以及 `resources/`、`.hugo_cache/`、`.hugo_build.lock` 都已在 `.gitignore` 里，不要提交。
-
-## 部署
-
-上游的 `.github/workflows/github-pages.yaml` 与 `.github/workflows/cloudflare-pages.yaml` 已在本仓库删除（提交 `ac422c2 移除workflows`），所以现在没有推送即部署的流水线。两条路：
-
-手动部署：先跑上面那条严格构建命令，再把生成的 `public/` 交出去——GitHub Pages 把来源设为分支（例如把 `public/` 推到 `gh-pages`）后由 Pages 直接发布，Cloudflare Pages 用 Direct Upload 上传这个目录。
-
-接回工作流：从历史里取回，自己核对后再提交。
-
-```bash
-mkdir -p .github/workflows
-git show 'ac422c2~1:.github/workflows/github-pages.yaml' > .github/workflows/github-pages.yaml
-git show 'ac422c2~1:.github/workflows/cloudflare-pages.yaml' > .github/workflows/cloudflare-pages.yaml
-```
-
-取回前需要知道的内容：两份文件的 `HUGO_VERSION` 都是 0.165.0，都用 `actions/setup-go@v7` 按 `go.mod` 装 Go、先 `go mod download github.com/pgsty/oink`、再跑同一条带 `--panicOnWarning` 的构建。GitHub Pages 那份先在 **Settings → Pages** 里把来源选成 **GitHub Actions**，构建时把 `--baseURL` 覆盖成 `actions/configure-pages` 算出的项目子路径。Cloudflare 那份走 Direct Upload（`cloudflare/wrangler-action@v4`），需要 `CLOUDFLARE_ACCOUNT_ID` 与 `CLOUDFLARE_API_TOKEN` 两个 secret（token 权限为 Account → Cloudflare Pages → Edit）；项目名默认取仓库名，可用仓库变量 `CLOUDFLARE_PROJECT_NAME` 覆盖；canonical 地址默认 `https://<project>.pages.dev/`，挂自定义域名时设 `CLOUDFLARE_SITE_URL`；只有设了 `CLOUDFLARE_PAGES_ENABLED=true` 才每次推送 `main` 自动部署，否则手动触发。同一个 Pages 项目要么用 Cloudflare 的 Git 集成、要么用这份 Direct Upload 工作流，不要两个一起。
-
-## 附带技能
-
-仓库内附两份 `replicate-doc-site` 技能（上游没有，本仓库自加），把既有文档站（Docusaurus、VitePress、GitBook、自站）整站复刻成本地 Hugo + OINK 站点。两份结构完全相同，只是内置的 OINK 主题副本与版本相关事实不同，按目标主题版本二选一：
-
-- `skill_base_oink1.3.2/` —— **OINK v1.3.2 基线（新项目默认）**：Hugo Extended ≥0.166.0、Go 1.27.0。
-- `skill_base_oink1.0.0/` —— OINK v1.0.0 基线：Hugo Extended ≥0.160.1，需要旧版主题行为时用。
-
-每份技能里：`SKILL.md` 是流程主文；`scripts/` 下是 `scaffold.py`、`check_coverage.py`、`audit_structure.py`、`matrix_check.py`、`verify_all.py` 等判据脚本；`references/` 是写作规范、覆盖矩阵口径与主题能力清单；`assets/` 带骨架模板、六份体裁样章、会自己失败的夹具，以及一份离线主题副本。用之前先跑 `python scripts/verify_all.py --selftest`——判据要先证明会红，它的绿色才算结论。两份技能各自的版本口径见其目录下 `README.md`。
-
-## 什么叫做完了
-
-本地构建成功、改动已提交、分支已推送、工作流转绿、公网渲染正确，是五道各自独立的闸门。部署后要逐个打开 `/`、`/zh/`、`/fr/`，再从 Blog、Docs、Book 各抽一页，桌面和移动端各看一遍。
-
-## 许可
-
-MIT。采用本模板时，把 `LICENSE` 的通用版权声明（现为 `The contributors`）与 `hugo.yaml` 里的 `copyright.authors` 换成你自己的。
+1. 不修改 `oink-main/` 主题目录。
+2. 正文语言为中文，不做多语言混排；`.md` 即中文正文。
+3. 目录与 `_index.md` 成对出现；文章必须有 front matter。
+4. 一篇文档只归一个板块；跨板块关联用站内链接，不复制正文。
+5. 不把本地临时路径、审计报告措辞写进正文；配图放 `static/images/`，正文用 `/images/...`。

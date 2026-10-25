@@ -1,9 +1,0 @@
-{{ define "main" }}
-<div class="td-content td-expo-content">
-{{ partial "page-title.html" . }}
-{{ with .Description }}<div class="lead">{{ . | markdownify }}</div>{{ end }}
-{{ partial "content/render.html" . }}
-{{ partial "expo/gallery.html" . }}
-{{ partial "expo/albums.html" . }}
-</div>
-{{ end }}

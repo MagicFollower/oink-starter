@@ -1,23 +1,23 @@
 ---
-title: Docs
-description: Learn the project, install it, follow a tutorial, and look up exact behavior.
+title: "文档"
+linkTitle: "文档"
+description: "按主题组织的全部文档，共 7 个分类、30 篇文章。"
 type: docs
 icon: fa-solid fa-book
 sidebar_root_for: self
 sidebar_root_link_self: true
-menus:
-  main:
-    identifier: docs
-    weight: 20
 cascade:
   type: docs
   footer_style: slim
 ---
 
-The documentation follows four familiar paths: understand the project, get it running, learn by doing, then consult the reference.
+按下面的分类进入。每一类都可以独立成树，左侧边栏会跟随当前分类切换。
 
-- [Introduction](/docs/introduction/)
-- [Get Started](/docs/get-started/)
-- [Tutorial](/docs/tutorial/)
-- [Reference](/docs/reference/)
+- [概览](/docs/01-overview/)
+- [快速开始](/docs/02-getting-started/)
+- [集群与运维](/docs/03-cluster-operations/)
+- [参考](/docs/04-reference/)
+- [常见问题](/docs/05-faq/)
+- [Dubbo 集成](/docs/06-dubbo-integration/)
+- [Dubbo 实战](/docs/07-dubbo-springboot-lab/)
 {.cards}

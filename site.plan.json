@@ -1,0 +1,558 @@
+{
+  "site": {
+    "title": "ZooKeeper 文档",
+    "description": "基于 Apache ZooKeeper 3.8.7 与 Dubbo 3.2.20 的中文文档站：从 ZooKeeper 核心概念、单机上手、端口与管理接口、三节点集群，到 ZooKeeper + Dubbo 的架构、注册发现、节点读写，以及 Spring Boot 2.7.18 + Java 8 的从零实战工程。",
+    "baseURL": "https://example.org/",
+    "copyright": {
+      "authors": "ZooKeeper 文档站贡献者",
+      "fromYear": 2026
+    },
+    "footer": "内容基于 Apache ZooKeeper 3.8.7 发行包与官方文档整理；Apache ZooKeeper 是 Apache 软件基金会的商标。",
+    "preset": "paper",
+    "presetMenu": [
+      "paper",
+      "slate",
+      "ink",
+      "terminal"
+    ]
+  },
+  "home": {
+    "eyebrow": "Apache ZooKeeper 3.8.7",
+    "title": [
+      "把分布式协调讲清楚"
+    ],
+    "lead": "从「为什么需要它」开始，讲清数据模型、单机上手、端口与管理接口、三节点集群与生产运维；再沿着 Dubbo 架构与 ZooKeeper 节点，走通注册发现，最后从空目录搭一套 Spring Boot 2.7 + Dubbo 的可运行工程。命令与输出都来自本机发行包和可运行工程。",
+    "actions": [
+      {
+        "label": "开始阅读",
+        "url": "docs/01-overview/认识ZooKeeper/why-zookeeper/",
+        "icon": "fa-solid fa-book",
+        "style": "primary"
+      },
+      {
+        "label": "浏览全部文档",
+        "url": "docs/",
+        "icon": "fa-solid fa-layer-group",
+        "style": "ghost"
+      }
+    ],
+    "cardsEyebrow": "按主题浏览",
+    "cardsTitle": "文档地图",
+    "cta": {
+      "title": "从痛点开始",
+      "text": "先看没有协调服务时会发生什么，再进入安装、集群、运维，最后落到 Dubbo 注册中心。",
+      "label": "开始阅读",
+      "url": "docs/01-overview/认识ZooKeeper/why-zookeeper/"
+    }
+  },
+  "categories": [
+    {
+      "dir": "01-overview",
+      "title": "概览",
+      "icon": "fa-solid fa-compass",
+      "weight": 1,
+      "desc": "先回答 ZooKeeper 是什么、为什么需要它，再沿前生今世、数据模型与整体架构建立完整心智模型。",
+      "sections": [
+        {
+          "dir": "认识ZooKeeper",
+          "title": "认识 ZooKeeper",
+          "weight": 1,
+          "desc": "从分布式协调的痛点出发，补上起源、版本变迁与生态位置，再建立 ZooKeeper 的整体心智模型。",
+          "articles": [
+            {
+              "file": "why-zookeeper.md",
+              "title": "为什么需要 ZooKeeper",
+              "weight": 1,
+              "desc": "从配置同步、命名、选主与锁问题出发，说明 ZooKeeper 的定位、典型场景与不适用边界。",
+              "sources": [
+                "发行包 docs/zookeeperOver.html",
+                "发行包 docs/zookeeperUseCases.html"
+              ]
+            },
+            {
+              "file": "architecture-and-data-model.md",
+              "title": "整体架构与数据模型",
+              "weight": 2,
+              "desc": "讲清 ensemble、Leader/Follower/Observer、znode 树、stat 版本、会话与 Watcher 的关系，以及读写路径。",
+              "sources": [
+                "发行包 docs/zookeeperOver.html",
+                "发行包 docs/zookeeperProgrammers.html",
+                "发行包 docs/zookeeperInternals.html"
+              ]
+            },
+            {
+              "file": "history-and-origins.md",
+              "title": "ZooKeeper 的前生：从 Chubby 到 Apache",
+              "weight": 3,
+              "desc": "从 Yahoo! 内部重复实现协调组件的痛点讲起，说明 Chubby 的启发、最初的设计目标、命名趣闻与进入 Apache 的路径。",
+              "sources": [
+                "USENIX ATC 2010 论文 ZooKeeper: Wait-free Coordination for Internet-scale Systems",
+                "Google Chubby 论文 The Chubby Lock Service for Loosely-Coupled Distributed Systems",
+                "发行包 docs/zookeeperOver.html",
+                "Apache ZooKeeper 主干 pom.xml 的 inceptionYear=2008"
+              ]
+            },
+            {
+              "file": "evolution-and-future.md",
+              "title": "ZooKeeper 的今世与未来：版本变迁与生态位置",
+              "weight": 4,
+              "desc": "沿 3.3 到 3.9.6 的发布线，解释 Observer、动态成员变更、持久 Watcher、安全加固等变更节点及其取舍，并讨论 Kafka 去 ZooKeeper 后的未来位置。",
+              "sources": [
+                "Apache ZooKeeper Releases 官方发布页",
+                "Apache ZooKeeper 3.5.0/3.6.0/3.7.0/3.8.0/3.9.0 Release Notes",
+                "发行包 docs/zookeeperReconfig.html",
+                "Apache ZooKeeper 官方 security.html",
+                "Apache Kafka 4.0 官方发布公告"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dir": "02-getting-started",
+      "title": "快速开始",
+      "icon": "fa-solid fa-rocket",
+      "weight": 2,
+      "desc": "用本机 3.8.7 发行包完成单机安装、配置、启停、端口排查与第一次 zkCli 操作。",
+      "sections": [
+        {
+          "dir": "单机安装与首次操作",
+          "title": "单机安装与首次操作",
+          "weight": 1,
+          "desc": "从发行包目录结构到 zoo.cfg、启动、端口地图、日志与 zkCli 基本命令。",
+          "articles": [
+            {
+              "file": "install-and-run.md",
+              "title": "单机安装、配置与启停",
+              "weight": 1,
+              "desc": "基于 3.8.7 发行包，完成 Java 环境准备、zoo.cfg 最小配置、前台与后台启动、状态检查与安全停止，并给出真实日志。",
+              "sources": [
+                "发行包 README.md",
+                "发行包 conf/zoo_sample.cfg",
+                "发行包 docs/zookeeperStarted.html",
+                "本机真实启停输出"
+              ]
+            },
+            {
+              "file": "zkcli-first-steps.md",
+              "title": "zkCli 常用操作与 Watcher 初体验",
+              "weight": 2,
+              "desc": "用真实 zkCli 会话演示 create/get/set/stat/ls/delete 与 watch，解释版本号、临时节点和会话边界。",
+              "sources": [
+                "发行包 docs/zookeeperCLI.html",
+                "发行包 docs/zookeeperProgrammers.html",
+                "本机 zkCli 真实输出"
+              ]
+            },
+            {
+              "file": "port-map-and-occupancy.md",
+              "title": "端口地图与占用排查",
+              "weight": 3,
+              "desc": "把 2181、8080、2888/3888、7000 放回各自通路，解释 netstat 里的真假占用、绑定地址与端口冲突的处理顺序。",
+              "sources": [
+                "用户提供《ZooKeeper 端口与管理接口问答实录》",
+                "发行包 docs/zookeeperAdmin.html",
+                "发行包 docs/zookeeperMonitor.html",
+                "本机端口与 AdminServer 复核输出"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dir": "03-cluster-operations",
+      "title": "集群与运维",
+      "icon": "fa-solid fa-server",
+      "weight": 3,
+      "desc": "把单机推进到三节点 ensemble，覆盖选主、管理面、监控、快照、日志与常见故障。",
+      "sections": [
+        {
+          "dir": "集群与一致性",
+          "title": "集群与一致性",
+          "weight": 1,
+          "desc": "三节点配置、myid、投票端口、Leader 选举与 ZAB 写入路径。",
+          "articles": [
+            {
+              "file": "ensemble-and-election.md",
+              "title": "三节点集群、myid 与 Leader 选举",
+              "weight": 1,
+              "desc": "从单机到三节点 ensemble：server.x、myid、2888/3888 端口、quorum 规则、选主过程与脑裂边界，附本机三节点真实状态。",
+              "sources": [
+                "发行包 docs/zookeeperAdmin.html",
+                "发行包 docs/zookeeperInternals.html",
+                "本机三节点真实输出"
+              ]
+            },
+            {
+              "file": "monitoring-and-backup.md",
+              "title": "四字命令、快照与事务日志",
+              "weight": 2,
+              "desc": "用 ruok/mntr/srvr/stat 观察健康状态，解释 dataDir 下的 snapshot 与 txnlog，给出备份、恢复与 autopurge 的落地步骤。",
+              "sources": [
+                "发行包 docs/zookeeperMonitor.html",
+                "发行包 docs/zookeeperAdmin.html",
+                "发行包 docs/zookeeperTools.html",
+                "本机真实命令输出"
+              ]
+            }
+          ]
+        },
+        {
+          "dir": "管理面与监控",
+          "title": "管理面与监控",
+          "weight": 2,
+          "desc": "AdminServer、四字命令与四条监控通道：管理接口怎么开、怎么关，监控数据从哪条路来。",
+          "articles": [
+            {
+              "file": "adminserver-http.md",
+              "title": "AdminServer 管理接口",
+              "weight": 1,
+              "desc": "从 8080 的 Jetty 服务讲到 /commands 端点：它提供什么、与 4lw 什么关系、关闭后业务和监控各受什么影响。",
+              "sources": [
+                "发行包 docs/zookeeperAdmin.html",
+                "用户提供《ZooKeeper 端口与管理接口问答实录》",
+                "本机 AdminServer 真实响应"
+              ]
+            },
+            {
+              "file": "four-letter-words.md",
+              "title": "四字命令 4lw",
+              "weight": 2,
+              "desc": "从明文四字诊断讲到 3.8.7 的白名单实现：哪些命令可用、如何验证、为什么 srvr 始终保留、生产该怎么收紧。",
+              "sources": [
+                "发行包 docs/zookeeperAdmin.html",
+                "发行包 docs/zookeeperMonitor.html",
+                "发行包 bin/zkServer.sh 与 zkServer.cmd",
+                "本机四字命令真实输出"
+              ]
+            },
+            {
+              "file": "monitoring-channels.md",
+              "title": "四条监控通道",
+              "weight": 3,
+              "desc": "把 4lw、AdminServer、JMX 与 Prometheus MetricsProvider 放回同一张图，按端口识别监控工具，判断关管理面后谁失联。",
+              "sources": [
+                "发行包 docs/zookeeperMonitor.html",
+                "发行包 docs/zookeeperJMX.html",
+                "发行包 docs/zookeeperAdmin.html",
+                "用户提供《ZooKeeper 端口与管理接口问答实录》",
+                "本机 Prometheus 指标端点输出"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dir": "04-reference",
+      "title": "参考",
+      "icon": "fa-solid fa-book-open",
+      "weight": 4,
+      "desc": "配置项、管理面收口与命令行工具的速查，面向已经跑起来、需要查参数和排障的读者。",
+      "sections": [
+        {
+          "dir": "配置与工具",
+          "title": "配置与工具",
+          "weight": 1,
+          "desc": "zoo.cfg 关键参数、管理面收口、四字命令白名单、CLI 与离线工具。",
+          "articles": [
+            {
+              "file": "config-reference.md",
+              "title": "zoo.cfg 关键配置项参考",
+              "weight": 1,
+              "desc": "按单机、集群、运维三组整理 tickTime、initLimit、syncLimit、dataDir、clientPort、server.x、autopurge 等参数。",
+              "sources": [
+                "发行包 conf/zoo_sample.cfg",
+                "发行包 docs/zookeeperAdmin.html"
+              ]
+            },
+            {
+              "file": "cli-and-tools.md",
+              "title": "CLI 与运维工具速查",
+              "weight": 2,
+              "desc": "zkCli 命令、zkServer 启停、zkCleanup、Snapshot/TxnLog 工具与四字命令的用途、参数和真实输出。",
+              "sources": [
+                "发行包 docs/zookeeperCLI.html",
+                "发行包 docs/zookeeperTools.html",
+                "发行包 bin",
+                "本机真实输出"
+              ]
+            },
+            {
+              "file": "management-plane-hardening.md",
+              "title": "管理面收口配置",
+              "weight": 3,
+              "desc": "给 Dubbo 注册中心场景一份可抄的 zoo.cfg：关闭 AdminServer、收紧 4lw、按需开 Prometheus，并逐项验证影响面。",
+              "sources": [
+                "用户提供《ZooKeeper 端口与管理接口问答实录》",
+                "发行包 conf/zoo_sample.cfg",
+                "发行包 docs/zookeeperAdmin.html",
+                "本机管理面收口复核输出"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dir": "05-faq",
+      "title": "常见问题",
+      "icon": "fa-solid fa-circle-question",
+      "weight": 5,
+      "desc": "保留真实问答现场的速查页，适合按症状定位，再跳到对应主题的完整文档。",
+      "sections": [
+        {
+          "dir": "端口与管理接口",
+          "title": "端口与管理接口",
+          "weight": 1,
+          "desc": "2181、8080、4lw、监控通道与管理面关闭的真实问答，附 3.8.7 核准差异。",
+          "articles": [
+            {
+              "file": "port-and-admin-faq.md",
+              "title": "端口与管理接口问答实录",
+              "weight": 1,
+              "desc": "保留原始五问五答：2181/8080 并存、禁用 AdminServer、监控通道、4lw 白名单与完全关闭的实际效果，并标注 3.8.7 的核准差异。",
+              "sources": [
+                "用户提供《ZooKeeper 端口与管理接口问答实录》",
+                "发行包 docs/zookeeperAdmin.html",
+                "发行包 docs/zookeeperMonitor.html",
+                "本机管理面复核输出"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dir": "06-dubbo-integration",
+      "title": "Dubbo 集成",
+      "icon": "fa-solid fa-plug",
+      "weight": 6,
+      "desc": "从 Dubbo 架构、选型与运行时拓扑，到注册发现流程、生效原理和 ZooKeeper 节点读写，再用可运行工程完成一次真实集成。",
+      "sections": [
+        {
+          "dir": "架构与选型",
+          "title": "架构与选型",
+          "weight": 1,
+          "desc": "先看清 Dubbo 的角色与调用链，再回答为什么把注册中心交给 ZooKeeper，以及两者合用后的运行时边界。",
+          "articles": [
+            {
+              "file": "dubbo-architecture.md",
+              "title": "Dubbo 架构与调用链",
+              "weight": 1,
+              "desc": "从 Provider、Consumer、Registry、Monitor、Container 五种角色讲到十层调用链，解释一次 RPC 从代理到网络再到提供者的完整路径，以及 ZooKeeper 在其中的位置。",
+              "sources": [
+                "Dubbo 3.2.20 源码",
+                "Dubbo 官方架构文档",
+                "本机 demo 启动日志"
+              ]
+            },
+            {
+              "file": "why-zookeeper.md",
+              "title": "为什么 Dubbo 推荐 ZooKeeper",
+              "weight": 2,
+              "desc": "把注册中心的五项硬需求拆开，对照 ZooKeeper 的 znode、临时节点、Watcher 与会话，说明它为什么适合做 Dubbo 注册中心，又在哪里会力不从心。",
+              "sources": [
+                "Dubbo 官方注册中心文档",
+                "ZooKeeper 3.8.7 官方文档",
+                "Dubbo 3.2.20 源码",
+                "本机真实节点树"
+              ]
+            },
+            {
+              "file": "runtime-architecture.md",
+              "title": "二者合用的运行时架构",
+              "weight": 3,
+              "desc": "把 ZooKeeper 集群、提供者、消费者、管理端和监控放回同一张部署图，标清 2181、20880、8080 等端口与接口级、应用级两套注册数据的关系。",
+              "sources": [
+                "Dubbo 3.2.20 源码",
+                "本机 demo 配置与运行输出",
+                "ZooKeeper 3.8.7 官方文档"
+              ]
+            }
+          ]
+        },
+        {
+          "dir": "注册与发现",
+          "title": "注册与发现",
+          "weight": 2,
+          "desc": "沿着一次服务上下线，看清谁写了哪些节点、谁在监听、通知如何变成可用地址列表，以及这套机制为什么能生效、何时会失灵。",
+          "articles": [
+            {
+              "file": "registration-discovery-flow.md",
+              "title": "服务注册与发现全流程",
+              "weight": 1,
+              "desc": "用真实运行日志和节点变化还原流程：提供者启动写节点、消费者订阅、映射应用名、拉取实例、刷新调用列表，直到提供者下线与会话过期。",
+              "sources": [
+                "Dubbo 3.2.20 源码",
+                "本机 demo 启动/调用/下线日志",
+                "本机 ZooKeeper 真实节点树"
+              ]
+            },
+            {
+              "file": "discovery-principle.md",
+              "title": "注册发现为什么能生效",
+              "weight": 2,
+              "desc": "从临时节点与会话心跳、Watcher 与 Curator ServiceCache、消费者本地目录和失败重试四层，解释地址变化如何变成一次成功调用，以及缓存、超时和半开连接带来的边界。",
+              "sources": [
+                "Dubbo 3.2.20 源码",
+                "ZooKeeper 3.8.7 会话与 Watcher 文档",
+                "本机下线与恢复实验"
+              ]
+            },
+            {
+              "file": "data-in-zookeeper.md",
+              "title": "Dubbo 在 ZooKeeper 中读写什么",
+              "weight": 3,
+              "desc": "把接口级 /dubbo 与应用级 /services 两套节点树逐层拆开，给出 URL 编码、节点数据、临时/持久属性、metadata 与 mapping 的真实样例和查看命令。",
+              "sources": [
+                "Dubbo 3.2.20 源码",
+                "本机三种 register-mode 实测",
+                "本机 ZooKeeper 节点 data 与 stat 输出"
+              ]
+            }
+          ]
+        },
+        {
+          "dir": "集成实践",
+          "title": "集成实践",
+          "weight": 3,
+          "desc": "用一套 Spring Boot 2.7 + Dubbo 3.2.20 的可运行工程，把依赖、配置、提供者、消费者、动态引用和验收步骤串起来。",
+          "articles": [
+            {
+              "file": "springboot-integration.md",
+              "title": "Spring Boot 集成 ZooKeeper 与 Dubbo",
+              "weight": 1,
+              "desc": "从 Maven 依赖与 Curator 5 版本对齐开始，完成 ZooKeeper 连接、服务暴露、静态与动态引用、启动顺序和端到端验收，并记录真实成功与失败响应。",
+              "sources": [
+                "本地 dubbo-flow-springboot 工程",
+                "Dubbo 3.2.20 源码",
+                "本机构建、启动与调用输出"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dir": "07-dubbo-springboot-lab",
+      "title": "Dubbo 实战",
+      "icon": "fa-solid fa-flask",
+      "weight": 7,
+      "desc": "从空目录开始，用 Spring Boot 2.7.18、Java 8、Dubbo 3.2.20 与 ZooKeeper 搭一套可运行的多模块 RPC 工程：模块拆分、契约、配置、提供者、消费者、动态引用、验收与排障。",
+      "sections": [
+        {
+          "dir": "工程蓝图",
+          "title": "工程蓝图",
+          "weight": 1,
+          "desc": "先明确实战目标、业务场景与模块边界，再把最终代码结构、构建顺序和依赖关系画成地图，避免一上来就堆代码。",
+          "articles": [
+            {
+              "file": "project-blueprint.md",
+              "title": "从零开始：目标、边界与代码地图",
+              "weight": 1,
+              "desc": "以一个流程中心回调多业务仓的场景为线索，定义模块边界、角色、最终代码结构与架构图，给出从空目录到可运行工程的路线。",
+              "sources": [
+                "本地 dubbo-flow-springboot 工程",
+                "Dubbo 3.2.20 源码",
+                "Spring Boot 2.7.18 官方文档"
+              ]
+            },
+            {
+              "file": "maven-skeleton.md",
+              "title": "Maven 多模块骨架",
+              "weight": 2,
+              "desc": "从空目录建立父 POM、flow/warehouse/portal 子模块，完成 Java 8、Spring Boot 2.7.18、Dubbo 3.2.20 与 Curator 5 的依赖对齐，并跑通第一次构建。",
+              "sources": [
+                "本地工程根 POM 与子模块 POM",
+                "Maven 3.10 构建输出",
+                "Dubbo 3.2.20 依赖说明"
+              ]
+            }
+          ]
+        },
+        {
+          "dir": "契约与底座",
+          "title": "契约与底座",
+          "weight": 2,
+          "desc": "先把接口、DTO、分组与路由表定下来，再准备 ZooKeeper 和 Spring Boot 配置，让后续编码有稳定边界。",
+          "articles": [
+            {
+              "file": "api-contract.md",
+              "title": "契约先行：API 模块、DTO 与分组设计",
+              "weight": 1,
+              "desc": "设计流程引擎与回调接口、DTO、group 常量与 businessType 路由表，讲清为什么契约模块不能依赖实现，以及如何为新增业务方留出扩展点。",
+              "sources": [
+                "本地 xxx-flow-api 源码",
+                "Dubbo 分组与多实现机制",
+                "真实节点树中的 group 证据"
+              ]
+            },
+            {
+              "file": "zookeeper-config.md",
+              "title": "ZooKeeper 与 Spring Boot 配置",
+              "weight": 2,
+              "desc": "准备独立 ZooKeeper 实例，配置注册地址、协议端口、QOS、会话与 register-mode，并给出提供者和消费者的最小 application.yml。",
+              "sources": [
+                "ZooKeeper 3.8.7 发行包",
+                "Dubbo 3.2.20 配置项",
+                "本地 application.yml 与启动参数"
+              ]
+            }
+          ]
+        },
+        {
+          "dir": "服务实现",
+          "title": "服务实现",
+          "weight": 3,
+          "desc": "分别从提供者和消费者两侧落地代码：暴露服务、静态引用、运行期动态引用，以及超时、重试和缓存。",
+          "articles": [
+            {
+              "file": "provider-implementation.md",
+              "title": "提供者：从接口到可调用服务",
+              "weight": 1,
+              "desc": "完成启动类、@DubboService 实现、分组声明、端口暴露与注册日志核对，理解一次服务暴露在代码和 ZooKeeper 上留下的痕迹。",
+              "sources": [
+                "本地仓库服务源码",
+                "Dubbo 3.2.20 RegistryProtocol",
+                "真实启动日志与节点树"
+              ]
+            },
+            {
+              "file": "consumer-static-dynamic.md",
+              "title": "消费者：静态引用与动态引用",
+              "weight": 2,
+              "desc": "实现 portal 的 @DubboReference 静态注入和 flow-service 的 ReferenceConfig 动态引用，解释 SimpleReferenceCache、check、timeout、retries 的取舍。",
+              "sources": [
+                "本地 portal 与 flow-service 源码",
+                "Dubbo 3.2.20 SimpleReferenceCache",
+                "真实调用与失败响应"
+              ]
+            }
+          ]
+        },
+        {
+          "dir": "运行与交付",
+          "title": "运行与交付",
+          "weight": 4,
+          "desc": "把工程真正跑起来：构建、启动顺序、端到端调用、ZooKeeper 核对、失败恢复、常见故障与上线检查。",
+          "articles": [
+            {
+              "file": "build-run-troubleshoot.md",
+              "title": "构建、启动、验收与排障",
+              "weight": 1,
+              "desc": "按顺序构建并启动四个进程，用真实 curl 响应和 zkCli 节点验证成功、提供者缺席与恢复，再给出故障定位表和上线检查清单。",
+              "sources": [
+                "本地 Maven 构建输出",
+                "四进程真实启动与调用日志",
+                "ZooKeeper 节点数据与 stat"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
