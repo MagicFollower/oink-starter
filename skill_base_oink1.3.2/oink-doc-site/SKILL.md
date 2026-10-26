@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 在空目录里搭出一个**可离线构建、可挂任意子路径、导航与首页完整**的中文文档站，并在同一套判据上完成骨架验收与成品验收。完整浏览走 HTTP；`file://` 只适合看纯文字，原因见 Step 3。
 
-主题 OINK v1.3.2 已内置（1,273 个文件 / 22,234,796 字节），Hugo、Go、字体、图标、搜索、Mermaid 运行时全部本地化，整个流程不联网。站点身份、首页、导航树与文章桩由一份 `site.plan.json` 驱动。
+主题 OINK v1.3.2 已内置（1,273 个文件 / 22,234,796 字节），Hugo、Go、字体、图标、搜索、Mermaid 运行时全部本地化，整个流程不联网。站点身份、首页、导航树与文章桩由一份 `site.plan.json` 驱动。骨架根目录带 `run.cmd`：Windows 双击即可启动 Hugo server、打印项目路径与访问地址，并自动打开浏览器。
 
 **贯穿全程的两条纪律：**
 
@@ -52,7 +52,7 @@ hugo version   # 必须 extended，且 >= 0.166.0
 go version     # 与 <站点>/go.mod 的 go 指令对齐（1.27.0）
 ```
 
-Hugo 不在 PATH 时让用户给绝对路径，验收时用 `--hugo <exe>`；Hugo 调不到 Go 时用 `--go-bin <go的bin目录>`。两者都找不到就报告缺什么并停在这里，不要现场换工具链。
+Hugo 不在 PATH 时让用户给绝对路径，验收时用 `--hugo <exe>`，站点根 `run.cmd` 则用 `HUGO_EXE` 指向同一个 exe；Hugo 调不到 Go 时用 `--go-bin <go的bin目录>`。两者都找不到就报告缺什么并停在这里，不要现场换工具链。
 
 如果 `go version` 打印 `go: downloading go1.27.0`，说明 PATH 选到了旧 Go（例如 `tools/go` 的 1.25.x）；把 `--go-bin` 指向 1.27.x 的 bin，或调整 PATH 顺序。验收时优先显式给 `--go-bin`。
 
@@ -66,7 +66,7 @@ python <技能目录>/scripts/scaffold.py --out <站点目录>
 
 ```
 theme -> <站点目录>/oink-main  copied=1273 skipped=0 files=1273
-scaffold -> <站点目录>  copied=8 skipped=0
+scaffold -> <站点目录>  copied=9 skipped=0
 plan -> <站点目录>/site.plan.json  copied=1
 ```
 
@@ -150,6 +150,8 @@ python <技能目录>/scripts/verify_site.py --site <站点目录> --plan <站�
 
 骨架模式可以给用户预览，但**不要说「内容已完成」**——文章桩还在。
 
+Windows 上可直接双击站点根目录的 `run.cmd`：它会设置 `GOTOOLCHAIN=local`/`GOPROXY=off`，优先使用 `HUGO_EXE`，否则 `where hugo`，在 `127.0.0.1:8768` 启动 Hugo server 并打开浏览器；端口冲突时先 `set PORT=9000`，脚本验证可设 `NO_OPEN=1`。Hugo 不在 PATH 时 `set "HUGO_EXE=<hugo.exe 完整路径>"` 后再运行。
+
 ## Step 4 写正文（仅 full 模式）
 
 先读 `references/writing-spec.md`，再按分类分批，一批 4–8 篇。每批给写作子代理五样：目标文件绝对路径、计划条目、写作规范绝对路径、对应体裁样章、事实来源。
@@ -209,7 +211,7 @@ python <技能目录>/scripts/audit_content.py --site <站点目录> --plan <站
 
 5. 检查/补写站点根 `.gitignore`（见文末「收尾：.gitignore」）：`public/`、`resources/`、`_mermaid-harness/` 等生成物必须忽略；`oink-main/`、`content/`、`hugo.yaml`、`go.mod`、`site.plan.json` 不能被忽略。
 
-6. 报告给用户：站点绝对路径与 `tree`、分类/板块/篇数、`verify_site.py` 的真实汇总行、`verify_site.py --selftest` 的 `SELFTEST_PASS`、MANUAL 项与未验证项。不要只写「搭好了」。
+6. 报告给用户：站点绝对路径与 `tree`、分类/板块/篇数、`verify_site.py` 的真实汇总行、`verify_site.py --selftest` 的 `SELFTEST_PASS`、`run.cmd` 的启动实测输出、MANUAL 项与未验证项。不要只写「搭好了」。
 
 ---
 
@@ -223,6 +225,9 @@ python <技能目录>/scripts/audit_content.py --site <站点目录> --plan <站
 | `go version` 打印 `go: downloading go1.27.0` 或下载超时 | PATH 里选到了低于 `go.mod` 的旧 Go | 把 `--go-bin` 指向 1.27.x 的 bin，或调整 PATH 顺序；不要只设 `GOTOOLCHAIN=local` |
 | 顶栏菜单区为空 / 没有「文档」tab | `hugo.yaml` 是否有 `menus.main` | 生成器会写 `identifier: docs`、`pageRef: /docs`；手删或旧站删了要补，`verify_site` 的 `nav` 判据会报 |
 | 双击 `public/index.html` 只有无样式文字 | 是否用 `file://` 打开 | 改用 `hugo server` 或 `python -m http.server`；`integrity`/`crossorigin` 在 file:// 被 CORS 拦截，不是站点内容坏了 |
+| 双击 `run.cmd` 窗口一闪而过 | Hugo 是否在 PATH，或 `HUGO_EXE` 是否指对 | 在终端执行 `run.cmd` 看完整报错；设置 `HUGO_EXE` 后重试 |
+| `run.cmd` 报端口被占用 | 8768 是否已被其他服务使用 | `set PORT=9000` 后重新运行，或关闭占用端口的进程 |
+| `run.cmd` 没有自动打开浏览器 | 系统默认浏览器/权限是否阻止 | 手动打开脚本打印的 `http://127.0.0.1:8768/`；服务本身通常已启动 |
 | 构建通过但外观菜单没有 4 套 | 先看 `public/index.html` 有没有 `data-td-preset` | 没有 = 主题副本是 1.0/1.1；有 = 检查 `preset_menu` 是否被注释 |
 | `links` 报 broken | 首页 `data/home/zh.yaml` 的 `url`、`content/docs/_index.md` 的卡片链接 | 以 `public/` 产物为准；`unmapped` 非零时先对齐 URL 规则 |
 | `audit` 报 `TOO_SHORT` / `FEW_NEWBIE` / `NO_MERMAID` | 文章是否还是桩或只有梗概 | 按 `references/writing-spec.md` 补正文；骨架阶段用 `--mode skeleton`，不要用 full 的绿骗自己 |
@@ -248,7 +253,7 @@ python <技能目录>/scripts/audit_content.py --site <站点目录> --plan <站
 - `scripts/verify_site.py` —— 统一入口：plan/scaffold/build/preset/nav/audit/links/mermaid/delivery；`--selftest` 用四个子脚本 + 假站点注入缺陷自证。
 - `assets/site.plan.example.json` —— 三分类示例计划，可复制成 `<站点>/site.plan.json` 后改。
 - `assets/templates/hugo.yaml` —— 站点配置模板；由 `plan_site.py` 填值，不要直接拷进站点手改。
-- `assets/scaffold/` —— 8 个骨架文件：`.gitignore`、`LICENSE`、`go.mod`/`go.sum`、品牌 SVG、写作规范、T0Level 模板。
+- `assets/scaffold/` —— 9 个骨架文件：`.gitignore`、`LICENSE`、`run.cmd`、`go.mod`/`go.sum`、品牌 SVG、写作规范、T0Level 模板。
 - `assets/example-docs/` —— 6 份体裁样章（216–540 行）；结构照它，事实不照抄。
 - `assets/theme/oink-main/oink-main/` —— OINK v1.3.2 主题本体（1,273 文件）；`scaffold.py` 整目录拷入。
 - `assets/fixtures/` —— 自证夹具（site / plan.json / expected.json）；只被 `--selftest` 消费。
@@ -256,6 +261,7 @@ python <技能目录>/scripts/audit_content.py --site <站点目录> --plan <站
 ## 自证基线（改脚本或夹具后重跑并更新本节）
 
 ```text
+scaffold --selftest: theme_files=1273 scaffold_ok=True（含 run.cmd）; SELFTEST_PASS
 plan_site --selftest: good problems=0; bad codes=BAD_HOME_URL,BAD_PATH,BAD_PRESET,
   DUP_WEIGHT,NO_ARTICLES,THIN_DESC,WEIGHT_GAP; SELFTEST_PASS
 audit_content --selftest: full problems=26 codes=21; skeleton problems=11 codes=10;
@@ -308,12 +314,13 @@ Appearance 可切 Slate 并写 localStorage；file:// 直开只有无样式文�
 - `oink-main/`：本地主题副本，`go.mod` 的 replace 指向它；忽略后新环境无法构建。
 - `content/`、`data/`、`static/`、`layouts/`（有站点级覆盖时）。
 - `hugo.yaml`、`go.mod`、`go.sum`、`site.plan.json`。
+- `run.cmd`：Windows 双击启动入口，丢了就只能手动敲 `hugo server`。
 - `README.md`、`doc/`。
 
 **检查命令**（在 Git 仓库内）：
 
 ```bash
-git check-ignore -v public resources _mermaid-harness oink-main content hugo.yaml site.plan.json
+git check-ignore -v public resources _mermaid-harness oink-main content hugo.yaml site.plan.json run.cmd
 ```
 
 输出里应出现 `public`、`resources`、`_mermaid-harness`，不应出现 `oink-main`、`content`、`hugo.yaml`、`site.plan.json`。目录不是 Git 仓库时不要为了这条检查去执行 `git init`；直接读 `.gitignore` 核对条目即可。

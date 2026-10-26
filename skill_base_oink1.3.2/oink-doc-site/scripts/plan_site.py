@@ -492,6 +492,7 @@ def render_readme(site, cats):
 ├── data/home/zh.yaml              # 首页 hero / 卡片 / CTA
 ├── hugo.yaml                      # 站点唯一配置
 ├── go.mod                         # 主题走 replace 本地化
+├── run.cmd                        # Windows 双击启动本地预览
 ├── oink-main/oink-main/           # OINK 主题（勿修改）
 ├── doc/                           # 编写规范、运行与构建
 └── site.plan.json                 # 导航计划（生成导航的源数据）
@@ -549,10 +550,13 @@ weight: 1
 ```bash
 export GOTOOLCHAIN=local GOPROXY=off
 hugo --cleanDestinationDir          # 构建
-hugo server -D                      # 本地预览（推荐）
+run.cmd                             # Windows：双击或命令行启动本地预览
+hugo server -D                      # 非 Windows 或手动启动
 python -m http.server 8766 --directory public   # 纯静态产物预览
 hugo --cleanDestinationDir --gc --minify   # 发布档
 ```
+
+Windows 的 `run.cmd` 会自动设置离线构建变量、查找 Hugo（找不到时可用 `HUGO_EXE` 指定完整路径）、在 `127.0.0.1:8768` 启动 Hugo server 并打开浏览器；端口冲突时先 `set PORT=9000` 再运行。`NO_OPEN=1` 可跳过自动打开浏览器，适合脚本验证。
 
 离线构建要同时满足：主题副本在 `oink-main/oink-main/`、`go.mod` 的 replace 指向它、Go 与 `go.mod` 指令对齐。Hugo 报 `failed to load modules` 时先查 Go 是否在 PATH，不是内容错误。验收时 Go 版本不对可用 `--go-bin` 指向正确 bin；如果 `go version` 打印 `go: downloading go1.27.0`，说明 PATH 选到了旧 Go。
 

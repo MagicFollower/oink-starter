@@ -17,6 +17,14 @@
 
 ## 二、项目启动（首次构建）
 
+### 双击启动（Windows）
+
+项目根目录的 `run.cmd` 供双击使用。它会切到脚本所在目录、设置 `GOTOOLCHAIN=local` 与 `GOPROXY=off`、优先使用 `HUGO_EXE`（未设置时用 `where hugo`），然后在 `127.0.0.1:8768` 启动 Hugo server 并自动打开浏览器。
+
+实测输出【待填：双击或 `cmd /c run.cmd` 的控制台输出，至少包含 Project / URL / Hugo 版本 / Built in】。
+
+端口被占用时，先在同一个命令行窗口执行 `set PORT=9000`，再运行 `run.cmd`；Hugo 不在 PATH 时用 `set "HUGO_EXE=<hugo.exe 的完整路径>"`。脚本验证时可设 `NO_OPEN=1` 跳过自动打开浏览器。
+
 ```
 【待填：构建命令】
 ```
@@ -31,7 +39,7 @@
 
 ## 三、本地调试
 
-`hugo server` 启动方式、重建行为、停止方式【待填：实测输出】。路由探针（`curl` 逐个真实状态码）：首页 / `/docs/` / 任一文章页 / 任一图片 / 搜索索引 / 一个不存在的路径（应为 404）。
+`hugo server` 启动方式、重建行为、停止方式【待填：实测输出】；`run.cmd` 在 Windows 上等价于一键执行同一件事，区别是它会打印项目路径、URL 与 Hugo 路径，并自动打开浏览器。路由探针（`curl` 逐个真实状态码）：首页 / `/docs/` / 任一文章页 / 任一图片 / 搜索索引 / 一个不存在的路径（应为 404）。
 
 浏览器实测（写明内核）：顶栏有「文档」入口且能进 `/docs/`；Mermaid 出图数量与 SVG 宽度、表格与 callout 与 💡 小结计数、`scrollWidth > innerWidth` 是否为 false、离线搜索能否命中。
 
