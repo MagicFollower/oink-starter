@@ -19,14 +19,3 @@ desktop.ini
 .idea/
 .vscode/
 *.swp
-
-# 实验案例包里的依赖与产物：不进仓库，也不该进 zip（口径同 cases/*/*/.gitignore）
-cases/**/node_modules/
-cases/**/__pycache__/
-cases/**/*.pyc
-cases/**/.venv/
-cases/**/venv/
-cases/**/dist/
-cases/**/build/
-cases/**/.pytest_cache/
-cases/**/*.env
