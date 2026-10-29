@@ -95,6 +95,7 @@ oink-starter/
 - **历史升级记录**（2026-10-24，自 v1.0.0）：整目录替换主题副本；`go.mod` / `go.sum` 升 v1.3.2；`hugo.yaml` 的 `hugoVersion.min` 从 0.160.1 升到 0.166.0；新增 `preset` / `preset_menu` 两行实值配置；本站无站点级 partial 覆盖，不涉及覆盖清理。
 - **生效判据**（只查配置不算数，要看产物）：`hugo.yaml` 中 `preset: paper` 与 `preset_menu: [paper, slate, ink, terminal]` 必须是不带 `#` 的实值；构建产物 `public/index.html` 的 `<html>` 标签上要能读到 `data-td-preset="paper"`。升级后实测（2026-10-29，Hugo 0.168.0 + Go 1.27.3）：标准档 `Pages 1022 / Static files 34 / Total 21719 ms`；生产档（`--minify --gc --environment production`）`Cleaned 2` → `Cleaned 0`、`Total 21220/21332 ms`，`public/` 1,078 个文件 / 115,533,517 字节；仅保留主题侧 LibSass 弃用 WARN。产物含 `llms.txt`、离线搜索索引 `offline-search-index.zh.97657c1cdc67cd644db8538be9bd9af8.json`（2,649,112 字节）与 `_print/` 打印档。
 - **升级前不可离线构建**：v1.0.0 时代主题靠远程模块解析（本地 `oink-main/` 为空目录），离线环境直接失败；升级后主题落地本地，`GOTOOLCHAIN=local GOPROXY=off` 下即可完整构建。
+- **技能 1.4.0 交付契约对齐**（2026-10-30）：按 OINK v1.4.0 技能复核，主题副本 1,292/1,292 哈希一致、`VENDOR.json` 74/74；修正 `content/docs/_index.md` 命名与 `preset` / `preset_menu` 的配置形态；`scaffold` / `build` / `preset` / `delivery_doc` 判据 PASS，`nav` 站点入口齐全（技能脚本截断误判），`links` 440 条坏链与 `audit` 不适用原因见 `doc/验收汇总.md`。本轮不改 404 篇 SILO 正文。
 
 ## 配置说明
 

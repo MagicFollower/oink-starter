@@ -1,6 +1,6 @@
 # 运行与构建（T0Level）
 
-读者设定：第一次接手这个仓库的人。本文件记录 OINK v1.3.2 → v1.4.0 升级后的真实命令与实测输出（2026-10-29，Windows 10.0.26300，Git Bash）。未执行的项目在第 8 节与「未验证项汇总」中逐条列出，不写想象中的输出。
+读者设定：第一次接手这个仓库的人。本文件记录 OINK v1.3.2 → v1.4.0 升级（2026-10-29）与技能 1.4.0 交付契约对齐（2026-10-30）的真实命令与实测输出（Windows 10.0.26300，Git Bash）。未执行的项目在第 8 节与「未验证项汇总」中逐条列出，不写想象中的输出。对齐轮只动主题/配置/交付件，不改 404 篇 SILO 正文，逐条读数见 `doc/验收汇总.md`。
 
 ## 一、前置要求
 
@@ -87,7 +87,7 @@ Press Ctrl+C to stop
 
 ```bash
 cd "/c/Users/webtu/Desktop/silo文档站/oink-starter（官方文档--禁止修改，只可参考）"
-export PATH="/c/Users/webtu/tools/hugo:/c/Users/webtu/tools/go1.27.3/go/bin:$PATH"
+export PATH="/d/Apps/hugo_extended_0.168.0_windows-amd64:/c/Users/webtu/tools/go1.27.3/go/bin:$PATH"
 GOTOOLCHAIN=local GOPROXY=off hugo --cleanDestinationDir
 ```
 
@@ -119,7 +119,7 @@ Total in 21719 ms
 优先双击 `run.cmd`：它会从 8768 起自动挑空闲端口（本机实测选 8769）。手动启动可用下面的等价命令（本测试用 8799）：
 
 ```bash
-export PATH="/c/Users/webtu/tools/hugo:/c/Users/webtu/tools/go1.27.3/go/bin:$PATH"
+export PATH="/d/Apps/hugo_extended_0.168.0_windows-amd64:/c/Users/webtu/tools/go1.27.3/go/bin:$PATH"
 GOTOOLCHAIN=local GOPROXY=off hugo server --bind 127.0.0.1 --port 8799 --renderToMemory --disableFastRender
 ```
 
@@ -154,7 +154,7 @@ Press Ctrl+C to stop
 生产构建：
 
 ```bash
-export PATH="/c/Users/webtu/tools/hugo:/c/Users/webtu/tools/go1.27.3/go/bin:$PATH"
+export PATH="/d/Apps/hugo_extended_0.168.0_windows-amd64:/c/Users/webtu/tools/go1.27.3/go/bin:$PATH"
 GOTOOLCHAIN=local GOPROXY=off hugo --cleanDestinationDir --gc --minify \
   --environment production --printPathWarnings
 ```
@@ -244,11 +244,54 @@ _print/ 打印档：85 个 HTML
 | 产物级链接 | 爬 `public/` 全部 HTML 的 href/src | 517 页 / 204,638 引用；CSS/JS 缺失 0；116 个唯一断链目标（页面 48、图片 68）；按引用次数 450 + 293 = 743，与 README 既有缺口一致 |
 | 390px 布局 | 同源 iframe 探针 | `scrollWidth=clientWidth=375`，无横向溢出 |
 | 预设与搜索 | headless Edge + 页面内点击 | 4 套预设可切换并写入 localStorage；搜索「安装」10 条、「silo」10 条、范围「文档」10 条 |
-| `verify_site.py` | 技能统一验收 | 未运行：本仓库没有 `site.plan.json` 与技能骨架，脚本不适用 |
-| `audit_content.py` | 结构/文体审计 | 未运行：没有计划文件；本站是上游 SILO 文档克隆，不是按技能计划生成的文章 |
-| `check_links.py` | 以 `public/` 为判据 | 运行过但不适用：脚本把 `.zh.md` 源映射成 `page.zh/`，本站产物是 `page/`，全部报 UNMAPPED；改用上面的产物级爬取 |
-| Mermaid 真解析 | `validate_mermaid.py` | 未运行：`content/` 中没有 mermaid 围栏 |
+| `verify_site.py` | 技能统一验收（无计划文件，逐判据调用） | 2026-10-30 实跑：`scaffold` PASS（`theme_files=1292 placeholders=0 preset=paper run_cmd=ok`）、`build` PASS（`Pages=1022 Static files=34 ERROR=0 rc=0`）、`preset` PASS（`data-td-preset=paper menu=list:4`）、`delivery_doc` PASS；`nav` 脚本 FAIL 但站点三项入口齐全（判据非贪婪截断，见第九节）；`links` FAIL（`broken=440 unmapped=416`）；`mermaid` GENERATED |
+| `audit_content.py` | 结构/文体审计 | 不适用：本站是上游 SILO 文档克隆，不是按技能计划生成的文章。`content/docs` 下 92 个目录 / 404 个 Markdown（403 个 `.zh.md`），树深 4 层；技能计划模型只有 `docs/<分类>/<板块>/<文件>` 两层且要求每层 `_index.md`，无法表达 |
+| `check_links.py` | 以 `public/` 为判据 | 2026-10-30 实跑：`links_checked=4006 broken=440 unmapped=416 home_urls=6`。440 条按前缀分组：`/images/` 230、`/../` 79、`/zh/` 75、`/blog/` 32、`/operations/` 21、其余 3；`unmapped` 源于 `.zh.md` 源文件到 `page/index.html` 的映射口径差异。按约定本轮不改正文；上面的产物级爬取是另一套口径 |
+| Mermaid 真解析 | `validate_mermaid.py` + headless Edge | 2026-10-30 实跑：`blocks=2`（均为 `--selftest` 注入样本），页面 `#out` 读回 `TOTAL=0 REAL_FAIL=0 SELFTEST=1/2 SELFTEST_PASS`；`content/` 没有真实 `mermaid` 围栏，`TOTAL=0` 属预期 |
 | 案例包判据 | `check_cases.py` | 未运行：本仓库没有 `cases/` |
+
+## 九、技能 1.4.0 交付契约对齐（2026-10-30）
+
+口径：只对齐版本与交付契约，不改 404 篇 SILO 正文。完整读数与复现脚本见 `doc/验收汇总.md`。
+
+### 版本面
+
+| 项 | 实测 |
+|----|------|
+| 主题副本与技能内置 1.4.0 逐文件 sha256 | `skill_files=1292 site_files=1292`；`only_skill=0 only_site=0 hash_diff=0`；两边均 27,213,292 字节 |
+| `VENDOR.json` 资产 | `artifacts_checked=74 ok=74 hash_bad=0 missing=0` |
+| `go.mod` | `go 1.27.3`、`require github.com/pgsty/oink v1.4.0`、`replace => ./oink-main/oink-main` |
+| `theme.toml` 的 `min_version` | `0.168.0` |
+| `hugo.yaml` 的 `module.hugoVersion.min` | `0.168.0` |
+
+### 本轮改动
+
+1. **`content/docs/_index.zh.md` → `content/docs/_index.md`**（`git mv`）。技能 scaffold 判据只认 `content/docs/_index.md`；本站默认语言是 `zh`，两种命名产出的 URL 与页面一致。改名后重构建仍为 `Pages 1022 / Static files 34`，`public/docs/index.html` 标题不变。
+2. **`hugo.yaml` 的 `preset` / `preset_menu` 去掉行尾注释**，注释移到键上方。技能判据按 `^\s*preset:\s*(.+?)\s*$` 取值，行尾 `# ...` 会被当成值的一部分；Hugo 侧行为不变。
+3. `run.cmd` 契约标记齐全（`verify_site.check_run_cmd` 无报错）；`.gitignore` 命中 `public`、`resources`、`_mermaid-harness`，未忽略 `oink-main`、`content`、`hugo.yaml`、`run.cmd`、`doc`。
+
+### 判据读数（逐判据调用，统一入口需 `--plan`）
+
+先跑 `verify_site.py --selftest`：注入缺陷逐条 FAIL、恢复后 PASS，末行 `SELFTEST_PASS`。
+
+| 判据 | 状态 | 读数 |
+|------|------|------|
+| `scaffold` | PASS | `theme_files=1292 placeholders=0 preset=paper run_cmd=ok` |
+| `build` | PASS | `Pages=1022 Static files=34 ERROR=0 rc=0` |
+| `preset` | PASS | `data-td-preset=paper menu=list:4` |
+| `nav` | 脚本 FAIL / 站点 PASS | 等深解析顶栏三项：`./blog/`、`./docs/`、`./book/` |
+| `links` | FAIL | `links_checked=4006 broken=440 unmapped=416 home_urls=6` |
+| `mermaid` | GENERATED | `blocks=2`；浏览器读回 `TOTAL=0 REAL_FAIL=0 SELFTEST=1/2 SELFTEST_PASS` |
+| `delivery_doc` | PASS | 本文件 |
+| `source_ledger` | MANUAL | 无 `doc/内容来源.md`，正文来自上游 SILO 快照 |
+
+### nav 脚本误判的原因
+
+`verify_site.gate_nav` 用 `<div[^>]*td-nav-menu-zone[^>]*>(.*?)</div>` 非贪婪截取菜单区；本站顶栏第一项 blog 带下拉分组，渲染出嵌套 `div`，匹配在第一个 `</div>` 就闭合，只读到 blog，漏掉 docs 与 book。技能自带示例站的首项都是叶子链接，所以该缺陷在示例包里不显形。本轮不改技能脚本。
+
+### 启动实测
+
+`PORT=8790 NO_OPEN=1 NO_PAUSE=1 cmd /c run.cmd`：Hugo 取 `where hugo` 命中 Extended 0.168.0，Go 取配置块 `GO_FALLBACK` 的 1.27.3；`Built in 21134 ms`，`Web Server is available at http://localhost:8790/`，`curl` 返回 `http=200`，标题 `Project Name`。
 
 ## 未验证项汇总
 
