@@ -577,6 +577,26 @@ Windows 的 `run.cmd` 会自动设置离线构建变量、查找 Hugo（找不�
     }
 
 
+RUN_TITLE_RE = re.compile(r'set "SITE_TITLE=[^\r\n]*')
+
+
+def patch_run_cmd_title(site_dir, title):
+    """只改 run.cmd 配置块里的 SITE_TITLE 一行；没有 run.cmd 时 no-op。"""
+    path = os.path.join(site_dir, "run.cmd")
+    if not os.path.isfile(path):
+        return False
+    with open(path, "rb") as f:
+        raw = f.read()
+    safe = title.replace('"', "").replace("\r", " ").replace("\n", " ").strip()
+    text = raw.decode("utf-8")
+    new = RUN_TITLE_RE.sub(lambda m: 'set "SITE_TITLE=%s"' % safe, text, count=1)
+    if new == text:
+        return False
+    with open(path, "wb") as f:
+        f.write(new.encode("utf-8"))
+    return True
+
+
 def write_plan(site_dir, data, force):
     site = data["site"]
     cats = data["categories"]
@@ -591,6 +611,8 @@ def write_plan(site_dir, data, force):
     write(os.path.join(site_dir, "data", "home", "zh.yaml"), render_home(site, data.get("home"), cats))
     write(os.path.join(site_dir, "README.md"), render_readme(site, cats))
     generated += 5
+    if patch_run_cmd_title(site_dir, site["title"]):
+        print("run.cmd SITE_TITLE -> %s" % site["title"])
 
     docs = os.path.join(site_dir, "content", "docs")
     for cat in cats:
@@ -671,6 +693,23 @@ def selftest():
           % (len(pgood), sgood["categories"], sgood["sections"], sgood["articles"]))
     print("bad: problems=%d codes=%s" % (len(pbad), ",".join(sorted(codes))))
     ok = not pgood and not missing
+    tmp = os.path.join(os.environ.get("OINK_DOC_TMP") or os.getcwd(), ".tmp", "plan-run-cmd")
+    os.makedirs(tmp, exist_ok=True)
+    run_dst = os.path.join(tmp, "run.cmd")
+    with open(os.path.join(SKILL, "assets", "scaffold", "run.cmd"), "rb") as f:
+        blob = f.read()
+    with open(run_dst, "wb") as f:
+        f.write(blob)
+    patched = patch_run_cmd_title(tmp, good["site"]["title"])
+    with io.open(run_dst, encoding="utf-8") as f:
+        lines = [l for l in f.read().splitlines() if l.startswith('set "SITE_TITLE=')]
+    title_ok = patched and lines == ['set "SITE_TITLE=%s"' % good["site"]["title"]]
+    noop_ok = patch_run_cmd_title(os.path.join(tmp, "nope"), "x") is False
+    for name in os.listdir(tmp):
+        os.remove(os.path.join(tmp, name))
+    os.rmdir(tmp)
+    print("run.cmd title patch: patched=%s title_ok=%s missing_noop=%s" % (patched, title_ok, noop_ok))
+    ok = ok and patched and title_ok and noop_ok
     if missing:
         print("SELFTEST_INVALID 未触发的缺陷：%s" % ",".join(missing))
     print("SELFTEST_PASS" if ok else "SELFTEST_INVALID")

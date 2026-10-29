@@ -9,12 +9,13 @@
 退出码：0 = 全部自动/构建判据通过；1 = 有 FAIL；2 = 用法错。
 
 判据分三类，汇总里分开写，别把 MANUAL 当 PASS：
-  AUTO    计划、脚手架、结构审计、站内链接、交付文档
+  AUTO    计划、脚手架、结构审计、站内链接、案例包、交付文档
   BUILD   hugo build、产物里的 data-td-preset 与顶栏 docs 入口（给了 --hugo 才跑）
   MANUAL  Mermaid 真解析（只生成解析台）、内容来源清单
 
-判据先要能红：`--selftest` 会跑四个子脚本的自证，并在假站点上注入
-「占位符 / 缺 data-td-preset / 缺顶栏入口 / 缺 T0 文档 / 坏计划」五类缺陷，逐条确认会报 FAIL。
+判据先要能红：`--selftest` 会跑六个子脚本的自证，并在假站点上注入
+「占位符 / 缺 data-td-preset / 缺顶栏入口 / 缺 T0 文档 / 坏计划 / 案例包 static 副本缺失 /
+缺 run.cmd / run.cmd 缺标记」八类缺陷，逐条确认会报 FAIL。
 """
 
 import argparse
@@ -31,7 +32,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import audit_content  # noqa: E402
+import check_cases  # noqa: E402
 import check_links  # noqa: E402
+import package_case  # noqa: E402
 import plan_site  # noqa: E402
 
 HUGO_ENV = {"GOTOOLCHAIN": "local", "GOPROXY": "off"}
@@ -122,6 +125,43 @@ def gate_plan(plan_path):
     return ("PASS" if not problems else "FAIL"), detail
 
 
+RUN_CMD_MARKERS = (
+    'set "GOTOOLCHAIN=local"',
+    'set "GOPROXY=off"',
+    "HUGO_EXE",
+    "NO_OPEN",
+    "NO_PAUSE",
+    "--openBrowser",
+    'set "SITE_TITLE=',
+)
+
+
+def check_run_cmd(site):
+    """run.cmd 是交付物：存在、ASCII、CRLF、带离线与启动契约标记。"""
+    path = os.path.join(site, "run.cmd")
+    if not os.path.isfile(path):
+        return "缺 run.cmd（拷 assets/scaffold/run.cmd 并只改 PROJECT CONFIG 块）"
+    with open(path, "rb") as f:
+        raw = f.read()
+    if b"\r\n" not in raw:
+        return "run.cmd 不是 CRLF 行尾"
+    if any(b > 127 for b in raw):
+        if b"chcp 65001" not in raw:
+            return "run.cmd 含非 ASCII 但缺 chcp 65001（中文显示会丢字节）"
+        if raw.startswith(b"\xef\xbb\xbf"):
+            return "run.cmd 带 UTF-8 BOM（cmd 解析会出错）"
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            return "run.cmd 非 ASCII 且不是合法 UTF-8"
+    else:
+        text = raw.decode("ascii")
+    missing = [m for m in RUN_CMD_MARKERS if m not in text]
+    if missing:
+        return "run.cmd 缺契约标记：%s（旧模板请整体换成 assets/scaffold/run.cmd）" % "、".join(missing)
+    return None
+
+
 def gate_scaffold(site, plan_data):
     theme, missing, n_theme = theme_info(site)
     if missing:
@@ -174,7 +214,10 @@ def gate_scaffold(site, plan_data):
     hits = scan_placeholders(site)
     if hits:
         return "FAIL", "仍有【】占位：%s" % "、".join("%s(%d)" % (k, v) for k, v in sorted(hits.items())[:6])
-    return "PASS", "theme_files=%d placeholders=0 preset=%s" % (n_theme, preset)
+    err = check_run_cmd(site)
+    if err:
+        return "FAIL", err
+    return "PASS", "theme_files=%d placeholders=0 preset=%s run_cmd=ok" % (n_theme, preset)
 
 
 def parse_hugo_output(out):
@@ -269,6 +312,21 @@ def gate_links(site):
     return ("PASS" if not (broken or unmapped) else "FAIL"), detail
 
 
+def gate_cases(site):
+    """实验验证案例包：源目录、zip、static 副本、文档引用四方一致。"""
+    if not os.path.isdir(os.path.join(site, "cases")):
+        return "SKIP", "无 cases/，本轮没有实验验证案例"
+    try:
+        problems, stats = check_cases.check(site)
+    except OSError as e:
+        return "FAIL", str(e)
+    detail = "cases=%d doc_links=%d public=%s problems=%d" % (
+        stats["cases"], stats["doc_links"], stats["public"], len(problems))
+    if problems:
+        detail += "；首条：" + "%s %s" % (problems[0][0], problems[0][1])
+    return ("PASS" if not problems else "FAIL"), detail
+
+
 def gate_mermaid(site):
     theme, missing, _ = theme_info(site)
     if missing:
@@ -322,6 +380,7 @@ def gates(args):
         ("nav", "BUILD") + gate_nav(site),
         ("audit", "AUTO") + gate_audit(site, plan_path, args.mode, args.min_lines, args.report),
         ("links", "AUTO") + gate_links(site),
+        ("cases", "AUTO") + gate_cases(site),
         ("mermaid", "MANUAL") + gate_mermaid(site),
         ("delivery_doc", "AUTO") + gate_delivery(site, args.mode),
         ("source_ledger", "MANUAL") + gate_ledger(site),
@@ -363,6 +422,8 @@ def fake_site(root, with_plan_doc=True):
     write(os.path.join(site, "content", "docs", "_index.md"), "---\ntitle: \"文档\"\ndescription: \"文档\"\n---\n")
     write(os.path.join(site, "data", "home", "zh.yaml"), "sections: [hero]\n")
     write(os.path.join(site, "README.md"), "# 示例\n")
+    shutil.copyfile(os.path.join(SKILL, "assets", "scaffold", "run.cmd"),
+                    os.path.join(site, "run.cmd"))
     hugo = read(os.path.join(SKILL, "assets", "templates", "hugo.yaml"))
     repl = {
         "【站点标题】": "示例文档", "【BASE_URL】": "https://example.org/",
@@ -392,6 +453,21 @@ def fake_site(root, with_plan_doc=True):
     return site, plan_path, plan
 
 
+def add_case_fixture(site, theme, case):
+    """在假站点里造一个四方齐全的最小完整案例：.gitignore + 手册 + 脚本，交给 package_case 打包。"""
+    cdir = os.path.join(site, "cases", theme, case)
+    write(os.path.join(cdir, ".gitignore"), check_cases.BASELINE_IGNORE)
+    write(os.path.join(cdir, "README.md"), check_cases.GOOD_MANUAL)
+    write(os.path.join(cdir, "probe.cmd"), "netstat -ano\n")
+    zp = package_case.pack(site, theme, case)[0]
+    # 构建后 static 副本会落进 public/；假站点已经有 public/，这里同步一份免得误报 NOT_IN_PUBLIC
+    os.makedirs(os.path.join(site, "public", "cases", theme), exist_ok=True)
+    shutil.copyfile(zp, os.path.join(site, "public", "cases", theme, case + ".zip"))
+    write(os.path.join(site, "content", "case-ref.md"),
+          "[%s.zip](/cases/%s/%s.zip)\n" % (case, theme, case))
+    return zp
+
+
 def selftest():
     root = os.environ.get("OINK_DOC_TMP") or os.path.join(os.getcwd(), ".tmp")
     os.makedirs(root, exist_ok=True)
@@ -402,6 +478,8 @@ def selftest():
             ("plan_site", [sys.executable, os.path.join(HERE, "plan_site.py"), "--selftest"]),
             ("audit_content", [sys.executable, os.path.join(HERE, "audit_content.py"), "--selftest"]),
             ("check_links", [sys.executable, os.path.join(HERE, "check_links.py"), "--selftest"]),
+            ("check_cases", [sys.executable, os.path.join(HERE, "check_cases.py"), "--selftest"]),
+            ("package_case", [sys.executable, os.path.join(HERE, "package_case.py"), "--selftest"]),
         ]
         for name, cmd in sub:
             rc, out = run_cmd(cmd, timeout=180)
@@ -438,6 +516,28 @@ def selftest():
         if st_bad != "FAIL":
             ok = False
         write(hugo_path, saved)
+        # run.cmd：缺文件 / 缺契约标记 必须红
+        run_path = os.path.join(site, "run.cmd")
+        with open(run_path, "rb") as f:
+            saved_run = f.read()
+        plan_data = json.load(io.open(plan_path, encoding="utf-8"))
+        os.remove(run_path)
+        st_bad, _ = gate_scaffold(site, plan_data)
+        print("run.cmd missing injected: %s（期望 FAIL）" % st_bad)
+        if st_bad != "FAIL":
+            ok = False
+        with open(run_path, "wb") as f:
+            f.write(saved_run.replace(b'set "GOPROXY=off"\r\n', b""))
+        st_bad, _ = gate_scaffold(site, plan_data)
+        print("run.cmd marker injected: %s（期望 FAIL）" % st_bad)
+        if st_bad != "FAIL":
+            ok = False
+        with open(run_path, "wb") as f:
+            f.write(saved_run)
+        st_good, _ = gate_scaffold(site, plan_data)
+        print("run.cmd restored: %s（期望 PASS）" % st_good)
+        if st_good != "PASS":
+            ok = False
         # 注入缺 data-td-preset / 缺顶栏入口：必须红
         write(os.path.join(site, "public", "index.html"), "<!doctype html><html><body></body></html>\n")
         plan_data = json.load(io.open(plan_path, encoding="utf-8"))
@@ -519,6 +619,26 @@ def selftest():
                                     os.path.join(fixtures, "plan.json"), "full", 20, None)
         print("audit fixture: %s（期望 FAIL）%s" % (st_bad, detail))
         if st_bad != "FAIL":
+            ok = False
+        # 案例包：无 cases/ 必须 SKIP，四方齐全必须 PASS，缺 static 副本必须 FAIL
+        st_skip, detail = gate_cases(site)
+        print("cases absent: %s（期望 SKIP）%s" % (st_skip, detail))
+        if st_skip != "SKIP":
+            ok = False
+        zp = add_case_fixture(site, "09-ops", "demo")
+        st_good, detail = gate_cases(site)
+        print("cases green: %s %s" % (st_good, detail))
+        if st_good != "PASS":
+            ok = False
+        os.remove(os.path.join(site, "static", "cases", "09-ops", "demo.zip"))
+        st_bad, detail = gate_cases(site)
+        print("cases static deleted: %s（期望 FAIL）%s" % (st_bad, detail))
+        if st_bad != "FAIL":
+            ok = False
+        shutil.copyfile(zp, os.path.join(site, "static", "cases", "09-ops", "demo.zip"))
+        st_good, _ = gate_cases(site)
+        print("cases restored: %s（期望 PASS）" % st_good)
+        if st_good != "PASS":
             ok = False
         # Hugo 输出解析器：ERROR 必须被看见
         sample_ok = " Pages │ 15\n Static files │ 34\n Total in 1231 ms\n"
