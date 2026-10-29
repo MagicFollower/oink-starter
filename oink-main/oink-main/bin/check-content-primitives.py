@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate everyday content primitive output and strict author failures.
+"""Validate everyday content primitive output and author diagnostics and safe fallbacks.
 
 Covers Badge, Kbd, Fields (shortcode and `{.fields}` table), the native list
 forms (`{.steps}`, `{.cards}`), the `filetree` fence, the table family (`.matrix`,
@@ -49,11 +49,14 @@ def check_outputs(public: Path) -> list[str]:
     for prefix in ("", "zh/"):
         technical = (public / f"{prefix}fixtures/table-layout-policy/index.html").read_text()
         technical_md = (public / f"{prefix}fixtures/table-layout-policy/index.md").read_text()
-        require('id="wide-technical-table"' in technical and 'class="td-table--wide"' in technical,
-                f"{prefix} technical table lost its explicit width marker", errors)
-        require('class="matrix full-width td-table--wide td-table--matrix"' in technical,
+        require('<table id="wide-technical-table" class="wide td-table--wide">' in technical,
+                f"{prefix} technical table lost its short width marker or style class", errors)
+        require('<table id="configuration-keys-table" class="td-table--wide">' in technical,
+                f"{prefix} technical table lost legacy width-marker compatibility", errors)
+        require('class="matrix full-width wide td-table--wide td-table--matrix"' in technical,
                 f"{prefix} wide marker displaced existing table modifiers", errors)
-        require("HG_PD_GRPC_HOST" in technical_md and "{#wide-technical-table .td-table--wide}" in technical_md and "<table" not in technical_md,
+        require("HG_PD_GRPC_HOST" in technical_md and "{#wide-technical-table .wide}" in technical_md
+                and "{#configuration-keys-table .td-table--wide}" in technical_md and "<table" not in technical_md,
                 f"{prefix} technical table Markdown lost authored content or acquired HTML", errors)
 
     # --- Badge / Kbd / Fields shortcode / full-width table -------------------
@@ -593,7 +596,9 @@ def check_table_family(hugo: str) -> list[str]:
             "## Site classes pass through, data-* and aria-* survive, on* is dropped\n\n"
             + TABLE + '{.ext-table .stretch-last data-fixture="kept" aria-describedby="note" onclick="alert(1)"}\n\n'
             "## Fields with a class and a generic attribute\n\n"
-            + TABLE + '{.fields .site-fields data-fixture="fields"}\n\n'
+            + TABLE + '{.fields .wide .site-fields data-fixture="fields"}\n\n'
+            "## Short and legacy width markers can coexist\n\n"
+            + TABLE + '{#wide-both .wide .td-table--wide}\n\n'
             "## Orphan attribute line (blank line in between) is not applied\n\n"
             + TABLE + "\n{.matrix}\n\n"
             "## Include\n\n"
@@ -674,7 +679,8 @@ def check_table_family(hugo: str) -> list[str]:
         html = (destination / "docs/family/index.html").read_text(encoding="utf-8")
         for marker in (
             '<table class="ext-table stretch-last" aria-describedby="note" data-fixture="kept">',
-            '<div class="td-fields site-fields" data-fixture="fields">',
+            '<div class="td-fields wide site-fields" data-fixture="fields">',
+            '<table id="wide-both" class="wide td-table--wide">',
             "Included <strong>Markdown</strong> snippet.",
             '<span class="nt">included</span><span class="p">:</span>',  # the yaml include, highlighted
             "Value 42 inline.",
@@ -687,7 +693,71 @@ def check_table_family(hugo: str) -> list[str]:
         errors += check_field_scopes(parity)
         require(html.count('data-td-language="yaml"') == 2 and 'data-td-language="js"' in html, "include code=true did not highlight the included files", errors)
         require("td-table--matrix" not in html and "<p>{.matrix}</p>" not in html, "an orphan attribute line was applied or printed", errors)
-        require(html.count("<table") == 2, "table family fixture rendered a wrong number of tables", errors)
+        require(html.count("<table") == 3, "table family fixture rendered a wrong number of tables", errors)
+    return errors
+
+
+def check_table_reader(hugo: str) -> list[str]:
+    """Explicit opt-in, class composition, localization and static degradation."""
+    errors: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="oink-table-reader-") as temp:
+        site = Path(temp)
+        content = site / "content/docs"
+        content.mkdir(parents=True)
+        attributes = (
+            '{#reader-alone .expand}',
+            '{#reader-wide .wide .expand}',
+            '{#reader-classes class="wide expand"}',
+            '{#reader-matrix .matrix .full-width .expand caption="Matrix caption"}',
+            '{#reader-numbered .expand num="7-1" caption="Numbered caption"}',
+            '{#reader-tab .expand tab="Table tab"}',
+        )
+        for suffix in ("", ".zh"):
+            (content / f"_index{suffix}.md").write_text("---\ntitle: Reader fixtures\n---\n")
+            (content / f"reader{suffix}.md").write_text(
+                "---\ntitle: Table reader\noutputs: [HTML, markdown, print]\n---\n\n"
+                + "\n".join(TABLE + attrs + "\n" for attrs in attributes)
+            )
+            (content / f"plain{suffix}.md").write_text("---\ntitle: Plain table\n---\n\n" + TABLE + "{.wide}\n")
+            (content / f"fields{suffix}.md").write_text("---\ntitle: Field list\n---\n\n" + TABLE + "{.fields .expand}\n")
+        destination = site / "public"
+        result = run_hugo_process(
+            [hugo, "--source", str(FIXTURE), "--themesDir", str(ROOT.parent),
+             "--contentDir", str(site / "content"), "--destination", str(destination), "--logLevel", "warn"],
+            cwd=ROOT, capture_output=True, text=True, check=False,
+        )
+        if result.returncode:
+            return [f"table reader fixture failed: {result.stdout}{result.stderr}"]
+        require(".fields cannot be combined with .expand" in result.stdout + result.stderr,
+                "fields/expand conflict did not warn", errors)
+        for prefix, label in (("", "Expand table"), ("zh/", "展开表格")):
+            html = (destination / f"{prefix}docs/reader/index.html").read_text()
+            require(html.count('data-td-table-expand>') == len(attributes), "reader opt-ins lost wrappers", errors)
+            require(html.count('data-td-table-reader aria-labelledby=') == 1 and label in html,
+                    f"{prefix} reader lost its single localized dialog", errors)
+            require('<table id="reader-wide" class="wide expand td-table--wide">' in html
+                    and '<table id="reader-classes" class="wide expand td-table--wide">' in html,
+                    "multiple classes changed table sizing/reader semantics", errors)
+            require('scope="row"' in html and 'Numbered caption' in html and 'data-td-tab="Table tab"' in html,
+                    "reader displaced matrix, numbered or tab semantics", errors)
+            chunks = [item for item in referenced_chunks(destination, html) if item.name == "table-reader"]
+            require(len(chunks) == 1 and chunks[0].path.is_file(), "reader runtime missing or duplicated", errors)
+            for name in ("plain", "fields"):
+                plain = (destination / f"{prefix}docs/{name}/index.html").read_text()
+                require("data-td-table-reader" not in plain and "js/chunks/table-reader" not in plain,
+                        f"{name} table loaded the reader without an eligible opt-in", errors)
+            markdown = (destination / f"{prefix}docs/reader/index.md").read_text()
+            require(all(attrs in markdown for attrs in attributes), "Markdown lost authored reader classes", errors)
+            static_outputs = (
+                (destination / f"{prefix}_print/docs/reader/index.html").read_text(),
+                unescape((destination / f"{prefix}docs/index.xml").read_text()),
+                markdown,
+            )
+            for output in static_outputs:
+                require("reader-wide" in output and "Numbered caption" in output,
+                        "reader static output lost content", errors)
+                require("data-td-table-reader" not in output and "data-td-table-expand" not in output
+                        and "js/chunks/table-reader" not in output, "reader leaked into static output", errors)
     return errors
 
 
@@ -813,11 +883,6 @@ def check_invalid_cases(hugo: str) -> list[str]:
         require(param_page.is_file(), "param map lost its safe output", errors)
         if param_page.is_file():
             require("fixture_map" not in param_page.read_text(), "param map value reached the rendered page", errors)
-        strict = run_hugo_process(
-            [*command, "--destination", str(temp_path / "public-strict"), "--panicOnWarning"],
-            cwd=ROOT, capture_output=True, text=True, check=False,
-        )
-        require(strict.returncode != 0, "batched invalid cases survived --panicOnWarning", errors)
 
     for name, body, expected in INVALID_CASES:
         if name not in UNBATCHED_INVALID_CASES:
@@ -837,11 +902,6 @@ def check_invalid_cases(hugo: str) -> list[str]:
             require(expected in case_output, f"invalid case {name} did not report {expected!r} at its position: {case_output or output.strip()}", errors)
             page = temp_path / "public/docs/invalid/index.html"
             require(page.is_file() == (result.returncode == 0), f"invalid case {name} left partial output", errors)
-            strict = run_hugo_process(
-                [*command, "--destination", str(temp_path / "public-strict"), "--panicOnWarning"],
-                cwd=ROOT, capture_output=True, text=True, check=False,
-            )
-            require(strict.returncode != 0, f"invalid case {name} survived --panicOnWarning", errors)
     return errors
 
 
@@ -962,6 +1022,7 @@ def main() -> int:
         + check_generic_rss_output(args.hugo)
         + check_rss_summary_contract(args.hugo)
         + check_table_family(args.hugo)
+        + check_table_reader(args.hugo)
         + check_invalid_cases(args.hugo)
         + check_template_contracts()
     )

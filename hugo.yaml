@@ -9,7 +9,7 @@ enableRobotsTXT: true
 enableEmoji: true
 timeZone: UTC
 
-# 顶栏导航：OINK 1.3.2 只渲染 .Site.Menus.main，不会自动挂 docs 入口。
+# 顶栏导航：OINK 1.4.0 只渲染 .Site.Menus.main，不会自动挂 docs 入口。
 # 这个入口由 plan_site.py 每次生成；重跑计划会保留，不要手删。
 menus:
   main:
@@ -75,4 +75,4 @@ module:
       replacement: ./oink-main/oink-main
   hugoVersion:
     extended: true
-    min: 0.166.0
+    min: 0.168.0

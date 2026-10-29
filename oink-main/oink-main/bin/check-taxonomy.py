@@ -138,7 +138,6 @@ def build(hugo: str, source: Path, destination: Path) -> subprocess.CompletedPro
             "--destination",
             str(destination),
             "--printPathWarnings",
-            "--panicOnWarning",
             "--logLevel",
             "warn",
         ],

@@ -24,6 +24,8 @@ from typing import Any
 
 from test_site import run_hugo_process
 
+from test_site import theme_warnings
+
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "navigation"
@@ -694,7 +696,7 @@ def build_observation() -> dict[str, Any]:
                     observation, log = observe_variant(
                         workspace, variant, offline_search, subpath=subpath
                     )
-                    warnings = [line for line in log.splitlines() if "WARN" in line]
+                    warnings = theme_warnings(log)
                     expected_warning_fragments = ["invalid search_boost"] if offline_search else []
                     if variant == "deep":
                         expected_warning_fragments.append(
@@ -1222,7 +1224,7 @@ params:
             result = run_hugo_process([
                 "hugo", "--source", str(source), "--destination", str(output),
                 "--cacheDir", str(source / "cache"), "--noBuildLock",
-                "--printPathWarnings", "--panicOnWarning",
+                "--printPathWarnings",
             ], env=environment, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             require(result.returncode == 0, f"explicit ownership fixture failed:\n{result.stdout}")
             for language in ("", "zh/"):

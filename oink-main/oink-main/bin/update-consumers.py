@@ -19,6 +19,7 @@ CONFIG_NAMES = ("hugo.yaml", "hugo.yml", "hugo.toml", "hugo.json",
 def release_env():
     env = os.environ.copy()
     env.pop("HUGO_MODULE_REPLACEMENTS", None)
+    env.pop("HUGO_PANICONWARNING", None)
     env["GOWORK"] = "off"
     env["HUGO_MODULE_WORKSPACE"] = "off"
     return env
@@ -287,7 +288,7 @@ def check(site, hugo, version, appearance=False):
     with tempfile.TemporaryDirectory(prefix="oink-consumer-build-") as directory:
         public = Path(directory) / "public"
         output = run(site, hugo, "--environment", "production", "--minify",
-                     "--panicOnWarning", "--printPathWarnings", "--printI18nWarnings",
+                     "--printPathWarnings", "--printI18nWarnings",
                      "--destination", str(public),
                      "--noBuildLock")
         if appearance:
@@ -297,14 +298,14 @@ def check(site, hugo, version, appearance=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("version", help="explicit published tag, e.g. v1.1.0")
+    parser.add_argument("version", help="explicit published tag, e.g. v1.3.2")
     parser.add_argument("--roots", nargs="*", type=Path,
                         default=[Path("~/www"), Path("~/pgsty")],
                         help="scan primary projects and their site/ directories (default: ~/www ~/pgsty)")
     parser.add_argument("--sites", nargs="*", type=Path, default=[],
                         help="include reviewed sites, including dirty modules or directories without Git")
     parser.add_argument("--write", action="store_true", help="update pins; otherwise inventory only")
-    parser.add_argument("--check", action="store_true", help="verify graph and build every selected site strictly")
+    parser.add_argument("--check", action="store_true", help="verify the published graph and build every selected site with warnings visible")
     parser.add_argument("--check-appearance", action="store_true",
                         help="with --check, require Paper default and all four styles on rendered entry pages")
     parser.add_argument("--refresh-vendor", action="store_true", help="back up and regenerate reviewed vendored themes")

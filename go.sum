@@ -1,3 +1,4 @@
 # 主题走 go.mod 的 replace 指向本地 ./oink-main/oink-main，离线构建（GOTOOLCHAIN=local GOPROXY=off）不读 go.sum。
-# Hugo Module 约俗保留版本行；联网解析 v1.3.2 时由 `go mod download github.com/pgsty/oink` 重写为真实哈希。
-github.com/pgsty/oink v1.3.2/go.mod h1:PLACEHOLDER-RUN-GO-MOD-DOWNLOAD-IF-YOU-NEED-ONLINE-RESOLUTION
+# Hugo Module 约俗保留版本行；联网解析 v1.4.0 时由 `go mod download github.com/pgsty/oink` 重写为真实哈希。
+# 版本口径：`go` 指令是下界，取「站点 go.mod」与「被 replace 的主题 go.mod」两处最大值，本基线两处都是 1.27.3。
+github.com/pgsty/oink v1.4.0/go.mod h1:PLACEHOLDER-RUN-GO-MOD-DOWNLOAD-IF-YOU-NEED-ONLINE-RESOLUTION

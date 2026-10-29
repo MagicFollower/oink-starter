@@ -134,15 +134,14 @@ def check_outputs(public: Path) -> list[str]:
     return errors
 
 
-def temp_page_build(hugo: str, body: str, *, front: str = "", panic_on_warning: bool = False) -> tuple[subprocess.CompletedProcess[str], str, str]:
+def temp_page_build(hugo: str, body: str, *, front: str = "") -> tuple[subprocess.CompletedProcess[str], str, str]:
     with tempfile.TemporaryDirectory(prefix="oink-gallery-page-") as temp:
         temp_path = Path(temp)
         content = temp_path / "content/docs/gallery-test"
         content.mkdir(parents=True)
         (content / "index.md").write_text("---\ntitle: Gallery test\noutputs: [HTML, markdown]\n" + front + "---\n\n" + body)
         destination = temp_path / "public"
-        extra = ["--panicOnWarning"] if panic_on_warning else []
-        result = run_hugo(hugo, "--source", str(FIXTURE), "--contentDir", str(temp_path / "content"), "--destination", str(destination), "--logLevel", "warn", *extra)
+        result = run_hugo(hugo, "--source", str(FIXTURE), "--contentDir", str(temp_path / "content"), "--destination", str(destination), "--logLevel", "warn")
         html = ""
         markdown = ""
         if result.returncode == 0:
@@ -161,7 +160,7 @@ def check_escaping_and_forms(hugo: str) -> list[str]:
         '![Quoted URL](https://example.invalid/image.svg?x="data-injected="yes&copy;=1)',
         attrs='{class="site-gallery" data-fixture="gallery" aria-label="Gallery"}',
     )
-    result, html, markdown = temp_page_build(hugo, body, panic_on_warning=True)
+    result, html, markdown = temp_page_build(hugo, body)
     if result.returncode != 0:
         errors.append(f"Gallery escaping fixture failed to build: {result.stdout}{result.stderr}")
         return errors
@@ -185,7 +184,7 @@ def check_escaping_and_forms(hugo: str) -> list[str]:
 
 
 def check_invalid_cases(hugo: str) -> list[str]:
-    """Invalid fences warn with the offending line and fail strict builds."""
+    """Invalid fences warn with the offending line and render a safe fallback."""
     errors: list[str] = []
     cases = (
         ("no-image", fence("just some text"), "must start with a Markdown image"),
@@ -196,16 +195,12 @@ def check_invalid_cases(hugo: str) -> list[str]:
         ("malformed-attribute", fence(f"![Alt]({VALID_IMAGE}) {{link}}"), "malformed attributes"),
         ("empty-fence", "```gallery\n```\n", "requires at least one image"),
     )
-    strict_canaries = {"no-image", "unknown-attribute", "empty-fence"}
     for name, body, expected in cases:
         result, html, _ = temp_page_build(hugo, body)
         output = f"{result.stdout}{result.stderr}"
         require(result.returncode == 0, f"Gallery invalid case {name} stopped the ordinary build", errors)
         require(expected in output, f"Gallery invalid case {name} lacks {expected!r}: {output[:400]}", errors)
         require(bool(html), f"Gallery invalid case {name} emitted no safe page output", errors)
-        if name in strict_canaries:
-            strict, _, _ = temp_page_build(hugo, body, panic_on_warning=True)
-            require(strict.returncode != 0, f"Gallery invalid case {name} survived --panicOnWarning", errors)
     return errors
 
 

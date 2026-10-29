@@ -212,6 +212,15 @@
 {{- $collapsible := and $interactive (gt $collapseLines 0) (gt $lineCount $collapseLines) -}}
 {{- $copyEnabled := and $interactive (ne $copyMode "false") -}}
 
+{{- /* This modifier changes presentation only; unsuitable source keeps the
+       ordinary code block, highlighting, copy mode, and author attributes. */ -}}
+{{- $authorClassTokens := findRE `\S+` $authorClass -}}
+{{- $command := in $authorClassTokens "td-code-command" -}}
+{{- if and $command (or (ne $lineCount 1) (gt $collapseLines 0) (not (in (slice "" "false") $lineNosKey))) -}}
+  {{- warnf "code block: td-code-command requires one line without line numbers or collapse at %s; using the regular block" $position -}}
+  {{- $authorClass = delimit (complement (slice "td-code-command") $authorClassTokens) " " -}}
+{{- end -}}
+
 {{- $classes := slice "td-code" -}}
 {{- if $filename -}}
   {{- $classes = $classes | append "td-code--titled" -}}

@@ -5,7 +5,7 @@
 {{ end -}}
 {{ $mode := partial "validate.html" (dict
     "value" (partial "ui-param.html" (dict "page" . "key" "blog_index")) "kind" "enum"
-    "allowed" (slice "list" "cards" "table") "fallback" "list"
+    "allowed" (slice "list" "cards" "table" "gallery") "fallback" "list"
     "key" "params.ui.blog_index" "where" (cond (isset .Params "blog_index") .Path "")) -}}
 {{ $columns := partial "validate.html" (dict
     "value" (partial "ui-param.html" (dict "page" . "key" "blog_index_columns")) "kind" "int"

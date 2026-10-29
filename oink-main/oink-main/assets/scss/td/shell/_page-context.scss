@@ -19,16 +19,25 @@
 // end side, so the actions never collide with a long page title.
 .td-shell-topline {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 
   .td-breadcrumbs {
+    flex: 1 1 16rem;
     min-width: 0;
+    max-width: 100%;
   }
 
   .breadcrumb {
     margin-bottom: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .breadcrumb-item {
+    min-width: 0;
+    max-width: 100%;
   }
 
   &__spacer {
@@ -71,6 +80,7 @@
   display: flex;
   align-items: center;
   flex: none;
+  margin-inline-start: auto;
   min-height: 29px;
 
   @media print {
@@ -176,7 +186,8 @@
   inset-block-start: calc(100% + 0.35rem);
   inset-inline-end: 0;
   z-index: 45;
-  min-width: 13.5rem;
+  width: 13.5rem;
+  max-width: calc(100vw - 2rem);
   margin: 0;
   padding: 0.35rem;
   font-weight: 400; // One weight throughout; no row reads as emphasized.

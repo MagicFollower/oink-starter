@@ -11,7 +11,7 @@
     <div class="td-landing-command-box"{{ if $interactive }} data-td-reveal{{ end }}>
       <pre tabindex="0"><code{{ with $data.lang }} class="language-{{ . }}"{{ end }}>{{ $code }}</code></pre>
       {{- if $interactive }}
-      <button type="button" data-td-copy-text="{{ $code }}" data-td-label-copied="{{ T "ui_code_copied" }}" aria-label="{{ T "ui_code_copy_label" }}" title="{{ T "ui_code_copy_label" }}"><i class="fa-regular fa-copy" aria-hidden="true"></i><span data-td-copy-status aria-live="polite"></span></button>
+      <button type="button" data-td-copy-text="{{ $code }}" data-td-label-copied="{{ T "ui_code_copied" }}" aria-label="{{ T "ui_code_copy_label" }}" title="{{ T "ui_code_copy_label" }}"><i class="fa-regular fa-copy" aria-hidden="true"></i><span class="td-landing-copy-label" aria-hidden="true">{{ T "ui_code_copy_label" }}</span><span data-td-copy-status aria-live="polite"></span></button>
       {{- end }}
     </div>
     {{- with $data.note }}<p class="td-landing-command-box__note">{{ partial "landing/markdown.html" (dict "page" $page "scope" (printf "%s-command-box-field-1" $scope) "value" .) }}</p>{{ end }}

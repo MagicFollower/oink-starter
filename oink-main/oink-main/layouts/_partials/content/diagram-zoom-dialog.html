@@ -1,31 +1,43 @@
-{{- /* One dialog per page, shared by every diagram on it. It is deliberately
-     separate from the image zoom dialog: that one is built around a single
-     `<img>` and its caption, while a diagram is re-rendered into a pannable
-     viewport at its natural size. Sharing one element would give two runtimes
-     one owner. */ -}}
+{{- /* One viewer for Mermaid and local PlantUML. It reuses rendered snapshots;
+       the independent image viewer retains ownership of ordinary image zoom. */ -}}
 <dialog class="td-diagram-zoom d-print-none" data-td-diagram-zoom-dialog
         aria-label="{{ T "ui_diagram_zoom_dialog" }}">
+  <script type="application/json" data-td-diagram-labels>{{ dict "source" (T "ui_release_source") "expand" (T "ui_diagram_expand") "copy" (T "ui_code_copy_label") "copied" (T "ui_code_copied") "copyError" (T "ui_code_copy_error") "error" (T "ui_diagram_error") "downloadStarted" (T "ui_diagram_download_started") "downloadError" (T "ui_diagram_download_error") | jsonify | safeJS }}</script>
   <div class="td-diagram-zoom__surface">
     <div class="td-diagram-zoom__controls">
-      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-out>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-out title="{{ T "ui_diagram_zoom_out" }}">
         {{- partialCached "shell/icon.html" "zoom-out" "diagram-zoom-out" -}}
         <span class="visually-hidden">{{ T "ui_diagram_zoom_out" }}</span>
       </button>
-      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-in>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-in title="{{ T "ui_diagram_zoom_in" }}">
         {{- partialCached "shell/icon.html" "zoom-in" "diagram-zoom-in" -}}
         <span class="visually-hidden">{{ T "ui_diagram_zoom_in" }}</span>
       </button>
-      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-reset>
-        {{- partialCached "shell/icon.html" "reset" "diagram-zoom-reset" -}}
-        <span class="visually-hidden">{{ T "ui_diagram_zoom_reset" }}</span>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-reset title="{{ T "ui_diagram_fit" }}">
+        {{- partialCached "shell/icon.html" "fit" "diagram-zoom-fit" -}}
+        <span class="visually-hidden">{{ T "ui_diagram_fit" }}</span>
       </button>
-      <button class="td-diagram-zoom__control td-diagram-zoom__close" type="button" data-td-diagram-zoom-close>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-source-toggle aria-pressed="false" aria-controls="td-diagram-source-view" title="{{ T "ui_release_source" }}">
+        <i class="fa-solid fa-code" aria-hidden="true"></i>
+        <span class="visually-hidden">{{ T "ui_release_source" }}</span>
+      </button>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-copy title="{{ T "ui_code_copy_label" }}">
+        <i class="fa-regular fa-copy" aria-hidden="true"></i>
+        <span class="visually-hidden">{{ T "ui_code_copy_label" }}</span>
+      </button>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-download title="{{ T "ui_diagram_download" }}">
+        <i class="fa-solid fa-download" aria-hidden="true"></i>
+        <span class="visually-hidden">{{ T "ui_diagram_download" }}</span>
+      </button>
+      <button class="td-diagram-zoom__control td-diagram-zoom__close" type="button" data-td-diagram-zoom-close title="{{ T "ui_diagram_zoom_close" }}">
         {{- partialCached "shell/icon.html" "x" "diagram-zoom-close" -}}
         <span class="visually-hidden">{{ T "ui_diagram_zoom_close" }}</span>
       </button>
     </div>
-    <div class="td-diagram-zoom__viewport" data-td-diagram-zoom-viewport>
+    <div class="td-diagram-zoom__viewport" data-td-diagram-zoom-viewport tabindex="0" role="region" aria-label="{{ T "ui_diagram_zoom_dialog" }}">
       <div class="td-diagram-zoom__canvas" data-td-diagram-zoom-canvas></div>
     </div>
+    <pre class="td-diagram-zoom__source" data-td-diagram-zoom-source id="td-diagram-source-view" tabindex="0" hidden><code></code></pre>
+    <p class="td-diagram-zoom__status" data-td-diagram-status role="status" aria-live="polite"></p>
   </div>
 </dialog>

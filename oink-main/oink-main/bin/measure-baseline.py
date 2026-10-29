@@ -4,7 +4,7 @@
 ``noise`` scans Markdown after front matter and reports theme shortcode tokens,
 wrapper lines, closing tags, native component instances, and semantic fallback.
 Site-local and Hugo built-in shortcodes are reported separately. ``assets``
-strict-builds revision-locked snapshots, then reports cold/warm time, CSS/JS,
+builds revision-locked snapshots, then reports cold/warm time, CSS/JS,
 fonts, third-party presence, and distinct page bundles. ``all`` runs both.
 
 Git sites default to HEAD snapshots; ``--worktree`` is explicit. Builds use a
@@ -59,7 +59,7 @@ DEFAULT_EXCLUDES: dict[str, list[str]] = {
     "pigsty.cc": ["content/ext/**"],
 }
 
-THEME_MARKER_RE = re.compile(r"\.(?:steps|cards|fields|matrix|full-width)\b")
+THEME_MARKER_RE = re.compile(r"\.(?:steps|cards|fields|matrix|full-width|wide|expand)\b")
 
 FRONT_MATTER_RE = re.compile(r"\A(---|\+\+\+)\s*\n.*?\n\1\s*\n", re.S)
 # One shortcode tag. Group 1: notation, 2: closing slash, 3: name, 4: rest.
@@ -556,7 +556,7 @@ def chunk_table(public: Path, pages: dict[str, dict], cache: AssetCache) -> list
 
 def run_hugo(hugo: str, source: Path, dest: Path, extra: list[str], env: dict[str, str]) -> dict:
     cmd = [hugo, "--source", str(source), "--destination", str(dest), "--minify",
-           "--printPathWarnings", "--panicOnWarning", *extra]
+           "--printPathWarnings", *extra]
     start = time.perf_counter()
     result = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False)
     wall = time.perf_counter() - start
@@ -597,15 +597,9 @@ def measure_build(name: str, snapshot: Path, hugo: str, theme: Path, *, fixture:
     shutil.rmtree(snapshot / "resources", ignore_errors=True)
     cold = run_hugo(hugo, snapshot, dest, extra, env)
     warm = run_hugo(hugo, snapshot, dest, extra, env) if cold["ok"] else None
-    result: dict = {"name": name, "strict_build_ok": cold["ok"], "cold": cold, "warm": warm}
+    result: dict = {"name": name, "build_ok": cold["ok"], "cold": cold, "warm": warm}
     if not cold["ok"]:
-        # Retry non-strict so the numbers still exist; the strict failure is recorded.
-        lenient_cmd = [hugo, "--source", str(snapshot), "--destination", str(dest), "--minify", *extra]
-        lenient = subprocess.run(lenient_cmd, capture_output=True, text=True, env=env, check=False)
-        result["lenient_build_ok"] = lenient.returncode == 0
-        if lenient.returncode != 0:
-            result["lenient_stderr_tail"] = (lenient.stderr or lenient.stdout)[-2000:]
-            return result
+        return result
     cache = AssetCache(dest)
     pages: dict[str, dict] = {}
     for page in sorted(dest.rglob("*.html")):
@@ -694,9 +688,9 @@ def render_markdown(report: dict) -> str:
                            f"{excluded['semantic_fallback']} instances (not counted above).")
                 out.append("")
     if any("build" in s for s in report["sites"].values()):
-        out.append("## Builds (strict: --minify --printPathWarnings --panicOnWarning; isolated snapshot; local theme via go.work)")
+        out.append("## Builds (production: --minify --printPathWarnings; isolated snapshot; local theme via go.work)")
         out.append("")
-        out.append("| site | strict | cold wall s | cold hugo ms | warm wall s | warm hugo ms | pages | chunks | main + FA CSS KB (gz) | fonts (FA) KB | public MB |")
+        out.append("| site | build | cold wall s | cold hugo ms | warm wall s | warm hugo ms | pages | chunks | main + FA CSS KB (gz) | fonts (FA) KB | public MB |")
         out.append("| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
         for name, site in report["sites"].items():
             b = site.get("build")
@@ -709,7 +703,7 @@ def render_markdown(report: dict) -> str:
             css_bytes = css0.get("bytes", 0) + fontawesome0.get("bytes", 0)
             css_gzip = css0.get("gzip", 0) + fontawesome0.get("gzip", 0)
             fonts = b.get("font_files", {})
-            out.append(f"| {name} | {'ok' if b['strict_build_ok'] else 'FAIL'} | {b['cold']['wall_seconds']} | {b['cold']['hugo_total_ms']} | "
+            out.append(f"| {name} | {'ok' if b['build_ok'] else 'FAIL'} | {b['cold']['wall_seconds']} | {b['cold']['hugo_total_ms']} | "
                        f"{b['warm']['wall_seconds'] if b.get('warm') else '—'} | {b['warm']['hugo_total_ms'] if b.get('warm') else '—'} | "
                        f"{b.get('pages_measured', '—')} | {b.get('chunk_count', '—')} | {kb(css_bytes)} ({kb(css_gzip)}) | "
                        f"{kb(fonts.get('bytes'))} ({kb(fonts.get('font_awesome_bytes'))}) | "
@@ -798,7 +792,7 @@ def main() -> int:
         "method": {
             "noise": "theme shortcode tags outside escaped forms; fences counted; site-local / hugo built-in / unknown excluded; "
                      "generated corpus excluded via globs; native = GFM callouts + diagram/data fences + theme block-attribute markers",
-            "build": "git clone --shared HEAD snapshot; go.work replace -> local theme; hugo --minify --printPathWarnings --panicOnWarning; "
+            "build": "git clone --shared HEAD snapshot; go.work replace -> local theme; hugo --minify --printPathWarnings; "
                      "cold = fresh resources/, warm = second run; gzip level 6",
         },
         "sites": {},

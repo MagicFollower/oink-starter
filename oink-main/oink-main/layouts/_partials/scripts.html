@@ -33,6 +33,7 @@
 {{ $hasLanding := and $interactiveOutput (.Page.Store.Get "hasLanding" | default false) -}}
 {{ $hasTabRuntime := and $interactiveOutput (.Page.Store.Get "hasTabs" | default false) -}}
 {{ $hasFileTree := and $interactiveOutput (.Page.Store.Get "hasFileTree" | default false) -}}
+{{ $hasTableReader := and $interactiveOutput (.Page.Store.Get "hasTableReader" | default false) -}}
 {{ $hasMermaid := and $interactiveOutput (.Page.Store.Get "hasmermaid" | default false) -}}
 {{ $hasAuthoredA11y := and $interactiveOutput (.Page.Store.Get "hasAuthoredA11y" | default false) -}}
 
@@ -110,14 +111,15 @@ window.markmap = {
 
 {{ $plantumlSVGURL := "" -}}
 {{ $plantumlSVG := false -}}
+{{ $plantumlServer := false -}}
 {{ if reflect.IsMap .Site.Params.plantuml -}}
-  {{ $plantumlSVGURL = index .Site.Params.plantuml "svg_image_url" | default "" -}}
+  {{ if isset .Site.Params.plantuml "svg_image_url" -}}
+    {{ $plantumlSVGURL = index .Site.Params.plantuml "svg_image_url" -}}
+    {{ $plantumlServer = or (ne (printf "%T" $plantumlSVGURL) "string") (ne $plantumlSVGURL "") -}}
+  {{ end -}}
   {{ $plantumlSVG = eq (index .Site.Params.plantuml "svg") true -}}
 {{ end -}}
-{{ if and $plantumlEnabled (not $plantumlSVGURL) -}}
-  {{ warnf "params.plantuml.enable requires an explicit params.plantuml.svg_image_url; the theme does not default to a public PlantUML service, so PlantUML stays off" -}}{{ $plantumlEnabled = false -}}
-{{ end -}}
-{{ if $plantumlEnabled -}}
+{{ if and $plantumlEnabled $plantumlServer -}}
   {{ $endpoint := partial "content/url.html" (dict "label" "params.plantuml" "parameter" "svg_image_url" "position" "site configuration" "value" $plantumlSVGURL "kind" "image") -}}
   {{ $plantumlEnabled = $endpoint.valid -}}
   {{ $plantumlSVGURL = $endpoint.href -}}
@@ -175,7 +177,17 @@ window.markmap = {
 {{/* Optional first-party runtimes publish as stable capability chunks. Page
      flags choose script tags; they never create a new concatenation identity. */ -}}
 {{ $jsChunks := slice -}}
-{{ if $hasPlantuml -}}
+{{ if $hasTableReader -}}
+  {{ partial "content/table-reader.html" . -}}
+  {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/table-reader.js" "members" (slice (resources.Get "js/table-reader.js"))) -}}
+{{ end -}}
+{{ if or $hasMermaid (and $hasPlantuml (not $plantumlServer)) -}}
+  {{ partial "content/diagram-zoom-dialog.html" . -}}
+  {{ partialCached "script-resource.html" (dict "target" "js/chunks/diagram.js" "members" (slice (resources.Get "js/diagram.js"))) "js/chunks/diagram.js" -}}
+{{ end -}}
+{{ if and $hasPlantuml (not $plantumlServer) -}}
+  {{ partial "scripts/plantuml.html" . -}}
+{{ else if $hasPlantuml -}}
   {{ $jsPako := resources.Get "third_party/pako/pako_deflate.min.js" -}}
   {{ $jsSvgLoader := resources.Get "third_party/external-svg-loader/svg-loader.min.js" -}}
   {{ $jsPlantuml := resources.Get "js/plantuml.js" | resources.ExecuteAsTemplate (printf "js/generated/plantuml-%s.js" .Site.Language.Lang) (dict "server" $plantumlSVGURL "svg" $plantumlSVG) -}}
@@ -289,7 +301,7 @@ window.markmap = {
   {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/swagger-init.js" "members" (slice (resources.Get "js/swagger-init.js"))) -}}
 {{ end -}}
 
-{{ if $localSearch }}{{ partialCached "shell/search-dialog.html" . .Site.Language.Lang $localSearch }}{{ end -}}
+{{ if $localSearch }}{{ partialCached "shell/search-dialog.html" . .Site.Language.Lang $localSearch .Section }}{{ end -}}
 {{- $darkMode := partialCached "dark-mode-config.html" "dark-mode-global" -}}
 {{ if and $interactiveOutput $darkMode.enable -}}
   {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/dark-mode.js" "members" (slice (resources.Get "js/dark-mode.js"))) -}}
@@ -334,12 +346,14 @@ window.markmap = {
   {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/authored-a11y.js" "members" (slice (resources.Get "js/authored-a11y.js"))) -}}
 {{ end -}}
 
+{{ if and $interactiveOutput (.Store.Get "hasBlogGallery") -}}
+  {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/blog-gallery.js" "members" (slice (resources.Get "js/expo-geometry.js") (resources.Get "js/blog-gallery.js"))) -}}
+{{ end -}}
 {{ if and $interactiveOutput (.Store.Get "hasExpo") -}}
   {{ partial "expo/viewer.html" . }}
   {{ $jsChunks = $jsChunks | append (dict "target" "js/chunks/expo.js" "members" (slice (resources.Get "js/expo-geometry.js") (resources.Get "js/expo.js"))) -}}
 {{ end -}}
 {{ if $hasImageZoom }}{{ partial "content/image-zoom-dialog.html" . }}{{ end -}}
-{{ if $hasMermaid }}{{ partial "content/diagram-zoom-dialog.html" . }}{{ end -}}
 {{ range $jsChunks -}}
   {{ partialCached "script-resource.html" . .target -}}
 {{ end -}}

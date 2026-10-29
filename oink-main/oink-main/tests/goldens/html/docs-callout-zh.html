@@ -82,7 +82,7 @@ if (localStorage.getItem('td-shell-toc-collapsed') === '1'
 html.setAttribute('data-td-shell-toc', 'collapsed');
 }
 var blogIndex = localStorage.getItem('td-blog-index');
-if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table') {
+if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
 html.setAttribute('data-td-blog-index', blogIndex);
 }
 if (sessionStorage.getItem('td-kbd-zen') === '1') {
@@ -571,7 +571,7 @@ aria-label="复制代码" title="复制代码">
 </span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">用 `hugo server -D` 可以预览草稿。
 </span></span></span><span class="line"><span class="cl"><span class="k">
 </span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">[!IMPORTANT]
-</span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">主题下限是 Hugo Extended 0.160.1，低于它构建直接失败。
+</span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">主题下限是 Hugo Extended 0.168.0，低于它构建直接失败。
 </span></span></span><span class="line"><span class="cl"><span class="k">
 </span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">[!WARNING]
 </span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">`hugo --cleanDestinationDir` 会清空 `public/`。
@@ -603,7 +603,7 @@ aria-label="复制代码" title="复制代码">
 </div><div class="td-callout td-callout--important" role="note">
 <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-circle-exclamation" aria-hidden="true"></i><span class="td-callout__label">重要</span></div>
 <div class="td-callout__body">
-<p>主题下限是 Hugo Extended 0.160.1，低于它构建直接失败。</p>
+<p>主题下限是 Hugo Extended 0.168.0，低于它构建直接失败。</p>
 </div>
 </div><div class="td-callout td-callout--warning" role="note">
 <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span class="td-callout__label">警告</span></div>
@@ -1257,6 +1257,8 @@ data-td-index-src="/offline-search-index.zh.<hash>.json"
 data-td-max-results="10"
 data-td-t-empty="未找到结果"
 data-td-t-loading="正在加载搜索索引……"
+data-td-t-partial="部分匹配：{matched}/{total} 个关键词"
+data-td-t-partial-results="没有页面包含全部关键词，以下为部分匹配"
 data-td-t-results="找到 {count} 条结果"
 data-td-t-actions="操作"
 data-td-t-page-actions="页面操作"
@@ -1282,14 +1284,30 @@ aria-label="关闭">
 <kbd>esc</kbd>
 </button>
 </div>
+<div class="td-shell-search__scope" data-td-search-scope-row>
+<span id="td-search-scope-label" class="td-shell-search__scope-label">搜索范围</span>
+<div id="td-search-scope" class="td-shell-search__scope-options" role="radiogroup"
+aria-labelledby="td-search-scope-label">
+<label class="td-shell-search__scope-option">
+<input type="radio" name="td-search-scope" value="" tabindex="0" data-td-search-scope checked>
+<span>全部栏目</span>
+</label>
+<label class="td-shell-search__scope-option">
+<input type="radio" name="td-search-scope" value="docs" tabindex="-1" data-td-search-scope>
+<span>文档</span>
+</label>
+</div>
+</div>
 <div id="td-shell-search-results" class="td-shell-search__list" role="listbox"
 aria-label="搜索…"></div>
-<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"
+<div class="td-shell-search__footer">
+<div class="td-shell-search__status" role="status" aria-live="polite" aria-atomic="true"
 data-td-shell-search-status></div>
 <div class="td-shell-search__foot" aria-hidden="true">
 <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
 <span><kbd>↵</kbd> 打开</span>
 <span><kbd>esc</kbd> 关闭</span>
+</div>
 </div>
 </div>
 </div><script src="/js/chunks/shell.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/keyboard.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/footer-collapse.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/local-search.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/dark-mode.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/appearance.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/code-block.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>

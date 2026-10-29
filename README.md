@@ -1,6 +1,6 @@
 # ZooKeeper 文档 — 文档站操作规范
 
-本项目是基于 Hugo + OINK v1.3.2 的中文文档站，主题与运行时全部本地化，构建过程不联网。本文件说明目录约定、写作门槛与验收命令，读完即可接手维护。
+本项目是基于 Hugo + OINK v1.4.0 的中文文档站，主题与运行时全部本地化，构建过程不联网。本文件说明目录约定、写作门槛与验收命令，读完即可接手维护。
 
 ## 一、项目结构
 
@@ -14,6 +14,7 @@ ZooKeeper 文档/
 ├── data/home/zh.yaml              # 首页 hero / 卡片 / CTA
 ├── hugo.yaml                      # 站点唯一配置
 ├── go.mod                         # 主题走 replace 本地化
+├── run.cmd                        # Windows 双击启动本地预览
 ├── oink-main/oink-main/           # OINK 主题（勿修改）
 ├── doc/                           # 编写规范、运行与构建
 └── site.plan.json                 # 导航计划（生成导航的源数据）
@@ -33,7 +34,7 @@ ZooKeeper 文档/
 
 新增分类或文章：改 `site.plan.json`，再跑 `plan_site.py --site . --plan site.plan.json`。不要只手建目录，目录与 `_index.md` 必须成对。
 
-顶栏「文档」tab 由生成器写入 `hugo.yaml` 的 `menus.main`（`identifier: docs`、`pageRef: /docs`）。OINK 1.3.2 的顶栏只渲染这个配置，主题不会自动挂入口；重跑计划会保留该键。
+顶栏「文档」tab 由生成器写入 `hugo.yaml` 的 `menus.main`（`identifier: docs`、`pageRef: /docs`）。OINK 1.4.0 的顶栏只渲染这个配置，主题不会自动挂入口；重跑计划会保留该键。
 
 ## 三、命名与 Front Matter
 
@@ -71,18 +72,21 @@ weight: 1
 
 | 工具 | 版本 | 要求 |
 |------|------|------|
-| Hugo | ≥ 0.166.0 **Extended** | 标准版无法编译 SCSS；严格 `--panicOnWarning` 闸门用 0.166.0 |
-| Go | 与 `go.mod` 的 `go` 指令一致（1.27.0） | 版本不匹配会触发联网下载工具链；PATH 里有旧 Go 时用 `--go-bin` 指向 1.27.x 的 bin |
+| Hugo | ≥ 0.168.0 **Extended** | 标准版无法编译 SCSS；主题契约禁止 `--panicOnWarning`，libsass WARN 保持可见即可 |
+| Go | ≥ 1.27.3（站点与主题两处 `go.mod` 取最大值） | 版本低于要求时 Go 会自己去 proxy 下载工具链，离线机直接失败；PATH 里有旧 Go 时用 `--go-bin` 指向 1.27.3 的 bin |
 
 ```bash
 export GOTOOLCHAIN=local GOPROXY=off
 hugo --cleanDestinationDir          # 构建
-hugo server -D                      # 本地预览（推荐）
+run.cmd                             # Windows：双击或命令行启动本地预览
+hugo server -D                      # 非 Windows 或手动启动
 python -m http.server 8766 --directory public   # 纯静态产物预览
 hugo --cleanDestinationDir --gc --minify   # 发布档
 ```
 
-离线构建要同时满足：主题副本在 `oink-main/oink-main/`、`go.mod` 的 replace 指向它、Go 与 `go.mod` 指令对齐。Hugo 报 `failed to load modules` 时先查 Go 是否在 PATH，不是内容错误。验收时 Go 版本不对可用 `--go-bin` 指向正确 bin；如果 `go version` 打印 `go: downloading go1.27.0`，说明 PATH 选到了旧 Go。
+Windows 的 `run.cmd` 会自动设置离线构建变量、查找 Hugo（找不到时可用 `HUGO_EXE` 指定完整路径）、在 `127.0.0.1:8768` 启动 Hugo server 并打开浏览器；端口冲突时先 `set PORT=9000` 再运行。`NO_OPEN=1` 可跳过自动打开浏览器，适合脚本验证。
+
+离线构建要同时满足：主题副本在 `oink-main/oink-main/`、`go.mod` 的 replace 指向它、被执行的 Go ≥ 1.27.3。Hugo 报 `failed to load modules` 时先查 Go，不是内容错误：`binary with name "go" not found in PATH` 是没装，`go: downloading go1.27.3 …` 是装了但版本低于要求（Go 正试图自己下载新工具链，离线机必然失败）。设 `GOTOOLCHAIN=local` 只是把报错换成 `go.mod requires go >= 1.27.3`，并不会让旧 Go 够用；把实际执行的那个 go.exe 换成 1.27.3 才是解。验收时用 `--go-bin` 显式指向正确的 bin。
 
 **打开方式**：完整功能请走 HTTP（`hugo server` 或上面的 `python -m http.server`）。直接双击 `public/index.html` 只有无样式文字：OINK 产物的 CSS/JS 带 `integrity` + `crossorigin`，`file://` 的 origin 是 `null`，会被浏览器 CORS 拦截，Mermaid、离线搜索、Appearance 都不可用。
 

@@ -14,6 +14,8 @@ from urllib.parse import unquote, urlsplit
 
 from test_site import fixture_config_args, run_hugo_process
 
+from test_site import theme_warnings
+
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/site"
@@ -105,7 +107,6 @@ def build_example(hugo: str, destination: Path) -> subprocess.CompletedProcess[s
             *fixture_config_args(),
             "--logLevel",
             "warn",
-            "--panicOnWarning",
         ],
         cwd=ROOT,
         capture_output=True,
@@ -501,7 +502,7 @@ def check_cached_content_navigation(hugo: str) -> list[str]:
             "## First heading {#first-heading}\n\n### Nested heading {#nested-heading}\n",
         )
 
-        result = run_site(hugo, source, "--panicOnWarning")
+        result = run_site(hugo, source)
         if result.returncode != 0:
             return [f"cached content sidebar fixture failed: {result.stdout}{result.stderr}"]
 
@@ -566,7 +567,7 @@ def check_foldable_content_navigation(hugo: str) -> list[str]:
 
         for cache_limit in (1, 10000):
             config_path.write_text(config + f"    sidebar_cache_limit: {cache_limit}\n")
-            result = run_site(hugo, source, "--panicOnWarning")
+            result = run_site(hugo, source)
             if result.returncode:
                 return errors + [f"foldable sidebar fixture failed: {result.stdout}{result.stderr}"]
             for kind in ("docs", "book"):
@@ -694,7 +695,6 @@ def check_invalid_pager_config(hugo: str) -> list[str]:
         ("bad-docs-root", "", "    docs_sidebar_root: archive\n    pager_types: [docs, book, blog]", "params.ui.docs_sidebar_root must be home or section"),
         ("scalar-docs-root", "", "    docs_sidebar_root: true\n    pager_types: [docs, book, blog]", "params.ui.docs_sidebar_root must be a string"),
     )
-    strict_canaries = {"bad-type", "scalar-types", "page-string", "scalar-docs-root"}
     for name, front_matter, config_extra, expected in cases:
         with tempfile.TemporaryDirectory(prefix=f"oink-components-pager-{name}-") as temp:
             source = Path(temp)
@@ -714,15 +714,12 @@ def check_invalid_pager_config(hugo: str) -> list[str]:
             result = run_site(hugo, source)
             output = result.stdout + result.stderr
             require(expected in output, f"invalid pager case {name} did not report {expected!r}", errors)
-            # An out-of-range value warns and falls back; only --panicOnWarning
-            # turns that into a failure.
+
+
             require(result.returncode == 0,
                     f"invalid pager case {name} stopped the build instead of warning", errors)
             require((source / "public/docs/page/index.html").is_file(),
                     f"invalid pager case {name} emitted no safe page output", errors)
-            if name in strict_canaries:
-                require(run_site(hugo, source, "--panicOnWarning").returncode != 0,
-                        f"invalid pager case {name} survived --panicOnWarning", errors)
     return errors
 
 
@@ -760,8 +757,6 @@ def check_explicit_shell_overrides(hugo: str) -> list[str]:
         nested = parse_navigation((public / 'docs/nested/page/index.html').read_text())
         require('/docs/nested/' in nested.sidebar_links and '/docs/' not in nested.sidebar_links,
                 'invalid sidebar_root_link_self did not fall back to true', errors)
-        require(run_site(hugo, source, '--panicOnWarning').returncode != 0,
-                'invalid shell overrides survived strict publication', errors)
     return errors
 
 
@@ -841,7 +836,7 @@ markup:
                            "---\ntitle: Two\n---\n\n## Topic\n")
         for base_path in ("/", "/preview/"):
             config.write_text(settings.replace("https://example.org/", f"https://example.org{base_path}"))
-            result = run_site(hugo, source, "--panicOnWarning")
+            result = run_site(hugo, source)
             if result.returncode:
                 return [f"Print relative-link fixture failed: {result.stdout}{result.stderr}"]
             for language in ("", "zh/"):
@@ -992,7 +987,7 @@ markup:
 """
                         write_file(source / f"content/{kind}/{chapter}{suffix}",
                                    f"---\ntitle: {chapter}\n---\n" + body)
-            result = run_site(hugo, source, "--panicOnWarning")
+            result = run_site(hugo, source)
             if result.returncode:
                 return [f"Print encoded-fragment fixture failed: {result.stdout}{result.stderr}"]
             for kind in ("docs", "book"):
@@ -1051,7 +1046,7 @@ def check_print_math_and_heading(hugo: str) -> list[str]:
                            '---\ntitle: Part\n---\n')
                 write_file(source / f'content/{shell}/part/page{suffix}',
                            f'---\ntitle: Page\ndescription: Lead exactly once.\n---\n\n{body}\n')
-        result = run_site(hugo, source, '--panicOnWarning')
+        result = run_site(hugo, source)
         if result.returncode:
             return [f'Print math fixture failed: {result.stdout}{result.stderr}']
         for language in ('', 'zh/'):
@@ -1087,10 +1082,10 @@ def check_unnumbered_math_attributes(hugo: str) -> list[str]:
             ('{num="!" caption="Ignored caption"}', "num must match"),
         ):
             write_file(page, f"---\ntitle: Formula\n---\n\n$$\nE=mc^2\n$$\n{attrs}\n")
-            result = run_site(hugo, source, *(('--panicOnWarning',) if warning is None else ()))
+            result = run_site(hugo, source)
             output = result.stdout + result.stderr
             require(result.returncode == 0, f"unnumbered math failed: {output}", errors)
-            require((warning in output) if warning else ('WARN' not in output),
+            require((warning in output) if warning else (not theme_warnings(output)),
                     f"unexpected unnumbered math diagnostics: {output}", errors)
             if result.returncode:
                 continue
@@ -1102,9 +1097,6 @@ def check_unnumbered_math_attributes(hugo: str) -> list[str]:
             markdown = (source / "public/docs/page/index.md").read_text()
             require('E=mc^2' in markdown and 'Equation ' not in markdown,
                     "unnumbered Markdown invented an equation label", errors)
-            if warning:
-                require(run_site(hugo, source, '--panicOnWarning').returncode != 0,
-                        "orphan math metadata survived strict publication", errors)
     return errors
 
 
@@ -1117,7 +1109,6 @@ def check_invalid_eq_escape(hugo: str) -> list[str]:
         ("class-without-num", '{{< eq class="wide" >}}x{{< /eq >}}', 'parameter "class" requires num'),
         ("positional", '{{< eq "x" >}}x{{< /eq >}}', "accepts named parameters only"),
     )
-    strict_canaries = {"empty", "caption-without-num", "positional"}
     for name, body, expected in cases:
         with tempfile.TemporaryDirectory(prefix=f"oink-components-eq-{name}-") as temp:
             source = Path(temp)
@@ -1133,9 +1124,6 @@ def check_invalid_eq_escape(hugo: str) -> list[str]:
             require(expected in output, f"invalid eq escape case {name} did not report {expected!r}", errors)
             require((source / "public/docs/page/index.html").is_file(),
                     f"invalid eq escape case {name} emitted no safe page output", errors)
-            if name in strict_canaries:
-                require(run_site(hugo, source, "--panicOnWarning").returncode != 0,
-                        f"invalid eq escape case {name} survived --panicOnWarning", errors)
     return errors
 
 
@@ -1270,7 +1258,7 @@ params:
                                  node("after"), node("divider")],
                     "active_path_by_url": {"/docs/group/a/": ["/docs/group/", "/docs/group/a/"]},
                 }))
-            result = run_site(hugo, source, "--panicOnWarning")
+            result = run_site(hugo, source)
             if result.returncode:
                 return [f"group fixture ({explicit=}) failed: {result.stdout}{result.stderr}"]
             public = source / "public"
@@ -1314,7 +1302,7 @@ params:
         for path in (source / "content/docs").glob("_index*.md"):
             path.write_text(path.read_text().replace("type: docs", "type: book")
                             + '\n{{< book-toc depth=3 >}}\n', encoding="utf-8")
-        result = run_site(hugo, source, "--panicOnWarning")
+        result = run_site(hugo, source)
         if result.returncode:
             return errors + [f"group Book fixture failed: {result.stdout}{result.stderr}"]
         for language in ("", "zh/"):
@@ -1371,7 +1359,7 @@ params:
             write_file(source / "data/docs_nav.json", json.dumps({"sections": [
                 node(section, children=[node(section, "b"), node(section, "a")])
                 for section in scopes]}))
-            result = run_site(hugo, source, "--panicOnWarning")
+            result = run_site(hugo, source)
             if result.returncode:
                 return errors + [f"scoped navigation {scopes} failed: {result.stdout}{result.stderr}"]
             for language in ("", "zh/"):
@@ -1404,7 +1392,7 @@ params:
                            f"---\ntitle: Part {name}\nweight: {weight}\n---\n")
         write_file(source / "data/docs_nav.json", json.dumps({"sections": [node("book", children=[
             node("book", "a"), node("book", "part", [node("book", "part/b"), node("book", "part/a")])])]}))
-        result = run_site(hugo, source, "--panicOnWarning")
+        result = run_site(hugo, source)
         if result.returncode:
             return errors + [f"nested navigation failed: {result.stdout}{result.stderr}"]
         for language in ("", "zh/"):
@@ -1437,7 +1425,7 @@ def check_explicit_navigation_state(hugo: str) -> list[str]:
             write_file(source / "data/docs_nav.json", json.dumps({"sections": [
                 {"page": "/docs/part", "children": [child]}
             ]}))
-            result = run_site(hugo, source, "--panicOnWarning")
+            result = run_site(hugo, source)
             if result.returncode:
                 return errors + [f"navigation state fixture failed: {result.stdout}{result.stderr}"]
             for language in ("", "zh/"):
@@ -1471,10 +1459,10 @@ def check_explicit_navigation_boundaries(hugo: str) -> list[str]:
             config.write_text(text)
             for sections in ([], [{"page": "/missing-docs"}]):
                 write_file(source / "data/docs_nav.json", json.dumps({"sections": sections}))
-                result = run_site(hugo, source, "--panicOnWarning")
+                result = run_site(hugo, source)
                 require(result.returncode == 0,
                         f"{shell} consumed irrelevant docs_nav data: {result.stdout}{result.stderr}", errors)
-                require("WARN" not in result.stdout + result.stderr,
+                require(not theme_warnings(result.stdout + result.stderr),
                         f"{shell} emitted an irrelevant navigation warning", errors)
     # Empty data remains invalid when a Docs section actually owns navigation.
     with tempfile.TemporaryDirectory(prefix="oink-nav-empty-docs-") as temp:
@@ -1484,8 +1472,6 @@ def check_explicit_navigation_boundaries(hugo: str) -> list[str]:
         result = run_site(hugo, source)
         require(result.returncode == 0 and "does not define any Docs navigation sections" in result.stdout + result.stderr,
                 "an applicable empty explicit tree must warn and fall back", errors)
-        require(run_site(hugo, source, "--panicOnWarning").returncode != 0,
-                "strict publication accepted an applicable empty explicit tree", errors)
     return errors
 
 

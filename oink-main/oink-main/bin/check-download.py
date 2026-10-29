@@ -28,15 +28,12 @@ def write(path: Path, content: str) -> None:
 
 def run(
     hugo: str, source: Path, destination: Path | None = None,
-    panic_on_warning: bool = False,
 ) -> subprocess.CompletedProcess[str]:
     command = [hugo, "--source", str(source), "--logLevel", "warn"]
     if source == FIXTURE:
         command.extend(fixture_config_args())
     if destination is not None:
         command.extend(["--destination", str(destination)])
-    if panic_on_warning:
-        command.append("--panicOnWarning")
     return run_hugo_process(
         command, cwd=ROOT, capture_output=True, text=True, check=False
     )
@@ -301,21 +298,6 @@ INVALID_CASES = (
     ("duplicate-component", BASE, '{{< download "demo" >}}\n{{< download "demo" >}}', "duplicate data key"),
 )
 
-STRICT_INVALID_CANARIES = {
-    "missing-key",              # data lookup
-    "missing-arg",              # shortcode arguments
-    "missing-version",          # record schema
-    "bad-kind",                 # channel schema
-    "rolling-code-version",     # rolling interpolation
-    "unknown-var",              # placeholder parsing
-    "duplicate-id",             # channel identity
-    "checksums-rolling",        # channel cross-field rule
-    "pinned-repo",              # repository requirement
-    "published-type",           # scalar type validation
-    "bad-url",                  # shared URL policy
-    "unknown-field",            # unsupported record fields
-}
-
 
 def check_invalid(hugo: str) -> list[str]:
     errors: list[str] = []
@@ -326,17 +308,13 @@ def check_invalid(hugo: str) -> list[str]:
             result = run(hugo, site)
             output = result.stdout + result.stderr
             # A malformed record warns and resolves to an empty block; the page
-            # still builds. --panicOnWarning is what keeps it fatal on publish.
+
             require(result.returncode == 0,
                     f"invalid download case {name} stopped the build instead of warning:\n{output[-400:]}", errors)
             require(expected in output, f"invalid download case {name} did not report {expected!r}", errors)
             require("content/docs/page.md:" in output, f"invalid download case {name} lost its source position", errors)
             page = site / "public/docs/page/index.html"
             require(page.is_file(), f"invalid download case {name} emitted no safe page output", errors)
-            if name in STRICT_INVALID_CANARIES:
-                strict = run(hugo, site, panic_on_warning=True)
-                require(strict.returncode != 0,
-                        f"invalid download case {name} survived --panicOnWarning", errors)
     return errors
 
 

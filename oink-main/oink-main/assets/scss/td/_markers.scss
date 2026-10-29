@@ -117,26 +117,23 @@ ul.cards {
     display: block;
     min-width: 0;
     margin: 0;
-    padding: 0.9rem 1rem;
-    border: 1px solid var(--bs-border-color);
-    border-radius: 0.6rem;
-    background: var(--td-brand-elev, var(--bs-tertiary-bg));
+    padding: 1rem 1.125rem;
+    @include td-content-tile;
     color: var(--bs-secondary-color);
     font-size: 0.95rem;
     line-height: 1.5;
-    transition:
-      transform 160ms ease,
-      border-color 160ms ease,
-      box-shadow 160ms ease;
 
     // The same split as .td-content-card: the hovered edge is a ground and
     // follows the section's accent, while the focus outline below stays with
     // the link family.
-    &:hover,
-    &:focus-within {
-      transform: translateY(-1px);
-      border-color: color-mix(in srgb, var(--td-accent) 45%, var(--bs-border-color));
-      box-shadow: var(--bs-box-shadow);
+    &:has(> a:first-child, > p:first-child > a:first-child):hover,
+    &:has(> a:first-child, > p:first-child > a:first-child):focus-within {
+      @include td-content-tile-active;
+    }
+
+    &:has(> a:first-child:focus-visible, > p:first-child > a:first-child:focus-visible) {
+      outline: 2px solid var(--td-card-accent);
+      outline-offset: 2px;
     }
 
     // The link is the card title; everything after it is the description.
@@ -144,11 +141,13 @@ ul.cards {
     // separator reads naturally; the loose form (own paragraph) stacks.
     > a:first-child,
     > p:first-child > a:first-child {
+      position: static;
+      z-index: auto;
       color: var(--bs-emphasis-color);
-      font-family: var(--td-display-font-family);
-      font-size: 1.02rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      font-family: var(--td-heading-font-family);
+      font-size: 1rem;
+      font-weight: $font-weight-semibold;
+      letter-spacing: -0.01em;
       text-decoration: none;
 
       &::after {
@@ -158,10 +157,7 @@ ul.cards {
         content: '';
       }
 
-      &:focus-visible {
-        outline: 2px solid var(--td-card-accent);
-        outline-offset: 2px;
-      }
+      &:focus-visible { outline: none; }
     }
 
     > p:first-child > a:first-child {
@@ -176,7 +172,57 @@ ul.cards {
     > p + p {
       margin-block-start: 0.35rem;
     }
+
+    // Include links nested in emphasis or other inline markup. The more
+    // specific title rules above keep its stretched target on the card.
+    :is(a, button, summary, input, select, textarea) {
+      position: relative;
+      z-index: 2;
+    }
   }
+}
+
+// A list has one frame; the individual rows keep their native list semantics.
+ul.cards.td-cards-list,
+.td-content-cards.td-cards-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--td-code-radius);
+  background: var(--td-brand-elev, var(--bs-tertiary-bg));
+
+  > li,
+  > .td-content-card {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+
+    &:first-child { border-start-start-radius: inherit; border-start-end-radius: inherit; }
+    &:last-child { border-end-start-radius: inherit; border-end-end-radius: inherit; }
+    + li,
+    + .td-content-card { border-block-start: 1px solid var(--bs-border-color); }
+    &:has(> a:first-child, > p:first-child > a:first-child, a.td-content-card__title):hover,
+    &:has(> a:first-child, > p:first-child > a:first-child, a.td-content-card__title):focus-within {
+      background: color-mix(in srgb, var(--td-accent) 4%, var(--td-brand-elev, var(--bs-tertiary-bg)));
+      box-shadow: none;
+    }
+  }
+}
+
+ol.steps.td-steps-compact,
+.td-steps.td-steps-compact {
+  --td-step-marker-size: 1.75rem;
+  --td-step-gutter: 2.75rem;
+  --td-step-marker-gap: 0.25rem;
+  margin-block: 1.5rem;
+
+  > li { margin-block-end: 1rem; }
+  > li:last-child { margin-block-end: 0; }
+  > :where(h2, h3, h4, h5, h6):not(.no-step-marker) { margin-block-start: 1.25rem; }
+  > :where(h2, h3, h4, h5, h6):first-child { margin-block-start: 0; }
+  > li::before,
+  > :where(h2, h3, h4, h5, h6)::before { font-size: 0.8125rem; }
 }
 
 // ---------------------------------------------------------------------------

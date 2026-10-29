@@ -18,7 +18,7 @@ type: docs
 | `HG_PD_GRPC_HOST` | Yes | None | `grpc.host` | Advertised gRPC hostname/IP; use container hostnames within a container network. |
 | `HG_PD_INITIAL_STORE_COUNT` | No | `1` | `pd.initial-store-count` | Minimum Store count needed for cluster availability. |
 | `HG_PD_ACTUATOR_EXPOSURE` | No | `health,metrics,prometheus` | `management.endpoints.web.exposure.include` | Public Actuator endpoint allowlist; `*` is forbidden. |
-{#wide-technical-table .td-table--wide}
+{#wide-technical-table .wide}
 
 ## Three-column configuration identifiers
 
@@ -41,4 +41,4 @@ type: docs
 | Component | Read | Write |
 | --- | --- | --- |
 | A long component identifier | Yes | No |
-{#wide-matrix-table .matrix .full-width .td-table--wide caption="Existing modifiers remain independent"}
+{#wide-matrix-table .matrix .full-width .wide caption="Existing modifiers remain independent"}

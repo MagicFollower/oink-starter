@@ -142,14 +142,19 @@
       var target = doc.getElementById(id);
       if (!target) return false;
       var panel = target.matches && target.matches('.td-tabs__panel') ? target : (target.closest ? target.closest('.td-tabs__panel') : null);
-      if (!panel) return false;
-      var root = panel.parentNode;
-      if (!root || !root.hasAttribute || !root.hasAttribute('data-td-tabs')) return false;
-      var value = valueOf(panel);
-      select(root, value, 'hash');
-      if (root.scrollIntoView) {
+      var ancestors = [];
+      while (panel) {
+        var root = panel.parentNode;
+        if (!root || !root.hasAttribute || !root.hasAttribute('data-td-tabs')) break;
+        ancestors.unshift({ root: root, value: valueOf(panel) });
+        panel = root.closest ? root.closest('.td-tabs__panel') : null;
+      }
+      if (!ancestors.length) return false;
+      // Reveal outside-in so dependent components can measure their container.
+      ancestors.forEach(function (entry) { select(entry.root, entry.value, 'hash'); });
+      if (target.scrollIntoView) {
         var reduced = win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        root.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
+        target.scrollIntoView({ block: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
       }
       return true;
     }

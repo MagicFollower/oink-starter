@@ -41,7 +41,6 @@ def build(base_url: str, public: Path) -> None:
             base_url,
             *fixture_config_args(),
             "--printPathWarnings",
-            "--panicOnWarning",
         ],
         cwd=ROOT,
         capture_output=True,

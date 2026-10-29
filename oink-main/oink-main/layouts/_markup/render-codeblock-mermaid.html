@@ -5,9 +5,9 @@
      readable afterwards is what lets the runtime (a) render late, because a
      diagram measured inside a `display: none` tab panel collapses to its
      padding and Mermaid never recomputes it, (b) re-render on a colour-scheme
-     change instead of reloading the page, and (c) draw a second copy at its
-     natural size for the zoom dialog rather than magnifying one that has
-     already been scaled down to fit the column.
+     change instead of reloading the page, and (c) provide exact source for
+     viewing and copying. A readable pre also survives disabled JavaScript and
+     printing before deferred rendering.
 
      Non-interactive outputs keep the source block: an RSS reader, a Markdown
      consumer or a Print bundle would otherwise receive an empty stage. Print
@@ -24,6 +24,7 @@
 {{- $page.Store.Set "hasmermaid" true -}}
 <figure class="td-diagram td-diagram--mermaid" data-td-diagram>
   <div class="td-diagram__stage" data-td-diagram-stage></div>
+  <pre class="td-mermaid-source" tabindex="0"><code class="language-mermaid">{{ $source }}</code></pre>
   <button class="td-diagram__expand d-print-none" type="button" hidden data-td-diagram-expand aria-haspopup="dialog">
     {{- partialCached "shell/icon.html" "expand" "diagram-expand" -}}
     <span class="visually-hidden">{{ T "ui_diagram_expand" }}</span>

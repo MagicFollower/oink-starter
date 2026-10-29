@@ -379,47 +379,41 @@
 }
 
 .td-landing-button {
+  @include td-control-surface;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
   min-height: 44px;
   padding: 12px 24px;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: var(--td-radius-sm);
   font-size: 0.98rem;
   font-weight: 700;
   line-height: 1;
   transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
-
-  &:hover {
-    transform: translateY(-2px);
-  }
+    box-shadow var(--td-motion-duration-fast) ease,
+    color var(--td-motion-duration-fast) ease;
 
   &--primary {
-    background: var(--td-primary-bg);
+    --td-control-bg: var(--td-primary-bg);
     color: var(--td-primary-fg);
     box-shadow: var(--td-primary-shadow);
 
     &:hover {
-      background: var(--td-primary-bg-hover);
+      --td-control-bg: var(--td-primary-bg-hover);
       color: var(--td-primary-fg);
       box-shadow: var(--td-primary-shadow-hover);
     }
   }
 
   &--ghost {
-    border-color: var(--td-line-strong);
-    background: transparent;
+    --td-control-border: var(--td-line-strong);
     color: var(--td-ink);
 
     &:hover {
-      border-color: var(--td-blue);
+      --td-control-border: var(--td-blue);
+      --td-control-bg: rgba(var(--bs-link-color-rgb), 0.04);
       color: var(--td-blue-strong);
     }
   }
@@ -1847,6 +1841,31 @@
 
 .td-landing-command-box__note { color: var(--td-muted); }
 
+// Textual feedback occupies the same grid cell before and after copying.
+.td-landing-command-box button {
+  @include td-control-surface;
+  --td-control-border: var(--td-terminal-line);
+  --td-control-bg: rgba(255, 255, 255, 0.05);
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  border-radius: var(--td-control-radius);
+  font-family: var(--td-ui-font-family);
+  font-size: 0.8125rem;
+
+  > i { grid-area: 1 / 1; }
+  .td-landing-copy-label,
+  [data-td-copy-status],
+  &::after { grid-area: 1 / 2; }
+  &::after { content: attr(data-td-label-copied); visibility: hidden; }
+  &[data-td-copy-state='success'] .td-landing-copy-label { visibility: hidden; }
+  &:hover { --td-control-bg: rgba(255, 255, 255, 0.1); }
+  &:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+}
+
 .td-landing-landing-steps {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1880,20 +1899,28 @@
   align-items: center;
   margin-top: 18px;
   padding: 8px 8px 8px 12px;
-  border-radius: 8px;
+  border-radius: var(--td-control-radius);
   background: var(--td-terminal);
   color: #c9d6e8;
 
   code { overflow-wrap: anywhere; color: inherit; }
 
   button {
-    min-width: 40px;
-    min-height: 40px;
-    border: 1px solid var(--td-terminal-line);
-    border-radius: 7px;
-    background: transparent;
+    @include td-control-surface;
+    --td-control-border: var(--td-terminal-line);
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    border-radius: var(--td-control-radius);
     color: inherit;
+    &:hover { --td-control-bg: rgba(255, 255, 255, 0.1); }
   }
+}
+
+// These command surfaces stay dark even when the page uses light mode.
+:is(.td-landing-command-box, .td-landing-step-command) button.td-is-copied {
+  --td-control-border: currentColor;
+  color: color-mix(in srgb, var(--bs-success) 45%, #fff);
 }
 
 .td-landing-timeline {

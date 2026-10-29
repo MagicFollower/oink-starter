@@ -52,6 +52,17 @@ function harness(command = () => true) {
     await assert.rejects(clipboard.writeText('Copy text', doc, {}));
     assert.equal(doc.activeElement, previous, 'failed copy did not restore focus');
   }
+  const modal = harness();
+  let copiedField;
+  modal.doc.body.appendChild = () => { throw new Error('background is inert'); };
+  modal.previous.closest = selector => {
+    assert.equal(selector, 'dialog[open]');
+    return { appendChild(field) { copiedField = field; } };
+  };
+  await clipboard.writeText('中文 -> "quotes" & source', modal.doc, {});
+  assert.equal(copiedField.value, '中文 -> "quotes" & source');
+  assert.equal(modal.doc.activeElement, modal.previous);
+
   const newerFocus = {};
   const changed = harness(doc => { doc.activeElement = newerFocus; return true; });
   await clipboard.writeText('Copy text', changed.doc, {});

@@ -7,9 +7,9 @@
   align-items: center;
   gap: 0.4em;
   max-width: 100%;
-  padding: 0.16em 0.55em;
+  padding: 0.2em 0.55em;
   border: 1px solid var(--td-badge-border);
-  border-radius: var(--bs-border-radius-pill);
+  border-radius: var(--td-control-radius);
   color: var(--td-badge-fg);
   font-family: var(--td-meta-font-family);
   font-size: 0.78em;
@@ -17,7 +17,7 @@
   line-height: 1.25;
   overflow-wrap: anywhere;
   text-decoration: none;
-  vertical-align: 0.08em;
+  vertical-align: 0.05em;
 
   > i {
     font-size: 0.85em;
@@ -172,7 +172,7 @@ a.td-badge--solid {
   scroll-margin-block-start: var(--td-scroll-padding-top, 0px);
 
   &:first-child {
-    padding-block-start: 0.25rem;
+    padding-block-start: 0.625rem;
   }
 
   &:last-child {
@@ -188,7 +188,7 @@ a.td-badge--solid {
   &:target {
     margin-inline: -0.6rem;
     padding-inline: 0.6rem;
-    border-radius: 0.5rem;
+    border-radius: var(--td-control-radius);
     background: var(--bs-tertiary-bg);
   }
 }

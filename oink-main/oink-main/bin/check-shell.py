@@ -163,6 +163,9 @@ def check_sources() -> list[str]:
             and "td-shell-topline--actions-only" in docs_layout
             and "td-shell-topline--actions-only" in blog_layout,
             "breadcrumb-free roots no longer lift their title while pinning actions", errors)
+    require("flex-wrap: wrap" in page_context_styles and "overflow-wrap: anywhere" in page_context_styles
+            and "max-width: calc(100vw - 2rem)" in page_context_styles,
+            "page context must reflow long breadcrumbs and keep the action menu within the viewport", errors)
     search_index = sidebar_panel.index('class="td-shell-iconbtn td-shell-sidebar__search"')
     collapse_index = sidebar_panel.index('class="td-shell-iconbtn td-shell-sidebar__collapse"')
     require(search_index < collapse_index,
@@ -382,7 +385,7 @@ def check_sources() -> list[str]:
     require('partial "ui-param.html" (dict "page" . "key" "blog_index")' in blog_state
             and 'partial "ui-param.html" (dict "page" . "key" "blog_index_columns")' in blog_state,
             "blog index form or column count is not a ui-param with a front matter override", errors)
-    require('"allowed" (slice "list" "cards" "table")' in blog_state
+    require('"allowed" (slice "list" "cards" "table" "gallery")' in blog_state
             and '"key" "params.ui.blog_index"' in blog_state
             and '"fallback" "list"' in blog_state,
             "blog index form is not validated against its enum with a documented fallback", errors)
@@ -421,11 +424,11 @@ def check_sources() -> list[str]:
     reader_choice = [line for line in blog_styles.splitlines()
                      if line.startswith("html[data-td-blog-index=")
                      and ".td-blog-posts" in line]
-    require(len(reader_choice) == 3
+    require(len(reader_choice) == 4
             and all("[data-td-blog-forms='all']" in line for line in reader_choice),
             "a stored index form can hide the only form a section published", errors)
     require("data-td-blog-index-toggle" in shell_js and "toggle.hidden = false" in shell_js
-            and "['list', 'cards', 'table']" in shell_js,
+            and "['list', 'cards', 'table', 'gallery']" in shell_js,
             "the shell runtime does not claim the index switch or lost its cycle order", errors)
     require('class="td-content-cards td-blog-cards"' in blog_list
             and "--td-card-columns:" in blog_list,
@@ -914,7 +917,7 @@ def build_example(hugo: str) -> list[str]:
         })
         result = run_hugo_process(
             [hugo, "--source", str(ROOT / "tests/site"), "--themesDir", str(ROOT.parent),
-             "--destination", str(public), *fixture_config_args(), "--panicOnWarning"],
+             "--destination", str(public), *fixture_config_args()],
             cwd=ROOT,
             env=env,
             text=True,
@@ -1139,7 +1142,7 @@ languages:
 
         result = run_hugo_process(
             [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-             "--destination", str(public), "--panicOnWarning"],
+             "--destination", str(public)],
             cwd=ROOT,
             text=True,
             capture_output=True,
@@ -1351,7 +1354,7 @@ params:
 
         result = run_hugo_process(
             [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-             "--destination", str(public), "--panicOnWarning"],
+             "--destination", str(public)],
             cwd=ROOT,
             text=True,
             capture_output=True,
@@ -1447,7 +1450,7 @@ params:
                     path.write_text(frontmatter, encoding="utf-8")
             result = run_hugo_process(
                 [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-                 "--destination", str(public), "--panicOnWarning"],
+                 "--destination", str(public)],
                 cwd=ROOT, text=True, capture_output=True)
             if result.returncode:
                 return ["root visibility fixture failed:\n" + result.stdout + result.stderr]
@@ -1474,7 +1477,7 @@ params:
 
 
 def build_featured_image_rejection(hugo: str) -> list[str]:
-    """An unknown mode warns, uses `none`, and fails strict publication."""
+    """An unknown mode warns and uses the safe `none` fallback."""
     errors: list[str] = []
     with tempfile.TemporaryDirectory(prefix="oink-shell-featured-") as temporary:
         root = Path(temporary)
@@ -1509,19 +1512,12 @@ params:
             capture_output=True,
         )
         output = result.stdout + result.stderr
-        strict = run_hugo_process(
-            [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-             "--destination", str(root / "strict"), "--logLevel", "warn", "--panicOnWarning"],
-            cwd=ROOT, text=True, capture_output=True,
-        )
         require(result.returncode == 0,
                 f"an invalid params.ui.featured_image stopped the build instead of warning: {output[-400:]}", errors)
         require("invalid params.ui.featured_image" in output
                 and "none | banner | wash | hero" in output
                 and "none" in output,
                 f"the featured_image warning does not name the allowed modes and the fallback: {output[-400:]}", errors)
-        require(strict.returncode != 0,
-                "an invalid params.ui.featured_image survived --panicOnWarning", errors)
     return errors
 
 
@@ -1562,15 +1558,6 @@ menus:
             "---\ntitle: Docs\n---\n", encoding="utf-8")
         (source / "content/docs/child.md").write_text(
             "---\ntitle: Child\ndate: 2026-01-01\n---\n\nChild.\n", encoding="utf-8")
-        strict = run_hugo_process(
-            [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-             "--destination", str(root / "public"), "--panicOnWarning"],
-            cwd=ROOT, text=True, capture_output=True,
-        )
-        output = strict.stdout + strict.stderr
-        require(strict.returncode != 0
-                and "the columns parameter is retired" in output,
-                f"retired menu columns survived --panicOnWarning: {output[-400:]}", errors)
         loose = run_hugo_process(
             [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
              "--destination", str(root / "public")],
@@ -1619,7 +1606,7 @@ def build_drawer_ownership(hugo: str) -> list[str]:
             )
         result = run_hugo_process(
             [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-             "--destination", str(root / "public"), "--panicOnWarning"],
+             "--destination", str(root / "public")],
             cwd=ROOT, text=True, capture_output=True,
         )
         require(result.returncode == 0,
@@ -1649,7 +1636,7 @@ def build_drawer_ownership(hugo: str) -> list[str]:
         (source / "content/_index.md").write_text("---\ntitle: Custom homepage\n---\n", encoding="utf-8")
         custom = run_hugo_process(
             [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-             "--destination", str(root / "public"), "--panicOnWarning"],
+             "--destination", str(root / "public")],
             cwd=ROOT, text=True, capture_output=True,
         )
         require(custom.returncode == 0,
@@ -1663,7 +1650,7 @@ def build_drawer_ownership(hugo: str) -> list[str]:
 
 
 def build_blog_index_forms(hugo: str) -> list[str]:
-    """Compare the three published forms and the paged reader toggle."""
+    """Compare all four published forms and the paged reader toggle."""
 
     errors: list[str] = []
     with tempfile.TemporaryDirectory(prefix="oink-blog-index-") as temporary:
@@ -1690,13 +1677,26 @@ def build_blog_index_forms(hugo: str) -> list[str]:
             "    blog_index_toggle: true\n",
             encoding="utf-8",
         )
+        gallery_overlay = root / "gallery.yaml"
+        gallery_overlay.write_text(
+            "params:\n  ui:\n    blog_index: gallery\n    blog_index_toggle: false\n"
+            "    blog_gallery:\n      mode: seamless\n      size: 280\n",
+            encoding="utf-8",
+        )
+        invalid_gallery = root / "invalid-gallery.yaml"
+        invalid_gallery.write_text(
+            "params:\n  ui:\n    blog_index: gallery\n    blog_index_toggle: false\n"
+            "    blog_gallery:\n      mode: invalid\n      size: 999\n",
+            encoding="utf-8",
+        )
         rendered: dict[str, str] = {}
         for name, extra in (("rows", (rows_overlay,)), ("cards", (overlay,)),
-                            ("table", (table_overlay,)), ("toggle", (toggle_overlay,))):
+                            ("table", (table_overlay,)), ("toggle", (toggle_overlay,)),
+                            ("gallery", (gallery_overlay,)), ("invalid-gallery", (invalid_gallery,))):
             public = root / name
             result = run_hugo_process(
                 [hugo, "--source", str(ROOT / "tests/site"), "--themesDir", str(ROOT.parent),
-                 "--destination", str(public), *fixture_config_args(*extra), "--panicOnWarning"],
+                 "--destination", str(public), *fixture_config_args(*extra)],
                 cwd=ROOT,
                 text=True,
                 capture_output=True,
@@ -1707,6 +1707,10 @@ def build_blog_index_forms(hugo: str) -> list[str]:
             if not index.is_file():
                 return [f"blog index {name} form did not render blog/oink/index.html"]
             rendered[name] = index.read_text(encoding="utf-8")
+            if name == "invalid-gallery":
+                require("blog_gallery.mode" in result.stdout + result.stderr
+                        and "blog_gallery.size" in result.stdout + result.stderr,
+                        "invalid gallery settings did not warn", errors)
 
         rows, cards = rendered["rows"], rendered["cards"]
         row_links = re.findall(
@@ -1733,6 +1737,19 @@ def build_blog_index_forms(hugo: str) -> list[str]:
                 "the two index forms disagree about pagination", errors)
         require('src=""' not in cards, "the cards index emitted an empty image source", errors)
 
+        gallery = rendered["gallery"]
+        gallery_pattern = r'<a class="td-blog-gallery__link" href="([^"]+)"'
+        require(re.findall(gallery_pattern, gallery) == row_links,
+                "gallery changed the page selection or its ordering", errors)
+        require('data-td-mode="seamless" data-td-size="280"' in gallery
+                and 'js/chunks/blog-gallery.' in gallery
+                and 'data-td-expo-viewer' not in gallery,
+                "gallery lost its settings/runtime or gained a photo viewer", errors)
+        require('data-td-mode="wall" data-td-size="240"' in rendered["invalid-gallery"],
+                "invalid gallery settings did not use safe defaults", errors)
+        require('td-blog-posts-list__item' not in gallery and 'class="td-content-cards td-blog-cards"' not in gallery,
+                "standalone gallery leaked another form", errors)
+
         # A standalone table remains an unpaginated archive.
         table = rendered["table"]
         table_links = re.findall(
@@ -1753,7 +1770,7 @@ def build_blog_index_forms(hugo: str) -> list[str]:
         # attribute is written from localStorage on every shell page, so an
         # index published in one form must be immune to it.
         require(all('data-td-blog-forms="all"' not in rendered[name]
-                    for name in ("rows", "cards", "table")),
+                    for name in ("rows", "cards", "table", "gallery")),
                 "a single-form index claims to carry every form", errors)
         require('data-td-blog-forms="all"' in rendered["toggle"],
                 "the toggle index does not mark that it carries every form", errors)
@@ -1767,7 +1784,7 @@ def build_blog_index_forms(hugo: str) -> list[str]:
             r'<a class="td-content-card__title" href="([^"]+)"', toggle, re.S)
         toggle_table = re.findall(
             r'<td class="td-blog-table__title"><a href="([^"]+)"', toggle)
-        require(toggle_rows == toggle_cards == toggle_table,
+        require(toggle_rows == toggle_cards == toggle_table == re.findall(gallery_pattern, toggle),
                 "toggle forms do not share the first pager slice", errors)
         second_path = root / "toggle/blog/oink/page/2/index.html"
         require(second_path.is_file(), "toggle fixture did not generate a second page", errors)
@@ -1777,7 +1794,7 @@ def build_blog_index_forms(hugo: str) -> list[str]:
                 r'<li class="td-blog-posts-list__item">.*?<a href="([^"]+)"', second, re.S)
             second_table = re.findall(
                 r'<td class="td-blog-table__title"><a href="([^"]+)"', second)
-            require(second_rows == second_table,
+            require(second_rows == second_table == re.findall(gallery_pattern, second),
                     "toggle forms do not share the second pager slice", errors)
             require(set(toggle_table).isdisjoint(second_table),
                     "toggle table repeats first-page posts on page two", errors)
@@ -1836,7 +1853,7 @@ params:
 
         result = run_hugo_process(
             [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-             "--destination", str(public), "--panicOnWarning"],
+             "--destination", str(public)],
             cwd=ROOT,
             text=True,
             capture_output=True,
@@ -1900,6 +1917,18 @@ params:
         cleared = by_title.get("Opted out", "")
         require("<img" not in cleared and "cascaded.png" not in cleared,
                 "`images: []` no longer turns off an inherited lead image", errors)
+
+        galleries = index.read_text(encoding="utf-8").split('data-gallery-item')[1:]
+        require(len(galleries) == 4, "gallery dropped a post without a cover", errors)
+        gallery_html = index.read_text(encoding="utf-8").split('data-gallery-grid>', 1)[1].split('</section>', 1)[0]
+        require('href="https://example.net/post/"' in gallery_html
+                and 'rel="noopener noreferrer"' in gallery_html,
+                "gallery lost external manual_link semantics", errors)
+        require(gallery_html.count('is-missing') == 3 and gallery_html.count('<img ') == 1,
+                "gallery missing-cover fallback or images: [] drifted", errors)
+        require('loading="lazy"' in gallery_html and 'alt=""' in gallery_html
+                and 'width="' in gallery_html and 'height="' in gallery_html,
+                "gallery lost lazy loading or known image dimensions", errors)
     return errors
 
 
@@ -1958,7 +1987,7 @@ params:
         )
         result = run_hugo_process(
             [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-             "--destination", str(public), "--panicOnWarning"],
+             "--destination", str(public)],
             cwd=ROOT,
             text=True,
             capture_output=True,

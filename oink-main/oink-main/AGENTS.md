@@ -6,8 +6,8 @@ accepted decisions, dated research, and active proposals.
 
 ## Current baseline
 
-The current release is `v1.3.2`, dated 2026-10-18 in `CHANGELOG.md`. The sibling
-site's `v1.3.2` Design contracts describe this release. Refresh Git state,
+The current release is `v1.4.0`, dated 2026-10-26 in `CHANGELOG.md`. The sibling
+site's `v1.4.0` Design contracts describe this release. Refresh Git state,
 public tags, and consumer pins before making claims about later releases or
 downstream adoption.
 
@@ -94,20 +94,20 @@ make -C ../oink.pgsty.com dev
 
 ## Theme contracts
 
-- Hugo Extended 0.166.0 is the minimum and default development/strict CI
-  version. Keep this baseline pinned; do not automatically follow latest Hugo.
-  A focused Hugo 0.168.0 check accepts its known upstream LibSass deprecation
-  warning while rejecting other diagnostics. Ordinary 0.168.0 builds may warn.
-  Update requirements, checkers, and current bilingual contracts together.
+- Use OINK v1.4.0 and Hugo Extended 0.168.0 for maintained consumer sites,
+  development, CI, and release checks. Keep this baseline pinned. Update
+  requirements, checkers, and current bilingual contracts together.
+  Keep the upstream LibSass deprecation warning visible and accepted.
 - SCSS uses Hugo Extended's built-in LibSass, including main and ReDoc styles.
   Ordinary consumers must not install Dart Sass or another Sass executable.
   Preserve project-variable/style hooks. Future Hugo upgrades must preserve
   this dependency boundary; do not add compatibility shims for unrelated versions.
-- The module declares Go 1.27.0 as its minimum; the current development default
-  is Go 1.27.2. Record the actual local tool versions when reporting validation.
-- Run default 0.166.0 checkers with `--panicOnWarning`. The focused 0.168.0
-  compatibility check permits only the upstream LibSass warning; theme warnings
-  remain failures. Ordinary editing may warn and fall back.
+- The module declares Go 1.27.3 as its minimum; the current development default
+  is Go 1.27.3. Record the actual local tool versions when reporting validation.
+- Do not enable `--panicOnWarning` or `HUGO_PANICONWARNING` in any build,
+  checker, preview, or CI job. Review diagnostics and verify their owning
+  output contracts. Invalid-input tests check warnings and safe fallback
+  output directly; warnings do not change Hugo's exit status.
 - Keep generated `public/`, `resources/`, locks, and caches out of Git.
 - Preserve pre-existing changes in this shared worktree and edit only the
   owning implementation, checker, and public Design contract for a change.

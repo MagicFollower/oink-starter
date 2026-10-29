@@ -1054,7 +1054,7 @@
   if (!toggle || !posts) return;
 
   var root = document.documentElement;
-  var FORMS = ['list', 'cards', 'table'];
+  var FORMS = ['list', 'cards', 'table', 'gallery'];
 
   // Seed the published default before revealing the control.
   function apply(form) {

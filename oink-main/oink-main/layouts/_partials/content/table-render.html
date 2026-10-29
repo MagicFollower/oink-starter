@@ -6,6 +6,7 @@
 {{- $isFields := in $classes "fields" -}}
 {{- $isMatrix := in $classes "matrix" -}}
 {{- $isFull := in $classes "full-width" -}}
+{{- $isExpand := in $classes "expand" -}}
 {{- $caption := strings.TrimSpace (index $policy.consumed "caption" | default "") -}}
 {{- $numRaw := index $policy.consumed "num" | default "" -}}
 {{- $idRaw := index $policy.consumed "id" | default "" -}}
@@ -21,6 +22,10 @@
 {{- if and $isFields $isFull -}}
   {{- warnf "table: .fields cannot be combined with .full-width at %s; ignoring .full-width" .Position -}}
   {{- $isFull = false -}}
+{{- end -}}
+{{- if and $isFields $isExpand -}}
+  {{- warnf "table: .fields cannot be combined with .expand at %s; ignoring .expand" .Position -}}
+  {{- $isExpand = false -}}
 {{- end -}}
 {{- if and $numRaw $tab -}}
   {{- warnf "table: num (Book target) and tab (tabs) are mutually exclusive at %s; ignoring tab" .Position -}}
@@ -149,6 +154,9 @@
 {{- /* Author classes stay on <table> (markers included) so site CSS keyed on
        e.g. table.full-width keeps working; the wrapper carries the modifiers. */ -}}
 {{- $tableClasses := $classes -}}
+{{- /* Keep the short author marker and map it to the existing style class.
+       Direct use of td-table--wide remains supported, including both forms. */ -}}
+{{- if and (in $classes "wide") (not (in $classes "td-table--wide")) }}{{ $tableClasses = $tableClasses | append "td-table--wide" }}{{ end -}}
 {{- if $isMatrix }}{{ $tableClasses = $tableClasses | append "td-table--matrix" }}{{ end -}}
 {{- $table := printf "%s" (partial "content/table-body.html" (dict
   "thead" .THead "tbody" .TBody "matrix" $isMatrix "format" $format
@@ -156,6 +164,10 @@
   "caption" (cond $numRaw "" $caption)
   "id" (cond (and $id (not $numRaw)) $id "")
 )) -}}
+{{- if and $isExpand (eq $format "html") -}}
+  {{- $page.Store.Set "hasTableReader" true -}}
+  {{- $table = printf `<div class="td-table-frame" data-td-table-expand>%s</div>` $table -}}
+{{- end -}}
 {{- $html := $table -}}
 {{- if $numRaw -}}
   {{- $label := partial "book/label.html" (dict "kind" "tbl" "num" $num) -}}

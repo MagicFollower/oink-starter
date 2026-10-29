@@ -69,7 +69,9 @@
     return Array.prototype.filter.call(
       container.querySelectorAll(FOCUSABLE),
       function (el) {
-        return el.offsetParent !== null || el === document.activeElement;
+        // A native radio group contributes its checked item to the Tab order.
+        return (el.type !== 'radio' || el.checked) &&
+          (el.offsetParent !== null || el === document.activeElement);
       },
     );
   }
@@ -100,6 +102,7 @@
     var list = root.querySelector('.td-shell-search__list');
     var panel = root.querySelector('.td-shell-search__panel');
     var status = root.querySelector('[data-td-shell-search-status]');
+    var scopeRow = root.querySelector('[data-td-search-scope-row]');
     if (!input || !list || !panel || !status) return null;
 
     var registry = options.registry || global.OinkActions;
@@ -341,16 +344,17 @@
       text = String(text || '');
       query = String(query || '').trim();
       var fragment = document.createDocumentFragment();
-      var at = query ? text.toLowerCase().indexOf(query.toLowerCase()) : -1;
-      if (at < 0) {
-        fragment.appendChild(document.createTextNode(text));
-        return fragment;
-      }
-      fragment.appendChild(document.createTextNode(text.slice(0, at)));
-      var mark = document.createElement('mark');
-      mark.textContent = text.slice(at, at + query.length);
-      fragment.appendChild(mark);
-      fragment.appendChild(document.createTextNode(text.slice(at + query.length)));
+      var needles = searchApi.terms ? searchApi.terms(query) : [query.toLowerCase()];
+      var merged = searchApi.matchRanges ? searchApi.matchRanges(text, needles) : [];
+      var cursor = 0;
+      merged.forEach(function (range) {
+        fragment.appendChild(document.createTextNode(text.slice(cursor, range[0])));
+        var mark = document.createElement('mark');
+        mark.textContent = text.slice(range[0], range[1]);
+        fragment.appendChild(mark);
+        cursor = range[1];
+      });
+      fragment.appendChild(document.createTextNode(text.slice(cursor)));
       return fragment;
     }
 
@@ -382,9 +386,9 @@
               id: 'page:' + result.doc.ref,
               sourceId: result.doc.ref,
               type: 'page',
-              title: result.doc.title || result.doc.ref,
+              title: (result.doc.title || result.doc.ref) + (result.heading ? ' › ' + result.heading : ''),
               description: result.excerpt || result.doc.description || '',
-              ref: result.doc.ref,
+              ref: result.ref || result.doc.ref,
               icon: result.doc.icon || 'fa-regular fa-file-lines',
               available: true,
               page: result,
@@ -413,7 +417,8 @@
 
       var groups = [];
       if (engine) {
-        try { groups = pageGroups(engine.query(raw)); } catch (_) { groups = []; queryFailed = true; }
+        var scope = root.querySelector('[data-td-search-scope]:checked');
+        try { groups = pageGroups(engine.query(raw, { root: scope ? scope.value : '' })); } catch (_) { groups = []; queryFailed = true; }
       }
       var actions = model.actionRows(registry, raw);
       if (actions.length)
@@ -518,6 +523,13 @@
           title.className = 'td-shell-search__item-title';
           title.appendChild(highlight(rowData.title, query));
           meta.appendChild(title);
+          if (rowData.page && rowData.page.partial) {
+            var coverage = document.createElement('div');
+            coverage.className = 'td-shell-search__item-ref';
+            coverage.textContent = (root.dataset.tdTPartial || 'Partial match: {matched}/{total} terms')
+              .replace('{matched}', rowData.page.matched).replace('{total}', rowData.page.total);
+            meta.appendChild(coverage);
+          }
           var detail = rowData.disabledReason || rowData.description || rowData.ref;
           if (detail && detail !== rowData.title) {
             var description = document.createElement('div');
@@ -542,15 +554,19 @@
       });
       if (rows.length) {
         select(0);
-        announce(resultMessage(rows.length));
+        var hasPartial = rows.some(function (row) { return row.page && row.page.partial; });
+        announce(resultMessage(rows.length) + (hasPartial
+          ? '. ' + (root.dataset.tdTPartialResults || 'No page matches every term; showing partial matches') : ''));
       }
     }
 
     function render(value, retryIndex) {
+      if (composing) return;
       if (retryIndex === undefined) retryIndex = true;
       var raw = String(value || '').trim();
       if (pendingExtension && pendingExtension.query !== raw) cancelExtension();
       var commandOnly = raw.charAt(0) === COMMAND_PREFIX;
+      if (scopeRow) scopeRow.hidden = !!choiceState || commandOnly;
       var groups = groupsFor(value);
       var actionCount = groups.reduce(function (total, group) {
         return total + group.rows.length;
@@ -712,9 +728,22 @@
     }
 
     var debounce = 0;
-    input.addEventListener('compositionstart', function () { composing = true; });
+    if (scopeRow) scopeRow.addEventListener('change', function () {
+      // Explicit tab stops also expose native radios with macOS Tab preferences.
+      scopeRow.querySelectorAll('[data-td-search-scope]').forEach(function (radio) {
+        radio.tabIndex = radio.checked ? 0 : -1;
+      });
+      cancelExtension();
+      global.clearTimeout(debounce);
+      render(input.value);
+    });
+    input.addEventListener('compositionstart', function () {
+      composing = true;
+      global.clearTimeout(debounce);
+    });
     input.addEventListener('compositionend', function () {
       composing = false;
+      global.clearTimeout(debounce);
       choiceState = null;
       render(input.value);
     });
