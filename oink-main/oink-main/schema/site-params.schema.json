@@ -60,7 +60,7 @@
           "default": "normal"
         },
         "markmap": {
-          "description": "Diagram runtimes are off until a site opts in. `markmap: true` renders ```markmap fences; plantuml and drawio also require their server URLs.",
+          "description": "Diagram runtimes are off until a site opts in. `markmap: true` renders ```markmap fences. PlantUML renders locally unless svg_image_url is set; only Draw.io requires a server URL.",
           "type": "boolean",
           "default": false
         },
@@ -208,7 +208,7 @@
               "default": 2
             },
             "blog_index": {
-              "description": "Form of the blog section list pages: list (rows), cards (a grid), or table (one compact row per post -- the whole section at once, no year groups, no pagination). Front matter `blog_index` (on the blog root, or through its cascade) overrides it per section.",
+              "description": "Form of the blog section list pages: list (rows), cards (a grid), gallery (linked cover images using Expo geometry), or table (one compact row per post -- the whole section at once, no year groups, no pagination). Front matter `blog_index` (on the blog root, or through its cascade) overrides it per section.",
               "type": "string",
               "default": "list"
             },
@@ -217,14 +217,29 @@
               "default": 3
             },
             "blog_index_toggle": {
-              "description": "Let a reader cycle the index through list, cards, and table from the index toolbar. Off by default: it puts every form in the document. The hidden ones load no images, but their markup is real.",
+              "description": "Let a reader cycle the index through list, cards, table, and gallery from the index toolbar. Off by default: it puts every form in the document. The hidden ones load no images, but their markup is real.",
               "type": "boolean",
               "default": false
             },
             "blog_index_size": {
-              "description": "Posts per page on a list or cards blog index; the table form always shows everything. Hugo ignores `pagination` set by a theme, so the list template passes this to .Paginate itself. Twelve divides by two, three, and four, so no card row is left short.",
+              "description": "Posts per page on a list, cards, or gallery blog index; a standalone table shows everything. Hugo ignores `pagination` set by a theme, so the list template passes this to .Paginate itself. Twelve divides by two, three, and four, so no card row is left short.",
               "type": "integer",
               "default": 12
+            },
+            "blog_gallery": {
+              "description": "Gallery defaults. A page's blog_gallery block replaces this whole block. Readers can choose a layout and size independently of Expo albums.",
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "default": "wall"
+                },
+                "size": {
+                  "type": "integer",
+                  "default": 240
+                }
+              }
             },
             "lastmod_commit": {
               "type": "string",

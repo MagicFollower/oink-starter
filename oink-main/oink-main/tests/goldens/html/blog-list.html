@@ -85,7 +85,7 @@ if (localStorage.getItem('td-shell-toc-collapsed') === '1'
 html.setAttribute('data-td-shell-toc', 'collapsed');
 }
 var blogIndex = localStorage.getItem('td-blog-index');
-if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table') {
+if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
 html.setAttribute('data-td-blog-index', blogIndex);
 }
 if (sessionStorage.getItem('td-kbd-zen') === '1') {
@@ -500,6 +500,7 @@ title="Switch layout" aria-label="Switch layout">
 <span class="td-page-actions__icon td-page-actions__icon--form-list"><i class="fa-solid fa-list" aria-hidden="true"></i></span>
 <span class="td-page-actions__icon td-page-actions__icon--form-cards"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i></span>
 <span class="td-page-actions__icon td-page-actions__icon--form-table"><i class="fa-solid fa-table-list" aria-hidden="true"></i></span>
+<span class="td-page-actions__icon td-page-actions__icon--form-gallery"><i class="fa-solid fa-images" aria-hidden="true"></i></span>
 </button>
 <a class="td-page-actions__primary" href="/blog/index.xml" title="RSS" aria-label="RSS">
 <span class="td-page-actions__icon"><i class="fa-solid fa-rss" aria-hidden="true"></i></span>
@@ -622,6 +623,164 @@ carry bylines resolved from the <code>authors</code> taxonomy.</p>
 </tbody>
 </table>
 <div class="td-blog-posts__paged">
+<section class="td-blog-gallery" data-td-blog-form="gallery" data-td-blog-gallery data-td-mode="wall" data-td-size="240" aria-label="Blog">
+<div class="td-expo-toolbar" data-gallery-controls hidden>
+<fieldset class="td-expo-modes">
+<legend class="visually-hidden">Image layout</legend>
+<label class="td-expo-mode" title="Image wall">
+<input type="radio" name="td-blog-gallery-mode" value="wall" data-gallery-mode aria-label="Image wall">
+<span class="td-expo-button"><i class="td-shell-icon td-shell-icon--wall fa-solid fa-table-cells-large" aria-hidden="true"></i></span>
+</label>
+<label class="td-expo-mode" title="Image cards">
+<input type="radio" name="td-blog-gallery-mode" value="cards" data-gallery-mode aria-label="Image cards">
+<span class="td-expo-button"><i class="td-shell-icon td-shell-icon--cards fa-solid fa-table-columns" aria-hidden="true"></i></span>
+</label>
+<label class="td-expo-mode" title="Seamless wall">
+<input type="radio" name="td-blog-gallery-mode" value="seamless" data-gallery-mode aria-label="Seamless wall">
+<span class="td-expo-button"><i class="td-shell-icon td-shell-icon--seamless fa-solid fa-border-none" aria-hidden="true"></i></span>
+</label>
+</fieldset>
+<label class="td-expo-size">
+<span class="td-expo-size__small" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span>
+<input type="range" min="160" max="360" step="20" value="240" data-gallery-size aria-label="Image size">
+<span class="td-expo-size__large" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span>
+</label>
+</div>
+<div class="td-blog-gallery__grid" data-gallery-grid>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/release/0.6.0/" aria-label="Oink 0.6.0 — Immersive blog reading, and a build that warns instead of stopping">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/releasenote.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>Oink 0.6.0 — Immersive blog reading, and a build that warns instead of stopping</h3>
+<p>Oink 0.6.0 adds an immersive presentation to the existing blog shell, then finishes it with featured images, authors, series, three index forms and a share bar, and adds attribution for vendored …</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/oink/immersive-reading/" aria-label="Immersive reading on the blog shell">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/blog/oink/immersive-reading/featured.svg" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>Immersive reading on the blog shell</h3>
+<p>Four front-matter keys turn a blog page into a reading-first layout: a hero drawn from the featured image, no chrome but the outline rail, and every blog component in its usual place below the fold.</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/release/0.5.0/" aria-label="Oink 0.5.0 — Component API v5 and the converged configuration">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/releasenote.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>Oink 0.5.0 — Component API v5 and the converged configuration</h3>
+<p>Oink 0.5.0 replaces most shortcodes with native Markdown forms, converges every configuration and front matter key on three rules, removes the 0.x compatibility layer, and ships the migration toolkit …</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/release/0.4.0/" aria-label="Oink 0.4.0 — Scenario components for complete publishing workflows">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/releasenote.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>Oink 0.4.0 — Scenario components for complete publishing workflows</h3>
+<p>Oink 0.4.0 adds sequential reading and release surfaces, reusable landing pages, Book publishing with stable references, and a keyboard-first site shell in one consolidated Scenario Components …</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/release/mcli-20260813/" aria-label="MCLI 20260813">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/releasenote.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>MCLI 20260813</h3>
+<p>Date-style tags remain valid and deterministic.</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/release/0.3.0/" aria-label="Oink 0.3.0 — Authoring, navigation, and a lighter page">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/releasenote.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>Oink 0.3.0 — Authoring, navigation, and a lighter page</h3>
+<p>Oink 0.3.0 adds enhanced code blocks and code groups, everyday content primitives, nested navigation with a Command Palette, semantic typography presets, and removes jQuery from every page.</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/release/pig-1.10.0/" aria-label="Pig 1.10.0">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/releasenote.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>Pig 1.10.0</h3>
+<p>Numeric semantic-version ordering places this ahead of 1.9.0.</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/release/pig-1.9.0/" aria-label="Pig 1.9.0">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/releasenote.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>Pig 1.9.0</h3>
+<p>An older semantic version with a deliberately lower weight.</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/typography/" aria-label="A typography regression article">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/oink.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>A typography regression article</h3>
+<p>A compact fixture for long-form reading and CJK fallback.</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/release/shorthand/" aria-label="A release URL alone">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/releasenote.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>A release URL alone</h3>
+<p>One GitHub release URL is the whole release input.</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/release/0.2.0/" aria-label="Oink 0.2.0 — Richer content and sharper presentation">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/releasenote.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>Oink 0.2.0 — Richer content and sharper presentation</h3>
+<p>Oink 0.2.0 adds composable homepage sections, theme-aware media, wordmarks, navigable component boards, a steps shortcode, polished terminal recordings, and a clearer release-publishing experience.</p>
+</div>
+</a>
+</article>
+<article class="td-blog-gallery__item" data-gallery-item data-td-width="0" data-td-height="0">
+<a class="td-blog-gallery__link" href="/blog/older/" aria-label="An older regression article">
+<span class="td-blog-gallery__media">
+<span class="td-blog-gallery__placeholder" aria-hidden="true"><i class="td-shell-icon td-shell-icon--image fa-regular fa-image" aria-hidden="true"></i></span><img src="/images/oink.webp" alt="" loading="lazy" decoding="async">
+</span>
+<div class="td-blog-gallery__caption">
+<h3>An older regression article</h3>
+<p>A second entry that fixes the blog pager&#39;s chronological behavior.</p>
+</div>
+</a>
+</article>
+</div>
+</section>
 <div class="td-content-cards td-blog-cards" data-td-blog-form="cards" style="--td-card-columns: 3">
 <article class="td-content-card td-blog-card">
 <img class="td-blog-card__image" src="/images/releasenote.webp" alt="" loading="lazy">
@@ -1286,6 +1445,8 @@ data-td-index-src="/offline-search-index.en.<hash>.json"
 data-td-max-results="10"
 data-td-t-empty="No results found"
 data-td-t-loading="Loading search index…"
+data-td-t-partial="Partial match: {matched}/{total} terms"
+data-td-t-partial-results="No page matches every term; showing partial matches"
 data-td-t-results="{count} results found"
 data-td-t-actions="Actions"
 data-td-t-page-actions="Page actions"
@@ -1311,14 +1472,30 @@ aria-label="Close">
 <kbd>esc</kbd>
 </button>
 </div>
+<div class="td-shell-search__scope" data-td-search-scope-row>
+<span id="td-search-scope-label" class="td-shell-search__scope-label">Search in</span>
+<div id="td-search-scope" class="td-shell-search__scope-options" role="radiogroup"
+aria-labelledby="td-search-scope-label">
+<label class="td-shell-search__scope-option">
+<input type="radio" name="td-search-scope" value="" tabindex="0" data-td-search-scope checked>
+<span>All sections</span>
+</label>
+<label class="td-shell-search__scope-option">
+<input type="radio" name="td-search-scope" value="blog" tabindex="-1" data-td-search-scope>
+<span>Blog</span>
+</label>
+</div>
+</div>
 <div id="td-shell-search-results" class="td-shell-search__list" role="listbox"
 aria-label="Search…"></div>
-<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"
+<div class="td-shell-search__footer">
+<div class="td-shell-search__status" role="status" aria-live="polite" aria-atomic="true"
 data-td-shell-search-status></div>
 <div class="td-shell-search__foot" aria-hidden="true">
 <span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
 <span><kbd>↵</kbd> Open</span>
 <span><kbd>esc</kbd> Close</span>
+</div>
 </div>
 </div>
 </div><dialog class="td-image-zoom d-print-none" data-td-image-zoom-dialog
@@ -1333,6 +1510,6 @@ data-td-open-label="Open image preview">
 </figure>
 </div>
 </dialog>
-<script src="/js/chunks/shell.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/keyboard.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/footer-collapse.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/local-search.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/dark-mode.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/appearance.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/image-zoom.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>
+<script src="/js/chunks/shell.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/keyboard.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/footer-collapse.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/local-search.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/dark-mode.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/appearance.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/image-zoom.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/blog-gallery.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>
 </body>
 </html>

@@ -83,7 +83,7 @@ if (localStorage.getItem('td-shell-toc-collapsed') === '1'
 html.setAttribute('data-td-shell-toc', 'collapsed');
 }
 var blogIndex = localStorage.getItem('td-blog-index');
-if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table') {
+if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table' || blogIndex === 'gallery') {
 html.setAttribute('data-td-blog-index', blogIndex);
 }
 if (sessionStorage.getItem('td-kbd-zen') === '1') {
@@ -997,6 +997,8 @@ data-td-index-src="/offline-search-index.en.<hash>.json"
 data-td-max-results="10"
 data-td-t-empty="No results found"
 data-td-t-loading="Loading search index…"
+data-td-t-partial="Partial match: {matched}/{total} terms"
+data-td-t-partial-results="No page matches every term; showing partial matches"
 data-td-t-results="{count} results found"
 data-td-t-actions="Actions"
 data-td-t-page-actions="Page actions"
@@ -1022,14 +1024,30 @@ aria-label="Close">
 <kbd>esc</kbd>
 </button>
 </div>
+<div class="td-shell-search__scope" data-td-search-scope-row>
+<span id="td-search-scope-label" class="td-shell-search__scope-label">Search in</span>
+<div id="td-search-scope" class="td-shell-search__scope-options" role="radiogroup"
+aria-labelledby="td-search-scope-label">
+<label class="td-shell-search__scope-option">
+<input type="radio" name="td-search-scope" value="" tabindex="0" data-td-search-scope checked>
+<span>All sections</span>
+</label>
+<label class="td-shell-search__scope-option">
+<input type="radio" name="td-search-scope" value="fixtures" tabindex="-1" data-td-search-scope>
+<span>Fixtures</span>
+</label>
+</div>
+</div>
 <div id="td-shell-search-results" class="td-shell-search__list" role="listbox"
 aria-label="Search…"></div>
-<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"
+<div class="td-shell-search__footer">
+<div class="td-shell-search__status" role="status" aria-live="polite" aria-atomic="true"
 data-td-shell-search-status></div>
 <div class="td-shell-search__foot" aria-hidden="true">
 <span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
 <span><kbd>↵</kbd> Open</span>
 <span><kbd>esc</kbd> Close</span>
+</div>
 </div>
 </div>
 </div><script src="/js/chunks/content-components.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/shell.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/keyboard.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/footer-collapse.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/local-search.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/swagger-init.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/dark-mode.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/appearance.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>

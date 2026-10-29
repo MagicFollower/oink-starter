@@ -162,6 +162,52 @@ test('stored value wins over default; hash wins over stored', () => {
   assert.equal(one.querySelector(':scope > .td-tabs__list > [aria-selected="true"]').getAttribute('data-td-tabs-value'), 'yarn');
 });
 
+test('nested fragment reveals ancestors before scrolling without persisting hash choices', () => {
+  const storage = memoryStorage();
+  storage.setItem('td-tabs:v1:outer', 'example');
+  storage.setItem('td-tabs:v1:platform', 'unix');
+  const outer = tabset({ group: 'outer', values: ['example', 'syntax'] });
+  const inner = tabset({ group: 'platform', values: ['unix', 'windows'] });
+  const peer = tabset({ group: 'platform', values: ['unix', 'windows'], id: 'peer' });
+  const outerPanel = outer.children[2];
+  const innerPanel = inner.children[2];
+  outerPanel.append(inner);
+  const heading = element('h3', { id: 'nested-heading' });
+  innerPanel.append(heading);
+  const plain = element('h2', { id: 'plain-heading' });
+  const { doc, win, history } = env([peer, outer, plain]);
+  // Address this exact nested panel even when a repeated group exists.
+  innerPanel.setAttribute('id', 'nested-windows');
+  const lookup = doc.getElementById;
+  doc.getElementById = (id) => id === 'nested-windows' ? innerPanel : lookup(id);
+  const controller = tabs.createController(doc, win, { storage });
+  [outer, inner, peer].forEach(controller.enhance);
+  const before = [...storage.values];
+  let scrolled = 0;
+  for (const target of [innerPanel, heading]) {
+    target.scrollIntoView = () => {
+      assert.equal(outerPanel.hidden, false);
+      assert.equal(innerPanel.hidden, false);
+      scrolled += 1;
+    };
+  }
+  for (const hash of ['#nested-windows', '#nested-heading']) {
+    controller.select(outer, 'example', 'sync');
+    controller.select(inner, 'unix', 'sync');
+    win.location.hash = hash;
+    assert.equal(controller.applyHash(), true);
+    assert.equal(outerPanel.hidden, false);
+    assert.equal(innerPanel.hidden, false);
+    assert.equal(peer.children[2].hidden, false);
+    assert.deepEqual([...storage.values], before);
+    assert.deepEqual(history.replaced, []);
+  }
+  assert.equal(scrolled, 2);
+  win.location.hash = '#plain-heading';
+  assert.equal(controller.applyHash(), false);
+  assert.deepEqual([...storage.values], before);
+});
+
 test('keyboard: arrows wrap and respect RTL, Home/End jump, focus follows', () => {
   for (const dir of ['ltr', 'rtl']) {
     const root = tabset({ values: ['a', 'b', 'c'] });

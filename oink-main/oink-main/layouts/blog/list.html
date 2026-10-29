@@ -13,7 +13,7 @@
 {{ $tablePages := slice -}}
 {{ if or (eq $mode "table") $toggle }}{{ $tablePages = $blogPages.ByDate.Reverse }}{{ end -}}
 {{ if $toggle -}}
-  {{/* Toggle views share one page of posts across all three forms. */ -}}
+  {{/* Toggle views share one page of posts across all four forms. */ -}}
   {{ $tablePages = $pager.Pages -}}
 {{ end -}}
 {{ if .Pages -}}
@@ -39,6 +39,9 @@
   {{ end -}}
   {{ if or (ne $mode "table") $toggle -}}
   <div class="td-blog-posts__paged">
+    {{ if or (eq $mode "gallery") $toggle -}}
+    {{ partial "shell/blog-gallery.html" (dict "page" . "pages" $pager.Pages) -}}
+    {{ end -}}
     {{ if or (eq $mode "cards") $toggle -}}
     <div class="td-content-cards td-blog-cards" data-td-blog-form="cards" style="--td-card-columns: {{ $columns }}">
       {{ range $pager.Pages -}}

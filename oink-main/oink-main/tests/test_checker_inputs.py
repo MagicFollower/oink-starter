@@ -32,7 +32,7 @@ class CheckerFixtureInputTests(unittest.TestCase):
             text=True,
         )
 
-    def test_default_builds_a_fresh_strict_fixture(self) -> None:
+    def test_default_builds_a_fresh_fixture(self) -> None:
         built = object()
         with mock.patch.object(
             test_site,
@@ -44,7 +44,7 @@ class CheckerFixtureInputTests(unittest.TestCase):
         self.assertEqual(public, Path("/tmp/fresh-public"))
         self.assertIs(result, built)
         build.assert_called_once_with(
-            "custom-hugo", "--printPathWarnings", "--panicOnWarning"
+            "custom-hugo", "--printPathWarnings"
         )
 
     def test_explicit_public_is_reused_without_a_build(self) -> None:

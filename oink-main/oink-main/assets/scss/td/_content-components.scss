@@ -5,6 +5,27 @@
   margin-block: 1.5rem;
 }
 
+.td-markmap__fit {
+  display: block;
+  min-height: 44px;
+  margin-inline-start: auto;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid var(--bs-link-color);
+    outline-offset: 2px;
+  }
+
+  @media print {
+    display: none;
+  }
+}
+
 .td-asciinema {
   // Derived from the palette tokens so every visual preset frames the
   // player in its own surfaces; the terminal colors below stay shared.
@@ -324,7 +345,7 @@
 }
 
 .td-content-card__body {
-  padding: 1rem;
+  padding: 1rem 1.125rem;
 
   > :last-child {
     margin-block-end: 0;
@@ -337,7 +358,7 @@
   gap: 1rem;
   margin-block: 1rem;
 
-  // `{{% cards %}}` has no cols parameter: the grid adapts to the width.
+  // Cards have no cols parameter: the grid adapts to the width.
   &--auto {
     grid-template-columns: repeat(auto-fit, minmax(#{'min(100%, 13.5rem)'}, 1fr));
   }
@@ -353,26 +374,16 @@
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--bs-border-color);
-  border-radius: var(--td-code-radius, 0.75rem);
-  background: var(--td-brand-elev, var(--bs-tertiary-bg));
+  @include td-content-tile;
   color: var(--bs-body-color);
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
 
   // The edge that appears under the pointer is a ground, so it follows the
   // section's accent -- a card grid in a Case section lights up in that
   // section's color. --td-card-accent stays the link family above: the icon
   // and the badge are marks on a reading surface.
-  &:hover,
-  &:focus-within {
-    border-color: color-mix(
-      in srgb,
-      var(--td-accent) 45%,
-      var(--bs-border-color)
-    );
-    box-shadow: 0 2px 10px rgba($black, 0.06);
+  &:has(a.td-content-card__title):hover,
+  &:has(a.td-content-card__title):focus-within {
+    @include td-content-tile-active;
   }
 }
 
@@ -387,15 +398,25 @@
 .td-content-card__head {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .td-content-card__icon {
+  display: grid;
+  place-items: center;
   flex: none;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: var(--td-control-radius);
+  background: color-mix(in srgb, var(--td-card-accent) 7%, transparent);
   color: var(--td-card-accent);
 }
 
 .td-content-card__title {
+  flex: 1 1 8rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--bs-emphasis-color);
   font-family: var(--td-heading-font-family);
   font-size: 1rem;
@@ -404,7 +425,7 @@
   line-height: 1.35;
   text-decoration: none;
 
-  &::after {
+  &:is(a)::after {
     position: absolute;
     inset: 0;
     z-index: 1;
@@ -417,7 +438,7 @@
 }
 
 .td-content-card:has(.td-content-card__title:focus-visible) {
-  outline: 2px solid var(--bs-focus-ring-color);
+  outline: 2px solid var(--bs-link-color);
   outline-offset: 2px;
 }
 
@@ -430,7 +451,7 @@
 }
 
 .td-content-card__description {
-  margin-block: 0.4rem 0;
+  margin-block: 0.625rem 0;
   color: var(--bs-secondary-color);
   font-size: 0.9rem;
   line-height: 1.55;
@@ -441,6 +462,11 @@
 
   > p {
     margin-block: 0 0.4rem;
+  }
+
+  :is(a, button, summary, input, select, textarea) {
+    position: relative;
+    z-index: 2;
   }
 }
 

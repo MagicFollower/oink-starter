@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Freeze the theme's public naming surface.
 
-Over a fresh strict regression fixture by default, or an existing build passed
+Over a fresh regression fixture by default, or an existing build passed
 explicitly with ``--public``:
 
   1. every class the theme generates starts with `td-`;
@@ -32,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # Author-facing markers: an author types these, so they stay unprefixed.
 # oink.pgsty.com/docs/design/components/ owns the public marker namespace.
 AUTHOR_MARKERS = {
-    "steps", "cards", "fields", "matrix", "full-width", "no-step-marker",
+    "steps", "cards", "fields", "matrix", "full-width", "wide", "expand", "no-step-marker",
 }
 
 # Site-owned markers used only by the self-contained regression fixture. They

@@ -9,6 +9,10 @@
 // ============================================================
 
 :root {
+  // Smaller controls sit inside the code/card frame. Experimental presets
+  // supply their own shape; authored project tokens can still override it.
+  --td-control-radius: var(--td-experiment-radius, 0.5rem);
+
   // Height of the viewport-pinned chrome that fixed shell elements must clear.
   // Zero when the navbar is off: the fallback subnav stays in normal flow.
   // body.td-shell-chrome--navbar raises it to the sticky navbar height below.

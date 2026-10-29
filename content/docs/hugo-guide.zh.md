@@ -127,7 +127,7 @@ module:
     - path: github.com/pgsty/oink     # OINK 主题（Hugo Module）
   hugoVersion:
     extended: true                    # 需要 Extended 版（支持 SCSS）
-    min: 0.160.1
+    min: 0.168.0
 ```
 
 ### 关键配置项说明
@@ -469,9 +469,9 @@ cta:                               # 行动号召
 
 | 依赖 | 版本要求 | 用途 |
 |------|----------|------|
-| Hugo Extended | >= 0.160.1 | 站点生成（必须 Extended 版以支持 SCSS） |
-| Go | >= 1.27.0 | Hugo 模块系统 |
-| Node.js | >= 18 | PostCSS / Autoprefixer |
+| Hugo Extended | >= 0.168.0 | 站点生成（必须 Extended 版以支持 SCSS） |
+| Go | >= 1.27.3 | Hugo 模块系统 |
+| Node.js | 不需要 | 主题 SCSS 由 Hugo 内置 LibSass 编译，无 PostCSS 步骤 |
 
 ---
 
@@ -537,12 +537,12 @@ TOCSS-DART: failed to transform "/scss/main.scss"
 ### Go 版本不匹配
 
 ```
-module requires go >= 1.27.0 (running go 1.24.0)
+module requires go >= 1.27.3 (running go 1.24.0)
 ```
 
-**原因**：OINK 主题要求 Go 1.27.0+。
+**原因**：OINK v1.4.0 要求 Go 1.27.3+。
 
-**解决**：升级 Go 版本到 1.27.0 或更高。
+**解决**：升级 Go 版本到 1.27.3 或更高。
 
 ### 页面不渲染
 

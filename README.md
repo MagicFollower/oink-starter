@@ -1,16 +1,16 @@
 # SILO 中文文档站
 
-基于 [Hugo](https://gohugo.io/) + [OINK](https://oink.pgsty.com/) v1.3.2 构建的 **PGSTY SILO 中文文档站**。内容为 `pgsty/silo` 20260903 快照的中文文档手册，覆盖安装、迁移、管理、开发、运维与兼容边界。
+基于 [Hugo](https://gohugo.io/) + [OINK](https://oink.pgsty.com/) v1.4.0 构建的 **PGSTY SILO 中文文档站**。内容为 `pgsty/silo` 20260903 快照的中文文档手册，覆盖安装、迁移、管理、开发、运维与兼容边界。
 
 > **SILO 是由 Pigsty 社区维护的 MinIO 分支。本项目并非 MinIO, Inc. 的关联项目，也未获得其认可、赞助或背书。**"MinIO" 是 MinIO, Inc. 的商标，此处仅用于标识上游项目。
 
 ## 站点特征
 
 - **仅简体中文**：`defaultContentLanguage: zh`，英文与法文语言块保持注释状态；
-- **完全离线可构建**：主题本地化在 `oink-main/oink-main/`（OINK v1.3.2，1,273 个文件），配合 `go.mod` 的 `replace` 指向，无需联网下载任何模块；
+- **完全离线可构建**：主题本地化在 `oink-main/oink-main/`（OINK v1.4.0，1,292 个文件），配合 `go.mod` 的 `replace` 指向，无需联网下载任何模块；
 - **4 套视觉预设**：Paper / Slate / Ink / Terminal，读者在页面 Appearance 面板一键切换，选择写入 localStorage 跨页记住。
 
-本仓库从 [pgsty/oink-starter](https://github.com/pgsty/oink-starter) 模板骨架起步，内容已整体替换为 SILO 文档克隆：2026-09-09 首次导入内容（首提交 `0a69173`），2026-10-24 主题从 v1.0.0 升级到 v1.3.2（详见「主题与视觉预设」一节）。模板自带的首页文案、博客示例与四章节小书仍保留，尚未替换为 SILO 品牌内容。
+本仓库从 [pgsty/oink-starter](https://github.com/pgsty/oink-starter) 模板骨架起步，内容已整体替换为 SILO 文档克隆：2026-09-09 首次导入内容（首提交 `0a69173`），2026-10-24 主题从 v1.0.0 升级到 v1.3.2，2026-10-29 升至 v1.4.0（详见「主题与视觉预设」一节）。模板自带的首页文案、博客示例与四章节小书仍保留，尚未替换为 SILO 品牌内容。
 
 > 第一次接触 Hugo？阅读 [零基础搭建教程](getting-started.zh.md)，从零开始 10 分钟理解一套文档站的搭建流程。
 
@@ -29,12 +29,14 @@ $env:GOTOOLCHAIN = "local"; $env:GOPROXY = "off"   # PowerShell
 hugo server -D
 ```
 
+Windows 也可直接双击根目录的 `run.cmd`：自动设置 `GOTOOLCHAIN=local` / `GOPROXY=off`，按 `HUGO_EXE` → `where hugo` → `HUGO_FALLBACK` 与 `GO_BIN` → `GO_FALLBACK` → `where go` 解析工具链，默认从 8768 起选空闲端口（本机 8768 被占用时实测用 8769），服务就绪后打开浏览器。只改顶部 PROJECT CONFIG 块（`SITE_TITLE` / `DEFAULT_PORT` / `PORT_MAX` / `HUGO_FALLBACK` / `GO_FALLBACK` / `GO_MIN_NOTE`）；`NO_OPEN=1` 跳过浏览器，`NO_PAUSE=1` 便于脚本化退出，`set PORT=9000` 可指定端口。
+
 ### 环境要求
 
 | 依赖 | 版本要求 | 用途 |
 |------|----------|------|
-| Hugo Extended | >= 0.166.0 | 站点生成（必须 Extended 版以支持 SCSS；OINK v1.3.2 的最低要求） |
-| Go | >= 1.27.0 | Hugo 模块系统（`go.mod` 声明 `go 1.27.0`） |
+| Hugo Extended | >= 0.168.0 | 站点生成（必须 Extended 版以支持 SCSS；OINK v1.4.0 的最低要求） |
+| Go | >= 1.27.3 | Hugo 模块系统（`go.mod` 声明 `go 1.27.3`） |
 | Git | 任意 | 版本控制 + `enableGitInfo` 时间戳 |
 
 不需要 Node.js 或 npm（`package.json` 只是可选的命令别名，见「构建与部署」）。
@@ -44,8 +46,9 @@ hugo server -D
 ```text
 oink-starter/
 ├── hugo.yaml                  # 唯一的站点配置文件
-├── go.mod / go.sum            # Go 模块（replace 指向本地 oink-main，锁定 OINK v1.3.2）
-├── oink-main/oink-main/       # 本地化主题副本（OINK v1.3.2，勿修改）
+├── go.mod / go.sum            # Go 模块（replace 指向本地 oink-main，锁定 OINK v1.4.0）
+├── oink-main/oink-main/       # 本地化主题副本（OINK v1.4.0，勿修改）
+├── run.cmd                    # Windows 一键预览（离线环境、端口顺延、自动开浏览器）
 ├── package.json               # 可选 npm 命令别名（dev / build / hugo / stop）
 │
 ├── content/                   # 内容目录（所有 Markdown）
@@ -63,7 +66,7 @@ oink-starter/
 ├── i18n/fr.yaml               # 法文翻译残留（fr 语言未启用，文件不生效）
 ├── examples/                  # 语言配置档（single / bilingual，见「多语言」）
 ├── scripts/                   # 语言清理脚本（remove-en-docs / remove-fr-docs）
-├── .github/workflows/         # GitHub Pages 与 Cloudflare Pages 部署工作流
+├── doc/运行与构建（T0Level）.md  # 本机构建、调试、发布与未验证项
 ├── getting-started.zh.md      # 零基础搭建教程（独立文档，不纳入站点）
 └── public/                    # 构建输出（勿手动编辑，已加入 .gitignore）
 ```
@@ -87,9 +90,10 @@ oink-starter/
 
 ## 主题与视觉预设
 
-- **主题版本**：OINK **v1.3.2**（2026-10-18 发布），本地副本 1,273 个文件 / 22,234,796 字节，位于 `oink-main/oink-main/`。技能基线副本与判据脚本见工作区 `oink-starter/skill_base_oink1.3.2/`。
-- **升级记录**（2026-10-24，自 v1.0.0）：整目录替换主题副本；`go.mod` / `go.sum` 升 v1.3.2；`hugo.yaml` 的 `hugoVersion.min` 从 0.160.1 升到 0.166.0；新增 `preset` / `preset_menu` 两行实值配置；本站无站点级 partial 覆盖，不涉及覆盖清理。
-- **生效判据**（只查配置不算数，要看产物）：`hugo.yaml` 中 `preset: paper` 与 `preset_menu: [paper, slate, ink, terminal]` 必须是不带 `#` 的实值；构建产物 `public/index.html` 的 `<html>` 标签上要能读到 `data-td-preset="paper"`。升级后实测：`Pages 1022 / Static files 34 / 0 ERROR`，产物含 `llms.txt`、带哈希的离线搜索索引与 `_print/` 打印档。
+- **主题版本**：OINK **v1.4.0**（2026-10-26 发布），本地副本 1,292 个文件 / 27,213,292 字节，位于 `oink-main/oink-main/`；与上游 v1.4.0 压缩包逐文件哈希一致（1,292/1,292，0 差异）。
+- **升级记录**（2026-10-29，自 v1.3.2）：整目录替换主题副本；`go.mod` 从 `go 1.27.0` / `v1.3.2` 升到 `go 1.27.3` / `v1.4.0`，`go.sum` 版本行同步；`hugo.yaml` 的 `hugoVersion.min` 从 0.166.0 升到 0.168.0；本机侧装 Go 1.27.3（`tools/go1.27.3`），构建仍用 `GOTOOLCHAIN=local GOPROXY=off`；本站未启用 PlantUML、gallery、`.expand` 表格等新增可选能力，现有页面行为不变。
+- **历史升级记录**（2026-10-24，自 v1.0.0）：整目录替换主题副本；`go.mod` / `go.sum` 升 v1.3.2；`hugo.yaml` 的 `hugoVersion.min` 从 0.160.1 升到 0.166.0；新增 `preset` / `preset_menu` 两行实值配置；本站无站点级 partial 覆盖，不涉及覆盖清理。
+- **生效判据**（只查配置不算数，要看产物）：`hugo.yaml` 中 `preset: paper` 与 `preset_menu: [paper, slate, ink, terminal]` 必须是不带 `#` 的实值；构建产物 `public/index.html` 的 `<html>` 标签上要能读到 `data-td-preset="paper"`。升级后实测（2026-10-29，Hugo 0.168.0 + Go 1.27.3）：标准档 `Pages 1022 / Static files 34 / Total 21719 ms`；生产档（`--minify --gc --environment production`）`Cleaned 2` → `Cleaned 0`、`Total 21220/21332 ms`，`public/` 1,078 个文件 / 115,533,517 字节；仅保留主题侧 LibSass 弃用 WARN。产物含 `llms.txt`、离线搜索索引 `offline-search-index.zh.97657c1cdc67cd644db8538be9bd9af8.json`（2,649,112 字节）与 `_print/` 打印档。
 - **升级前不可离线构建**：v1.0.0 时代主题靠远程模块解析（本地 `oink-main/` 为空目录），离线环境直接失败；升级后主题落地本地，`GOTOOLCHAIN=local GOPROXY=off` 下即可完整构建。
 
 ## 配置说明
@@ -125,7 +129,7 @@ module:
       replacement: ./oink-main/oink-main   # 指向本地主题副本，离线构建的关键
   hugoVersion:
     extended: true
-    min: 0.166.0                           # OINK v1.3.2 的最低 Hugo 要求
+    min: 0.168.0                           # OINK v1.4.0 的最低 Hugo 要求
 ```
 
 `hugo.yaml` 中还预置了整块注释的可选配置：仓库链接、Giscus 评论、Google Analytics、主题色、字体、图片缩放、分享按钮、反馈组件、logo 与 wordmark。启用某个集成时取消对应注释即可。
@@ -195,8 +199,10 @@ hugo server -D
 hugo server -D                        # 开发服务器（热重载 + 草稿）
 hugo --cleanDestinationDir            # 标准构建（验证用）
 hugo --cleanDestinationDir --gc --minify --environment production \
-  --printPathWarnings --panicOnWarning    # 发布闸门（有告警即失败）
+  --printPathWarnings    # 发布构建（保持告警可见，勿加 --panicOnWarning）
 ```
+
+OINK v1.4.0 明确不要启用 `--panicOnWarning` / `HUGO_PANICONWARNING`：Hugo 的 LibSass 弃用 WARN 会让严格闸门必然失败，保持告警可见并人工复核。
 
 可选的 npm 别名（等价关系，非必需）：
 
@@ -209,11 +215,11 @@ hugo --cleanDestinationDir --gc --minify --environment production \
 
 ### 部署
 
-仓库带两条现成工作流：`.github/workflows/github-pages.yaml`（GitHub Actions 部署 GitHub Pages，需在 **Settings → Pages** 把来源设为 **GitHub Actions**）与 `cloudflare-pages.yaml`（Direct Upload，需 `CLOUDFLARE_ACCOUNT_ID` 与 `CLOUDFLARE_API_TOKEN` 两个 secret）。
+上游模板带两条工作流：`.github/workflows/github-pages.yaml`（GitHub Actions 部署 GitHub Pages，需在 **Settings → Pages** 把来源设为 **GitHub Actions**）与 `cloudflare-pages.yaml`（Direct Upload，需 `CLOUDFLARE_ACCOUNT_ID` 与 `CLOUDFLARE_API_TOKEN` 两个 secret）。本克隆在离线对齐时未保留 `.github/workflows/`，需要时从上游 starter 取回。
 
-> **注意**：两条工作流的 `HUGO_VERSION` 仍钉在 **0.165.0**，低于 OINK v1.3.2 要求的 **0.166.0** 下限。启用任一工作流前，先把该值改为 `0.166.0` 或更高，否则 CI 构建会因主题用了新版本特性而失败。
+> **注意**：恢复工作流时，`HUGO_VERSION` 至少设为 **0.168.0**、Go 至少 **1.27.3**，否则低于 OINK v1.4.0 的构建下限。
 
-也可以手动部署：本地跑上面的发布闸门命令，把 `public/` 交给你选择的静态托管。
+也可以手动部署：本地跑上面的发布构建命令，把 `public/` 交给你选择的静态托管。
 
 ## 已知内容缺口（克隆自带，非升级引入）
 
@@ -229,7 +235,7 @@ hugo --cleanDestinationDir --gc --minify --environment production \
 
 ## 什么叫做完了
 
-本地构建成功、改动已提交、工作流转绿、公网渲染正确，是四道各自独立的闸门。部署后逐个打开首页、`/docs/` 与六个分类页，桌面和移动端各看一遍；换预设（Paper/Slate/Ink/Terminal）后再抽两页确认观感切换与记住生效。
+本地构建成功、改动已提交、公网渲染正确，是三道各自独立的闸门（若恢复部署工作流，再加一道「工作流转绿」）。部署后逐个打开首页、`/docs/` 与六个分类页，桌面和移动端各看一遍；换预设（Paper/Slate/Ink/Terminal）后再抽两页确认观感切换与记住生效。
 
 ## 许可
 

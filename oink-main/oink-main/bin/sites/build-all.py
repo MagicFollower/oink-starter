@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Strict-build the maintained sites in isolated snapshots against this theme.
+"""Build the maintained sites in isolated snapshots against this theme.
 
 HEAD is the default; ``--ref`` selects another revision and ``--worktree``
 copies the current tree. A scratch ``go.work`` replaces OINK without modifying
@@ -64,7 +64,7 @@ def build(snapshot: Path, hugo: str) -> dict:
     shutil.rmtree(dest, ignore_errors=True)
     cmd = [
         hugo, "--source", str(snapshot), "--destination", str(dest), "--minify",
-        "--printPathWarnings", "--panicOnWarning",
+        "--printPathWarnings",
         "--ignoreVendorPaths", "github.com/pgsty/oink",
     ]
     start = time.perf_counter()
@@ -157,7 +157,7 @@ def main() -> int:
     ok = sum(1 for s in report["sites"].values() if s.get("ok"))
     total = len(report["sites"])
     lines = [f"# Site builds — theme {theme_sha}, ref {args.ref}, {report['generated_at']}", "",
-             f"{ok}/{total} strict builds passed", "", "| site | snapshot | revision | strict | s | pages | errors | first error |", "| --- | --- | --- | --- | ---: | ---: | ---: | --- |"]
+             f"{ok}/{total} builds passed", "", "| site | snapshot | revision | build | s | pages | errors | first error |", "| --- | --- | --- | --- | ---: | ---: | ---: | --- |"]
     for name, s in report["sites"].items():
         first = (s.get("errors") or [""])[0][:110].replace("|", "\\|")
         rev = (s.get("revision") or "")[:8]

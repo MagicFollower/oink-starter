@@ -170,24 +170,6 @@ html[data-td-preset-switching] *::after {
     }
   }
 
-  // PG.CENTER's signature: a section heading trails a hairline to the edge
-  // of the measure. The rule is a zero-net-width inline box after the last
-  // line, so headings with inline code or links keep normal wrapping.
-  @supports (overflow-x: clip) {
-    [data-td-preset='paper'] .td-content > h2 {
-      overflow-x: clip;
-
-      &::after {
-        content: '';
-        display: inline-block;
-        width: 100%;
-        margin-inline: 0.9rem calc(-100% - 0.9rem);
-        border-top: 1px solid var(--td-hairline);
-        vertical-align: 0.3em;
-      }
-    }
-  }
-
   // Framed tables with a header band and no zebra fill.
   [data-td-preset='paper'] .td-content {
     .td-table-scroll {
@@ -202,7 +184,9 @@ html[data-td-preset-switching] *::after {
 
     // A tab panel or a titled block already frames the table.
     .td-tabs__panel-body > .td-table-scroll:only-child,
-    .td-tab-block > .td-table-scroll {
+    .td-tab-block > .td-table-scroll,
+    .td-tabs__panel-body > .td-table-frame:only-child > .td-table-scroll,
+    .td-tab-block > .td-table-frame > .td-table-scroll {
       border: 0;
       border-radius: 0;
       background: transparent;
@@ -236,6 +220,12 @@ html[data-td-preset-switching] *::after {
     border-end-start-radius: 0;
     border-start-end-radius: 8px;
     border-end-end-radius: 8px;
+
+    &--details {
+      border: 1px solid var(--bs-border-color);
+      border-radius: var(--td-code-radius);
+      background: var(--td-brand-elev);
+    }
   }
 
   // Landing keeps its structure; the blueprint grid and glow are Slate's.

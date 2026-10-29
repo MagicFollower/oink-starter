@@ -53,7 +53,7 @@ brew install hugo
 
 ```bash
 hugo version
-# 应显示 v0.160.1 或更高版本，且输出中必须包含 "extended"
+# 应显示 v0.168.0 或更高版本，且输出中必须包含 "extended"
 ```
 
 > **重要**：如果 `hugo version` 输出中没有 `extended`，SCSS 编译会失败。请确认安装的是 Extended 版本。
@@ -74,7 +74,7 @@ brew install go
 
 ```bash
 go version
-# 应显示 go1.27.0 或更高版本
+# 应显示 go1.27.3 或更高版本
 ```
 
 ### 1.3 安装 Git
@@ -492,10 +492,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.27'
+          go-version: '1.27.3'
       - uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: '0.165.0'
+          hugo-version: '0.168.0'
           extended: true
       - run: hugo --minify --gc --environment production
       - uses: actions/upload-pages-artifact@v3
@@ -671,12 +671,12 @@ hugo server
 ### Q: Go 版本不匹配
 
 ```
-module requires go >= 1.27.0 (running go 1.24.0)
+module requires go >= 1.27.3 (running go 1.24.0)
 ```
 
-**原因**：OINK 主题要求 Go 1.27.0+。
+**原因**：OINK v1.4.0 要求 Go 1.27.3+。
 
-**解决**：升级 Go 到 1.27.0 或更高版本。
+**解决**：升级 Go 到 1.27.3 或更高版本。
 
 ### Q: 直接打开 index.html 显示异常
 
@@ -753,7 +753,7 @@ module:
     - path: github.com/pgsty/oink
   hugoVersion:
     extended: true
-    min: 0.160.1
+    min: 0.168.0
 ```
 
 ### data/home/zh.yaml
@@ -890,9 +890,9 @@ const config = {
 ```text
 module my-docs
 
-go 1.27.0
+go 1.27.3
 
-require github.com/pgsty/oink v1.0.0
+require github.com/pgsty/oink v1.4.0
 ```
 
 ### 运行

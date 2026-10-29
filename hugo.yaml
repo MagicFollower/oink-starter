@@ -115,4 +115,4 @@ module:
       replacement: ./oink-main/oink-main
   hugoVersion:
     extended: true
-    min: 0.166.0
+    min: 0.168.0

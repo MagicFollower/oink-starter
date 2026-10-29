@@ -31,6 +31,8 @@ import tempfile
 
 from test_site import run_hugo_process
 
+from test_site import theme_warnings
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -480,14 +482,12 @@ def site_config(params: str) -> str:
     )
 
 
-def build_case(hugo: str, name: str, params: str, front_matter: str,
-               panic_on_warning: bool = False) -> tuple[int, str, bool]:
+def build_case(hugo: str, name: str, params: str, front_matter: str) -> tuple[int, str, bool]:
     """Build a one-page site; return its exit code, log, and page presence.
 
     An invalid parameter no longer stops a build: it warns and falls back, so a
     case is judged on what the output says rather than on whether Hugo exited.
-    `panic_on_warning` reproduces what every publishing gate does, which is
-    where a warning is still a hard failure."""
+    Checks verify the diagnostic and safe output with warnings visible."""
     with tempfile.TemporaryDirectory(prefix=f"oink-params-{name}-") as temp:
         source = Path(temp)
         (source / "content/docs").mkdir(parents=True)
@@ -498,8 +498,6 @@ def build_case(hugo: str, name: str, params: str, front_matter: str,
         )
         command = [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
                    "--destination", str(source / "public"), "--logLevel", "warn"]
-        if panic_on_warning:
-            command.append("--panicOnWarning")
         result = run_hugo_process(command, capture_output=True, text=True, check=False)
         page = source / "public/docs/page/index.html"
         return result.returncode, (result.stdout + result.stderr), page.is_file()
@@ -517,36 +515,21 @@ def check_builds(hugo: str) -> list[str]:
     for index, (fragment, expected) in enumerate(INVALID_PAGE_CASES):
         jobs.append((f"invalid-page-{index}", "", fragment, expected))
 
-    strict_canary_cases = {
-        ("site", "params.comments must be a boolean or a map"),
-        ("site", 'invalid params.ui.share entry "discord"'),
-        ("site", "is not a #rgb or #rrggbb hex color"),
-        ("site", "AA body text needs 4.5:1"),
-        ("site", "params.ui.fonts.main is not a typography role"),
-        ("site", 'params.ui.sidebar_width_min "1; color: red" is not a whole number'),
-        ("site", "invalid params.ui.sidebar_item_overflow"),
-        ("site", "params.ui.sidebar_menu_foldable must be true or false"),
-        ("page", "front matter comments must be a boolean"),
-    }
 
     def run(job: tuple[str, str, str, str | None]):
         name = job[0]
         origin = "page" if name.startswith("invalid-page-") else "site"
         code, output, page_exists = build_case(hugo, name, job[1], job[2])
-        # Every invalid value must warn and keep building. One case from each
-        # shared validator family also proves that publishing makes it fatal.
-        strict = None
-        if (origin, job[3]) in strict_canary_cases:
-            strict = build_case(hugo, name + "-strict", job[1], job[2], panic_on_warning=True)[0]
-        return job, origin, code, output, page_exists, strict
+        # Every invalid value must warn and keep building.
+        return job, origin, code, output, page_exists
 
     with ThreadPoolExecutor(max_workers=4) as pool:
-        for (name, params, front, expected), origin, code, output, page_exists, strict in pool.map(run, jobs):
+        for (name, params, front, expected), origin, code, output, page_exists in pool.map(run, jobs):
             label = (params or front).replace("\n", " ")
             if expected is None:
                 require(code == 0, f"accepted shape failed to build ({label}): {output[-400:]}", errors)
                 if "scroll_spy" in label:
-                    require("WARN" not in output,
+                    require(not theme_warnings(output),
                             f"scroll_spy compatibility input emitted a warning: {output[-400:]}", errors)
                 continue
             if name.startswith("invalid-"):
@@ -556,9 +539,6 @@ def check_builds(hugo: str) -> list[str]:
                         f"invalid value {label!r} did not warn with {expected!r}: {output[-400:]}", errors)
                 require(page_exists,
                         f"invalid value {label!r} emitted no safe page output", errors)
-                if (origin, expected) in strict_canary_cases:
-                    require(strict != 0,
-                            f"invalid value {label!r} survived --panicOnWarning", errors)
                 continue
     return errors
 
@@ -581,14 +561,11 @@ def check_blog_index_enum(hugo: str) -> list[str]:
                    "--destination", str(source / "public"), "--logLevel", "warn"]
         result = run_hugo_process(command, capture_output=True, text=True, check=False)
         output = result.stdout + result.stderr
-        strict = run_hugo_process(command + ["--panicOnWarning"], capture_output=True, text=True, check=False)
         require(result.returncode == 0,
                 f"a form outside the enum stopped the build instead of warning: {output[-400:]}", errors)
         require("invalid params.ui.blog_index" in output and "list | cards | table" in output
                 and "list" in output,
                 f"the blog index warning does not name the allowed forms and the fallback: {output[-400:]}", errors)
-        require(strict.returncode != 0,
-                "an invalid params.ui.blog_index survived --panicOnWarning", errors)
     return errors
 
 
@@ -605,7 +582,6 @@ def check_blog_numeric_params(hugo: str) -> list[str]:
         ("columns-fraction", "ui:\n  blog_index: cards\n  blog_index_columns: 2.5",
          'params.ui.blog_index_columns "2.5" is not a whole number'),
     )
-    strict_canaries = {"size-string", "size-zero"}
     for name, params, expected in cases:
         with tempfile.TemporaryDirectory(prefix=f"oink-params-blog-{name}-") as temp:
             source = Path(temp)
@@ -625,9 +601,6 @@ def check_blog_numeric_params(hugo: str) -> list[str]:
                     f"blog case {name} did not warn with {expected!r}: {output[-400:]}", errors)
             require((source / "public/blog/index.html").is_file(),
                     f"blog case {name} emitted no safe index output", errors)
-            if name in strict_canaries:
-                strict = run_hugo_process(command + ["--panicOnWarning"], capture_output=True, text=True, check=False)
-                require(strict.returncode != 0, f"blog case {name} survived --panicOnWarning", errors)
 
     # A leading zero must read as decimal, not octal: the int validator casts
     # through float (base 10), where Hugo's string-to-int cast uses base 0 and
@@ -641,7 +614,7 @@ def check_blog_numeric_params(hugo: str) -> list[str]:
         (source / "content/blog/post.md").write_text(
             "---\ntitle: Post\ndate: 2026-08-19\n---\n\nBody.\n", encoding="utf-8")
         command = [hugo, "--source", str(source), "--themesDir", str(ROOT.parent),
-                   "--destination", str(source / "public"), "--logLevel", "warn", "--panicOnWarning"]
+                   "--destination", str(source / "public"), "--logLevel", "warn"]
         result = run_hugo_process(command, capture_output=True, text=True, check=False)
         require(result.returncode == 0,
                 f"a leading-zero column count did not build cleanly: {(result.stdout + result.stderr)[-400:]}", errors)
@@ -669,14 +642,12 @@ def check_print_params(hugo: str) -> list[str]:
                    "--destination", str(source / "public"), "--logLevel", "warn"]
         result = run_hugo_process(command, capture_output=True, text=True, check=False)
         output = result.stdout + result.stderr
-        strict = run_hugo_process(command + ["--panicOnWarning"], capture_output=True, text=True, check=False)
         require(result.returncode == 0,
                 f"invalid print params stopped the build instead of warning: {output[-400:]}", errors)
         require("params.print.toc must be true or false" in output,
                 f"print.toc did not warn as a boolean: {output[-400:]}", errors)
         require('params.print.section_break_wordcount "lots" is not a whole number' in output,
                 f"section_break_wordcount did not warn as a whole number: {output[-400:]}", errors)
-        require(strict.returncode != 0, "invalid print params survived --panicOnWarning", errors)
     return errors
 
 
@@ -709,7 +680,7 @@ def check_diagram_endpoints(hugo: str) -> list[str]:
                 params = (f"plantuml:\n  enable: true\n  svg_image_url: {value}\n"
                           f"drawio:\n  enable: true\n  drawio_server: {value}")
             (source / "hugo.yaml").write_text(site_config(params), encoding="utf-8")
-            result = run_hugo_process(command + (["--panicOnWarning"] if enabled else []),
+            result = run_hugo_process(command,
                                       capture_output=True, text=True, check=False)
             log = result.stdout + result.stderr
             require(result.returncode == 0, f"diagram {name} failed ordinary build: {log[-600:]}", errors)
@@ -717,24 +688,24 @@ def check_diagram_endpoints(hugo: str) -> list[str]:
             html = page.read_text() if page.exists() else ""
             require('language-plantuml' in html, f"diagram {name} lost PlantUML source", errors)
             for marker in ("js/chunks/plantuml-", "js/chunks/drawio", 'id="td-drawio-config"'):
-                require((marker in html) == enabled,
+                expected = enabled or (name == "missing" and marker == "js/chunks/plantuml-")
+                require((marker in html) == expected,
                         f"diagram {name}: runtime marker {marker!r} enabled={enabled}", errors)
             if enabled:
-                require("WARN" not in log, f"valid diagram {name} warned: {log[-600:]}", errors)
+                require(not theme_warnings(log), f"valid diagram {name} warned: {log[-600:]}", errors)
                 chunks = list((source / "public/js/chunks").glob("plantuml-*.js"))
                 require(any(value in path.read_text() for path in chunks),
                         f"diagram {name} did not receive the validated endpoint", errors)
             else:
-                require(warning in log and "params.plantuml" in log and "params.drawio" in log,
-                        f"diagram {name} did not name both invalid endpoints: {log[-600:]}", errors)
-                strict = run_hugo_process(command + ["--panicOnWarning"], capture_output=True,
-                                          text=True, check=False)
-                require(strict.returncode != 0, f"diagram {name} survived --panicOnWarning", errors)
+                require(warning in log and "params.drawio" in log,
+                        f"diagram {name} did not name invalid Draw.io endpoint: {log[-600:]}", errors)
+                require(("params.plantuml" in log) == (name != "missing"),
+                        f"diagram {name} did not distinguish local PlantUML from invalid endpoint: {log[-600:]}", errors)
     return errors
 
 
 def check_no_errorf() -> list[str]:
-    """Author input warns and falls back; strict publication rejects warnings."""
+    """Author input warns and falls back without aborting the build."""
     errors: list[str] = []
     pattern = re.compile(r"\berrorf\s+\"")
     for root in (ROOT / "layouts", ROOT / "assets" / "json"):

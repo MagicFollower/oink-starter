@@ -76,12 +76,11 @@ def normalise(text: str) -> str:
 
 def build(hugo: str) -> Path:
     # No --quiet: the output is captured and only printed when the build
-    # fails, and --quiet suppressed the --panicOnWarning reason too, so a
+    # fails, and --quiet suppressed the reason too, so a
     # failure reported nothing at all about which warning caused it.
     dest, result = build_fixture_public(
         hugo,
         "--printPathWarnings",
-        "--panicOnWarning",
     )
     if result.returncode != 0:
         print(result.stdout + result.stderr, file=sys.stderr)

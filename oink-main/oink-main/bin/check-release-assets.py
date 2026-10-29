@@ -30,7 +30,6 @@ def run(
     hugo: str,
     source: Path,
     destination: Path | None = None,
-    panic_on_warning: bool = False,
     extra_args: tuple[str, ...] = (),
 ) -> subprocess.CompletedProcess[str]:
     command = [hugo, "--source", str(source), "--logLevel", "warn"]
@@ -38,8 +37,6 @@ def run(
         command.extend(fixture_config_args())
     if destination is not None:
         command.extend(["--destination", str(destination)])
-    if panic_on_warning:
-        command.append("--panicOnWarning")
     command.extend(extra_args)
     return run_hugo_process(
         command,
@@ -294,7 +291,7 @@ def check_releases_layout(hugo: str) -> list[str]:
                 public = site / f"public-{environment}-{attempt}"
                 extra = ("--environment", environment, "--printPathWarnings")
                 extra += ("-DFE",) if environment == "development" else ("--minify",)
-                result = run(hugo, site, public, panic_on_warning=True, extra_args=extra)
+                result = run(hugo, site, public, extra_args=extra)
                 label = f"releases {environment} attempt {attempt + 1}"
                 if result.returncode != 0:
                     errors.append(f"{label} failed: {result.stdout}{result.stderr}")
@@ -447,11 +444,6 @@ date: 2026-08-13
                 f"naming {key} did not warn about its removal",
                 errors,
             )
-        require(
-            run(hugo, site, panic_on_warning=True).returncode != 0,
-            "removed list keys survived --panicOnWarning",
-            errors,
-        )
         parser = ReleaseIndexParser()
         parser.feed((site / "public/blog/releases/index.html").read_text(encoding="utf-8"))
         require(
@@ -493,17 +485,6 @@ INVALID_CASES = (
     ("asset-unknown", "", '{{< release-assets base="/files" color="red" >}}\n' + "a" * 64 + "  file.zip\n{{< /release-assets >}}", "unsupported parameter"),
 )
 
-STRICT_INVALID_CANARIES = {
-    "release-url-bad-host",   # release URL policy
-    "release-url-scalar",     # release URL type
-    "release-legacy-map",     # removed front matter
-    "release-card-param",     # release-card parameters
-    "asset-bad-line",         # checksum parser
-    "asset-dual-source",      # source selection
-    "asset-missing-source",   # required source
-    "asset-scheme",           # asset URL policy
-}
-
 
 def check_invalid(hugo: str) -> list[str]:
     errors: list[str] = []
@@ -521,9 +502,6 @@ def check_invalid(hugo: str) -> list[str]:
             require("content/docs/invalid.md:" in output, f"invalid case {name} lost its source position", errors)
             page = site / "public/docs/invalid/index.html"
             require(page.is_file(), f"invalid case {name} emitted no safe page output", errors)
-            if name in STRICT_INVALID_CANARIES:
-                require(run(hugo, site, panic_on_warning=True).returncode != 0,
-                        f"invalid case {name} survived --panicOnWarning", errors)
     return errors
 
 

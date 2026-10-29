@@ -3,7 +3,70 @@
 All notable changes to OINK are documented here. The project follows
 [Semantic Versioning](https://semver.org/) for published tags.
 
-## [Unreleased]
+## [1.4.0] — 2026-10-26
+
+### Added
+
+- Add explicit `.expand` table reading, independent of `.wide`: a direct corner
+  action appears on desktop hover/focus and stays visible on touch. A native
+  dialog preserves the original table, text size, links and selection, and
+  restores reading position and focus on close. No-JS and static outputs keep
+  complete inline tables; browser printing restores an open table first.
+- Add `.wide` as the author-facing marker for technical table layout, preserving
+  the existing styling and compatibility with `.td-table--wide`.
+- Upgrade local search with mixed CJK/English terms, literal technical
+  identifiers, complete-match and phrase ranking, real section anchors and
+  context, and one result per page. Add an accessible current-section filter
+  to the existing palette, with explicit partial-match states. Preserve
+  index scopes, exclusions, keyword/page weights, commands and IME behavior.
+- Share Mermaid and local PlantUML reading controls: pan/zoom, fit, original
+  source viewing/copy and standalone SVG download, with keyboard/touch access
+  and failure feedback. Defer engines and serial rendering until diagrams
+  approach the viewport; retain readable source for early browser printing.
+  Keep PlantUML Blob-image isolation and the existing pinned local engines.
+- Render PlantUML locally with the pinned MIT `@plantuml/core` 1.2026.9
+  engine and Viz.js 3.24.0. Enabling PlantUML without a server now uses the
+  two bundled browser assets only on pages with diagrams; consumers need no
+  Java, Graphviz, npm install or rendering service. Preserve explicit server
+  configurations, source text on failure, and follow the reader's color mode.
+  Fix double escaping of arrows, quotes and ampersands in PlantUML fences.
+- Add opt-in divided card lists (`.td-cards-list`, `cards variant="list"`),
+  compact steps (`.td-steps-compact`, `steps variant="compact"`), and single-line
+  command strips (`.td-code-command`). Unsupported command layouts warn and
+  retain the regular block without changing source text or output content.
+- Add `blog_index: gallery` as the fourth blog index view. Linked post covers
+  use Expo's row geometry with wall, seamless, and masonry card modes, a size
+  slider, and reader preferences independent of albums. Preserve date order,
+  pagination, and external article links across the four views.
+- Keep gallery titles available through keyboard focus, visible touch captions,
+  missing-image placeholders, and a no-JavaScript grid. Resize and image-load
+  handling preserve usable spacing, including captions beneath narrow tiles.
+
+### Changed
+
+- Refine Cards, disclosures, Tabs, code controls, tables, Fields, badges,
+  steps, Landing actions, and shell rows across all four visual presets.
+  Share surface and spacing rules, keep labels fixed during press feedback,
+  reserve localized copy-feedback width, and enlarge touch controls. Preserve
+  Paper/Slate rounding and Ink/Terminal flat geometry without new JavaScript
+  or dependencies.
+- Standardize maintained sites and theme development on Hugo Extended 0.168.0.
+  Remove warning-fatal build flags and the old Hugo compiler matrix. Keep
+  diagnostics visible; accept Hugo's upstream LibSass deprecation warning.
+  Negative checkers verify the specific warning and safe output directly.
+- Pin the module minimum and development/CI toolchain to Go 1.27.3.
+- Refresh current fixture examples and output goldens for the 0.168.0 baseline.
+
+### Fixed
+
+- Reveal nested tabs when following a fragment link and keep equations and
+  page-context controls within narrow reading columns.
+- Keep diagrams readable after resizing and printing, including Markmap fit
+  controls and independent Infographic surfaces.
+- Keep clipboard fallback usable inside active dialogs.
+- Remove decorative heading tails from the Paper preset.
+- Align native table captions with column labels, add vertical padding inside
+  the table frame, and keep long captions clear of the corner expand action.
 
 ## [1.3.2] — 2026-10-18
 
@@ -2331,7 +2394,7 @@ fail the build with the new name rather than being silently ignored.
   responsive shell rails, improved footer/hero/blog layouts, and accessibility
   repairs.
 
-[Unreleased]: https://github.com/pgsty/oink/compare/v1.3.2...HEAD
+[1.4.0]: https://github.com/pgsty/oink/compare/v1.3.2...v1.4.0
 [1.3.2]: https://github.com/pgsty/oink/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/pgsty/oink/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/pgsty/oink/compare/v1.2.0...v1.3.0

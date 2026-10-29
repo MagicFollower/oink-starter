@@ -18,7 +18,7 @@ type: docs
 | `HG_PD_GRPC_HOST` | 是 | 无 | `grpc.host` | 对外宣告的 gRPC 主机名或 IP 地址；容器网络内部应使用容器主机名。 |
 | `HG_PD_INITIAL_STORE_COUNT` | 否 | `1` | `pd.initial-store-count` | 集群可用时所需的最少存储节点数量。 |
 | `HG_PD_ACTUATOR_EXPOSURE` | 否 | `health,metrics,prometheus` | `management.endpoints.web.exposure.include` | 对外开放的监控端点白名单，不允许使用通配符。 |
-{#wide-technical-table .td-table--wide}
+{#wide-technical-table .wide}
 
 ## 三列配置标识符
 
@@ -41,4 +41,4 @@ type: docs
 | 组件 | 读取 | 写入 |
 | --- | --- | --- |
 | 长组件标识符 | 是 | 否 |
-{#wide-matrix-table .matrix .full-width .td-table--wide caption="已有修饰符保持独立"}
+{#wide-matrix-table .matrix .full-width .wide caption="已有修饰符保持独立"}

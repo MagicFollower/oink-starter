@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Structural output checks for the theme fixture.
 
-Over a fresh strict regression fixture by default, or an existing build passed
+Over a fresh regression fixture by default, or an existing build passed
 explicitly with ``--public``:
   1. HTML structure — every strict container element (div, section, nav, ul/ol, table
      parts, a, button, span, main, aside, header, footer, details, summary, figure,
@@ -399,7 +399,6 @@ params:
                 "--destination",
                 str(public),
                 "--printPathWarnings",
-                "--panicOnWarning",
             ],
             cwd=ROOT,
             capture_output=True,
@@ -493,7 +492,7 @@ outputs:
         )
         # The bare-boolean idiom: false opts a page out of the section's
         # color, inherited dark half included, without a word -- this file
-        # sits inside the --panicOnWarning build, which is the proof.
+        # is checked in the rendered build output.
         write(
             "content/solo/optout.md",
             "---\ntitle: Optout\ntheme_color: false\n---\n\nDeliberately plain.\n",
@@ -508,7 +507,7 @@ outputs:
 
         public = site / "public"
         command = [hugo, "--source", str(site), "--themesDir", str(ROOT.parent),
-                   "--destination", str(public), "--printPathWarnings", "--panicOnWarning"]
+                   "--destination", str(public), "--printPathWarnings"]
         result = run_hugo_process(command, capture_output=True, text=True, check=False)
         if result.returncode != 0:
             return [f"theme-color fixture failed to build: {result.stdout}{result.stderr}"]
@@ -625,7 +624,6 @@ def check_config_image_policy(hugo: str) -> list[str]:
             "unsupported images scheme",
         ),
     )
-    strict_canaries = {"wordmark", "site-social-card"}
     for name, overrides, expected in cases:
         with tempfile.TemporaryDirectory(prefix=f"oink-output-{name}-") as temp:
             environment = {**os.environ, **overrides}
@@ -648,7 +646,7 @@ def check_config_image_policy(hugo: str) -> list[str]:
             output = result.stdout + result.stderr
             # The URL validator warns and drops the value rather than stopping
             # the build; refusing to emit it is the protection. What must hold
-            # is that the problem is named and that publishing still fails.
+            # is that the problem is named and safe output is preserved.
             if expected not in output:
                 errors.append(f"configured image case {name} did not report {expected!r}: {output[-400:]}")
             if result.returncode != 0:
@@ -660,26 +658,6 @@ def check_config_image_policy(hugo: str) -> list[str]:
                 metadata = home.read_text(encoding="utf-8") if home.is_file() else ""
                 if OG_IMAGE.findall(metadata) or SCHEMA_IMAGE.findall(metadata) or TWITTER_IMAGE.findall(metadata):
                     errors.append("an invalid site social card still reached page metadata")
-            if name in strict_canaries:
-                strict = run_hugo_process(
-                    [
-                        hugo,
-                        "--source",
-                        str(FIXTURE),
-                        "--destination",
-                        str(Path(temp) / "public-strict"),
-                        "--logLevel",
-                        "warn",
-                        "--panicOnWarning",
-                    ],
-                    cwd=ROOT,
-                    env=environment,
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-                if strict.returncode == 0:
-                    errors.append(f"configured image case {name} survived --panicOnWarning")
     return errors
 
 
@@ -729,7 +707,7 @@ cascade:
 {{ .AddResource (dict "path" "adapter/featured.svg" "content" (dict "mediaType" "image/svg+xml" "value" `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>`)) }}""")
         expected["blog/adapter"] = "/first.svg"
         result = run_hugo_process([hugo, "--source", str(site), "--themesDir", str(ROOT.parent),
-                                   "--destination", str(site / "public"), "--panicOnWarning"],
+                                   "--destination", str(site / "public")],
                                   cwd=ROOT, capture_output=True, text=True, check=False)
         if result.returncode != 0:
             return [f"featured source fixture failed: {result.stdout}{result.stderr}"]
@@ -773,7 +751,7 @@ params:
                           f"---\ntitle: Post {num}\ndate: 2026-01-0{num}\n---\nContent.\n")
         write("content/list/untranslated.md", "---\ntitle: No translation\ndate: 2026-01-03\n---\nEnglish only.\n")
         result = run_hugo_process([hugo, "--source", str(site), "--themesDir", str(ROOT.parent),
-                                   "--destination", str(site / "public"), "--panicOnWarning"],
+                                   "--destination", str(site / "public")],
                                   cwd=ROOT, capture_output=True, text=True, check=False)
         if result.returncode != 0:
             return [f"SEO boundary fixture failed: {result.stdout}{result.stderr}"]

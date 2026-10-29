@@ -282,9 +282,14 @@
 /* ------------------------------------------- reader-chosen index form */
 
 .td-blog-posts[data-td-blog-default='list'] .td-blog-posts__paged > [data-td-blog-form='cards'],
+.td-blog-posts[data-td-blog-default='list'] .td-blog-posts__paged > [data-td-blog-form='gallery'],
 .td-blog-posts[data-td-blog-default='cards'] .td-blog-posts__paged > [data-td-blog-form='list'],
+.td-blog-posts[data-td-blog-default='cards'] .td-blog-posts__paged > [data-td-blog-form='gallery'],
+.td-blog-posts[data-td-blog-default='gallery'] .td-blog-posts__paged > [data-td-blog-form='list'],
+.td-blog-posts[data-td-blog-default='gallery'] .td-blog-posts__paged > [data-td-blog-form='cards'],
 .td-blog-posts[data-td-blog-default='table'] > .td-blog-posts__paged,
 .td-blog-posts[data-td-blog-default='list'] > [data-td-blog-form='table'],
+.td-blog-posts[data-td-blog-default='gallery'] > [data-td-blog-form='table'],
 .td-blog-posts[data-td-blog-default='cards'] > [data-td-blog-form='table'] {
   display: none;
 }
@@ -298,6 +303,7 @@ html[data-td-blog-index='list'] .td-blog-posts[data-td-blog-forms='all'] {
   > [data-td-blog-form='table'] { display: none; }
 
   .td-blog-posts__paged > [data-td-blog-form='cards'] { display: none; }
+  .td-blog-posts__paged > [data-td-blog-form='gallery'] { display: none; }
   .td-blog-posts__paged > [data-td-blog-form='list'] { display: block; }
 }
 
@@ -306,6 +312,7 @@ html[data-td-blog-index='cards'] .td-blog-posts[data-td-blog-forms='all'] {
   > [data-td-blog-form='table'] { display: none; }
 
   .td-blog-posts__paged > [data-td-blog-form='list'] { display: none; }
+  .td-blog-posts__paged > [data-td-blog-form='gallery'] { display: none; }
   .td-blog-posts__paged > [data-td-blog-form='cards'] { display: grid; }
 }
 
@@ -314,9 +321,18 @@ html[data-td-blog-index='table'] .td-blog-posts[data-td-blog-forms='all'] {
   > [data-td-blog-form='table'] { display: table; }
 }
 
+html[data-td-blog-index='gallery'] .td-blog-posts[data-td-blog-forms='all'] {
+  > .td-blog-posts__paged { display: block; }
+  > [data-td-blog-form='table'] { display: none; }
+  .td-blog-posts__paged > [data-td-blog-form='list'],
+  .td-blog-posts__paged > [data-td-blog-form='cards'] { display: none; }
+  .td-blog-posts__paged > [data-td-blog-form='gallery'] { display: block; }
+}
+
 // Show the destination glyph for the next form in the cycle.
 .td-page-actions__form {
   .td-page-actions__icon--form-cards,
+  .td-page-actions__icon--form-gallery,
   .td-page-actions__icon--form-table { display: none; }
 }
 
@@ -328,6 +344,11 @@ html[data-td-blog-index='list'] .td-page-actions__form {
 html[data-td-blog-index='cards'] .td-page-actions__form {
   .td-page-actions__icon--form-list { display: none; }
   .td-page-actions__icon--form-table { display: inline-flex; }
+}
+
+html[data-td-blog-index='table'] .td-page-actions__form {
+  .td-page-actions__icon--form-list { display: none; }
+  .td-page-actions__icon--form-gallery { display: inline-flex; }
 }
 
 /* --------------------------------------------------- table index form */

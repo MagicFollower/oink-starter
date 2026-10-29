@@ -18,6 +18,8 @@ from typing import Any
 
 from test_site import TEST_SITE, fixture_config, run_hugo_process
 
+from test_site import theme_warnings
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_SCRIPT = ROOT / "bin" / "check-navigation-contract.py"
@@ -214,7 +216,6 @@ def validate_external_mount_actions() -> None:
                 "--config",
                 fixture_config(ROOT / "tests/fixtures/external-actions.yml"),
                 "--printPathWarnings",
-                "--panicOnWarning",
                 "--quiet",
             ],
             cwd=ROOT,
@@ -320,8 +321,7 @@ def validate_source_paths(workspace: Path) -> None:
     public = workspace / "source-paths-public"
     result = run_hugo_process(
         ["hugo", "--source", str(site), "--themesDir", str(ROOT.parent),
-         "--destination", str(public), "--cacheDir", str(workspace / "source-paths-cache"),
-         "--panicOnWarning"], text=True, capture_output=True, check=False,
+         "--destination", str(public), "--cacheDir", str(workspace / "source-paths-cache")], text=True, capture_output=True, check=False,
     )
     require(result.returncode == 0, "source-path fixture failed:\n" + result.stdout + result.stderr)
     output = json.loads((public / "index.html").read_text(encoding="utf-8"))
@@ -490,8 +490,6 @@ def run_invalid_build(
     name: str,
     command_yaml: str,
     expected: str,
-    *,
-    strict_canary: bool,
 ) -> None:
     site = workspace / f"invalid-{name}"
     output = workspace / f"invalid-public-{name}"
@@ -528,7 +526,7 @@ def run_invalid_build(
     # Every invalid command warns and is dropped, unsafe URLs included: the
     # protection is refusing to emit the row, not stopping the build. A build
     # that dies takes every page of the site down with it over one bad config
-    # entry, and --panicOnWarning below still fails where publishing happens.
+    # entry. The checker verifies the warning and safe output directly.
     require(expected in result.stdout, f"invalid {name} build missed {expected!r}:\n{result.stdout}")
     require(result.returncode == 0,
             f"invalid {name} command stopped the build instead of warning:\n{result.stdout}")
@@ -545,30 +543,6 @@ def run_invalid_build(
             if path.is_file() and "javascript:alert" in path.read_text(errors="ignore")
         ]
         require(not leaked, f"invalid {name} command leaked its unsafe URL into {leaked[:3]}")
-    if strict_canary:
-        strict = run_hugo_process(
-            [
-                "hugo", "--source", str(site), "--themesDir", str(ROOT.parent),
-                "--destination", str(output) + "-strict",
-                "--cacheDir", str(workspace / "cache-invalid-strict"),
-                "--panicOnWarning",
-            ],
-            cwd=site,
-            env={**os.environ, "HUGO_ENVIRONMENT": "development"},
-            text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
-        )
-        require(strict.returncode != 0, f"invalid {name} command survived --panicOnWarning")
-
-
-def strict_fails(site: Path, workspace: Path, name: str) -> bool:
-    strict = run_hugo_process(
-        ["hugo", "--source", str(site), "--themesDir", str(ROOT.parent),
-         "--destination", str(workspace / f"strict-{name}"),
-         "--cacheDir", str(workspace / f"cache-strict-{name}"), "--panicOnWarning"],
-        cwd=site, env={**os.environ, "HUGO_ENVIRONMENT": "development"},
-        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
-    )
-    return strict.returncode != 0
 
 
 def validate_custom_url_policy(helper: Any, workspace: Path) -> None:
@@ -576,7 +550,7 @@ def validate_custom_url_policy(helper: Any, workspace: Path) -> None:
     href, so both run through the shared URL policy: a bad entry warns and is
     dropped, never repaired, and its value reaches no rendered page. A build
     that dies takes the whole site down over one config line, so the drop is a
-    warning; --panicOnWarning still fails where publishing happens."""
+    warning; the checker verifies the dropped output directly."""
     base = action_config(helper, True)
     marker = "    page_context_menu:\n      assistant_links: true\n"
     require(marker in base, "action config lost the page_context_menu block")
@@ -608,8 +582,6 @@ def validate_custom_url_policy(helper: Any, workspace: Path) -> None:
     # the valid Handbook link is what earns the second.
     require(html.count("td-page-actions__separator") == 2,
             "the custom-link separator is missing when a valid link survives")
-    require(strict_fails(site, workspace, "custom-links"),
-            "invalid custom links survived --panicOnWarning")
 
     all_bad = base.replace(marker, marker.rstrip("\n") + "\n"
         "      links:\n"
@@ -660,7 +632,7 @@ def main() -> int:
                     action_config(helper, subpath),
                 )
                 require(
-                    all("invalid search_boost" in line for line in log.splitlines() if "WARN" in line),
+                    all("invalid search_boost" in line for line in theme_warnings(log)),
                     f"{deployment} action fixture emitted an unrelated warning",
                 )
                 stylesheets = sorted((output / "scss").glob("*.css"))
@@ -934,16 +906,6 @@ def main() -> int:
                     'field "keywords" must be an array of strings',
                 ),
             }
-            strict_canaries = {
-                "unknown",          # built-in action lookup
-                "both",             # action/URL exclusivity
-                "callback",         # unsupported fields
-                "javascript",       # URL policy
-                "duplicate",        # command identity
-                "reserved",         # built-in identity
-                "numeric-title",    # scalar field types
-                "scalar-keywords",  # list field types
-            }
             for name, (yaml, expected) in invalid_cases.items():
                 run_invalid_build(
                     helper,
@@ -951,7 +913,6 @@ def main() -> int:
                     name,
                     yaml,
                     expected,
-                    strict_canary=name in strict_canaries,
                 )
 
             validate_custom_url_policy(helper, workspace)

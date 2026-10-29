@@ -7,6 +7,9 @@
 # 技能运行时临时目录(replicate-doc-site 判据脚本的 REPLICATE_TMP 落点)
 /.tmp/
 
+# Mermaid 真解析台（validate_mermaid.py 生成，不入库）
+/_mermaid-harness/
+
 # 依赖与缓存
 node_modules/
 

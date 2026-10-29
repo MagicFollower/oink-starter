@@ -1,0 +1,18 @@
+{{- /* The original table stays inline until the capability runtime succeeds. */ -}}
+<dialog id="td-table-reader" class="td-table-reader d-print-none" data-td-table-reader aria-labelledby="td-table-reader-title">
+  <script type="application/json" data-td-table-labels>{{ dict "title" (T "ui_table_reader") "viewport" (T "ui_table_reader_scroll") | jsonify | safeJS }}</script>
+  <template data-td-table-trigger>
+    <button type="button" class="td-table-expand d-print-none" aria-haspopup="dialog" aria-controls="td-table-reader" title="{{ T "ui_table_expand" }}">
+      {{- partialCached "shell/icon.html" "expand" "table-expand" -}}
+      <span class="visually-hidden">{{ T "ui_table_expand" }}</span>
+    </button>
+  </template>
+  <div class="td-table-reader__header">
+    <h2 id="td-table-reader-title" class="td-table-reader__title" tabindex="-1">{{ T "ui_table_reader" }}</h2>
+    <button type="button" class="td-table-reader__close" data-td-table-close title="{{ T "ui_search_close" }}">
+      {{- partialCached "shell/icon.html" "x" "table-close" -}}
+      <span class="visually-hidden">{{ T "ui_search_close" }}</span>
+    </button>
+  </div>
+  <div class="td-content td-table-reader__body" data-td-table-body></div>
+</dialog>

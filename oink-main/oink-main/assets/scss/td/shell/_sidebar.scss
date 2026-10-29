@@ -261,7 +261,7 @@
   gap: 4px;
   padding: 8px;
   padding-inline-start: var(--td-shell-indent, 8px);
-  border-radius: 10px;
+  border-radius: var(--td-control-radius);
   color: var(--td-shell-muted-fg);
   transition: background-color var(--td-motion-duration) ease;
 
