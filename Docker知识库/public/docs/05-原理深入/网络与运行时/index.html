@@ -1,0 +1,744 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-preset='slate'] { background: #f1f4f8; color: #16222e; }
+  html[data-td-preset='slate'][data-bs-theme='dark'] { background: #0b1119; color: #e8eef6; }
+  html[data-td-preset='ink'] { background: #ffffff; color: #141414; }
+  html[data-td-preset='ink'][data-bs-theme='dark'] { background: #0b0b0b; color: #ededed; }
+  html[data-td-preset='terminal'] { background: #f4f5f2; color: #1d211f; }
+  html[data-td-preset='terminal'][data-bs-theme='dark'] { background: #0c0f0e; color: #d3dbd6; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    var root = document.documentElement;
+    var allowed = ["paper","slate","ink","terminal"];
+    var canvases = {"ink":{"dark":"#0b0b0b","darkInk":"#ededed","light":"#ffffff","lightInk":"#141414"},"paper":{"dark":"#161513","darkInk":"#ece9e3","light":"#f7f6f3","lightInk":"#21201c"},"slate":{"dark":"#0b1119","darkInk":"#e8eef6","light":"#f1f4f8","lightInk":"#16222e"},"terminal":{"dark":"#0c0f0e","darkInk":"#d3dbd6","light":"#f4f5f2","lightInk":"#1d211f"}};
+    var preset = null;
+    try {
+      preset = localStorage.getItem('td-preset');
+      if (preset !== null && allowed.indexOf(preset) < 0) {
+        preset = null;
+        localStorage.removeItem('td-preset');
+      }
+    } catch (_) {
+      
+    }
+    if (preset) root.setAttribute('data-td-preset', preset);
+    var c = canvases[root.getAttribute('data-td-preset')];
+    if (!c) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('data-td-canvas-light', c.light);
+      meta.setAttribute('data-td-canvas-dark', c.dark);
+      meta.setAttribute('content', c.light);
+    });
+  })();
+</script>
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<link rel="alternate" type="application/rss&#43;xml" href="https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/index.xml">
+<link rel="alternate" type="text/html" href="https://example.org/_print/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/">
+<link rel="alternate" type="text/markdown" href="https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/index.md">
+
+<link rel="prev" href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E9%9A%94%E7%A6%BB%E4%B8%8E%E8%B5%84%E6%BA%90/%E8%81%94%E5%90%88%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%8E%E9%95%9C%E5%83%8F%E5%88%86%E5%B1%82/">
+<link rel="next" href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/%E7%BD%91%E7%BB%9C%E5%BA%95%E5%B1%82%E8%B7%A8%E4%B8%BB%E6%9C%BA%E6%96%B9%E6%A1%88%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6%E7%94%9F%E6%80%81/"><meta name="robots" content="index, follow">
+<link rel="icon" href="../../../favicon.svg" type="image/svg+xml" />
+
+<title>网络与运行时 | Docker 团队知识库</title>
+<meta name="description" content="数据包怎么出去，单机为什么不够用。">
+<link rel="canonical" href="https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/">
+<link rel="alternate" hreflang="zh-CN" href="https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/">
+<meta property="og:url" content="https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/">
+	<meta property="og:site_name" content="Docker 团队知识库">
+	<meta property="og:title" content="网络与运行时">
+	<meta property="og:description" content="数据包怎么出去，单机为什么不够用。">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="website">
+
+	<meta itemprop="name" content="网络与运行时">
+	<meta itemprop="description" content="数据包怎么出去，单机为什么不够用。">
+	<meta itemprop="wordCount" content="47">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="网络与运行时">
+	<meta name="twitter:description" content="数据包怎么出去，单机为什么不够用。">
+<link rel="preload" href="../../../scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" as="style" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<link href="../../../scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="../../../scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" rel="stylesheet" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<script>
+  (function () {
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script><script defer src="../../../js/third_party/lunr.min.0c50d9002b85780a842afffb567bb54ede402dae7c6dc5997a018614d8044fc8.js" integrity="sha256-DFDZACuFeAqEKv/7Vnu1Tt5ALa58bcWZegGGFNgET8g=" crossorigin="anonymous"></script>
+
+  </head>
+  <body class="td-section td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="主导航">
+      <a href="../../../" class="td-nav-brand" data-td-navbar-route
+         aria-label="Docker 团队知识库 — 首页">
+        <img src="../../../icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Docker 团队知识库</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link active" href="../../../docs/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="文档"
+  data-td-navbar-region="desktop" data-td-navbar-label="文档"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-book" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">文档</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+        <button type="button" class="td-nav-search-box" data-td-shell-search-open
+          title="搜索…" aria-label="搜索…"
+          aria-controls="td-shell-search" aria-expanded="false"><i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="td-nav-search-box__hint">搜索…</span>
+          <kbd class="td-nav-search-box__kbd" aria-hidden="true">/</kbd>
+        </button><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">风格</legend>
+      <div class="td-appearance__presets">
+        <label class="td-appearance__preset" title="默认">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="paper"
+            data-td-preset-value="paper" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513" checked>
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--paper" aria-hidden="true"><i class="td-shell-icon td-shell-icon--file-lines fa-solid fa-file-lines" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Paper</span><span class="visually-hidden"> (默认)</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="slate"
+            data-td-preset-value="slate" data-td-canvas-light="#f1f4f8" data-td-canvas-dark="#0b1119">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--slate" aria-hidden="true"><i class="td-shell-icon td-shell-icon--layers fa-solid fa-layer-group" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Slate</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="ink"
+            data-td-preset-value="ink" data-td-canvas-light="#ffffff" data-td-canvas-dark="#0b0b0b">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--ink" aria-hidden="true"><i class="td-shell-icon td-shell-icon--pen-nib fa-solid fa-pen-nib" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Ink</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="terminal"
+            data-td-preset-value="terminal" data-td-canvas-light="#f4f5f2" data-td-canvas-dark="#0c0f0e">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--terminal" aria-hidden="true"><i class="td-shell-icon td-shell-icon--terminal fa-solid fa-terminal" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Terminal</span></span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="打开导航" aria-label="打开导航"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal td-shell-layout--no-toc"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none">
+          <div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="../../../" aria-label="Docker 团队知识库 home">
+        <img src="../../../icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Docker 团队知识库</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__search" data-td-shell-search-open
+        title="搜索…" aria-label="搜索…"
+        aria-controls="td-shell-search" aria-expanded="false"><i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="收起侧栏" aria-label="收起侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <button type="button" class="td-shell-search-btn td-shell-search-btn--drawer" data-td-shell-search-open
+        aria-controls="td-shell-search" aria-expanded="false">
+        <i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <span class="td-shell-search-btn__label">搜索…</span>
+        <span class="td-shell-search-btn__keys" aria-hidden="true"><kbd>/</kbd></span>
+      </button>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="关闭导航" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-root">
+  <button type="button" class="td-shell-root__trigger" data-td-shell-root-toggle
+    aria-haspopup="true" aria-expanded="false" aria-label="选择栏目">
+    <span class="td-shell-root__icon"><i class="fa-solid fa-microscope" aria-hidden="true"></i></span>
+    <span class="td-shell-root__title">原理深入</span>
+    <i class="td-shell-icon td-shell-icon--chevrons-up-down fa-solid fa-sort" aria-hidden="true"></i>
+  </button>
+  <div class="td-shell-root__pop" hidden><a class="td-shell-root__item" href="../../../docs/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-book" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">文档</span>
+        <span class="td-shell-root__item-desc">一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../docs/00-%E5%AF%BC%E8%AF%BB/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-compass" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">导读</span>
+        <span class="td-shell-root__item-desc">站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">基础认知</span>
+        <span class="td-shell-root__item-desc">先知道容器解决的是什么问题，再亲手跑起第一个容器。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-terminal" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">核心操作</span>
+        <span class="td-shell-root__item-desc">主线站①的日常命令面：把容器跑起来、看住它、连上网、留住数据。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../docs/03-%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-box-archive" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">镜像构建</span>
+        <span class="td-shell-root__item-desc">主线站③④⑤：从第一份 Dockerfile，到别人也能 build、能拉。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">单机编排</span>
+        <span class="td-shell-root__item-desc">主线站②：把九参数的 docker run 变成一条 compose up。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item td-is-active" href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/" aria-current="page">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-microscope" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">原理深入</span>
+        <span class="td-shell-root__item-desc">按需查阅层：不要求通读，每篇开头的触发条件告诉你什么时候该来。</span>
+      </span>
+      <span class="td-shell-root__check"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../docs/06-%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8E%E7%94%9F%E4%BA%A7/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-rocket" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">工程化与生产</span>
+        <span class="td-shell-root__item-desc">团队尚在本地开发阶段，本篇按「上生产前的准入基线 &#43; 演练」写，不假装有生产事故。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-wrench" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">运维手册</span>
+        <span class="td-shell-root__item-desc">使用频率最高的一篇，故障域各节一律按「症状 → 判据 → 命令 → 根因」四列写。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-book" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">生态与附录</span>
+        <span class="td-shell-root__item-desc">坐标与查阅件：什么时候该换工具，以及版本口径以谁为准。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../docs/09-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-circle-question" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">常见问题</span>
+        <span class="td-shell-root__item-desc">压在全库最后：每条按「问题—机制—数字/命令—自查动作」四段作答，并指回正文判据。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a>
+  </div>
+</div>
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="章节导航"
+      data-td-sidebar-icon-policy="groups" data-td-sidebar-root-id="/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-docs05-e58e9fe79086e6b7b1e585a5-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/" title="原理深入"
+        class="td-shell-tree__link"
+        id="m-docs05-e58e9fe79086e6b7b1e585a5"><i class="fa-solid fa-microscope" aria-hidden="true"></i><span>原理深入</span></a>
+      
+    </div><div id="m-docs05-e58e9fe79086e6b7b1e585a5-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-has-child"
+      id="m-docs05-e58e9fe79086e6b7b1e585a5e99a94e7a6bbe4b88ee8b584e6ba90-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E9%9A%94%E7%A6%BB%E4%B8%8E%E8%B5%84%E6%BA%90/" title="隔离与资源"
+        class="td-shell-tree__link"
+        id="m-docs05-e58e9fe79086e6b7b1e585a5e99a94e7a6bbe4b88ee8b584e6ba90"><span>隔离与资源</span></a>
+      <button type="button" class="td-shell-tree__chevron" data-td-shell-tree-toggle
+        aria-expanded="false" aria-controls="m-docs05-e58e9fe79086e6b7b1e585a5e99a94e7a6bbe4b88ee8b584e6ba90-children"
+        aria-label="展开章节: 隔离与资源"
+        data-td-label-expand="展开章节: 隔离与资源"
+        data-td-label-collapse="收起章节: 隔离与资源"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></button>
+    </div><div id="m-docs05-e58e9fe79086e6b7b1e585a5e99a94e7a6bbe4b88ee8b584e6ba90-children" class="td-shell-tree__children">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--2"><li class="td-shell-tree__item td-leaf"
+      id="m-docs05-e58e9fe79086e6b7b1e585a5e99a94e7a6bbe4b88ee8b584e6ba90e5aeb9e599a8e69cace8b4a8namespacee4b88ecgroups-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E9%9A%94%E7%A6%BB%E4%B8%8E%E8%B5%84%E6%BA%90/%E5%AE%B9%E5%99%A8%E6%9C%AC%E8%B4%A8namespace%E4%B8%8Ecgroups/" title="容器的本质、Namespace 与 Cgroups"
+        class="td-shell-tree__link"
+        id="m-docs05-e58e9fe79086e6b7b1e585a5e99a94e7a6bbe4b88ee8b584e6ba90e5aeb9e599a8e69cace8b4a8namespacee4b88ecgroups"><span>容器的本质、Namespace 与 Cgroups</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-docs05-e58e9fe79086e6b7b1e585a5e99a94e7a6bbe4b88ee8b584e6ba90e88194e59088e69687e4bbb6e7b3bbe7bb9fe4b88ee9959ce5838fe58886e5b182-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E9%9A%94%E7%A6%BB%E4%B8%8E%E8%B5%84%E6%BA%90/%E8%81%94%E5%90%88%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%8E%E9%95%9C%E5%83%8F%E5%88%86%E5%B1%82/" title="联合文件系统与 OverlayFS"
+        class="td-shell-tree__link"
+        id="m-docs05-e58e9fe79086e6b7b1e585a5e99a94e7a6bbe4b88ee8b584e6ba90e88194e59088e69687e4bbb6e7b3bbe7bb9fe4b88ee9959ce5838fe58886e5b182"><span>联合文件系统与 OverlayFS</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li><li class="td-shell-tree__item td-has-child td-active-path"
+      id="m-docs05-e58e9fe79086e6b7b1e585a5e7bd91e7bb9ce4b88ee8bf90e8a18ce697b6-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/" aria-current="page" title="网络与运行时"
+        class="td-shell-tree__link active"
+        id="m-docs05-e58e9fe79086e6b7b1e585a5e7bd91e7bb9ce4b88ee8bf90e8a18ce697b6"><span>网络与运行时</span></a>
+      <button type="button" class="td-shell-tree__chevron" data-td-shell-tree-toggle
+        aria-expanded="true" aria-controls="m-docs05-e58e9fe79086e6b7b1e585a5e7bd91e7bb9ce4b88ee8bf90e8a18ce697b6-children"
+        aria-label="收起章节: 网络与运行时"
+        data-td-label-expand="展开章节: 网络与运行时"
+        data-td-label-collapse="收起章节: 网络与运行时"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></button>
+    </div><div id="m-docs05-e58e9fe79086e6b7b1e585a5e7bd91e7bb9ce4b88ee8bf90e8a18ce697b6-children" class="td-shell-tree__children td-is-open">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--2"><li class="td-shell-tree__item td-leaf"
+      id="m-docs05-e58e9fe79086e6b7b1e585a5e7bd91e7bb9ce4b88ee8bf90e8a18ce697b6e7bd91e7bb9ce5ba95e5b182e8b7a8e4b8bbe69cbae696b9e6a188e4b88ee8bf90e8a18ce697b6e7949fe68081-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/%E7%BD%91%E7%BB%9C%E5%BA%95%E5%B1%82%E8%B7%A8%E4%B8%BB%E6%9C%BA%E6%96%B9%E6%A1%88%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6%E7%94%9F%E6%80%81/" title="网络底层实现、跨主机网络、运行时生态与无 root 容器"
+        class="td-shell-tree__link"
+        id="m-docs05-e58e9fe79086e6b7b1e585a5e7bd91e7bb9ce4b88ee8bf90e8a18ce697b6e7bd91e7bb9ce5ba95e5b182e8b7a8e4b8bbe69cbae696b9e6a188e4b88ee8bf90e8a18ce697b6e7949fe68081"><span>网络底层实现、跨主机网络、运行时生态与无 root 容器</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+
+        </aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="展开侧栏" aria-label="展开侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            <div class="td-shell-topline">
+              <nav aria-label="breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="../../../docs/">文档</a></li>
+  <li class="breadcrumb-item">
+    <a href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/">原理深入</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    网络与运行时</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span>
+              <div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="已复制 Markdown" data-td-t-copy-error="无法复制 Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__primary" data-td-action="copy_markdown" data-td-url="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/index.md"
+      title="复制 Markdown 文本" aria-label="复制 Markdown 文本">
+      <span class="td-page-actions__icon"><i class="td-shell-icon td-shell-icon--copy fa-regular fa-copy" aria-hidden="true"></i></span>
+      <span class="td-page-actions__icon td-page-actions__icon--done"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </button>
+    <button type="button" class="td-page-actions__toggle"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      title="操作" aria-label="操作"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="操作">
+    <li><button type="button" class="td-page-actions__item" data-td-action="copy_markdown" data-td-url="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/index.md">
+      <i class="fa-regular fa-copy" aria-hidden="true"></i><span>复制 Markdown 文本</span>
+    </button></li>
+    <li><a class="td-page-actions__item" data-td-action="view_markdown" href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/index.md" target="_blank" rel="noopener">
+      <i class="fa-brands fa-markdown" aria-hidden="true"></i><span>查阅 Markdown 源码</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="print_section" href="../../../_print/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/">
+      <i class="fa-solid fa-print" aria-hidden="true"></i><span>打印完整章节</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+<div class="td-content">
+		<div class="td-page-heading">
+  <h1>网络与运行时</h1>
+</div>
+
+  <div class="lead">数据包怎么出去，单机为什么不够用。</div>
+	<header class="td-article-meta">
+		
+</header>
+	<p>数据包怎么出去，单机为什么不够用。</p>
+<p>本板块包含：网络底层实现、跨主机网络、运行时生态与无 root 容器。</p>
+
+	
+    <div class="td-section-index td-section-index--cards td-content-cards" style="--td-card-columns: 2">
+    <article class="td-content-card td-section-index__card">
+                <div class="td-content-card__body">
+                    <div class="td-content-card__head"><a class="td-content-card__title" href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/%E7%BD%91%E7%BB%9C%E5%BA%95%E5%B1%82%E8%B7%A8%E4%B8%BB%E6%9C%BA%E6%96%B9%E6%A1%88%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6%E7%94%9F%E6%80%81/">网络底层实现、跨主机网络、运行时生态与无 root 容器</a>
+                    </div><p class="td-content-card__description">docker0 与 veth pair 逐跳分析；overlay/macvlan/ipvlan 思路；OCI 与 runc/containerd 分工；user namespace 映射。</p></div>
+            </article>
+        </div>
+<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="上一页 / 下一页">
+  <a class="td-pager__link td-pager__link--prev" href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E9%9A%94%E7%A6%BB%E4%B8%8E%E8%B5%84%E6%BA%90/%E8%81%94%E5%90%88%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%8E%E9%95%9C%E5%83%8F%E5%88%86%E5%B1%82/"
+    aria-label="上一页 - 联合文件系统与 OverlayFS" title="联合文件系统与 OverlayFS" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">联合文件系统与 OverlayFS</span>
+  </a>
+  <a class="td-pager__link td-pager__link--next" href="../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/%E7%BD%91%E7%BB%9C%E5%BA%95%E5%B1%82%E8%B7%A8%E4%B8%BB%E6%9C%BA%E6%96%B9%E6%A1%88%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6%E7%94%9F%E6%80%81/"
+    aria-label="下一页 - 网络底层实现、跨主机网络、运行时生态与无 root 容器" title="网络底层实现、跨主机网络、运行时生态与无 root 容器" data-td-pager-next>
+    <span class="td-pager__title" dir="auto">网络底层实现、跨主机网络、运行时生态与无 root 容器</span><span class="td-pager__arrow" aria-hidden="true">→</span>
+  </a>
+</nav>
+  
+</div>
+</div>
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="目录">
+  <div class="td-shell-toc__panel">
+    <div class="td-shell-toc__actions">
+      <button type="button" class="td-shell-toc__title-btn" data-td-shell-right-toggle
+        title="隐藏目录" aria-label="隐藏目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+    </div>
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="显示目录" aria-label="显示目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors">Docker 团队知识库</span>
+  </span><span class="td-footer__all_rights_reserved">保留所有权利</span></div>
+  <div class="td-shell-footline__center">内部技术知识库 · 依据《Docker知识库内容结构与组织清单》v2.1 建设 · 主题 OINK v1.3.2（Apache 2.0，本地副本）</div>
+  <div class="td-shell-footline__right">
+    
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">风格</legend>
+      <div class="td-appearance__presets">
+        <label class="td-appearance__preset" title="默认">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="paper"
+            data-td-preset-value="paper" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513" checked>
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--paper" aria-hidden="true"><i class="td-shell-icon td-shell-icon--file-lines fa-solid fa-file-lines" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Paper</span><span class="visually-hidden"> (默认)</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="slate"
+            data-td-preset-value="slate" data-td-canvas-light="#f1f4f8" data-td-canvas-dark="#0b1119">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--slate" aria-hidden="true"><i class="td-shell-icon td-shell-icon--layers fa-solid fa-layer-group" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Slate</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="ink"
+            data-td-preset-value="ink" data-td-canvas-light="#ffffff" data-td-canvas-dark="#0b0b0b">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--ink" aria-hidden="true"><i class="td-shell-icon td-shell-icon--pen-nib fa-solid fa-pen-nib" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Ink</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="terminal"
+            data-td-preset-value="terminal" data-td-canvas-light="#f4f5f2" data-td-canvas-dark="#0c0f0e">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--terminal" aria-hidden="true"><i class="td-shell-icon td-shell-icon--terminal fa-solid fa-terminal" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Terminal</span></span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="键盘快捷键" aria-label="键盘快捷键"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="键盘快捷键">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>键盘快捷键</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">章节导航</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>在侧栏中移动</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>收起或展开章节</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>打开当前页面</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>上一个或下一个标题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>上一页或下一页</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">操作</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>/</kbd><kbd>F</kbd></span></dt>
+          <dd>搜索</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>\</kbd><kbd>C</kbd></span></dt>
+          <dd>命令面板</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>专注阅读模式</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>切换主题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>切换顶层页面</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":true,"description":"复制 Markdown 文本","disabledReason":"","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":"/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/index.md"},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":true,"description":"查阅 Markdown 源码","disabledReason":"","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":"/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/index.md"},{"available":false,"description":"查阅编辑历史","disabledReason":"查阅编辑历史: 暂不可用","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":""},{"available":false,"description":"编辑当前页面","disabledReason":"编辑当前页面: 暂不可用","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":""},{"available":false,"description":"添加子页面","disabledReason":"添加子页面: 暂不可用","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":""},{"available":false,"description":"提交文档议题","disabledReason":"提交文档议题: 暂不可用","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":""},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":true,"description":"打印完整章节","disabledReason":"","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":"/_print/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/"},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":false,"description":"切换语言","disabledReason":"切换语言: 暂不可用","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":true,"description":"外观","disabledReason":"","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Ink","Terminal","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"},{"available":true,"disabledReason":"","id":"slate","title":"Slate","value":"slate"},{"available":true,"disabledReason":"","id":"ink","title":"Ink","value":"ink"},{"available":true,"disabledReason":"","id":"terminal","title":"Terminal","value":"terminal"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":false,"description":"GitHub","disabledReason":"GitHub: 暂不可用","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":""}],"commands":[],"language":"zh","quickLinks":[{"available":true,"description":"一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。","disabledReason":"","icon":"fa-solid fa-book","id":"quick_docs","keywords":["文档","docs"],"kind":"url","target":"self","title":"文档","url":"/docs/"}],"rootOrder":["docs"],"version":1}</script>
+
+<script src="../../../js/actions.min.c784a65471d30f25801832ad47eca4fc6e9681b4521bd2414655e6623aa58934.js" integrity="sha256-x4SmVHHTDyWAGDKtR&#43;yk/G6WgbRSG9JBRlXmYjqliTQ=" crossorigin="anonymous"></script>
+<script src="../../../js/core.min.9d572929bf152f8c3018bd8c276e7338cecd5fdada90aefbf09c56c913fb7668.js" integrity="sha256-nVcpKb8VL4wwGL2MJ25zOM7NX9rakK778JxWyRP7dmg=" crossorigin="anonymous"></script>
+  <div id="td-shell-search" class="td-shell-search" hidden
+     data-td-index-src="../../../offline-search-index.zh.28e779bf03824cbfa8c3b9dcd8175812.json"
+     data-td-max-results="10"
+     data-td-t-empty="未找到结果"
+     data-td-t-loading="正在加载搜索索引……"
+     data-td-t-results="找到 {count} 条结果"
+     data-td-t-actions="操作"
+     data-td-t-page-actions="页面操作"
+     data-td-t-preferences="偏好设置"
+     data-td-t-commands="命令"
+     data-td-t-quick-links="快速链接"
+     data-td-t-no-commands="未找到匹配命令"
+     data-td-t-choice="请选择一项"
+     data-td-t-action-failed="无法完成此操作"
+     data-td-t-index-unavailable="页面索引暂不可用，操作仍可使用"
+     data-td-t-pages="页面">
+  <div class="td-shell-search__backdrop" data-td-shell-search-close></div>
+  <div class="td-shell-search__panel" role="dialog" aria-modal="true" aria-label="搜索…">
+    <div class="td-shell-search__head">
+      <i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="search" class="td-shell-search__input" placeholder="搜索…"
+             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+             role="combobox" aria-autocomplete="list" aria-haspopup="listbox"
+             aria-controls="td-shell-search-results" aria-expanded="false"
+             aria-label="搜索…" enterkeyhint="go">
+      <button type="button" class="td-shell-search__esc" data-td-shell-search-close
+        aria-label="关闭">
+        <kbd>esc</kbd>
+      </button>
+    </div>
+    <div id="td-shell-search-results" class="td-shell-search__list" role="listbox"
+      aria-label="搜索…"></div>
+    <div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"
+      data-td-shell-search-status></div>
+    <div class="td-shell-search__foot" aria-hidden="true">
+      <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
+      <span><kbd>↵</kbd> 打开</span>
+      <span><kbd>esc</kbd> 关闭</span>
+    </div>
+  </div>
+</div><script src="../../../js/chunks/shell.min.4194e10aaa62c42f08b26df08079fd620326ddf0fe55fdd6ee9a2d44d16d61c0.js" integrity="sha256-QZThCqpixC8Ism3wgHn9YgMm3fD&#43;Vf3W7potRNFtYcA=" crossorigin="anonymous"></script><script src="../../../js/chunks/keyboard.min.8a521e4a2d9464db41a80d088ef54dd1a3127943710baa3a3ea14e2e41cba227.js" integrity="sha256-ilIeSi2UZNtBqA0IjvVN0aMSeUNxC6o6PqFOLkHLoic=" crossorigin="anonymous"></script><script src="../../../js/chunks/local-search.min.6e96fff4982b84f9eaece26beffefac00b7d27c36e1d325c8b4ac637a61055e1.js" integrity="sha256-bpb/9JgrhPnq7OJr7/76wAt9J8NuHTJci0rGN6YQVeE=" crossorigin="anonymous"></script><script src="../../../js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="../../../js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script>
+  </body>
+</html>

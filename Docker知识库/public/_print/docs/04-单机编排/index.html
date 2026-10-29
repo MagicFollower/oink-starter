@@ -1,0 +1,2927 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-preset='slate'] { background: #f1f4f8; color: #16222e; }
+  html[data-td-preset='slate'][data-bs-theme='dark'] { background: #0b1119; color: #e8eef6; }
+  html[data-td-preset='ink'] { background: #ffffff; color: #141414; }
+  html[data-td-preset='ink'][data-bs-theme='dark'] { background: #0b0b0b; color: #ededed; }
+  html[data-td-preset='terminal'] { background: #f4f5f2; color: #1d211f; }
+  html[data-td-preset='terminal'][data-bs-theme='dark'] { background: #0c0f0e; color: #d3dbd6; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    var root = document.documentElement;
+    var allowed = ["paper","slate","ink","terminal"];
+    var canvases = {"ink":{"dark":"#0b0b0b","darkInk":"#ededed","light":"#ffffff","lightInk":"#141414"},"paper":{"dark":"#161513","darkInk":"#ece9e3","light":"#f7f6f3","lightInk":"#21201c"},"slate":{"dark":"#0b1119","darkInk":"#e8eef6","light":"#f1f4f8","lightInk":"#16222e"},"terminal":{"dark":"#0c0f0e","darkInk":"#d3dbd6","light":"#f4f5f2","lightInk":"#1d211f"}};
+    var preset = null;
+    try {
+      preset = localStorage.getItem('td-preset');
+      if (preset !== null && allowed.indexOf(preset) < 0) {
+        preset = null;
+        localStorage.removeItem('td-preset');
+      }
+    } catch (_) {
+      
+    }
+    if (preset) root.setAttribute('data-td-preset', preset);
+    var c = canvases[root.getAttribute('data-td-preset')];
+    if (!c) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('data-td-canvas-light', c.light);
+      meta.setAttribute('data-td-canvas-dark', c.dark);
+      meta.setAttribute('content', c.light);
+    });
+  })();
+</script>
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<link rel="canonical" type="text/html" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/">
+<link rel="alternate" type="application/rss&#43;xml" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/index.xml">
+<link rel="alternate" type="text/markdown" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/index.md">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+<title>单机编排 | Docker 团队知识库</title>
+<meta name="description" content="主线站②：把九参数的 docker run 变成一条 compose up。">
+<link rel="canonical" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/">
+<link rel="alternate" hreflang="zh-CN" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/">
+<meta property="og:url" content="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/">
+	<meta property="og:site_name" content="Docker 团队知识库">
+	<meta property="og:title" content="单机编排">
+	<meta property="og:description" content="主线站②：把九参数的 docker run 变成一条 compose up。">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="website">
+
+	<meta itemprop="name" content="单机编排">
+	<meta itemprop="description" content="主线站②：把九参数的 docker run 变成一条 compose up。">
+	<meta itemprop="wordCount" content="76">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="单机编排">
+	<meta name="twitter:description" content="主线站②：把九参数的 docker run 变成一条 compose up。">
+<link rel="preload" href="/scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" as="style" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<link href="/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" rel="stylesheet" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+
+  </head>
+  <body class="td-section td-print-view">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    <div class="container-fluid td-print-shell">
+      <main id="td-main-content" class="td-print-document" tabindex="-1">
+        
+
+
+
+
+<div class="td-content">
+<div class="td-page-notice td-page-notice--primary d-print-none">
+<p>
+这是本节的多页打印视图。
+<button type="button" class="btn btn-link p-0 align-baseline" data-td-action="print">点击此处打印</button>.
+</p><p>
+<a href="/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/">返回本页常规视图</a>.
+</p>
+</div>
+
+
+
+<h1 class="title">单机编排</h1>
+<div class="lead">主线站②：把九参数的 docker run 变成一条 compose up。</div>
+
+
+
+
+    <ul>
+    
+  
+  
+  
+  
+
+  
+    
+    
+    <li>
+1: <a href="#pg-e761c5b2078ba5e37799da0f4521194d">定义</a>
+
+
+      <ul>
+        
+  
+  
+  
+  
+
+  
+    
+    
+    <li>
+1.1: <a href="#pg-827804aef89669d08f53f4cf8e47643a">为什么需要 Compose、语法基线与文件全字段参考</a>
+
+
+    </li>
+  
+
+      </ul>
+      
+    </li>
+  
+    
+    
+    <li>
+2: <a href="#pg-820e2a527a790036e2163301780ab344">启停</a>
+
+
+      <ul>
+        
+  
+  
+  
+  
+
+  
+    
+    
+    <li>
+2.1: <a href="#pg-53017ef909a68ac0690863c1d32a0dc3">常用命令、启动顺序控制与健康检查</a>
+
+
+    </li>
+  
+
+      </ul>
+      
+    </li>
+  
+    
+    
+    <li>
+3: <a href="#pg-327fbfc1d9aece146fd81ad7ae229721">日常</a>
+
+
+      <ul>
+        
+  
+  
+  
+  
+
+  
+    
+    
+    <li>
+3.1: <a href="#pg-19529b6bbeb23498cd20a6fbde70171f">多环境与扩展、开发期热重载与完整实战</a>
+
+
+    </li>
+  
+
+      </ul>
+      
+    </li>
+  
+
+    </ul>
+<div class="content">
+      <p>主线站②：把九参数的 docker run 变成一条 compose up。</p>
+<h2 id="pg-87413d561c95d14e0d15a024a3273d1d--知识板块">知识板块
+</h2>
+<ul>
+<li><strong>定义</strong> — 先把语法基线定死，再谈字段。</li>
+<li><strong>启停</strong> — 命令、顺序与健康。</li>
+<li><strong>日常</strong> — 多环境、热重载，最后把五个服务一键起来。</li>
+</ul>
+
+</div>
+</div>
+
+
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+	<h1 id="pg-e761c5b2078ba5e37799da0f4521194d">1 - 定义</h1>
+    <div class="lead">先把语法基线定死，再谈字段。</div>
+	<p>先把语法基线定死，再谈字段。</p>
+<p>本板块包含：为什么需要 Compose、语法基线与文件全字段参考。</p>
+
+</div>
+
+
+
+    
+      
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="">
+	<h1 id="pg-827804aef89669d08f53f4cf8e47643a">1.1 - 为什么需要 Compose、语法基线与文件全字段参考</h1>
+    <div class="lead">从九参数的 docker run 到一份 compose.yaml；compose-spec 与已废弃字段、旧教程辨识、services 与顶层字段的逐条实测。</div>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第②段 · 一条命令起全栈（本篇负责「第②段那份文件凭什么长这样」，为 4.7~4.9 的动手准备好语法基线）
+<strong>示例版本</strong>：消费 <code>示例/贯穿示例/compose.yaml</code>（本篇不产出文件，但每一条字段读数的来源都是它）；本篇的判据实验另外用了 10 份一次性最小样本，写在正文里可直接复制
+<strong>前置依赖</strong>：<a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/">/docs/02-核心操作/接上去/端口映射数据管理与权限时区/</a>、<a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E8%B7%91%E8%B5%B7%E6%9D%A5/%E9%95%9C%E5%83%8F%E7%AE%A1%E7%90%86%E4%B8%8E%E5%AE%B9%E5%99%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">/docs/02-核心操作/跑起来/镜像管理与容器生命周期/</a>、<a href="/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/">/docs/00-导读/把环境搭好/环境准备/</a>
+<strong>本篇产出物</strong>：团队语法基线的一句话结论（并要求在 7.11 落地为唯一事实来源）；一张「哪些写错法会被 <code>config</code> 拦住、哪些不会」的实测表；一张 services 字段速查表，逐列标出本机是否验证过
+<strong>拓展接口</strong>：本篇的「<code>config</code> 是唯一的真相来源」这条判据在 4.7 多文件合并与 6.6 CI 里被反复复用；「已废弃 <code>version:</code> 字段」在 8.6 版本兼容矩阵里作为一条独立条目；「中文目录名导致项目名为空」在 7.2 症状索引里单列
+<strong>难度·耗时</strong>：★☆☆ · 40 分钟（读 + 三条动手判据）
+<strong>自测三题</strong>：</p>
+<ol>
+<li>为什么 <code>docker compose config</code> 输出的模型和你写进文件的内容不完全一样？举两个具体字段。</li>
+<li><code>version: &quot;3.8&quot;</code> 这一行现在会被拒绝吗？依据是什么？旧教程里还有哪三行属于同一类？</li>
+<li>一份文件放在中文目录里、没写 <code>name:</code>，报什么错？为什么？</li>
+</ol>
+</blockquote>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--为什么一条-docker-run-到九个参数就撑不住了">为什么一条 <code>docker run</code> 到九个参数就撑不住了
+</h2>
+<p>第二篇里那条把 redis 跑起来的命令，是<strong>单服务</strong>的极限形态：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker run -d --name m-p1 -p 6380:6379 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="go">    -v mdata:/data --memory 512m --tz Asia/Shanghai \
+</span></span></span><span class="line"><span class="cl"><span class="go">    --health-cmd &#34;redis-cli ping&#34; --health-interval 5s \
+</span></span></span><span class="line"><span class="cl"><span class="go">    --health-retries 5 --health-start-period 20s \
+</span></span></span><span class="line"><span class="cl"><span class="go">    redis:7-alpine redis-server --appendonly yes
+</span></span></span></code></pre></div></div>
+</div>
+<p>现在把第②段那个栈（web + api + MySQL + Redis + nginx 反向代理）用同样的方式写出来。下面是按 <code>compose.yaml</code> 逐条推出来的等价展开，<strong>不是实测输出</strong>——它是为了说明规模，行为判据都由后面的 compose 实测给出：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-1" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="20">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-1-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker network create kb-p2-net
+</span></span><span class="line"><span class="cl">docker volume create kb-p2_dbdata
+</span></span><span class="line"><span class="cl">docker volume create kb-p2_cachedata
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">docker run -d --name db    --network kb-p2-net -v kb-p2_dbdata:/var/lib/mysql <span class="se">\
+</span></span></span><span class="line"><span class="cl">  -e <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>… -e <span class="nv">MYSQL_DATABASE</span><span class="o">=</span>kbdemo <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --health-cmd <span class="s1">&#39;…&#39;</span> --health-interval 5s --health-timeout 3s --health-retries <span class="m">20</span> --health-start-period 20s <span class="se">\
+</span></span></span><span class="line"><span class="cl">  mysql:8.4
+</span></span><span class="line"><span class="cl">docker run -d --name cache --network kb-p2-net -v kb-p2_cachedata:/data <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --health-cmd <span class="s1">&#39;redis-cli ping&#39;</span> --health-interval 5s --health-timeout 2s --health-retries <span class="m">10</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl">  redis:7-alpine redis-server --appendonly yes
+</span></span><span class="line"><span class="cl">docker build -t kb-p2-api ./api
+</span></span><span class="line"><span class="cl">docker run -d --name api --network kb-p2-net -e <span class="nv">DB_HOST</span><span class="o">=</span>db -e <span class="nv">REDIS_HOST</span><span class="o">=</span>cache <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --health-cmd <span class="s1">&#39;…&#39;</span> … kb-p2-api                     <span class="c1"># ← 必须先等 db healthy，顺序得自己控</span>
+</span></span><span class="line"><span class="cl">docker build -t kb-p2-web ./web
+</span></span><span class="line"><span class="cl">docker run -d --name web --network kb-p2-web kb-p2-web
+</span></span><span class="line"><span class="cl">docker run -d --name proxy --network kb-p2-net -p 8080:80 <span class="se">\
+</span></span></span><span class="line"><span class="cl">  -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --depends-on <span class="nv">api</span><span class="o">=</span>healthy                          <span class="c1"># ← 这条参数在 docker run 里并不存在</span>
+</span></span><span class="line"><span class="cl">nginx:1.27-alpine</span></span></code></pre></div></div>
+</div>
+<p>三个问题立刻出现：<strong>顺序要人控</strong>（<code>docker run</code> 没有「等依赖 healthy」这个参数）、<strong>名字要人对</strong>（网络别名、卷名前缀散在每条命令里）、<strong>改一次要重放全部</strong>（改个环境变量得记住它是第几条 run 的参数）。</p>
+<p>Compose 换掉的正是这个方向：你写下<strong>期望状态</strong>，工具负责把它和实际状态做差集并收敛。这不是修辞——<code>up</code> 的行为在本机量过：改了 <code>.env</code> 里的端口再 <code>up -d</code>，只有那一个服务被 <code>Recreate</code>，其余四个报 <code>Running</code>（读数在 4.4/4.5 那篇）。</p>
+<pre class="td-mermaid-source"><code class="language-mermaid">flowchart TB
+    sub IMP[&#34;命令式：docker run&#34;]
+        R1[&#34;第 1 步：建网络&#34;] --&gt; R2[&#34;第 2 步：建卷&#34;]
+        R2 --&gt; R3[&#34;第 3 步：起 db&#34;]
+        R3 --&gt; R4[&#34;第 4 步：人肉确认 db 可用&#34;]
+        R4 --&gt; R5[&#34;第 5 步：起 api&#34;]
+        R5 --&gt; R6[&#34;第 6 步：改一个参数，从头重放&#34;]
+    end
+    sub DEC[&#34;声明式：compose.yaml&#34;]
+        F1[&#34;一份文件写下期望状态&#34;] --&gt; F2[&#34;up：计算差集&#34;]
+        F2 --&gt; F3[&#34;只动需要动的对象&#34;]
+        F3 --&gt; F4[&#34;再 up 一次：几乎什么都不做&#34;]
+    end
+    IMP -.-&gt;|&#34;顺序、命名、重放都交给人&#34;| HUMAN[&#34;人脑记账&#34;]
+    DEC -.-&gt;|&#34;三项都交给模型&#34;| TOOL[&#34;compose 的收敛循环&#34;]</code></pre><blockquote>
+<p>💡 新人小结：<strong><code>docker run</code> 是「每次开工前手动按十二个按钮」，<code>compose.yaml</code> 是「把工序单贴在机器上」</strong>。按钮按错顺序，机器不启动但也不会告诉你为什么；工序单交给机器之后，机器自己按顺序按，而且每次开工前先对比「现在是不是已经按到位了」。类比之后接机制：工序单就是那份 YAML 描述的<strong>期望模型</strong>，按钮顺序是它的<strong>依赖图</strong>，对比动作是 <code>up</code> 的 diff——所以下面所有语法问题都可以还原成一句：「模型里这个字段声明的是什么，实际对象现在是什么」。</p>
+</blockquote>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--语法基线三个名字两种调用一条已废弃字段">语法基线：三个名字、两种调用、一条已废弃字段
+</h2>
+<p>先把容易混的三个名词钉住：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">名词</th>
+      <th scope="col">是什么</th>
+      <th scope="col">本机读数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>compose-spec</strong></td>
+      <td>文件格式的规范（一套 YAML 字段的定义与合并语义），语言无关</td>
+      <td>下面所有「字段能不能写、写错报什么」的行为都来自它的校验器</td>
+    </tr>
+    <tr>
+      <td><strong>Docker Compose v2</strong>（<code>docker compose</code>）</td>
+      <td>规范的 Go 实现，作为 Docker CLI 插件</td>
+      <td><code>Docker Compose version v5.5.1</code></td>
+    </tr>
+    <tr>
+      <td><strong><code>docker-compose</code>（连字符）</strong></td>
+      <td>老的 Python 实现的名字；现在这台机器上它指的是<strong>同一个</strong> v2 实现</td>
+      <td><code>where docker-compose</code> 指到 Docker Desktop 的 <code>resources\bin\docker-compose.exe</code>，<code>docker-compose version</code> 报的仍是 <code>Docker Compose version v5.5.1</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>这条读数很重要，因为它否定了一种常见的「新旧判断法」：<strong>不要看到 <code>docker-compose</code> 这个写法就断定对方在用 v1</strong>——在同一台机器上这两个名字可能指向同一个二进制。要判断实现与版本，只看 <code>version</code> 输出的字符串。</p>
+<p><code>version:</code> 顶层字段的现状是本机实测的：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-3" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-3-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet           <span class="c1"># 文件第一行写的是 version: &#34;3.8&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]
+</span></span></span><span class="line"><span class="cl"><span class="go">level=warning msg=&#34;…\compose.yaml: the attribute `version` is obsolete,
+</span></span></span><span class="line"><span class="cl"><span class="go">it will be ignored, please remove it to avoid potential confusion&#34;
+</span></span></span></code></pre></div></div>
+</div>
+<p><strong>不报错，只警告，并且明确说「会被忽略」</strong>。所以旧教程里那行 <code>version: '3.7'</code> 拷过来照样能跑，但它已经不再选择任何语法版本——字段校验用的是当前实现自带的那一份 schema。这就是为什么「按 <code>version</code> 行判断这段配置属于哪个年代」这件事已经失效。</p>
+<blockquote>
+<p>💡 新人小结：顶层那行 <code>version: &quot;3.8&quot;</code> 现在像<strong>老地图上印的「1998 年测量」</strong>——地图你照样能看，但那行字已经不决定地图画的是什么了；真正决定内容的是你手上这一版地图本身。类比之后接机制：决定「哪些字段合法」的是这台机器上 Compose 实现自带的那份 schema，<code>config</code> 只会告诉你「这一行我忽略了」，不会替你切回 3.8 的语义。所以判断一段配置新旧，要看<strong>字段级信号</strong>（有没有 <code>links</code>、<code>volumes_from</code>、<code>test: []</code> 这类），不是那行印章。</p>
+</blockquote>
+<p>旧教程的辨识改看这几条信号，每条都给出「现在该怎么写」：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">看到</th>
+      <th scope="col">大致年代/来源</th>
+      <th scope="col">现在的写法</th>
+      <th scope="col">依据</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>顶层 <code>version:</code></td>
+      <td>v1 时代或早期 v2</td>
+      <td>删掉</td>
+      <td>本机 warning 原文</td>
+    </tr>
+    <tr>
+      <td><code>docker-compose up</code>（文档里的命令）</td>
+      <td>可能是 v1，也可能只是旧写法</td>
+      <td>用 <code>docker compose</code>，并在同一台机器上核 <code>version</code> 字符串</td>
+      <td>上面那条 <code>where</code> 读数</td>
+    </tr>
+    <tr>
+      <td><code>links:</code> 字段、<code>--link</code></td>
+      <td>bridge 默认网络时代的容器互通</td>
+      <td><code>networks:</code> + 服务名解析</td>
+      <td>第①段实测：自定义网络里服务名直接可解析</td>
+    </tr>
+    <tr>
+      <td><code>network_mode: default</code></td>
+      <td>旧文档里的「默认网络」写法</td>
+      <td>省略或用 <code>networks: [default]</code></td>
+      <td>本机未跑，属语法层提示</td>
+    </tr>
+    <tr>
+      <td><code>volumes_from:</code></td>
+      <td>用数据卷容器共享数据的旧模式</td>
+      <td>各自声明 named volume</td>
+      <td>本轮卷读数</td>
+    </tr>
+    <tr>
+      <td><code>swarm</code> 专属的 <code>deploy.placement</code>/<code>update_config</code> 用在单机 compose</td>
+      <td>swarm 时代</td>
+      <td>单机上多半被忽略，要按实现确认</td>
+      <td>本轮未实测，见未验证项</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>团队语法基线一句话结论</strong>（这条要在 7.11 团队规范里落地成唯一事实来源，其它章节只链接不复述）：</p>
+<blockquote>
+<p>统一用 <code>docker compose</code>（v2 实现）；文件名统一 <code>compose.yaml</code>，开发期覆盖写 <code>compose.override.yaml</code>；<strong>不写顶层 <code>version:</code></strong>；顶层显式写 <code>name:</code>；口令一类的值一律走 <code>.env</code> 或注入，不进文件。</p>
+</blockquote>
+<div class="td-callout td-callout--note" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-circle-info" aria-hidden="true"></i><span class="td-callout__label">说明</span></div>
+  <div class="td-callout__body">
+<p>为什么必须写 <code>name:</code>：项目名会进容器名、网络名、卷名。Compose 用「第一个指定文件所在目录的<strong>基本名</strong>」当默认项目名，并把非法字符过滤掉。本机实测：把同样的文件放进一个中文命名的目录，<code>config</code> 直接失败——</p>
+  </div>
+</div><div class="td-code td-code--untitled" id="td-code-05fd8770-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet      <span class="c1"># 目录名是中文，文件里没有 name:</span>
+</span></span><span class="line"><span class="cl"><span class="go">[rc=1] project name must not be empty
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet      <span class="c1"># 内容一字不改，只把目录换成 ASCII 名</span>
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]
+</span></span></span></code></pre></div></div>
+</div>
+<p>这条不是抽象风险：团队的仓库路径里出现「文档」「项目」这类中文目录名是常态，而报错文本 <code>project name must not be empty</code> 完全不提示「是目录名导致的」，新人会去查 YAML 语法。</p>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--一个-composeyaml-分几层">一个 <code>compose.yaml</code> 分几层
+</h2>
+<pre class="td-mermaid-source"><code class="language-mermaid">flowchart TD
+    TOP[&#34;顶层&#34;] --&gt; N[&#34;name：项目名，进所有对象名&#34;]
+    TOP --&gt; SVC[&#34;services：唯一必须有内容的一层&#34;]
+    TOP --&gt; NET[&#34;networks：网络定义&#34;]
+    TOP --&gt; VOL[&#34;volumes：命名卷定义&#34;]
+    TOP --&gt; CS[&#34;configs / secrets：文件类注入&#34;]
+    TOP --&gt; INC[&#34;include：把别处的 compose 文件并进来&#34;]
+    TOP --&gt; EXT[&#34;x- 前缀键：自定义扩展，不参与语义&#34;]
+    SVC --&gt; S1[&#34;镜像与构建：image / build&#34;]
+    SVC --&gt; S2[&#34;运行内容：command / entrypoint / environment / working_dir / user&#34;]
+    SVC --&gt; S3[&#34;互通：ports / networks / extra_hosts / hostname / dns&#34;]
+    SVC --&gt; S4[&#34;数据：volumes / tmpfs&#34;]
+    SVC --&gt; S5[&#34;生命周期：restart / healthcheck / depends_on / stop_grace_period&#34;]
+    SVC --&gt; S6[&#34;资源与安全：deploy / cap_add / security_opt / sysctls / read_only&#34;]
+    SVC --&gt; S7[&#34;开发与协作：profiles / develop.watch / labels / extends&#34;]</code></pre><p><code>x-</code> 前缀与 <code>include</code> 是本机能确认「确实支持」的两条：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> 顶层写 x-团队约定: <span class="p">&amp;</span>team <span class="o">{</span>labels: <span class="o">{</span>team: platform<span class="o">}}</span>，服务里用 &lt;&lt;: *team
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]  services.a.labels = {&#34;team&#34;: &#34;platform&#34;}
+</span></span></span><span class="line"><span class="cl"><span class="go">        config --format json 的顶层键 = [&#39;name&#39;, &#39;networks&#39;, &#39;services&#39;, &#39;x-团队约定&#39;]
+</span></span></span></code></pre></div></div>
+</div>
+<p>顶层键里 <code>x-团队约定</code> <strong>被保留下来</strong>，说明它是「合法但不参与语义」的容器；YAML 锚点（<code>&amp;team</code> / <code>*team</code> / <code>&lt;&lt;:</code>）也照常生效。这两条组合起来就是团队里最常用的复用手法：用 <code>x-</code> 放一份「约定」，服务用锚点合并它（比如统一的 <code>labels</code>、<code>restart</code>、日志驱动）。</p>
+<p>另外两条同样跑通的复用手段，语义差别要说清：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-7" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-7-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> extends：从同目录另一个文件里的服务继承
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]  web = {&#34;environment&#34;:{&#34;EXTRA&#34;:&#34;1&#34;,&#34;FROM&#34;:&#34;override&#34;},&#34;image&#34;:&#34;nginx:1.27-alpine&#34;, …}
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">#</span> include：另一个文件整个并进当前项目
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]  config --services → inc-a main
+</span></span></span></code></pre></div></div>
+</div>
+<p><code>extends</code> 是<strong>服务级继承</strong>（继承来的字段与本地字段按同一套合并规则叠，上例里 <code>FROM</code> 被本地值 <code>override</code> 覆盖、<code>EXTRA</code> 新增、<code>image</code> 继承）；<code>include</code> 是<strong>文件级并入</strong>（那个文件里的服务、网络、卷都进当前模型）。选哪个的判断标准是「要不要改一部分」：要改就用 <code>extends</code>，只是拆分文件就用 <code>include</code>。</p>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--services-字段速查逐列标注本机是否验证">services 字段速查（逐列标注本机是否验证）
+</h2>
+<p>这张表是 4.3 的产出物。「本机读数」列只填真跑出来的值，没跑的写「未跑」——不猜。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">字段</th>
+      <th scope="col">一句话</th>
+      <th scope="col">本机读数 / 未跑说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>image</code></td>
+      <td>用哪个镜像</td>
+      <td><code>redis:7-alpine</code>、<code>mysql:8.4</code> 直接进模型；<code>docker compose images</code> 列出 <code>IMAGE ID</code> 与 <code>SIZE</code>（<code>mysql:8.4</code> 为 <code>1.1GB</code>）</td>
+    </tr>
+    <tr>
+      <td><code>build</code></td>
+      <td>从 Dockerfile 构建</td>
+      <td>规范化成绝对路径的 <code>context</code> + <code>dockerfile</code>；产出镜像默认名 <code>kb-p2-api</code>（项目名-服务名），<code>25.6MB</code></td>
+    </tr>
+    <tr>
+      <td><code>command</code> / <code>entrypoint</code></td>
+      <td>覆盖镜像的启动命令</td>
+      <td>多文件合并时<strong>整体替换</strong>（不是追加）</td>
+    </tr>
+    <tr>
+      <td><code>environment</code></td>
+      <td>环境变量（map 或 list 写法）</td>
+      <td>合并结果 <code>{&quot;DB_HOST&quot;:&quot;db&quot;,&quot;LOG_LEVEL&quot;:&quot;debug&quot;,&quot;REDIS_HOST&quot;:&quot;cache&quot;}</code>，同键后写胜</td>
+    </tr>
+    <tr>
+      <td><code>env_file</code></td>
+      <td>从文件注入环境</td>
+      <td>未跑（本轮只用 <code>.env</code> + 插值）</td>
+    </tr>
+    <tr>
+      <td><code>ports</code></td>
+      <td>宿主端口映射</td>
+      <td>长写法规范化为 <code>{&quot;mode&quot;:&quot;ingress&quot;,&quot;host_ip&quot;:&quot;127.0.0.1&quot;,&quot;target&quot;:3306,&quot;published&quot;:&quot;3307&quot;,&quot;protocol&quot;:&quot;tcp&quot;}</code>；<code>&quot;99999-80&quot;</code> 这种写不完整的区间报 <code>invalid containerPort: 99999-80</code></td>
+    </tr>
+    <tr>
+      <td><code>expose</code></td>
+      <td>只声明不外发</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td><code>volumes</code></td>
+      <td>挂载</td>
+      <td>短写法 <code>dbdata:/var/lib/mysql</code> 变 <code>{&quot;type&quot;:&quot;volume&quot;,&quot;source&quot;:&quot;dbdata&quot;,&quot;target&quot;:&quot;/var/lib/mysql&quot;}</code>；单段写法 <code>/tmp/x</code> <strong>合法</strong>（匿名卷，不报错）</td>
+    </tr>
+    <tr>
+      <td><code>tmpfs</code></td>
+      <td>内存盘</td>
+      <td>未跑（第①篇量过容器内 <code>tmpfs</code> 是 <code>noexec</code>）</td>
+    </tr>
+    <tr>
+      <td><code>networks</code></td>
+      <td>接哪些网络</td>
+      <td>列表写法 <code>[n1]</code> 与 override 的 <code>[n2]</code> 合并成<strong>并集</strong> <code>{&quot;n1&quot;:null,&quot;n2&quot;:null}</code></td>
+    </tr>
+    <tr>
+      <td><code>network_mode</code></td>
+      <td>单网络简写（<code>host</code>/<code>none</code>/<code>bridge</code>）</td>
+      <td>未跑；与 <code>networks</code> 互斥</td>
+    </tr>
+    <tr>
+      <td><code>hostname</code> / <code>extra_hosts</code> / <code>dns</code></td>
+      <td>容器名与解析</td>
+      <td>未跑；内置 DNS 是 <code>127.0.0.11</code>（第②篇读数）</td>
+    </tr>
+    <tr>
+      <td><code>depends_on</code></td>
+      <td>启动依赖</td>
+      <td>见 4.5：列表形态规范化成 <code>condition: service_started</code>，循环依赖报 <code>dependency cycle detected: a -&gt; b -&gt; a</code></td>
+    </tr>
+    <tr>
+      <td><code>healthcheck</code></td>
+      <td>就绪探测</td>
+      <td>见 4.6：compose 写就覆盖镜像；<code>disable: true</code> → <code>{&quot;Test&quot;:[&quot;NONE&quot;]}</code>；<code>test: []</code> → <code>healthcheck={}</code></td>
+    </tr>
+    <tr>
+      <td><code>restart</code></td>
+      <td>重启策略</td>
+      <td><code>restart: maybe</code> 被 <code>config</code> 放过（rc=0），到运行时才由 daemon 拒绝：<code>invalid restart policy: unknown policy 'maybe'; use one of 'no', 'always', 'on-failure', or 'unless-stopped'</code></td>
+    </tr>
+    <tr>
+      <td><code>profiles</code></td>
+      <td>哪些命令带上这个服务</td>
+      <td>不带 <code>--profile app</code> 时 <code>config --services</code> 只有 <code>cache db</code></td>
+    </tr>
+    <tr>
+      <td><code>develop.watch</code></td>
+      <td>开发期热重载</td>
+      <td>规范化成 <code>{&quot;action&quot;:&quot;sync+restart&quot;,&quot;path&quot;:…,&quot;target&quot;:&quot;/usr/share/nginx/html/index.html&quot;,&quot;exec&quot;:{&quot;command&quot;:null}}</code>；三档代价见 4.8</td>
+    </tr>
+    <tr>
+      <td><code>labels</code></td>
+      <td>打标签</td>
+      <td>锚点合并可用（见上一节）；<code>com.docker.compose.*</code> 是 compose 自己的账本</td>
+    </tr>
+    <tr>
+      <td><code>container_name</code></td>
+      <td>固定容器名</td>
+      <td>未跑；注意它会<strong>破坏 <code>--scale</code></strong>，本团队建议禁用（判据见 4.4）</td>
+    </tr>
+    <tr>
+      <td><code>deploy</code></td>
+      <td>资源与更新策略</td>
+      <td>映射类<strong>深合并</strong>（<code>memory: 128m</code> 与 override 的 <code>cpus</code> 共存，<code>128m</code> 被规范化成 <code>134217728</code>）</td>
+    </tr>
+    <tr>
+      <td><code>cap_add</code> / <code>cap_drop</code> / <code>security_opt</code> / <code>sysctls</code> / <code>read_only</code></td>
+      <td>安全收紧</td>
+      <td>未跑，归 5.2 与 6.3</td>
+    </tr>
+    <tr>
+      <td><code>user</code> / <code>group_add</code> / <code>ulimits</code></td>
+      <td>身份与限额</td>
+      <td>未跑，归 2.7 的 UID/GID 现象与 5.3</td>
+    </tr>
+    <tr>
+      <td><code>stop_grace_period</code> / <code>stop_signal</code></td>
+      <td>怎么被停</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td><code>secrets</code> / <code>configs</code></td>
+      <td>注入文件</td>
+      <td><code>secrets: [pw]</code> 而顶层没声明 → <code>service &quot;s&quot; refers to undefined secret pw: invalid compose project</code></td>
+    </tr>
+    <tr>
+      <td><code>extends</code></td>
+      <td>服务级继承</td>
+      <td>见上一节读数</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--顶层四个键networks--volumes--configs--secrets">顶层四个键：<code>networks</code> / <code>volumes</code> / <code>configs</code> / <code>secrets</code>
+</h2>
+<p><code>config --format json</code> 是看清楚这一层的唯一办法，因为<strong>规范化会改你的名字</strong>：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-8" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-8-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app config --format json   <span class="c1"># 节选</span>
+</span></span><span class="line"><span class="cl"><span class="go">  顶层 name    = kb-p2
+</span></span></span><span class="line"><span class="cl"><span class="go">  networks     = {&#34;default&#34;: {&#34;name&#34;: &#34;kb-p2-net&#34;, &#34;ipam&#34;: {}}}
+</span></span></span><span class="line"><span class="cl"><span class="go">  volumes      = {&#34;cachedata&#34;: {&#34;name&#34;: &#34;kb-p2_cachedata&#34;}, &#34;dbdata&#34;: {&#34;name&#34;: &#34;kb-p2_dbdata&#34;}}
+</span></span></span></code></pre></div></div>
+</div>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">键</th>
+      <th scope="col">作用</th>
+      <th scope="col">必须知道的落点</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>networks</code></td>
+      <td>定义网络；<code>default</code> 不写就自动建</td>
+      <td>本项目显式命名成 <code>kb-p2-net</code>，所以 <code>docker network ls</code> 里查得到它，不受前缀规则影响</td>
+    </tr>
+    <tr>
+      <td><code>volumes</code></td>
+      <td>定义命名卷</td>
+      <td>不写 <code>name:</code> 时<strong>自动加项目前缀</strong>：声明是 <code>dbdata</code>，实际叫 <code>kb-p2_dbdata</code>。手工 <code>docker volume rm</code> 按前缀名找</td>
+    </tr>
+    <tr>
+      <td><code>configs</code></td>
+      <td>注入配置文件（文本类）</td>
+      <td>本轮未用；<code>services.*.configs</code> 引用未声明的 config 会像 secret 一样在加载期失败</td>
+    </tr>
+    <tr>
+      <td><code>secrets</code></td>
+      <td>注入敏感文件</td>
+      <td>未跑通用法，只跑到「引用未声明」的报错文本；生产写法归 6.3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>前缀这条规则的副作用很实在：<strong>同一个 <code>compose.yaml</code> 换 <code>-p</code> 或换目录名，会得到另一套卷</strong>。这就是「换了个项目名，数据库怎么变空了」的机制解释（症状索引里值得单列）。要绑死就用 <code>name:</code>（卷/网络各自也能写 <code>name:</code>）。</p>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--哪些写错法会被拦住config-的边界">哪些写错法会被拦住：<code>config</code> 的边界
+</h2>
+<p><code>docker compose config --quiet</code> 是校验器（<code>--quiet</code> 只报问题不打印模型）。它的报错形状本机逐条量过，<strong>这张表的价值在于它会给你「原来这条不拦」的反例</strong>：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">写法</th>
+      <th scope="col"><code>config</code></th>
+      <th scope="col">报错原文（截取）</th>
+      <th scope="col">何时才暴露</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>服务里多一个 <code>typo_field: x</code></td>
+      <td>rc=1</td>
+      <td><code>validating &lt;路径&gt;: services.s additional properties 'typo_field' not allowed</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td>顶层多一个 <code>random_top: 1</code></td>
+      <td>rc=1</td>
+      <td><code>validating &lt;路径&gt;:  additional properties 'random_top' not allowed</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td><code>ports: [&quot;99999-80&quot;]</code></td>
+      <td>rc=1</td>
+      <td><code>invalid containerPort: 99999-80</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td><code>depends_on: [ghost]</code>（服务不存在）</td>
+      <td>rc=1</td>
+      <td><code>service &quot;s&quot; depends on undefined service &quot;ghost&quot;: invalid compose project</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td><code>a→b→a</code> 循环依赖</td>
+      <td>rc=1</td>
+      <td><code>dependency cycle detected: a -&gt; b -&gt; a</code></td>
+      <td>加载期（<code>--dry-run</code> 同样报）</td>
+    </tr>
+    <tr>
+      <td><code>secrets: [pw]</code> 未声明</td>
+      <td>rc=1</td>
+      <td><code>service &quot;s&quot; refers to undefined secret pw: invalid compose project</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td>目录名非 ASCII 且无 <code>name:</code></td>
+      <td>rc=1</td>
+      <td><code>project name must not be empty</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td>顶层 <code>version: &quot;3.8&quot;</code></td>
+      <td><strong>rc=0</strong></td>
+      <td>warning：<code>the attribute version is obsolete, it will be ignored…</code></td>
+      <td>不暴露（被忽略）</td>
+    </tr>
+    <tr>
+      <td><code>restart: maybe</code></td>
+      <td><strong>rc=0</strong></td>
+      <td>—</td>
+      <td><strong>运行时</strong>，daemon 拒绝并列出合法值</td>
+    </tr>
+    <tr>
+      <td><code>healthcheck.test: []</code></td>
+      <td><strong>rc=0</strong></td>
+      <td>—</td>
+      <td>不报错，但等于「没有健康检查」；下游 <code>service_healthy</code> 会永远不满足</td>
+    </tr>
+    <tr>
+      <td><code>volumes: [&quot;/tmp/x&quot;]</code></td>
+      <td><strong>rc=0</strong></td>
+      <td>—</td>
+      <td>合法（匿名卷），不是错误</td>
+    </tr>
+    <tr>
+      <td><code>docker compose volume ls</code></td>
+      <td>rc=1</td>
+      <td>一整段用法帮助</td>
+      <td>命令名写错（正确是 <code>volumes</code>）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>两条推论，是团队里最该教的：</p>
+<ul>
+<li><strong>「未知字段」会拦，「值不合法」不一定拦</strong>。<code>restart: maybe</code> 这种拼进模型的错误值要等到容器创建才由 daemon 拒。所以 <code>config --quiet</code> 通过 ≠ 能 <code>up</code>。</li>
+<li><strong>「不报错」不等于「按你想要的方式生效」</strong>。<code>test: []</code> 静默地让健康检查消失，<code>version:</code> 静默地被忽略。想确认语义，只有一条路：<code>config --format json</code> 看规范化后的模型。</li>
+</ul>
+<p><code>config</code> 本身也有几个能救命（或救 CI）的选项，读自 <code>config --help</code>：<code>--format yaml|json</code>、<code>--images</code>、<code>--networks</code>、<code>--models</code>、<code>--hash</code>（打印每个服务的配置哈希，判断「这个服务会不会被重建」的直接依据）、<code>--environment</code>（打印插值用的环境）、<code>--no-consistency</code>、<code>--lock-image-digests</code>（生成一份把镜像钉到 digest 的覆盖文件）。<code>--paths</code> 这一项<strong>本机不存在</strong>（<code>unknown flag: --paths</code>），网上有人用它当字段清单的写法已经过时。</p>
+<blockquote>
+<p>💡 新人小结：<strong><code>config</code> 像「把口语需求整理成正式工单」的那道程序</strong>——你说的是「大概这样」，工单上必须写死编号、负责人、时长，而且工单一旦生成，后面执行只看工单不看你的原话。类比之后接机制：YAML 里的 <code>dbdata</code> 变成 <code>kb-p2_dbdata</code>、<code>depends_on: [db]</code> 变成 <code>{condition: service_started, required: true}</code>、<code>128m</code> 变成 <code>134217728</code>，都是这道「整理」的产物。所以「我的文件里明明写了 X」永远不是证据，<code>config</code> 输出才是。</p>
+</blockquote>
+<div class="td-callout td-callout--tip" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-lightbulb" aria-hidden="true"></i><span class="td-callout__label">提示</span></div>
+  <div class="td-callout__body">
+<p><code>.env</code> 缺失的真实失败形状（第②篇的插值规则在这里落地）。主干里写 <code>${DB_ROOT_PW:?在 .env 里设一个}</code>，把 <code>.env</code> 临时移走后：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-9" data-td-code data-td-code-auto-id
+     data-td-language="" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-9-viewport" data-td-code-viewport><pre tabindex="0"><code>level=warning msg=&#34;The \&#34;DB_ROOT_PW\&#34; variable is not set. Defaulting to a blank string.&#34;
+error while interpolating services.db.environment.MYSQL_ROOT_PASSWORD:
+  required variable DB_ROOT_PW is missing a value: 在 .env 里设一个</code></pre></div>
+</div>
+<p><code>:?</code> 后面那句自解释文案被原样打进报错——这是团队里该养的习惯：<strong>每个必填变量都写一句「去哪儿设」</strong>。普通 <code>${VAR}</code> 只会警告后按空串继续，MySQL 会拿空密码起，失败点在很后面。</p>
+  </div>
+</div><h2 id="pg-827804aef89669d08f53f4cf8e47643a--实战切入三条判据十分钟内把基线钉死">实战切入：三条判据，十分钟内把基线钉死
+</h2>
+<p>这三条不是阅读练习，每条都有可核对的输出。</p>
+<p><strong>判据一：确认你机器上这两个名字是不是同一个实现。</strong></p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-10" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-10-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose version
+</span></span><span class="line"><span class="cl"><span class="go">Docker Compose version v5.5.1
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker-compose version
+</span></span><span class="line"><span class="cl"><span class="go">Docker Compose version v5.5.1
+</span></span></span></code></pre></div></div>
+</div>
+<p>预期：两行字符串一致。不一致的话（本机以外完全可能，比如另装了 v1 的独立包）先把 PATH 里谁赢查清楚再讨论语法。</p>
+<p><strong>判据二：把「写错法」跑一遍，确认你的校验器会拦哪一种。</strong></p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-11" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="6">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-11-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">kbprobe</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">s</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">busybox:1.37</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l">maybe</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">typo_field</span><span class="p">:</span><span class="w"> </span><span class="l">x</span></span></span></code></pre></div></div>
+</div>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-12" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-12-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet        <span class="c1"># 期望 rc=1，只报 additional properties</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> <span class="c1"># 把 typo_field 删掉再跑一次</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet        <span class="c1"># 期望 rc=0（version/restart 这类不拦）</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose up -d                 <span class="c1"># 期望 rc=1，daemon 拒绝 restart policy</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose down
+</span></span></code></pre></div></div>
+</div>
+<p>这条的价值是让新人亲自看到「<code>config</code> 绿了但起不来」。<strong>这是本篇最容易被忽略的一条判据</strong>：只跑第一条的人，会以为校验器什么都管。</p>
+<p><strong>判据三：<code>config --format json</code> 里找到三个「被改过的名字」。</strong></p>
+<p>对照自己的项目文件，逐条回答：卷的实际名字有没有项目前缀？<code>depends_on</code> 被展开成什么 <code>condition</code>？映射类资源名（网络）是什么？</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-13" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="1">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-13-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app config --format json <span class="p">|</span> python -c <span class="s2">&#34;import json,sys; d=json.load(sys.stdin); print(d[&#39;name&#39;]); print(list(d[&#39;volumes&#39;].values())); print(list(d[&#39;services&#39;][&#39;api&#39;][&#39;depends_on&#39;].items()))&#34;</span>
+</span></span></code></pre></div></div>
+</div>
+<p>本机读数：<code>kb-p2</code>、<code>[{'name': 'kb-p2_cachedata'}, {'name': 'kb-p2_dbdata'}]</code>、<code>[('cache', {'condition': 'service_healthy', 'required': True}), ('db', {…})]</code>。</p>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--常见误读">常见误读
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">误读</th>
+      <th scope="col">实际</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>「写了 <code>version: '3.8'</code> 就锁定了语法版本」</td>
+      <td>现在这行会被忽略并警告；schema 由实现决定</td>
+    </tr>
+    <tr>
+      <td>「<code>docker-compose</code> 这个写法就说明对方在用 v1」</td>
+      <td>本机两个名字指向同一个 v2 实现，版本串一致。判断要看 <code>version</code> 输出</td>
+    </tr>
+    <tr>
+      <td>「<code>config --quiet</code> 通过就能 <code>up</code>」</td>
+      <td><code>restart: maybe</code> 这条实测：<code>config</code> rc=0，<code>up</code> rc=1</td>
+    </tr>
+    <tr>
+      <td>「不报错就说明我写的字段生效了」</td>
+      <td><code>healthcheck.test: []</code>、<code>version:</code> 都是「不报错但改变语义」的例子</td>
+    </tr>
+    <tr>
+      <td>「声明的卷名就是磁盘上的卷名」</td>
+      <td>不写 <code>name:</code> 时实际名带项目前缀（<code>dbdata</code> → <code>kb-p2_dbdata</code>）</td>
+    </tr>
+    <tr>
+      <td>「<code>environment</code> 写成 list 和写成 map 完全一样」</td>
+      <td>本轮全程用 map 写法，<code>config</code> 出来是 map；list 写法的规范化未跑，别当已验证</td>
+    </tr>
+    <tr>
+      <td>「<code>x-</code> 开头的键会被 Docker 解析」</td>
+      <td>它被保留在模型里但不参与语义，是给人看的约定</td>
+    </tr>
+    <tr>
+      <td>「目录名不影响项目」</td>
+      <td>中文目录名会让默认项目名被过滤成空，直接 <code>project name must not be empty</code></td>
+    </tr>
+    <tr>
+      <td>「<code>include</code> 和 <code>extends</code> 是一回事」</td>
+      <td>前者文件级并入、后者服务级继承，合并规则不同（上文的 <code>FROM: override</code> 是证据）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--要点总结">要点总结
+</h2>
+<ul>
+<li>Compose 的价值不是「少打字」，而是把<strong>顺序、命名、重放</strong>三件事从人脑转移到模型：<code>up</code> 做的是 diff 后的收敛，本机表现为只重建那一个端口变了的 <code>proxy</code>。</li>
+<li>基线一句话：<code>docker compose</code>（v2，本机 v5.5.1）+ 文件名 <code>compose.yaml</code> + 开发覆盖 <code>compose.override.yaml</code> + <strong>不写 <code>version:</code></strong> + <strong>必写顶层 <code>name:</code></strong> + 口令走 <code>.env</code> 注入。</li>
+<li><code>version:</code> 现在只给 warning 并被忽略；<code>docker-compose</code> 这个命令名在本机与 <code>docker compose</code> 是同一实现——辨识旧教程要靠字段级信号（<code>links</code>、<code>volumes_from</code>、<code>network_mode: default</code>），不能靠这两条。</li>
+<li>顶层结构是 <code>name</code> / <code>services</code> / <code>networks</code> / <code>volumes</code> / <code>configs</code> / <code>secrets</code> / <code>include</code> / <code>x-*</code>；<code>x-*</code> 与 YAML 锚点、<code>extends</code>、<code>include</code> 四种复用手法本机都跑通。</li>
+<li>名字会被规范化：卷加项目前缀、<code>depends_on</code> 展开成 <code>condition</code>、<code>128m</code> 变字节。<strong>证据永远是 <code>config --format json</code>，不是源文件</strong>。</li>
+<li>校验器只拦「未知字段/引用不存在/名字非法」这一类；「值不合法」（<code>restart: maybe</code>）留给运行时，「静默改变语义」（<code>test: []</code>、<code>version:</code>）谁都不提醒。</li>
+<li><code>.env</code> 缺失时 <code>${VAR:?文案}</code> 会硬失败并把文案打进报错；普通 <code>${VAR}</code> 只警告并按空串继续。</li>
+</ul>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--本篇未验证项">本篇未验证项
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>env_file</code>、<code>expose</code>、<code>network_mode</code>、<code>tmpfs</code>、<code>user</code>/<code>ulimits</code>、<code>stop_grace_period</code>、<code>cap_*</code> 等行为字段</td>
+      <td>未跑</td>
+      <td>速查表里逐项标了「未跑」；跑它们需要各自的实验设计，塞进本篇只会得到没有对照的读数</td>
+    </tr>
+    <tr>
+      <td><code>configs</code> / <code>secrets</code> 的正向用法</td>
+      <td>未跑</td>
+      <td>只跑到「引用未声明」的加载期报错；生产写法在 6.3</td>
+    </tr>
+    <tr>
+      <td><code>network_mode: default</code> 现在是否仍被接受</td>
+      <td>未跑</td>
+      <td>表里那条只作旧教程信号提示，不当结论用</td>
+    </tr>
+    <tr>
+      <td><code>deploy.placement</code> 等 swarm 字段在单机 compose 上的实际处理</td>
+      <td>未跑</td>
+      <td>需要真 swarm 或明确的忽略判据，本轮没有</td>
+    </tr>
+    <tr>
+      <td><code>environment</code> 的 list 写法规范化结果</td>
+      <td>未跑</td>
+      <td>本轮示例统一用 map</td>
+    </tr>
+    <tr>
+      <td><code>docker compose config --lock-image-digests</code> 生成的覆盖文件长什么样</td>
+      <td>未跑</td>
+      <td>选项存在（读自 <code>--help</code>），产物形态待验</td>
+    </tr>
+    <tr>
+      <td>v1（Python 实现）的行为差异</td>
+      <td>未测</td>
+      <td>本机没有 v1；本篇只做了一件事：证明这台机器上 <code>docker-compose</code> 这个名字不是 v1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+</div>
+
+
+
+    
+	
+  
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+	<h1 id="pg-820e2a527a790036e2163301780ab344">2 - 启停</h1>
+    <div class="lead">命令、顺序与健康。</div>
+	<p>命令、顺序与健康。</p>
+<p>本板块包含：常用命令、启动顺序控制与健康检查。</p>
+
+</div>
+
+
+
+    
+      
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="">
+	<h1 id="pg-53017ef909a68ac0690863c1d32a0dc3">2.1 - 常用命令、启动顺序控制与健康检查</h1>
+    <div class="lead">up/down/ps/logs/exec/build 的真实语义与数据风险；depends_on 三种条件与健康检查优先级、探测命令集、start_period 怎么定。</div>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第②段 · 一条命令起全栈（本篇负责「起起来之后怎么看清现场」，读数全部来自同一套 <code>示例/贯穿示例/</code> 栈）
+<strong>示例版本</strong>：需要 4.7~4.9 那三个 compose 文件；本篇不新产文件，只消费并验证它们的行为
+<strong>前置依赖</strong>：<a href="/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/compose%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%BA%BF%E4%B8%8E%E6%96%87%E4%BB%B6%E5%85%A8%E5%AD%97%E6%AE%B5%E5%8F%82%E8%80%83/">/docs/04-单机编排/定义/Compose语法基线与文件全字段参考/</a>、<a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/">/docs/02-核心操作/接上去/端口映射数据管理与权限时区/</a>、<a href="/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/">/docs/00-导读/把环境搭好/环境准备/</a>
+<strong>本篇产出物</strong>：一张「命令 → 本机是否真跑过 → 读数」对照表；一条被证伪的写法（裸 <code>depends_on</code> 的失败日志与它的第二次假绿）；一套健康检查参数定法（含 MySQL 首次通过 8.6 秒的时间线）
+<strong>拓展接口</strong>：本篇的「健康门 + <code>--wait</code>」在 6.4 滚动更新里被推翻（换成就绪探针与流量摘除）；「<code>down -v</code> 删数据」在 7.2 症状索引里作为一条独立症状；「应用侧自己重连」这条在 6.6 CI 里被复用（CI 不用健康门，用一次性任务）
+<strong>难度·耗时</strong>：★★☆ · 50 分钟（含动手）
+<strong>自测三题</strong>：</p>
+<ol>
+<li><code>docker compose stop cache</code> 之后再改 <code>compose.yaml</code> 里 cache 的配置，<code>docker compose start cache</code> 会让改动生效吗？依据是什么？</li>
+<li><code>up</code> 报了 <code>dependency failed to start: container kb-p2-api-1 exited (1)</code>，此刻 <code>db</code> 容器是什么状态？</li>
+<li>同一个反面配置，第一次 <code>up</code> 失败、第二次 <code>up --wait</code> 全绿。这说明配置修好了吗？</li>
+</ol>
+</blockquote>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--为什么要先把命令分成四组而不是背-docker-compose-的参数表">为什么要先把命令分成四组，而不是背 <code>docker compose</code> 的参数表
+</h2>
+<p>一次真实的值班对话（场景是本地栈，不是生产，但错法一模一样）：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="10">
+  <div class="td-code__viewport" id="td-code-12275087-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">「服务起不来，我 down 一下再 up。」
+</span></span><span class="line"><span class="cl">「等一下，你 down 有没有带 -v？」
+</span></span><span class="line"><span class="cl">「没有吧……带了会怎样？」
+</span></span><span class="line"><span class="cl">「数据没了。」
+</span></span><span class="line"><span class="cl">「那我改成 stop 再 start，总安全。」
+</span></span><span class="line"><span class="cl">「安全，但你刚才改了配置，stop/start 不会重建容器，改动不生效。」
+</span></span><span class="line"><span class="cl">「那 up 呢？up 会不会把我的库刷一遍？」
+</span></span><span class="line"><span class="cl">「不会，up 只做 diff。但它会不会重建，取决于配置有没有变——这个要会自己判断。」
+</span></span><span class="line"><span class="cl">「还有：它起不来到底是依赖没就绪，还是镜像构建失败？」
+</span></span><span class="line"><span class="cl">「看 ps 和 logs，别看心情。」</span></span></code></pre></div></div>
+</div>
+<p><code>docker compose</code> 有 30 个子命令，但新人真正需要的是先分清真意图：<strong>看现场、改状态、动数据、动镜像</strong>。这四组的后果等级不同，混用的代价就是上面那段对话。本篇把每一组里最常用、也最容易按错的那几条量清楚——每条都给本机读数，没跑过的会明确标出来。</p>
+<blockquote>
+<p>💡 新人小结：<strong>把 compose 想成「你对系统说的一句话」，而不是「一个终端里的按钮」</strong>。<code>ps</code>/<code>logs</code>/<code>top</code> 是问，<code>up</code>/<code>stop</code>/<code>restart</code> 是要求改动，<code>down</code> 是拆，<code>down -v</code> 是拆完再倒垃圾，<code>build</code>/<code>pull</code>/<code>push</code> 是搬货。类比之后接机制：<code>up</code> 是幂等的「把实际状态收敛到文件声明的状态」，它自己决定要不要重建；<code>stop</code>/<code>start</code> 只动运行时状态，不重新计算配置差异——这就是「改了配置但 stop/start 不生效」的原因，下面第 4 节的表用端口读数把这条钉住。</p>
+</blockquote>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--命令族30-条按用途分四组">命令族：30 条按用途分四组
+</h2>
+<p>下面的清单读自本机 <code>docker compose --help</code>（v5.5.1），「本轮」列标出这条命令在本次取数里<strong>是否真的执行过</strong>——没执行过的不给你编行为。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">组</th>
+      <th scope="col">命令</th>
+      <th scope="col"><code>--help</code> 里的一句话</th>
+      <th scope="col">本轮</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>看现场</td>
+      <td><code>ps</code></td>
+      <td>List containers</td>
+      <td>跑了 4 次，含 <code>--format</code> 与 <code>-a</code></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>logs</code></td>
+      <td>View output from containers</td>
+      <td>跑了 3 次（<code>--tail</code>、<code>--timestamps</code>）</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>top</code></td>
+      <td>Display the running processes</td>
+      <td>跑了</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>images</code></td>
+      <td>List images used by the created containers</td>
+      <td>跑了</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>ls</code></td>
+      <td>List running compose projects</td>
+      <td>跑了</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>port</code></td>
+      <td>Print the public port for a port binding</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>stats</code></td>
+      <td>Display a live stream of container(s) resource usage statistics</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>events</code></td>
+      <td>Receive real time events from containers</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>config</code></td>
+      <td>Parse, resolve and render compose file in canonical format</td>
+      <td>跑了十几次，本篇主力</td>
+    </tr>
+    <tr>
+      <td>改状态</td>
+      <td><code>up</code></td>
+      <td>Create and start containers</td>
+      <td>跑了 6 次（冷/热/wait/no-recreate/force-recreate/scale）</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>start</code> / <code>stop</code></td>
+      <td>Start / Stop services</td>
+      <td>各跑了 2 次</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>restart</code></td>
+      <td>Restart service containers</td>
+      <td>跑了</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>kill</code></td>
+      <td>Force stop service containers</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>pause</code> / <code>unpause</code></td>
+      <td>Pause / Unpause services</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>rm</code></td>
+      <td>Removes stopped service containers</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>create</code></td>
+      <td>Creates containers for a service</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>run</code></td>
+      <td>Run a one-off command on a service</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>exec</code></td>
+      <td>Execute a command in a running container</td>
+      <td>跑了 5 次</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>attach</code></td>
+      <td>Attach local standard input, output…</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>cp</code></td>
+      <td>Copy files/folders between a service container and the local filesystem</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>wait</code></td>
+      <td>Block until containers of all (or specified) services stop.</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>watch</code></td>
+      <td>Watch build context for service and rebuild/refresh containers when files are updated</td>
+      <td>跑了 2 次（两档）</td>
+    </tr>
+    <tr>
+      <td>动数据</td>
+      <td><code>down</code></td>
+      <td>Stop and remove containers, networks</td>
+      <td>跑了 5 次（带与不带 profile、<code>-v</code>、<code>--remove-orphans</code>）</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>volumes</code></td>
+      <td>List volumes</td>
+      <td>跑了 1 次</td>
+    </tr>
+    <tr>
+      <td>动镜像</td>
+      <td><code>build</code></td>
+      <td>Build or rebuild services</td>
+      <td>跑了 2 次（缓存命中 / <code>--no-cache</code>）</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>pull</code></td>
+      <td>Pull service images</td>
+      <td>跑了</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>push</code> / <code>publish</code></td>
+      <td>Push service images / Publish compose application</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>commit</code> / <code>export</code></td>
+      <td>Create a new image… / Export a service container&rsquo;s filesystem</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td>元命令</td>
+      <td><code>version</code></td>
+      <td>Show the Docker Compose version information</td>
+      <td>跑了</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><code>bridge</code>（Management Command）</td>
+      <td>Convert compose files into another model</td>
+      <td>未跑，用途未查</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>还有一条容易忽略的：<code>docker compose volumes</code>（<strong>带 s</strong>）。我按 <code>docker volume ls</code> 的直觉写了 <code>docker compose volume ls</code>，结果是用法帮助全文、<code>rc=1</code>：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-1" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-12275087-fence-1-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose volume ls
+</span></span><span class="line"><span class="cl"><span class="go">Usage:  docker compose [OPTIONS] COMMAND
+</span></span></span><span class="line"><span class="cl"><span class="go">...
+</span></span></span></code></pre></div></div>
+</div>
+<p>这条不是小事：脚本里如果只看「有没有打印出卷名」，一段用法帮助照样包含 <code>VOLUME</code> 字样，就会误判成成功。<strong>命令报错时 rc≠0，要先看 rc</strong>。</p>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--ps-的四种读数与它们各自回答什么"><code>ps</code> 的四种读数与它们各自回答什么
+</h2>
+<p>同一套栈，<code>ps</code> 加不同参数回答的是不同问题。真实读数：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="7">
+  <div class="td-code__viewport" id="td-code-12275087-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps
+</span></span><span class="line"><span class="cl"><span class="go">NAME            IMAGE               COMMAND                   SERVICE   CREATED          STATUS                    PORTS
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-api-1     kb-p2-api           &#34;/usr/local/bin/api&#34;      api       17 seconds ago   Up 5 seconds (healthy)    8080/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-cache-1   redis:7-alpine      &#34;docker-entrypoint.s…&#34;   cache     17 seconds ago   Up 16 seconds (healthy)   6379/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-db-1      mysql:8.4           &#34;docker-entrypoint.s…&#34;   db        17 seconds ago   Up 16 seconds (healthy)   127.0.0.1:3307-&gt;3306/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-proxy-1   nginx:1.27-alpine   &#34;/docker-entrypoint.…&#34;   proxy     16 seconds ago   Up Less than a second     0.0.0.0:8080-&gt;80/tcp, [::]:8080-&gt;80/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-web-1     kb-p2-web           &#34;/docker-entrypoint.…&#34;   web       17 seconds ago   Up 16 seconds             80/tcp
+</span></span></span></code></pre></div></div>
+</div>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-3" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="6">
+  <div class="td-code__viewport" id="td-code-12275087-fence-3-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps --format <span class="s2">&#34;{{.Name}}\t{{.Service}}\t{{.Status}}\t{{.Health}}&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">kb-p2-api-1     api     Up 6 seconds (healthy)        healthy
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-cache-1   cache   Up 16 seconds (healthy)       healthy
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-db-1      db      Up 16 seconds (healthy)       healthy
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-proxy-1   proxy   Up Less than a second
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-web-1     web     Up 16 seconds
+</span></span></span></code></pre></div></div>
+</div>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">想回答的问题</th>
+      <th scope="col">该看的列</th>
+      <th scope="col">读数里的陷阱</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>这个服务活着吗</td>
+      <td><code>State</code>（<code>running</code>/<code>exited</code>）</td>
+      <td><code>Up Less than a second</code> 可能是刚被重建，不一定是第一次起</td>
+    </tr>
+    <tr>
+      <td>它「能用」吗</td>
+      <td><code>Health</code></td>
+      <td><code>Health</code> 空 = <strong>没有健康检查</strong>，不等于健康。上面 <code>proxy</code>/<code>web</code> 就是空，因为主干没给它们写 <code>healthcheck</code></td>
+    </tr>
+    <tr>
+      <td>端口到底落在宿主哪里</td>
+      <td><code>PORTS</code></td>
+      <td><code>0.0.0.0:8080-&gt;80/tcp</code> 与 <code>127.0.0.1:3307-&gt;3306/tcp</code> 暴露面不同（前者全网卡，后者只回环）</td>
+    </tr>
+    <tr>
+      <td>它是不是我上次起的那个</td>
+      <td><code>CREATED</code> 对比 <code>STATUS</code> 里的 <code>Up</code></td>
+      <td><code>CREATED 17 seconds ago</code> + <code>Up 5 seconds</code> = 容器新建 17 秒、但进程只跑了 5 秒（重启过或是依赖后起的）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>-a</code> 是把退出/未启动的也列出来，反面实验里全靠它：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="6">
+  <div class="td-code__viewport" id="td-code-12275087-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps -a --format <span class="s2">&#34;{{.Name}}\t{{.Status}}&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">kb-p2-api-1     Exited (1) 14 seconds ago
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-cache-1   Up 14 seconds (healthy)
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-db-1      Up 15 seconds (healthy)
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-proxy-1   Created
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-web-1     Up 15 seconds
+</span></span></span></code></pre></div></div>
+</div>
+<p><code>Created</code> 这一格值得停一下：<code>proxy</code> 从没启动过，因为它的 <code>depends_on</code> 里 <code>api</code> 需要 <code>service_healthy</code>，而 <code>api</code> 已经退出了。<strong>依赖链的失败会往上冻结</strong>，<code>ps -a</code> 是看清冻结边界的最快方法。</p>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--up-的三个档位改动什么时候才生效"><code>up</code> 的三个档位：改动什么时候才生效
+</h2>
+<p>用「<code>.env</code> 里把 <code>PROXY_PORT</code> 从 8080 改成 8085」这一件事当探针，同一个改动跑三种命令。判据不是「有没有报错」，而是 <code>docker inspect</code> 里的实际端口映射：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">命令</th>
+      <th scope="col"><code>proxy</code> 的宿主端口</th>
+      <th scope="col"><code>Created</code> 时间戳</th>
+      <th scope="col"><code>curl</code> 8085</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>up -d --no-recreate</code>（改了 <code>.env</code> 之后）</td>
+      <td><code>8080</code> 不变</td>
+      <td>与改动前同一个</td>
+      <td><code>http=000</code>（连不上）</td>
+    </tr>
+    <tr>
+      <td><code>up -d</code>（同一改动）</td>
+      <td><strong><code>8085</code></strong></td>
+      <td>变新（日志里只有 <code>proxy</code> 出现 <code>Recreate</code>/<code>Recreated</code>）</td>
+      <td><code>http=200</code></td>
+    </tr>
+    <tr>
+      <td><code>up -d --wait --force-recreate</code></td>
+      <td><code>8080</code>（已还原 <code>.env</code>）</td>
+      <td>五个容器全部变新</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>三条读数说明三件事：</p>
+<ul>
+<li><strong><code>--no-recreate</code> 是「只补缺，不改已有的」</strong>。配置真的变了也不动现有容器，同时它仍然会跑健康等待（日志里出现 <code>Waiting</code>/<code>Healthy</code>）。用它来「避免重启我的长任务」是对的，但它不会告诉你「因此你的改动没生效」。</li>
+<li><strong>默认 <code>up</code> 做逐服务 diff</strong>。只有 <code>proxy</code> 被重建，其余四个 <code>Running</code> 不动——这就是「改一个服务不要把整栈刷一遍」的机制依据，不是玄学。</li>
+<li><strong><code>--force-recreate</code> 是「不管 diff 全部重建」</strong>，代价实测：本机五个容器 <code>up -d --wait --force-recreate</code> 用时 <strong>18.2 秒</strong>，且重建严格按依赖顺序落地（<code>db</code>/<code>cache</code> 的 <code>StartedAt</code> 最早，<code>api</code> 晚 5.7 秒，<code>proxy</code> 最晚）。</li>
+</ul>
+<p><code>up</code> 的其它常用档位（读自 <code>up --help</code>，本轮未全部实测）：<code>--build</code>（起之前先构建）、<code>--abort-on-container-exit</code>（任一容器停止就停全部，与 <code>-d</code> 互斥）、<code>--exit-code-from &lt;服务&gt;</code>（把某个容器的退出码当命令退出码，隐含前者）、<code>--abort-on-container-failure</code>（只在失败退出时停）、<code>--always-recreate-deps</code>（连带重建依赖，与 <code>--no-recreate</code> 互斥）、<code>--attach</code> / <code>--attach-dependencies</code>（控制日志跟着打哪些服务）。</p>
+<div class="td-callout td-callout--warning" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span class="td-callout__label">警告</span></div>
+  <div class="td-callout__body">
+<p><code>up</code> 的退出码不等于「全栈可用」。带 <code>--wait</code> 时它等的是健康检查；不带 <code>--wait</code> 时它只要容器创建成功就可能返回 0。反过来，<code>--wait</code> 报 <code>rc=1</code> 也不一定是指令写坏了——下面「假绿」那节给了一条相反的例子。</p>
+  </div>
+</div><h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--down-家族-vprofile--rmi-各自删了什么"><code>down</code> 家族：<code>-v</code>、profile、<code>--rmi</code> 各自删了什么
+</h2>
+<p><code>down</code> 的四个开关是正交的，混起来记就会出事。本机读数是：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">写法</th>
+      <th scope="col">容器</th>
+      <th scope="col">网络</th>
+      <th scope="col">卷</th>
+      <th scope="col">读数摘要</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>down</code>（不带 <code>--profile</code>）</td>
+      <td>只删模型里有的 <code>db</code>/<code>cache</code></td>
+      <td><strong>删不掉</strong></td>
+      <td>保留</td>
+      <td>用时 2.0 秒；<code>docker ps</code> 里 <code>api</code>/<code>web</code>/<code>proxy</code> 三个还在跑；日志出现 <code>Network kb-p2-net Resource is still in use</code></td>
+    </tr>
+    <tr>
+      <td><code>down --remove-orphans</code></td>
+      <td>按项目标签把全部容器删掉</td>
+      <td>删掉</td>
+      <td>保留</td>
+      <td>逐条 <code>Stopped</code>/<code>Removed</code>，末尾 <code>Network kb-p2-net Removed</code></td>
+    </tr>
+    <tr>
+      <td><code>down -v</code></td>
+      <td>同第一行（仍漏 profile）</td>
+      <td>删不掉</td>
+      <td><strong>删掉</strong></td>
+      <td>用时 1.6 秒；<code>Volume kb-p2_dbdata Removed</code>；再 <code>up</code> 后 <code>ERROR 1146 … Table 'kbdemo.t_note' doesn't exist</code></td>
+    </tr>
+    <tr>
+      <td><code>down -v --rmi local</code></td>
+      <td>删</td>
+      <td>删</td>
+      <td>删</td>
+      <td>本轮只在一处收尾用过，效果由后续读数反证：那次实验（项目 <code>kbhcp</code>）构建出的 <code>kbhcp-s</code> 镜像在之后的 <code>docker images</code> 列表里不存在，而中间一步 <code>docker image prune -f --filter until=1h</code> 报的是 <code>Total reclaimed space: 0B</code>，所以不是被 prune 掉的</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>--rmi</code> 的取值口径来自帮助文本（<code>local</code> 只删本项目构建出来的镜像，<code>all</code> 连 pulled 的镜像一起删）。<code>all</code> 这一档本轮没跑：拿 1.1 GB 的 <code>mysql:8.4</code> 做实验换回来的只是重拉时间，不值得。</p>
+<blockquote>
+<p>💡 新人小结：<strong><code>down</code> 是退租，<code>-v</code> 是把家具扔掉，<code>--rmi</code> 是把搬家用的卡车也卖了，<code>--remove-orphans</code> 是「把这套房里所有还在住的人都请出去，不管合同上写没写名字」</strong>。类比之后接机制：<code>--remove-orphans</code> 的依据是容器上的 <code>com.docker.compose.project</code> 标签，而 profile 只影响「本次命令的服务模型」，两者不是一回事——这就是「不带 profile 的 <code>down</code> 会漏容器，而带 <code>--remove-orphans</code> 就能收干净」的原因。</p>
+</blockquote>
+<p><code>docker compose ls</code> 是「这个 compose 项目现在被认为在跑什么」的账本，删干净之后它是空的：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-5" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-12275087-fence-5-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose ls
+</span></span><span class="line"><span class="cl"><span class="go"> NAME                STATUS              CONFIG FILES
+</span></span></span><span class="line"><span class="cl"><span class="go"> kb-p2   running(5)  ...\compose.yaml,...\compose.override.yaml
+</span></span></span></code></pre></div></div>
+</div>
+<p><code>running(5)</code> 这个数还会告诉你 override 是否被自动合并（配置文件列了两个）。清理核对用的就是它。</p>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--空项目上的静默成功判据要先检查前提">空项目上的静默成功：判据要先检查前提
+</h2>
+<p>一组反面读数。项目里只有一个服务、但从未 <code>up</code> 过，逐条命令的结果：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-12275087-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="go">空项目 ps             rc=0  out=&#39;NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS&#39;
+</span></span></span><span class="line"><span class="cl"><span class="go">空项目 logs s         rc=0  out=&#39;&#39;
+</span></span></span><span class="line"><span class="cl"><span class="go">空项目 stop           rc=0  out=&#39;&#39;
+</span></span></span><span class="line"><span class="cl"><span class="go">空项目 restart s      rc=0  out=&#39;&#39;
+</span></span></span><span class="line"><span class="cl"><span class="go">空项目 down           rc=0  out=&#39;&#39;
+</span></span></span></code></pre></div></div>
+</div>
+<p>五条全部 <code>rc=0</code>。也就是说：<strong>「命令跑成功」在 compose 里几乎不提供信息量</strong>，因为「没东西可操作」也是成功。脚本里写 <code>if docker compose ps; then echo OK</code>，会得到一个永远为真的分支。</p>
+<p>对比之下，两类错误才是真的会红：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-7" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-12275087-fence-7-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose logs --tail <span class="m">1</span> nope
+</span></span><span class="line"><span class="cl"><span class="go">[rc=1] no such service: nope
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose volume ls
+</span></span><span class="line"><span class="cl"><span class="go">[rc=1] Usage:  docker compose [OPTIONS] COMMAND …
+</span></span></span></code></pre></div></div>
+</div>
+<p>判据要写成「检查前置状态」而不是「检查命令返回值」。同一批取数里可用的两条硬判据是：<code>docker compose ps -a --format &quot;{{.Status}}&quot;</code> 的每一行都必须含 <code>healthy</code> 才算就绪；<code>up --wait</code> 之前先 <code>config --services</code> 确认服务数量符合预期。</p>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--启动顺序三种依赖条件与它们的失败形状">启动顺序：三种依赖条件与它们的失败形状
+</h2>
+<p><code>depends_on</code> 有两种书写形态，语义差别全在「等多久」。</p>
+<p><strong>列表形态</strong>（很多人以为它「等就绪」）：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-8" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="1">
+  <div class="td-code__viewport" id="td-code-12275087-fence-8-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">depends_on</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">db, cache]</span></span></span></code></pre></div></div>
+</div>
+<p><code>config</code> 把它规范化成下面这样——这是理解全部后续现象的钥匙：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-9" data-td-code data-td-code-auto-id
+     data-td-language="json" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-12275087-fence-9-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="s2">&#34;depends_on&#34;</span><span class="err">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;cache&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;condition&#34;</span><span class="p">:</span> <span class="s2">&#34;service_started&#34;</span><span class="p">,</span> <span class="nt">&#34;required&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;db&#34;</span><span class="p">:</span>    <span class="p">{</span><span class="nt">&#34;condition&#34;</span><span class="p">:</span> <span class="s2">&#34;service_started&#34;</span><span class="p">,</span> <span class="nt">&#34;required&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre></div></div>
+</div>
+<p><code>service_started</code> 只看<strong>容器进程起没起</strong>，不看服务能不能干活。本机把应用改成「依赖没就绪就主动退出」的样子（<code>STRICT=1</code>），跑出来的失败形状是：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-10" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="9">
+  <div class="td-code__viewport" id="td-code-12275087-fence-10-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose -f compose.yaml -f compose.badstart.yaml --profile app up -d
+</span></span><span class="line"><span class="cl"><span class="go">[rc=1] 用时 1.5 秒
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-1 Started
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-1 Waiting
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-1 Error dependency api failed to start
+</span></span></span><span class="line"><span class="cl"><span class="go">dependency failed to start: container kb-p2-api-1 exited (1)
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose logs --timestamps api
+</span></span><span class="line"><span class="cl"><span class="go">api-1  | 2026-10-27T03:57:41.947697228Z 依赖未就绪，按 STRICT=1 退出： dial tcp 172.18.0.3:3306: connect: connection refused
+</span></span></span></code></pre></div></div>
+</div>
+<p>那行日志是本篇最重要的一条读数：<code>172.18.0.3</code> 说明<strong>服务名已经解析到 IP 了</strong>（DNS 是通的），<code>connection refused</code> 说明 MySQL 还没开始监听。<code>service_started</code> 给的正是「容器起了但端口没开」这个中间态。</p>
+<p><strong>健康门形态</strong>（本篇示例用的就是这个）：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-11" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-12275087-fence-11-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">depends_on</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">db</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_healthy }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">cache</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_healthy }</span></span></span></code></pre></div></div>
+</div>
+<p><code>up</code> 会等 <code>db</code> 的 <code>mysqladmin ping</code> 第一次成功再起 <code>api</code>。健康检查细节见下一节，这里关心顺序证据本身。</p>
+<p><strong>一次性任务形态</strong>（做迁移脚本用的）：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-12" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="2">
+  <div class="td-code__viewport" id="td-code-12275087-fence-12-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">depends_on</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">init</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_completed_successfully }</span></span></span></code></pre></div></div>
+</div>
+<p>本机跑出来 <code>init</code> 先 <code>Exited</code>、<code>app</code> 才 <code>Started</code>，<code>up</code> 返回 0，<code>app</code> 确实读到了 <code>init</code> 写进共享卷的文件：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-13" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-12275087-fence-13-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="go"> Container kbinit-init-1 Started
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kbinit-init-1 Waiting
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kbinit-init-1 Exited
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kbinit-app-1 Starting
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kbinit-app-1 Started
+</span></span></span></code></pre></div></div>
+</div>
+<p>再加一个可选依赖的写法，失败也不挡路：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-14" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="2">
+  <div class="td-code__viewport" id="td-code-12275087-fence-14-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">depends_on</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">opt</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="nt">service_completed_successfully, required</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span>}</span></span></code></pre></div></div>
+</div>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-15" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-12275087-fence-15-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="go"> Container kbreq-opt-1 Skipped: optional dependency &#34;opt&#34; didn&#39;t complete successfully: exit 3
+</span></span></span><span class="line"><span class="cl"><span class="go">time=&#34;…&#34; level=warning msg=&#34;optional dependency \&#34;opt\&#34; didn&#39;t complete successfully: exit 3&#34;
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kbreq-main-1 Starting
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kbreq-main-1 Started
+</span></span></span></code></pre></div></div>
+</div>
+<p><code>rc=0</code>，但有一行 warning。<strong><code>required: false</code> 是把「依赖失败」降级成「警告」</strong>，用在「有更好、没有也能跑」的东西上（比如埋点、可选缓存）。用它就必须同时把 warning 打到人眼里，否则静默降级会变成第二天才发现的问题。</p>
+<p>三种条件的取舍：</p>
+<blockquote>
+<p>💡 新人小结：<strong><code>service_started</code> 像「人已经坐到工位上了」，<code>service_healthy</code> 像「人坐在工位上并且能接电话」，<code>service_completed_successfully</code> 像「开班前那次晨会必须开完，店才开始接客」</strong>。类比之后接机制：Docker 只知道「容器进程在不在」，「能不能接电话」必须有人去问——那个「问」就是 <code>healthcheck.test</code> 里的探测命令；问不出来（探测失败）时，compose 有的参数（<code>condition</code>）会拒绝放行下游，有的参数（<code>required: false</code>）只留一行警告。所以「等不等得到」不是 compose 聪明，是<strong>你写的探测命令真的能区分就绪与未就绪</strong>。</p>
+</blockquote>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">方案</th>
+      <th scope="col">什么时候用</th>
+      <th scope="col">优点</th>
+      <th scope="col">代价</th>
+      <th scope="col">本轮证据</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>service_healthy</code> + 健康检查</td>
+      <td>依赖会「起了但没就绪」（数据库、缓存）</td>
+      <td>顺序由工具保证，应用代码不用改</td>
+      <td>每个依赖都要写对探测命令，<code>start_period</code> 要给够；启动时间变长</td>
+      <td>冷启动 18.4 秒里等健康占了大头</td>
+    </tr>
+    <tr>
+      <td><code>service_started</code>（裸列表）</td>
+      <td>依赖是「进程在就是可用」（静态站点）</td>
+      <td>起得快</td>
+      <td>对数据库类依赖就是错误的期望</td>
+      <td>反面实验：<code>connection refused</code></td>
+    </tr>
+    <tr>
+      <td>应用侧自己重试/重连</td>
+      <td>生产更常用；或依赖不该阻塞启动</td>
+      <td>与编排解耦，恢复能力最强</td>
+      <td>要写代码，且必须有连接超时（否则卡死）</td>
+      <td>实测：停 <code>db</code> → <code>api</code> 仍 <code>healthy</code> 且 <code>StartedAt</code> 不变，<code>{&quot;db&quot;:&quot;DOWN&quot;}</code>；起回 <code>db</code> → 5 秒内 <code>{&quot;db&quot;:&quot;UP&quot;}</code>，全程没重启 <code>api</code></td>
+    </tr>
+    <tr>
+      <td><code>service_completed_successfully</code></td>
+      <td>迁移/初始化脚本</td>
+      <td>表达「必须先跑完一件事」</td>
+      <td>一次性容器要自己退出，<code>restart</code> 策略别写 <code>always</code></td>
+      <td>上面 <code>kbinit</code> 的读数</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="pg-53017ef909a68ac0690863c1d32a0dc3--同一个坏配置第一次红第二次绿">同一个坏配置，第一次红、第二次绿
+</h3>
+<p>这是本轮最值得记住的一条。反面配置（<code>STRICT=1</code> + 裸 <code>depends_on</code>）第一次 <code>up</code> 失败之后，<strong>什么都不改</strong>再跑一次并加 <code>--wait</code>：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-16" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="8">
+  <div class="td-code__viewport" id="td-code-12275087-fence-16-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose -f compose.yaml -f compose.badstart.yaml --profile app up -d --wait
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-1 Started
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-1 Waiting
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-1 Healthy
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-proxy-1 Starting
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-proxy-1 Started
+</span></span></span><span class="line"><span class="cl"><span class="go"> …（全部 Healthy）
+</span></span></span></code></pre></div></div>
+</div>
+<p><code>rc=0</code>，全绿。<strong>但配置仍然是错的</strong>：第二次跑时 <code>db</code> 容器已经在上一轮失败里起了、并且已经初始化完（MySQL 首次探测通过要 8.6 秒，见下一节），<code>api</code> 起来时端口自然就通。<code>service_started</code> 的语义没变，变的是运气。</p>
+<p>所以：<strong>验证一个「顺序类修复」是否真的有效，要先 <code>down</code> 到干净状态</strong>（保留卷可以，但所有容器都要重建），否则你测的是热缓存。第②段判据里那条「冷启动 18.4 秒 vs 热启动 7.1 秒」的差值，正好就是这个陷阱的量。</p>
+<pre class="td-mermaid-source"><code class="language-mermaid">sequenceDiagram
+    participant C as &#34;compose up&#34;
+    participant D as &#34;db (mysql:8.4)&#34;
+    participant A as &#34;api&#34;
+    participant P as &#34;proxy&#34;
+    C-&gt;&gt;D: 创建并启动
+    Note over D: 首次 mysqladmin ping 失败&lt;br/&gt;FailingStreak 走到 3
+    D--&gt;&gt;C: 第 8.6 秒探测通过，状态 healthy
+    C-&gt;&gt;A: 满足 service_healthy 后启动
+    A--&gt;&gt;C: 自身健康检查通过
+    C-&gt;&gt;P: api healthy 才启动
+    Note over P: 裸 depends_on 的失败点在这条线上&lt;br/&gt;api 退出(1)，proxy 停在 Created</code></pre><h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--健康检查两种写法优先级与参数怎么定">健康检查：两种写法、优先级与参数怎么定
+</h2>
+<p>写在哪里有两处，行为不同。本机用一个镜像自带 <code>HEALTHCHECK</code>、compose 又写了一份的服务量了优先级：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-18" data-td-code data-td-code-auto-id
+     data-td-language="dockerfile" data-td-line-count="1">
+  <div class="td-code__viewport" id="td-code-12275087-fence-18-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">HEALTHCHECK</span> --interval<span class="o">=</span>7s <span class="k">CMD</span> <span class="p">[</span><span class="s2">&#34;/bin/dockercmd&#34;</span><span class="p">]</span></span></span></code></pre></div></div>
+</div>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-19" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-12275087-fence-19-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;CMD&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;/bin/dockercmd&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;--from-compose&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">3s</span></span></span></code></pre></div></div>
+</div>
+<p>运行时生效的是 compose 那份：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-20" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-12275087-fence-20-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker inspect --format <span class="s2">&#34;{{json .Config.Healthcheck.Test}} | {{json .Config.Healthcheck.Interval}} | {{.State.Health.Status}}&#34;</span> kbhcp-s-1
+</span></span><span class="line"><span class="cl"><span class="go">[&#34;CMD&#34;,&#34;/bin/dockercmd&#34;,&#34;--from-compose&#34;] | 3000000000 | healthy
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker image inspect --format <span class="s2">&#34;{{json .Config.Healthcheck}}&#34;</span> kbhcp-s
+</span></span><span class="line"><span class="cl"><span class="go">{&#34;Test&#34;:[&#34;CMD&#34;,&#34;/bin/dockercmd&#34;],&#34;Interval&#34;:7000000000}
+</span></span></span></code></pre></div></div>
+</div>
+<p>镜像里那份 7 秒的 <code>HEALTHCHECK</code> 仍然存在，只是被容器配置覆盖。三条边界要记住：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">写法</th>
+      <th scope="col">结果</th>
+      <th scope="col">读数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>compose 写完整 <code>healthcheck</code></td>
+      <td>覆盖镜像的</td>
+      <td>上面那组</td>
+    </tr>
+    <tr>
+      <td>compose 不写</td>
+      <td>用镜像自带的</td>
+      <td><code>adminer:4</code> 我没写健康检查，<code>up --wait</code> 里它是 <code>Healthy</code></td>
+    </tr>
+    <tr>
+      <td><code>healthcheck: {disable: true}</code></td>
+      <td>彻底关掉</td>
+      <td><code>inspect</code> 得到 <code>{&quot;Test&quot;:[&quot;NONE&quot;]}</code>，<code>.State.Health</code> 是 <code>null</code></td>
+    </tr>
+    <tr>
+      <td><code>healthcheck: {test: []}</code></td>
+      <td><strong>不是</strong>「永远失败」，是「没有检查」</td>
+      <td><code>config</code> 出来 <code>healthcheck={}</code>，<code>inspect</code> 的 <code>.Config.Healthcheck={}</code>、<code>.State.Health=null</code>；<code>ps</code> 的 <code>Health</code> 列是空</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第四行容易读错：<code>test: []</code> 不报错、也不会让 <code>--wait</code> 失败，它只是让这一格变成「没有健康检查」。于是 <code>depends_on: {condition: service_healthy}</code> 会直接失败（没有检查就永远不可能 healthy），这是 7.2 里值得单列的一条症状。</p>
+<h3 id="pg-53017ef909a68ac0690863c1d32a0dc3--探测命令集本机跑过的">探测命令集（本机跑过的）
+</h3>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">目标</th>
+      <th scope="col">命令</th>
+      <th scope="col">本轮</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>MySQL</td>
+      <td><code>[&quot;CMD&quot;, &quot;mysqladmin&quot;, &quot;ping&quot;, &quot;-h&quot;, &quot;127.0.0.1&quot;, &quot;-uroot&quot;, &quot;-p${PW}&quot;]</code></td>
+      <td>跑过，成功输出 <code>mysqld is alive</code></td>
+    </tr>
+    <tr>
+      <td>Redis</td>
+      <td><code>[&quot;CMD&quot;, &quot;redis-cli&quot;, &quot;ping&quot;]</code></td>
+      <td>跑过</td>
+    </tr>
+    <tr>
+      <td>HTTP 服务</td>
+      <td><code>[&quot;CMD&quot;, &quot;wget&quot;, &quot;-q&quot;, &quot;-O&quot;, &quot;-&quot;, &quot;http://127.0.0.1:8080/api/health&quot;]</code></td>
+      <td>跑过（alpine 自带 busybox wget，scratch 里没有）</td>
+    </tr>
+    <tr>
+      <td>PostgreSQL</td>
+      <td><code>[&quot;CMD-SHELL&quot;, &quot;pg_isready -U ${POSTGRES_USER}&quot;]</code></td>
+      <td>本轮未跑（栈里没有 PG）</td>
+    </tr>
+    <tr>
+      <td>只看进程活着</td>
+      <td><code>[&quot;CMD&quot;, &quot;true&quot;]</code></td>
+      <td>未跑，等价于「几乎不检查」，别在生产用</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="pg-53017ef909a68ac0690863c1d32a0dc3--start_period--interval--retries-怎么定"><code>start_period</code> / <code>interval</code> / <code>retries</code> 怎么定
+</h3>
+<p>不要拍数字，量一次时间线。本机用一个不设 <code>start_period</code> 的 MySQL，<code>interval: 2s</code>，每 0.5 秒轮询一次 <code>docker inspect</code> 得到：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">相对时刻</th>
+      <th scope="col"><code>Health.Status</code> / <code>FailingStreak</code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0.4 秒</td>
+      <td><code>starting</code> / 0</td>
+    </tr>
+    <tr>
+      <td>2.6 秒</td>
+      <td><code>starting</code> / 1</td>
+    </tr>
+    <tr>
+      <td>4.8 秒</td>
+      <td><code>starting</code> / 2</td>
+    </tr>
+    <tr>
+      <td>7.0 秒</td>
+      <td><code>starting</code> / 3</td>
+    </tr>
+    <tr>
+      <td>8.6 秒</td>
+      <td><code>healthy</code> / 0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>失败探测的输出长这样（<code>inspect .State.Health.Log</code> 的最后一条 <code>ExitCode</code> 已经是 0）：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-21" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="2">
+  <div class="td-code__viewport" id="td-code-12275087-fence-21-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">error: &#39;Can&#39;t connect to MySQL server on &#39;127.0.0.1:3306&#39; (111)&#39;
+</span></span><span class="line"><span class="cl">Check that mysqld is running on 127.0.0.1 and that the port is 3306.</span></span></code></pre></div></div>
+</div>
+<p>于是三条参数规则是实测推出来的，不是抄的：</p>
+<ul>
+<li><strong><code>retries × interval</code> 必须大于「冷启动到真的能服务」的时间</strong>，否则容器会被判 <code>unhealthy</code>。本机 MySQL 空库初始化到第一次 ping 通约 8.6 秒；示例里给的是 <code>interval: 5s, retries: 20</code> = 100 秒预算，够容纳带数据的恢复。</li>
+<li><strong><code>start_period</code> 的用途是「这段时间内失败不计入 retries」</strong>。示例给 MySQL <code>start_period: 20s</code>，是 8.6 秒的两倍余量；给 <code>api</code> 的是 <code>5s</code>，因为它只是起一个 Go 进程（本机实测起监听在 1 秒内）。</li>
+<li><strong><code>timeout</code> 要小于 <code>interval</code></strong>，否则探测会叠加。示例是 <code>timeout: 3s / interval: 5s</code>。</li>
+</ul>
+<p>永远失败的探测会怎样？本机用 <code>test: [&quot;CMD&quot;, &quot;false&quot;]</code>、<code>interval: 2s</code>、<code>retries: 3</code> 量到：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-22" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="8">
+  <div class="td-code__viewport" id="td-code-12275087-fence-22-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose up -d --wait
+</span></span><span class="line"><span class="cl"><span class="go">[rc=1]
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kbbad-s-1 Started
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kbbad-s-1 Waiting
+</span></span></span><span class="line"><span class="cl"><span class="go">container kbbad-s-1 is unhealthy
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker inspect --format <span class="s2">&#34;{{.State.Status}} | {{json .State.Health}}&#34;</span> kbbad-s-1
+</span></span><span class="line"><span class="cl"><span class="go">running | {&#34;Status&#34;:&#34;unhealthy&#34;,&#34;FailingStreak&#34;:3,&#34;Log&#34;:[ … 三条 ExitCode:1 … ]}
+</span></span></span></code></pre></div></div>
+</div>
+<p>三个信息点：<strong>容器一直是 <code>running</code></strong>（健康检查不会杀容器）、<code>--wait</code> 会失败并给出 <code>container &lt;name&gt; is unhealthy</code>、<code>Health.Log</code> 里保留最近三次探测的 <code>ExitCode</code> 与输出——排错时这是最短路径。杀容器是 <code>autoheal</code> 或编排系统的事，Docker 本身不做。</p>
+<h3 id="pg-53017ef909a68ac0690863c1d32a0dc3--别把口令写进健康检查命令">别把口令写进健康检查命令
+</h3>
+<p><code>mysqladmin ping -p${PW}</code> 这种写法会被 compose 在加载阶段插值成明文，然后<strong>跟着容器配置走</strong>。本机对照量了两种写法：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">写法</th>
+      <th scope="col"><code>config</code> 输出里的 <code>healthcheck.test</code></th>
+      <th scope="col">含明文？</th>
+      <th scope="col"><code>docker inspect</code> 里含明文？</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>-p${PW}</code></td>
+      <td><code>… -uroot -psecret-in-env</code></td>
+      <td>是</td>
+      <td>是</td>
+    </tr>
+    <tr>
+      <td><code>-p$$MYSQL_ROOT_PASSWORD</code></td>
+      <td><code>… -uroot -p$$MYSQL_ROOT_PASSWORD</code></td>
+      <td>否</td>
+      <td>是（<code>.Config.Env</code> 里那条 <code>MYSQL_ROOT_PASSWORD=secret-in-env</code> 还是明文）</td>
+    </tr>
+    <tr>
+      <td>运行时容器里的实际命令</td>
+      <td>—</td>
+      <td>—</td>
+      <td>转义写法是 <code>-p$MYSQL_ROOT_PASSWORD</code>，由容器内 shell 展开</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>结论要精确：<strong><code>$$</code> 转义只把明文从 <code>config</code> 输出（CI 日志、<code>docker compose config</code> 存档）里拿掉，挡不住 <code>docker inspect</code></strong>。两种写法容器都能正常 <code>healthy</code>（本机各 11 秒）。真要不外泄，得让口令别出现在容器配置里——那是 6.3（secrets 与配置注入）的事，本篇只给判据：<code>docker inspect --format &quot;{{json .Config.Healthcheck}}&quot;</code> 与 <code>{{json .Config.Env}}</code> 两条命令都要跑，只看前者会漏。</p>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3----scale-与健康门能不能共存"><code>--scale</code> 与健康门能不能共存
+</h2>
+<p>这是「起两个 api 会不会把依赖链搞坏」的实测。<code>docker compose --profile app up -d --scale api=2</code>：</p>
+<div class="td-code td-code--untitled" id="td-code-12275087-fence-23" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="11">
+  <div class="td-code__viewport" id="td-code-12275087-fence-23-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="go">[rc=0]
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-2 Creating
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-2 Started
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-2 Healthy
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-api-1 Healthy
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker ps --filter <span class="nv">label</span><span class="o">=</span>com.docker.compose.service<span class="o">=</span>api --format <span class="s2">&#34;{{.Names}} {{.Status}}&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">kb-p2-api-2 Up 5 seconds (healthy) | kb-p2-api-1 Up 11 seconds (healthy)
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s http://127.0.0.1:8080/api/health
+</span></span><span class="line"><span class="cl"><span class="go">{&#34;status&#34;:&#34;UP&#34;,&#34;db&#34;:&#34;UP&#34;,&#34;cache&#34;:&#34;UP&#34;}|http=200
+</span></span></span></code></pre></div></div>
+</div>
+<p><code>proxy</code> 仍然 200，因为 nginx 的 <code>proxy_pass http://api:8080</code> 走 Docker 内置 DNS，多副本时它自己会轮询解析到的多个 IP（机制，本轮未用两条不同响应体区分两个副本，所以「真的轮询到两个」这条没量到）。scale 的硬约束在别处：<strong>有 <code>container_name</code>、或把宿主端口写死（没有 <code>-</code> 区间）的服务不能 scale</strong>——本轮没造出这两个反例，标在本篇未验证项里。</p>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--实战切入把这套命令当成体检单">实战切入：把这套命令当成体检单
+</h2>
+<p>这一段可以照着敲，每条都给「本机读数」作为预期值。用栈是 <code>示例/贯穿示例/</code>，先 <code>docker compose --profile app up -d --wait</code>。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">步</th>
+      <th scope="col">命令</th>
+      <th scope="col">本机读数</th>
+      <th scope="col">判什么</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><code>docker compose config --services</code></td>
+      <td><code>cache</code>、<code>db</code> 两行（不带 profile）</td>
+      <td>模型规模对不对，profile 有没有用反</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><code>docker compose --profile app config --services</code></td>
+      <td>五行：<code>cache db api web proxy</code></td>
+      <td>五个服务都在</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><code>docker compose --profile app up -d --wait</code></td>
+      <td>冷 18.4 秒 / 热 7.1 秒</td>
+      <td>依赖链能不能自己收敛</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><code>docker compose ps --format &quot;{{.Service}} {{.Health}}&quot;</code></td>
+      <td><code>api healthy</code>、<code>cache healthy</code>、<code>db healthy</code>、<code>proxy</code>（空）、<code>web</code>（空）</td>
+      <td>空的格子是「没写检查」而不是「健康」</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><code>docker inspect --format &quot;{{json .State.Health}}&quot; kb-p2-db-1</code></td>
+      <td>最后一组探测 <code>ExitCode:0</code>，输出含 <code>mysqld is alive</code></td>
+      <td>探测命令真的在容器里跑通</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><code>curl -s http://127.0.0.1:8080/api/health</code></td>
+      <td><code>{&quot;status&quot;:&quot;UP&quot;,&quot;db&quot;:&quot;UP&quot;,&quot;cache&quot;:&quot;UP&quot;}</code></td>
+      <td>经入口的端到端可用</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td><code>docker compose stop db</code> 后重复第 6 步</td>
+      <td><code>{&quot;status&quot;:&quot;UP&quot;,&quot;db&quot;:&quot;DOWN&quot;,&quot;cache&quot;:&quot;UP&quot;}</code>，<code>api</code> 未重启</td>
+      <td>应用侧是否有重连；爆炸半径</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><code>docker compose start db</code>，等 5 秒重复第 6 步</td>
+      <td><code>{&quot;db&quot;:&quot;UP&quot;}</code>，<code>api</code> 的 <code>StartedAt</code> 不变</td>
+      <td>恢复不需要重启上游</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td><code>docker compose down</code> 后 <code>docker ps --format &quot;{{.Names}}&quot;</code></td>
+      <td>仍列出 <code>api</code>/<code>web</code>/<code>proxy</code></td>
+      <td>profile 陷阱是否被理解</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td><code>docker compose --profile app down --remove-orphans</code> 后 <code>docker compose ls</code></td>
+      <td>空</td>
+      <td>项目账本干净</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第 9、10 步是本篇的命令视角判据：<strong>能解释第 9 步为什么漏，才算会用 <code>down</code></strong>。</p>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--常见误读">常见误读
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">误读</th>
+      <th scope="col">实际</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>「<code>rc=0</code> 说明服务可用」</td>
+      <td>空项目上 <code>ps</code>/<code>logs</code>/<code>stop</code>/<code>down</code> 全 <code>rc=0</code>。可用要由 <code>--wait</code> + 健康检查 + 一次真实请求三件事共同保证</td>
+    </tr>
+    <tr>
+      <td>「<code>depends_on</code> 会等数据库就绪」</td>
+      <td>列表形态等于 <code>service_started</code>，等的是「进程起了」。日志里那句 <code>connection refused</code> 就是证据</td>
+    </tr>
+    <tr>
+      <td>「健康检查失败容器会被杀掉」</td>
+      <td><code>unhealthy</code> 只是状态标签，容器仍 <code>running</code>；杀掉要外部机制</td>
+    </tr>
+    <tr>
+      <td>「<code>test: []</code> 是让检查永远失败」</td>
+      <td>它是「没有检查」，<code>Health</code> 列为空，并且会让依赖它的 <code>service_healthy</code> 永远不满足</td>
+    </tr>
+    <tr>
+      <td>「<code>stop</code> 之后 <code>start</code> 会应用配置改动」</td>
+      <td>不重建容器就不重算配置。要改动生效用 <code>up -d</code>（逐服务 diff）或 <code>--force-recreate</code></td>
+    </tr>
+    <tr>
+      <td>「<code>--no-recreate</code> 是安全模式」</td>
+      <td>它只是不重建，不告诉你「因此改动没生效」</td>
+    </tr>
+    <tr>
+      <td>「<code>-v</code> 是更彻底的清理」</td>
+      <td><code>-v</code> 删 named volume，即数据。它的回执可能就是那条 <code>ERROR 1146</code></td>
+    </tr>
+    <tr>
+      <td>「Dockerfile 里的 HEALTHCHECK 优先」</td>
+      <td>compose 写就覆盖镜像写；compose 不写才用镜像的</td>
+    </tr>
+    <tr>
+      <td>「<code>$$</code> 转义能防口令泄漏」</td>
+      <td>只防住 <code>config</code> 输出与日志落盘，<code>docker inspect</code> 的 <code>Env</code> 仍然明文</td>
+    </tr>
+    <tr>
+      <td>「第二次 <code>up</code> 绿了就是修好了」</td>
+      <td>本轮同一条坏配置第二次全绿，因为依赖已经热了。验证顺序修复要从干净状态起</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--要点总结">要点总结
+</h2>
+<ul>
+<li>30 个子命令先分四组：看现场（<code>ps</code>/<code>logs</code>/<code>top</code>/<code>images</code>/<code>config</code>）、改状态（<code>up</code>/<code>stop</code>/<code>start</code>/<code>restart</code>/<code>exec</code>/<code>watch</code>）、动数据（<code>down</code>/<code>volumes</code>）、动镜像（<code>build</code>/<code>pull</code>）。后果等级不同，别混着记。</li>
+<li><code>up</code> 做逐服务 diff：改 <code>.env</code> 端口只有 <code>proxy</code> 被重建；<code>--no-recreate</code> 让改动不生效但照样报 0；<code>--force-recreate</code> 本机 18.2 秒重建五容器并按依赖顺序落地。</li>
+<li><code>down</code> 的三个开关正交：profile 决定作用范围、<code>-v</code> 删数据、<code>--remove-orphans</code> 按标签兜底。不带 profile 的 <code>down</code> 本机实测漏掉三个容器且网络删不掉（<code>Resource is still in use</code>）。</li>
+<li>顺序控制的真相在 <code>config</code> 的规范化输出里：列表 = <code>service_started</code>，<code>condition: service_healthy</code> = 等探测通过，<code>service_completed_successfully</code> = 等一次性容器成功退出，<code>required: false</code> = 降级成警告。</li>
+<li>反面实验给出两条：<code>service_started</code> 下应用会撞到 <code>connection refused</code>；同一条坏配置第二次 <code>up --wait</code> 全绿，说明<strong>顺序类验证必须从干净状态起</strong>。</li>
+<li>健康检查：compose 覆盖镜像；<code>disable: true</code> → <code>{&quot;Test&quot;:[&quot;NONE&quot;]}</code>；<code>test: []</code> → 没有检查；探测失败只标 <code>unhealthy</code> 不杀容器；<code>retries × interval</code> 要大于冷启动时间，本机 MySQL 的实测是 8.6 秒首次通过（3 次失败探测）。</li>
+<li>口令写进 <code>healthcheck</code> 会同时进 <code>config</code> 输出和容器配置；<code>$$</code> 转义只解决前者。查泄漏要 <code>Config.Healthcheck</code> 与 <code>Config.Env</code> 两条 <code>inspect</code> 都跑。</li>
+<li><code>--scale api=2</code> 与健康门共存（本机两个副本都 <code>healthy</code>，入口仍 200）。</li>
+</ul>
+<h2 id="pg-53017ef909a68ac0690863c1d32a0dc3--本篇未验证项">本篇未验证项
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>logs --follow</code> 的实时行为</td>
+      <td>未实测</td>
+      <td>只取到帮助文本（<code>-f, --follow</code>、<code>--since</code>、<code>--until</code>、<code>--no-log-prefix</code>、<code>--index</code>）；长会话在本轮会留下子进程句柄问题，值得单独跑</td>
+    </tr>
+    <tr>
+      <td><code>run</code> / <code>create</code> / <code>rm</code> / <code>cp</code> / <code>port</code> / <code>stats</code> / <code>kill</code> / <code>pause</code></td>
+      <td>未实测</td>
+      <td>清单里那张「本轮」列是命令族的全集，逐项标了跑过没有</td>
+    </tr>
+    <tr>
+      <td><code>down --rmi all</code></td>
+      <td>未跑</td>
+      <td>会删掉 1.1 GB 的 <code>mysql:8.4</code>，代价只是重拉时间，不值得用来换一个 already-known 的结论</td>
+    </tr>
+    <tr>
+      <td>scale 的两个硬约束（<code>container_name</code>、写死宿主端口）</td>
+      <td>未实测</td>
+      <td>机制结论，本轮没造反例；下一批补</td>
+    </tr>
+    <tr>
+      <td>nginx 多副本是否真的轮询到两个 api</td>
+      <td>未实测</td>
+      <td>需要让两个副本返回可区分内容，本轮的占位服务返回同一份 JSON</td>
+    </tr>
+    <tr>
+      <td><code>service_healthy</code> 在被依赖方<strong>没有</strong>检查时的报错文本</td>
+      <td>未实测</td>
+      <td>只从 <code>test: []</code> 的读数推出「不可能满足」，没跑那条命令</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+</div>
+
+
+
+    
+	
+  
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+	<h1 id="pg-327fbfc1d9aece146fd81ad7ae229721">3 - 日常</h1>
+    <div class="lead">多环境、热重载，最后把五个服务一键起来。</div>
+	<p>多环境、热重载，最后把五个服务一键起来。</p>
+<p>本板块包含：多环境与扩展、开发期热重载与完整实战。</p>
+
+</div>
+
+
+
+    
+      
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="">
+	<h1 id="pg-19529b6bbeb23498cd20a6fbde70171f">3.1 - 多环境与扩展、开发期热重载与完整实战</h1>
+    <div class="lead">override 合并与 profiles、.env 插值的真实语义；compose watch 三档实测代价；一键起 web + api + MySQL + Redis + nginx 并跑通第②段判据。</div>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第②段 · 一条命令起全栈（本篇就是第②段的落点，本机已跑通并留下逐条读数）
+<strong>示例版本</strong>：本篇直接产出 <code>示例/贯穿示例/</code> 下的 <code>compose.yaml</code>、<code>compose.override.yaml</code>、<code>compose.debug.yaml</code>、<code>.env</code> 四个文件，拷进站点即可构建；其中 <code>api</code> 是 Go 写的占位服务（真实贯穿示例是 Spring Boot，原因见「与真实技术栈的差距」一节）
+<strong>前置依赖</strong>：<a href="/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/compose%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%BA%BF%E4%B8%8E%E6%96%87%E4%BB%B6%E5%85%A8%E5%AD%97%E6%AE%B5%E5%8F%82%E8%80%83/">/docs/04-单机编排/定义/Compose语法基线与文件全字段参考/</a>、<a href="/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F%E4%B8%8E%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5/">/docs/04-单机编排/启停/常用命令启动顺序与健康检查/</a>、<a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/">/docs/02-核心操作/接上去/端口映射数据管理与权限时区/</a>
+<strong>本篇产出物</strong>：一套能跑的三层 compose 文件（主干 + override + debug）+ 第②段判据的通过记录（冷启 18.4 秒、热启 7.1 秒、经 proxy 两个端点都 200、<code>down</code> 后数据仍在）+ <code>watch</code> 两档的真实耗时
+<strong>拓展接口</strong>：本篇的「网络与卷设计」在 6.2 生产编排里被推翻（换成显式外部网络与备份策略）；「override 自动合并」这条规则在 6.6 CI 里被复用（CI 只加载主干）；「<code>down -v</code> 删数据」在 7.2 症状索引里作为一条独立症状收录
+<strong>难度·耗时</strong>：★★★ · 60 分钟（含动手，全套命令本机跑过一遍）
+<strong>自测三题</strong>：</p>
+<ol>
+<li><code>docker compose down</code> 之后 <code>docker ps</code> 仍能看到三个容器，最可能的原因是什么？该用哪条命令收干净？</li>
+<li>同目录下有 <code>compose.override.yaml</code> 和 <code>compose.debug.yaml</code>，为什么一个自动生效、一个不生效？</li>
+<li><code>watch</code> 的 <code>sync+restart</code> 与 <code>rebuild</code> 两档，各自在你机器上的实际代价由什么决定？</li>
+</ol>
+</blockquote>
+<h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--为什么要拆成三个文件而不是在一个-composeyaml-里改来改去">为什么要拆成三个文件，而不是在一个 <code>compose.yaml</code> 里改来改去
+</h2>
+<p>团队里最先出现的那个 compose 文件，往往就是开发自己的一份：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="8">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">「本地起 full stack，我要 3306 直通宿主方便用 Navicat 连。」
+</span></span><span class="line"><span class="cl">「好。」（改了 db.ports）
+</span></span><span class="line"><span class="cl">「CI 里也用它？」
+</span></span><span class="line"><span class="cl">「CI 不用那个端口，但我把 build 参数改了……现在 CI 挂在镜像构建上。」
+</span></span><span class="line"><span class="cl">「生产也用这个？」
+</span></span><span class="line"><span class="cl">「生产口令不能写死在里面，我用 ${DB_ROOT_PW}，然后……」
+</span></span><span class="line"><span class="cl">「然后线上有人忘了设环境变量，起不来。」
+</span></span><span class="line"><span class="cl">「而且昨天有人把改过的这份文件提交了，把 dev 的 3306 直通带上了生产。」</span></span></code></pre></div></div>
+</div>
+<p>这条路的终点的确实存在的：<strong>一份文件同时背三个环境的差异，差异靠人脑记</strong>。多文件不是「更正式」，而是把「哪个文件在什么时候生效」变成工具规则，不再依赖记忆。</p>
+<p>机制上有三件事各自独立，混在一起想就乱：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">机制</th>
+      <th scope="col">解决什么</th>
+      <th scope="col">谁决定它生效</th>
+      <th scope="col">本机实测的边界</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>多文件合并（<code>-f</code> / 同名 override）</td>
+      <td>环境差异分层</td>
+      <td>文件命名与加载顺序</td>
+      <td>同目录 <code>compose.override.yaml</code> 自动合并；<code>compose.debug.yaml</code> <strong>不</strong>自动合并</td>
+    </tr>
+    <tr>
+      <td><code>profiles</code></td>
+      <td>同一份文件里，哪些服务默认不起</td>
+      <td>命令行是否给 <code>--profile</code></td>
+      <td>不给 <code>--profile app</code> 时，<code>api</code>/<code>web</code>/<code>proxy</code> 在模型里根本不存在</td>
+    </tr>
+    <tr>
+      <td><code>.env</code> 插值</td>
+      <td>把端口、口令这类会变的值挪出文件</td>
+      <td>变量是否存在</td>
+      <td>变量缺失时 <code>:?</code> 会硬失败，普通引用只给空串</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>一个服务最终出现在模型里，要同时过<strong>两道门</strong>：它所在的那个文件被加载了，并且它的 profile 被点名了。本机把这两道门分开量了一次——<code>adminer</code> 这个服务同时写了 <code>profiles: [&quot;debug&quot;]</code>，文件叫 <code>compose.debug.yaml</code>（不会被自动加载）：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">命令</th>
+      <th scope="col">模型里的服务</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>docker compose config --services</code>（只加载主干 + 自动 override）</td>
+      <td><code>cache db</code></td>
+      <td>应用层和调试层都不在</td>
+    </tr>
+    <tr>
+      <td><code>docker compose -f compose.yaml -f compose.debug.yaml config --services</code></td>
+      <td><code>cache db</code></td>
+      <td>文件加载了，但 <code>debug</code> 这道门没开</td>
+    </tr>
+    <tr>
+      <td><code>docker compose -f compose.yaml -f compose.debug.yaml --profile debug config --services</code></td>
+      <td><code>db adminer cache</code></td>
+      <td>两道门都过，<code>adminer</code> 出现</td>
+    </tr>
+    <tr>
+      <td><code>docker compose -f compose.yaml -f compose.debug.yaml --profile debug --profile app config --services</code></td>
+      <td><code>db adminer cache api web proxy</code></td>
+      <td>六个服务全入选</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>改文件之前 <code>adminer</code> 没写 <code>profiles</code> 那一行，第二条命令的结果是 <code>db adminer cache</code>——只靠 <code>-f</code> 就把它带进来了。这正是「以为环境隔离了、其实没有」的真实形态，所以示例文件里那行 <code>profiles: [&quot;debug&quot;]</code> 不是装饰。</p>
+<blockquote>
+<p>💡 新人小结：<strong>profiles 像会议室的门牌，不是门锁</strong>。<code>profiles: [&quot;app&quot;]</code> 只是给服务挂了块「应用层」的牌子，默认这条命令不会把牌子念到；你喊 <code>--profile app</code>，它才把挂这块牌子的服务一起带走。所以「加了 profile 就默认不起」不是 Docker 记错了，而是你没报名字。类比之后接机制：Compose 在加载阶段按 <code>--profile</code> 过滤服务集合，被过滤掉的服务连配置模型都不进——下面第一条读数里 <code>config --services</code> 只列出两个服务，就是这个过滤的结果。</p>
+</blockquote>
+<h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--先看默认模型有多小profiles-的实测边界">先看默认模型有多小：profiles 的实测边界
+</h2>
+<p>主干文件把 <code>api</code>、<code>web</code>、<code>proxy</code> 三个服务打上 <code>profiles: [&quot;app&quot;]</code>（见下一节），然后什么都不加：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-1" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-1-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --services
+</span></span><span class="line"><span class="cl"><span class="go">cache
+</span></span></span><span class="line"><span class="cl"><span class="go">db
+</span></span></span></code></pre></div></div>
+</div>
+<p>加上 profile 才出现另外三个：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="6">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app config --services
+</span></span><span class="line"><span class="cl"><span class="go">cache
+</span></span></span><span class="line"><span class="cl"><span class="go">db
+</span></span></span><span class="line"><span class="cl"><span class="go">api
+</span></span></span><span class="line"><span class="cl"><span class="go">web
+</span></span></span><span class="line"><span class="cl"><span class="go">proxy
+</span></span></span></code></pre></div></div>
+</div>
+<p>这条读数比看上去重要。它意味着：<strong><code>docker compose up</code>（不带 <code>--profile</code>）不会起应用层，<code>docker compose config --format json</code> 的模型里也没有 <code>api</code></strong>。上一轮我自己就踩在这里——脚本直接取 <code>services[&quot;api&quot;]</code> 抛 <code>KeyError</code>，看着像配置文件坏了，其实是模型里根本没有这个键。同理，<code>pull</code> 也不看 profile：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-3" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-3-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose pull
+</span></span><span class="line"><span class="cl"><span class="go"> Image mysql:8.4 Pulling
+</span></span></span><span class="line"><span class="cl"><span class="go"> Image redis:7-alpine Pulling
+</span></span></span><span class="line"><span class="cl"><span class="go"> Image mysql:8.4 Pulled
+</span></span></span><span class="line"><span class="cl"><span class="go"> Image redis:7-alpine Pulled
+</span></span></span></code></pre></div></div>
+</div>
+<p>只拉了 <code>db</code> 和 <code>cache</code> 两个镜像，<code>nginx:1.27-alpine</code> 与两个 <code>build</code> 服务都不在这条命令的职责里。CI 里想「预拉全部依赖」必须显式带上 profile，否则镜像缓存永远缺一块。</p>
+<p>而 <code>compose.debug.yaml</code>（里面只有一个 <code>adminer</code>，用来演示调试面板）默认完全不参与：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="8">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile debug config --services
+</span></span><span class="line"><span class="cl"><span class="go">cache
+</span></span></span><span class="line"><span class="cl"><span class="go">db
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose -f compose.yaml -f compose.debug.yaml --profile debug config --services
+</span></span><span class="line"><span class="cl"><span class="go">db
+</span></span></span><span class="line"><span class="cl"><span class="go">adminer
+</span></span></span><span class="line"><span class="cl"><span class="go">cache
+</span></span></span></code></pre></div></div>
+</div>
+<p>原因是 Compose 只自动加载<strong>两个</strong>文件名：主干 <code>compose.yaml</code>（或 <code>compose.yml</code>、<code>docker-compose.yml</code>）与同目录的 <code>compose.override.yaml</code>（或 <code>compose.override.yml</code>、<code>docker-compose.override.yml</code>）。其它名字一律要 <code>-f</code> 点名，或者交给 <code>COMPOSE_FILE</code> 环境变量。所以团队里约定「多环境文件叫 <code>compose.&lt;环境&gt;.yaml</code>」的同时，必须同时约定<strong>加载方式</strong>：<code>-f compose.yaml -f compose.debug.yaml</code>，或 <code>COMPOSE_FILE=compose.yaml:compose.debug.yaml</code>（分隔符在 Linux 是 <code>:</code>，Windows 上要用 <code>;</code>，这一条本机未实测）。</p>
+<div class="td-callout td-callout--warning" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span class="td-callout__label">警告</span></div>
+  <div class="td-callout__body">
+<p>一旦你写了 <code>-f</code>，自动合并就没了。S4 那次反面实验用 <code>-f compose.yaml -f compose.badstart.yaml</code>，<code>config</code> 出来 <code>api.environment</code> 是 <code>{&quot;DB_HOST&quot;:&quot;db&quot;,&quot;REDIS_HOST&quot;:&quot;cache&quot;,&quot;STRICT&quot;:&quot;1&quot;}</code>——override 里那句 <code>LOG_LEVEL: debug</code> 没跟上来。端口上的表现更直观，读自另一次 <code>-f compose.yaml -f compose.debug.yaml</code> 的真跑：那次 <code>docker ps</code> 里 <code>db</code> 的端口列是 <code>3306/tcp, 33060/tcp</code>（没有任何宿主映射），而自动合并的几次都是 <code>127.0.0.1:3307-&gt;3306/tcp</code>。排查「我明明改了 override 怎么没生效」，先看命令里有没有 <code>-f</code>。</p>
+  </div>
+</div><h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--三层文件各自放什么">三层文件各自放什么
+</h2>
+<p>本机的分工是这样落地的（完整文件在 <code>示例/贯穿示例/</code>）：</p>
+<p>主干 <code>compose.yaml</code> 只放<strong>三个环境都成立</strong>的事实：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-5" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="17">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-5-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">kb-p2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">db</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">mysql:8.4</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">MYSQL_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l">${DB_ROOT_PW:?在 .env 里设一个}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="l">kbdemo</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">dbdata:/var/lib/mysql</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;CMD&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;mysqladmin&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;ping&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-h&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;127.0.0.1&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-uroot&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-p${DB_ROOT_PW}&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">3s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="m">20</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l">20s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># cache / api / web / proxy 见 4.9 完整实战一节</span></span></span></code></pre></div></div>
+</div>
+<p><code>compose.override.yaml</code> 只放<strong>开发期收窄</strong>的东西：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="11">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">api</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="l">debug</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">develop</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">watch</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l">rebuild</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">./api</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">db</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="s2">&#34;127.0.0.1:3307:3306&#34;</span></span></span></code></pre></div></div>
+</div>
+<p><code>compose.debug.yaml</code> 放<strong>要点名才有</strong>的东西（<code>adminer</code> 挂 8081，只在 <code>--profile debug</code> 时入选）。<code>.env</code> 放<strong>不能进版本库的值</strong>：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-7" data-td-code data-td-code-auto-id
+     data-td-language="ini" data-td-line-count="2">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-7-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ini" data-lang="ini"><span class="line"><span class="cl"><span class="na">DB_ROOT_PW</span><span class="o">=</span><span class="s">local-dev-only</span>
+</span></span><span class="line"><span class="cl"><span class="na">PROXY_PORT</span><span class="o">=</span><span class="s">8080</span></span></span></code></pre></div></div>
+</div>
+<p>合并后的真实模型（<code>docker compose --profile app config --format json</code> 的节选）能直接读出「哪一句来自哪个文件」：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">字段</th>
+      <th scope="col">合并后的值</th>
+      <th scope="col">来源</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>api.environment</code></td>
+      <td><code>{&quot;DB_HOST&quot;:&quot;db&quot;,&quot;LOG_LEVEL&quot;:&quot;debug&quot;,&quot;REDIS_HOST&quot;:&quot;cache&quot;}</code></td>
+      <td><code>LOG_LEVEL</code> 来自 override</td>
+    </tr>
+    <tr>
+      <td><code>db.ports</code></td>
+      <td><code>[{&quot;mode&quot;:&quot;ingress&quot;,&quot;host_ip&quot;:&quot;127.0.0.1&quot;,&quot;target&quot;:3306,&quot;published&quot;:&quot;3307&quot;,&quot;protocol&quot;:&quot;tcp&quot;}]</code></td>
+      <td>来自 override（主干里 <code>db</code> 没有 <code>ports</code>）</td>
+    </tr>
+    <tr>
+      <td><code>api.depends_on</code></td>
+      <td><code>{&quot;cache&quot;:{&quot;condition&quot;:&quot;service_healthy&quot;,&quot;required&quot;:true},&quot;db&quot;:{...}}</code></td>
+      <td>主干</td>
+    </tr>
+    <tr>
+      <td><code>proxy.ports</code></td>
+      <td><code>[{&quot;mode&quot;:&quot;ingress&quot;,&quot;target&quot;:80,&quot;published&quot;:&quot;8080&quot;,&quot;protocol&quot;:&quot;tcp&quot;}]</code></td>
+      <td><code>8080</code> 是 <code>.env</code> 的 <code>PROXY_PORT</code> 插值结果</td>
+    </tr>
+    <tr>
+      <td><code>networks</code></td>
+      <td><code>{&quot;default&quot;:{&quot;name&quot;:&quot;kb-p2-net&quot;,&quot;ipam&quot;:{}}}</code></td>
+      <td>主干显式命名</td>
+    </tr>
+    <tr>
+      <td><code>volumes</code></td>
+      <td><code>{&quot;cachedata&quot;:{&quot;name&quot;:&quot;kb-p2_cachedata&quot;},&quot;dbdata&quot;:{&quot;name&quot;:&quot;kb-p2_dbdata&quot;}}</code></td>
+      <td>名字被加了项目前缀</td>
+    </tr>
+    <tr>
+      <td>顶层 <code>name</code></td>
+      <td><code>kb-p2</code></td>
+      <td>主干</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>compose ls</code> 也会把两个文件都列出来，这是「override 到底有没有被合并进去」最快的自检：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-8" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-8-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose ls
+</span></span><span class="line"><span class="cl"><span class="go"> NAME                STATUS              CONFIG FILES
+</span></span></span><span class="line"><span class="cl"><span class="go"> kb-p2   running(5)  ...\compose.yaml,...\compose.override.yaml
+</span></span></span></code></pre></div></div>
+</div>
+<h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--同名字段怎么合并规则不直觉所以逐条量">同名字段怎么合并：规则不直觉，所以逐条量
+</h2>
+<p>这是最容易写错的一节。<strong>映射类字段深合并、列表类字段按语义分两种</strong>，「override 会覆盖主干」这句话在列表上不成立。下面每一行都是本机用一个两文件小样（主干 + override，服务只有一个 <code>s</code>）跑 <code>config --format json</code> 得到的：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">字段</th>
+      <th scope="col">主干写</th>
+      <th scope="col">override 写</th>
+      <th scope="col">合并结果</th>
+      <th scope="col">结论</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>ports</code></td>
+      <td><code>[&quot;8001:6379&quot;]</code></td>
+      <td><code>[&quot;8002:6379&quot;]</code></td>
+      <td>两条都在</td>
+      <td><strong>追加</strong>（按宿主端口去重，不是替换）</td>
+    </tr>
+    <tr>
+      <td><code>volumes</code></td>
+      <td><code>base-vol:/data</code></td>
+      <td><code>over-vol:/extra</code></td>
+      <td>两条都在</td>
+      <td><strong>追加</strong></td>
+    </tr>
+    <tr>
+      <td><code>command</code></td>
+      <td><code>[&quot;redis-server&quot;,&quot;--appendonly&quot;,&quot;no&quot;]</code></td>
+      <td><code>[&quot;redis-server&quot;,&quot;--maxmemory&quot;,&quot;64mb&quot;]</code></td>
+      <td>只剩 override</td>
+      <td><strong>整体替换</strong></td>
+    </tr>
+    <tr>
+      <td><code>environment</code></td>
+      <td><code>A=1, SHARED=base</code></td>
+      <td><code>B=2, SHARED=override</code></td>
+      <td><code>A=1, B=2, SHARED=override</code></td>
+      <td><strong>按键合并</strong>，同键后者胜</td>
+    </tr>
+    <tr>
+      <td><code>networks</code>（列表写法）</td>
+      <td><code>[n1]</code></td>
+      <td><code>[n2]</code></td>
+      <td><code>n1</code> 与 <code>n2</code> 都在</td>
+      <td><strong>并集</strong></td>
+    </tr>
+    <tr>
+      <td><code>deploy.resources.limits</code></td>
+      <td><code>memory: 128m</code></td>
+      <td><code>cpus: &quot;0.5&quot;</code></td>
+      <td><code>memory:134217728</code> 与 <code>cpus:0.5</code> 都在</td>
+      <td><strong>深合并</strong>（映射逐层合并，<code>128m</code> 被规范化成字节）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>后果很具体：想用 override「改掉」一个端口而不是「再加一个」，靠删行不行——两文件都在时容器会同时监听 <code>8001</code> 与 <code>8002</code>。真要收窄，用 YAML 标签把整段列表强制替换：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-9" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="6">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-9-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> 主干：ports: <span class="o">[</span><span class="s2">&#34;9001:80&#34;</span>,<span class="s2">&#34;9002:80&#34;</span><span class="o">]</span>，volumes: v1:/a 与 v2:/b，environment: <span class="nv">KEEP</span><span class="o">=</span><span class="m">1</span> <span class="nv">DROP</span><span class="o">=</span><span class="m">2</span>
+</span></span><span class="line"><span class="cl"><span class="gp">#</span> override：ports: !override <span class="o">[</span><span class="s2">&#34;9100:80&#34;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --format json
+</span></span><span class="line"><span class="cl"><span class="go">  !override 后 ports       = [{&#34;mode&#34;:&#34;ingress&#34;,&#34;target&#34;:80,&#34;published&#34;:&#34;9100&#34;,&#34;protocol&#34;:&#34;tcp&#34;}]
+</span></span></span><span class="line"><span class="cl"><span class="go">  !override 后 volumes     = null      # volumes: !override []
+</span></span></span><span class="line"><span class="cl"><span class="go">  !override 后 environment = null      # environment: !override {}
+</span></span></span></code></pre></div></div>
+</div>
+<p>三条读数说明 <code>!override</code> 是<strong>整段替换</strong>而不是逐条比对，替换成空列表就等于删掉。反过来想用 <code>!remove</code> 精确摘掉一条：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-10" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="2">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-10-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> override：ports: !remove <span class="s2">&#34;9002:80&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">rc=1 cannot override services.s.ports
+</span></span></span></code></pre></div></div>
+</div>
+<p>本机这一版（v5.5.1）不吃这个形状的 <code>!remove</code>——要按值摘除，得写成 <code>!remove</code> 加列表的形式再试，或者干脆用 <code>!override</code> 把留下的部分整段写出来。团队约定就一条：<strong>列表类字段的「减」不靠猜测，写完必须用 <code>config</code> 看合并结果</strong>。</p>
+<blockquote>
+<p>💡 新人小结：<strong>override 不是「改正主干」，是「往主干上贴便利贴」</strong>。便利贴可以补充（<code>environment</code> 多了 <code>B=2</code>）、可以改写同一格（<code>SHARED</code> 从 <code>base</code> 变 <code>override</code>）、也能往一列清单里再加一行（<code>ports</code> 变两条），但不能凭空让原来那行消失——想让整张清单换掉，得写「整段替换」的记号（<code>!override</code>）。类比之后接机制：这些规则来自 compose-spec 对每种字段的合并语义定义，<code>config --format json</code> 就是那台能把规则讲清楚的机器。</p>
+</blockquote>
+<div class="td-callout td-callout--note" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-circle-info" aria-hidden="true"></i><span class="td-callout__label">说明</span></div>
+  <div class="td-callout__body">
+<p><code>deploy</code> 在本机是 1.28 之后重新启用的字段，但 <code>deploy.resources</code> 之外的 swarm 专属字段（<code>placement.constraints</code> 之类）在 compose v2 单机上被忽略——这条本机未实测，看到旧教程用 <code>deploy.placement</code> 调亲和性时按 swarm 语境判断。</p>
+  </div>
+</div><h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--一条命令起全栈第段判据长什么样">一条命令起全栈：第②段判据长什么样
+</h2>
+<p>现在把主干、override、<code>.env</code> 合起来跑一次。判据必须写成能被机器回答的形式，四条缺一不可：</p>
+<ol>
+<li><strong>一条命令</strong>：<code>docker compose --profile app up -d --wait</code>，不预先 <code>create</code> 任何东西。</li>
+<li><strong>全部就绪</strong>：<code>ps</code> 表里每个带健康检查的服务都是 <code>healthy</code>。</li>
+<li><strong>入口可达</strong>：从宿主机经 <code>proxy</code> 打到 <code>api</code> 与 <code>web</code>，两个请求都 <code>200</code>。</li>
+<li><strong>数据活过重起</strong>：<code>down</code>（不带 <code>-v</code>）之后 <code>up -d --wait</code>，先前写入的数据还在。</li>
+</ol>
+<p>第 1、2、3 条的读数：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-11" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="15">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-11-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app up -d --wait     <span class="c1"># 用时 18.4 秒（冷，含两个 build）</span>
+</span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps
+</span></span><span class="line"><span class="cl"><span class="go">NAME            IMAGE               SERVICE   STATUS                    PORTS
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-api-1     kb-p2-api           api       Up 5 seconds (healthy)    8080/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-cache-1   redis:7-alpine      cache     Up 16 seconds (healthy)   6379/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-db-1      mysql:8.4           db        Up 16 seconds (healthy)   127.0.0.1:3307-&gt;3306/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-proxy-1   nginx:1.27-alpine   proxy     Up Less than a second     0.0.0.0:8080-&gt;80/tcp, [::]:8080-&gt;80/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-web-1     kb-p2-web           web       Up 16 seconds             80/tcp
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s http://127.0.0.1:8080/api/health
+</span></span><span class="line"><span class="cl"><span class="go">{&#34;status&#34;:&#34;UP&#34;,&#34;db&#34;:&#34;UP&#34;,&#34;cache&#34;:&#34;UP&#34;}|http=200|耗时=0.003729s
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s -o /dev/null -w <span class="s2">&#34;首页 http=%{http_code}&#34;</span> http://127.0.0.1:8080/
+</span></span><span class="line"><span class="cl"><span class="go">首页 http=200 耗时=0.002235s
+</span></span></span></code></pre></div></div>
+</div>
+<p>第 4 条的读数（先写两行数据，<code>down</code>，再 <code>up</code>）：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-12" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-12-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose <span class="nb">exec</span> db sh -c <span class="s1">&#39;mysql -uroot -p… kbdemo -e &#34;SELECT * FROM t_note ORDER BY id;&#34;&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="go">id	note
+</span></span></span><span class="line"><span class="cl"><span class="go">1	before-down
+</span></span></span><span class="line"><span class="cl"><span class="go">2	warm-start
+</span></span></span></code></pre></div></div>
+</div>
+<p>四行都在，<code>down</code> 到 <code>up</code> 之间没有做过任何备份动作。这一条本轮只量了 MySQL：redis 侧的同一个键（<code>seg2</code>）是在重启<strong>之后</strong>才写进去的，所以「redis 的键活过 compose 级 <code>down</code>」这条在本批次里不算已验；它在第①段用容器级 <code>docker rm</code> 验过（见 <a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/">/docs/02-核心操作/接上去/端口映射数据管理与权限时区/</a> 的「实战切入」一节），挂载与卷类型完全相同，只是当时的删除粒度不同。</p>
+<p>四个「用时」放在一起看，才知道 18.4 秒花在哪：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">场景</th>
+      <th scope="col">命令</th>
+      <th scope="col">用时</th>
+      <th scope="col">差在哪</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>冷（卷是空的，两个服务要 build）</td>
+      <td><code>up -d --wait</code></td>
+      <td>18.4 秒</td>
+      <td>MySQL 首次初始化数据目录 + 两次 build</td>
+    </tr>
+    <tr>
+      <td>热（卷已有数据，容器都在）</td>
+      <td><code>up -d --wait</code></td>
+      <td>7.1 秒</td>
+      <td>只做「等到 healthy」，无创建无初始化</td>
+    </tr>
+    <tr>
+      <td>卷被删但镜像已 build</td>
+      <td><code>up -d --wait</code></td>
+      <td>16.8 秒</td>
+      <td>又付了一次 MySQL 初始化</td>
+    </tr>
+    <tr>
+      <td>强制重建全部容器</td>
+      <td><code>up -d --wait --force-recreate</code></td>
+      <td>18.2 秒</td>
+      <td>五个容器重建 + 两轮健康等待</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>启动时间主要由<strong>MySQL 的数据目录初始化</strong>决定，不是 compose 本身慢。同一批取数里另有一组对照：把 <code>interval</code> 收到 2 秒、不设 <code>start_period</code>，MySQL 8.4 从容器起来到第一次探测通过是 <strong>8.6 秒</strong>，中间记录到 3 次失败探测（<code>FailingStreak</code> 走到 3，最后一次输出 <code>mysqld is alive</code>）。这里的 <code>start_period: 20s</code> 就是照着这个量级放的，细节见 <a href="/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F%E4%B8%8E%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5/">/docs/04-单机编排/启停/常用命令启动顺序与健康检查/</a>。</p>
+<p>启动与流量的方向画出来是这样（<code>depends_on</code> 决定创建顺序，HTTP 流量方向是另一件事）：</p>
+<pre class="td-mermaid-source"><code class="language-mermaid">flowchart LR
+    HOST[&#34;宿主 127.0.0.1:8080&#34;] --&gt; PX[&#34;proxy&lt;br/&gt;nginx:1.27-alpine&#34;]
+    PX --&gt;|&#34;/api/ 前缀&#34;| API[&#34;api&lt;br/&gt;kb-p2-api&#34;]
+    PX --&gt;|&#34;/ 前缀&#34;| WEB[&#34;web&lt;br/&gt;kb-p2-web&#34;]
+    API --&gt;|&#34;依赖：等 healthy&#34;| DB[(&#34;db&lt;br/&gt;mysql:8.4&#34;)]
+    API --&gt;|&#34;依赖：等 healthy&#34;| CACHE[(&#34;cache&lt;br/&gt;redis:7-alpine&#34;)]
+    API -.-&gt;|&#34;proxy 等 api healthy 才起&#34;| PX
+    DB --- DV[(&#34;卷 kb-p2_dbdata&#34;)]
+    CACHE --- CV[(&#34;卷 kb-p2_cachedata&#34;)]</code></pre><h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--down-的三种收场为什么不能凭手感写"><code>down</code> 的三种收场：为什么不能凭手感写
+</h2>
+<p><code>down</code> 在 04 篇里是最容易出事的一条命令，因为它同时决定「容器停不停」和「数据留不留」。本机三种写法的结果：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">写法</th>
+      <th scope="col">结果</th>
+      <th scope="col">读数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>down</code>（不带 <code>--profile</code>）</td>
+      <td>只停掉模型里有的 <code>db</code>/<code>cache</code>；<code>api</code>/<code>web</code>/<code>proxy</code> 三个仍在跑，网络删不掉</td>
+      <td>用时 2.0 秒；随后 <code>docker ps</code> 列出三个 <code>Up</code> 容器，<code>docker network ls</code> 里 <code>kb-p2-net</code> 还在；<code>down</code> 的日志里出现 <code>Network kb-p2-net Resource is still in use</code></td>
+    </tr>
+    <tr>
+      <td><code>--profile app down --remove-orphans</code></td>
+      <td>五个容器全部停并删，网络删掉，卷保留</td>
+      <td>日志逐条 <code>Stopped</code>/<code>Removed</code>，最后 <code>Network kb-p2-net Removed</code></td>
+    </tr>
+    <tr>
+      <td><code>down -v</code></td>
+      <td>连卷一起删（数据没了），但同样漏掉 profile 服务，网络仍报「仍在使用」</td>
+      <td>用时 1.6 秒；<code>Volume kb-p2_dbdata Removed</code>；再 <code>up</code> 后 <code>ERROR 1146 (42S02) at line 1: Table 'kbdemo.t_note' doesn't exist</code>，redis <code>dbsize</code> 为 <code>0</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>两条结论要分开记：</p>
+<ul>
+<li><strong>profile 决定 <code>down</code> 的作用范围。</strong> 起的时候带了 <code>--profile app</code>，停的时候也必须带；不带就是「只停我看得到的那两个」。补救办法是 <code>--remove-orphans</code>，它按项目标签把不属于当前模型的容器一起收掉。</li>
+<li><strong><code>-v</code> 是删数据的开关，不是「清得更干净」的开关。</strong> 上面的 <code>ERROR 1146</code> 就是它的回执：容器、网络、卷全部重建，MySQL 的数据目录是空的，表自然不存在。</li>
+</ul>
+<blockquote>
+<p>💡 新人小结：<code>down</code> 像退房，<code>down -v</code> 像退房之后把房间重新装修一遍——两件事的费用不是一个量级，而且第二件不可撤销。类比之后接机制：<code>down</code> 删的是「项目派生的运行时对象」（容器、默认网络），<code>-v</code> 额外删掉 compose 声明的 named volume，而 named volume 是唯一活过容器生命周期的那份（02 篇里已经用备份命令验证过它的落点在 <code>/var/lib/docker/volumes/.../_data</code>，Windows 上挂在 WSL2 的 <code>/dev/sdd</code>）。</p>
+</blockquote>
+<p>要留数据但清干净，用 <code>stop</code> + <code>start</code> 而不是 <code>down</code>：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-14" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="7">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-14-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose stop cache          <span class="c1"># 容器保留，只是停了</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps --format <span class="s2">&#34;{{.Service}}\t{{.State}}\t{{.Health}}&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">api	running	healthy
+</span></span></span><span class="line"><span class="cl"><span class="go">db	running	healthy
+</span></span></span><span class="line"><span class="cl"><span class="go">proxy	running
+</span></span></span><span class="line"><span class="cl"><span class="go">web	running
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose start cache         <span class="c1"># 原容器原样起来</span>
+</span></span></code></pre></div></div>
+</div>
+<p><code>stop</code>/<code>start</code> 不重建容器，因此配置改动不会生效——这一条与 4.4 里 <code>--no-recreate</code> 的读数同源。</p>
+<h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--热重载watch-的三档与它们的真实代价">热重载：<code>watch</code> 的三档与它们的真实代价
+</h2>
+<p>开发期最烦的是「改一行等三分钟」。Compose 的 <code>develop.watch</code> 把这件事分成三档，档位差别就是「要不要重建镜像」：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">档位</th>
+      <th scope="col">做什么</th>
+      <th scope="col">适用</th>
+      <th scope="col">本机实测代价</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>sync</code></td>
+      <td>把改的文件推进容器，不动进程</td>
+      <td>解释型语言 + 自动重载（PHP、Node 带 <code>--reload</code>、Rails）</td>
+      <td>未单独实测（示例里没有这种服务）</td>
+    </tr>
+    <tr>
+      <td><code>sync+restart</code></td>
+      <td>推进文件，然后重启容器内进程</td>
+      <td>静态资源、需要重启才生效的纯配置文件</td>
+      <td>从落盘到 <code>curl</code> 看到新内容 <strong>2.0 秒</strong></td>
+    </tr>
+    <tr>
+      <td><code>rebuild</code></td>
+      <td>重新构建镜像并重建容器</td>
+      <td>需要编译的语言、依赖变化</td>
+      <td><strong>4.1 秒</strong>（本例的占位服务只有两层）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>sync+restart</code> 那次的证据链：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-15" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="14">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-15-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> watch 已在后台跑（docker compose --profile app watch --no-up）
+</span></span><span class="line"><span class="cl"><span class="gp">#</span> 宿主改 web/index.html，加一行 &lt;p&gt;watch-marker-…&lt;/p&gt;
+</span></span><span class="line"><span class="cl"><span class="go">Watch enabled
+</span></span></span><span class="line"><span class="cl"><span class="go">Syncing service &#34;web&#34; after 1 changes were detected
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-web-1 Restarting
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-web-1 Started
+</span></span></span><span class="line"><span class="cl"><span class="go">service(s) [&#34;web&#34;] restarted
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps --format <span class="s2">&#34;{{.Service}}\t{{.Status}}&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">api	Up 37 seconds (healthy)
+</span></span></span><span class="line"><span class="cl"><span class="go">cache	Up 29 seconds (healthy)
+</span></span></span><span class="line"><span class="cl"><span class="go">db	Up 29 seconds (healthy)
+</span></span></span><span class="line"><span class="cl"><span class="go">proxy	Up 31 seconds
+</span></span></span><span class="line"><span class="cl"><span class="go">web	Up 1 second          # 只有它被重启了
+</span></span></span></code></pre></div></div>
+</div>
+<p>配置文件里对应这两档的写法：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-16" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="12">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-16-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">web</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">develop</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">watch</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l">sync+restart</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">./web/index.html</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l">/usr/share/nginx/html/index.html</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">api</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">develop</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">watch</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l">rebuild</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">./api</span></span></span></code></pre></div></div>
+</div>
+<p><code>config</code> 里能看到被规范化后的形状（<code>target</code> 只在 <code>sync</code> 系需要，<code>rebuild</code> 不带它）：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-17" data-td-code data-td-code-auto-id
+     data-td-language="json" data-td-line-count="2">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-17-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;watch&#34;</span><span class="p">:</span> <span class="p">[{</span><span class="nt">&#34;path&#34;</span><span class="p">:</span> <span class="s2">&#34;…\\web\\index.html&#34;</span><span class="p">,</span> <span class="nt">&#34;action&#34;</span><span class="p">:</span> <span class="s2">&#34;sync+restart&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;target&#34;</span><span class="p">:</span> <span class="s2">&#34;/usr/share/nginx/html/index.html&#34;</span><span class="p">,</span> <span class="nt">&#34;exec&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;command&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}]}</span></span></span></code></pre></div></div>
+</div>
+<p><code>rebuild</code> 档的 4.1 秒要老实标注它不能外推：这个占位服务的 Dockerfile 只有 <code>FROM alpine</code> + <code>COPY</code> 一步，本机 <code>docker compose build --no-cache api</code> 是 <strong>1.0 秒</strong>，缓存命中是 <strong>0.5 秒</strong>。换成真实 Spring Boot，<code>rebuild</code> 里多出依赖解析与打包，量级完全不同——本轮没有 Maven 环境，那个数没量到，写进 4.8 的判据里作为待补项而不是结论。</p>
+<div class="td-callout td-callout--tip" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-lightbulb" aria-hidden="true"></i><span class="td-callout__label">提示</span></div>
+  <div class="td-callout__body">
+<p><code>watch</code> 与 <code>up</code> 的关系：<code>docker compose up --watch</code> 与单独跑 <code>docker compose watch</code> 等价；<code>--no-up</code> 用于「栈已经起来了，只挂监视器」，本机的两次实测都是这么起的。<code>watch</code> 是<strong>前台会话</strong>，用脚本起它要注意 <code>docker</code> CLI 会派生 <code>docker-compose</code> 子进程，父进程被终止时子进程还活着并占着日志文件句柄——本轮就在这里踩过一次，目录删不掉，最后按子进程 pid 收的。</p>
+  </div>
+</div><h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--windows-下的-bind-mount-与-hmr现象成因与解法">Windows 下的 bind mount 与 HMR：现象、成因与解法
+</h2>
+<p>前端开发常见的一句抱怨是「容器里跑 Vite，改文件浏览器不热更」。三个独立的坑叠在一起，要分开验：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">症状</th>
+      <th scope="col">成因</th>
+      <th scope="col">解法</th>
+      <th scope="col">本机状态</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>改文件完全没反应，容器内也不见新内容</td>
+      <td>挂载写错（路径大小写、Docker Desktop 文件共享未放行该盘）</td>
+      <td>先 <code>docker compose exec web ls -l /app</code> 看容器里看到的到底是什么</td>
+      <td>未实测（示例的 <code>web</code> 是构建进镜像的静态文件，不是 bind mount）</td>
+    </tr>
+    <tr>
+      <td>容器内文件变了，但监听器不触发</td>
+      <td>Windows 侧的 9p/DrvFs 挂载不把 inotify 事件传进容器，只有数据变化可见</td>
+      <td>Vite 打开轮询：<code>server.watch.usePolling = true</code>（配 <code>interval</code>，常见 300 毫秒起）；或改用 <code>develop.watch</code> 的 <code>sync</code> 由 compose 主动推</td>
+      <td>机制成立，<strong>本轮未实测</strong>；02 篇量到的「bind mount 走 9p、比命名卷慢一个量级」是同一条链上的另一环</td>
+    </tr>
+    <tr>
+      <td>浏览器连的是 <code>localhost:5173</code> 但 WebSocket 失败</td>
+      <td>HMR 的 WS 端口/主机与 dev server 不一致：容器里监听 <code>127.0.0.1</code> 外面进不来</td>
+      <td><code>server.host = true</code> 监听所有网卡 + <code>ports</code> 把 5173 publish 出来 + 必要时 <code>server.hmr.clientPort = 5173</code>；<code>/api</code> 前缀交给 <code>proxy</code> 服务而不是 Vite 的 <code>proxy</code></td>
+      <td>未实测，属配置口径；给判据：浏览器 Network 里 WS 请求的目标地址应与 <code>docker compose port web 5173</code> 的读数一致</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>docker compose port</code> 这条命令在排查第三种症状时最省事——它直接回答「compose 认为这个服务的外部地址是什么」，而不是让人去翻 <code>ps</code> 的 <code>PORTS</code> 列。Java 侧的对应做法（devtools + 挂载 <code>target/classes</code>、或直接让 IDE 跑在 <code>kb-p2-net</code> 上）同样只给口径，本轮没有 Java 容器可跑，标在本篇未验证项里。</p>
+<blockquote>
+<p>💡 新人小结：文件共享挂载像<strong>隔着一扇玻璃窗递东西</strong>——东西（内容）你看得见也拿得到，但窗那边的人不知道你什么时候递的（事件传不过去）。所以「改文件不热更」常常不是没生效，是没人通知它。接机制：<code>usePolling</code> 就是让窗那边的人每隔几百毫秒自己探头看一眼，代价是 CPU 与延迟，换来行为可预测。</p>
+</blockquote>
+<h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--完整实战五个服务的栈是怎么长出来的">完整实战：五个服务的栈是怎么长出来的
+</h2>
+<p>主干文件完整贴一次（<code>api</code>/<code>web</code>/<code>proxy</code> 三个都挂在 <code>profiles: [&quot;app&quot;]</code> 下，因为它们是「应用层」，CI 预拉依赖时不该被卷进来）：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-18" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="50">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-18-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">cache</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">redis:7-alpine</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;redis-server&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;--appendonly&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;yes&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">cachedata:/data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;CMD&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;redis-cli&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;ping&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">2s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="m">10</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">api</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l">./api</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">DB_HOST</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="l">cache</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">db</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_healthy }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">cache</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_healthy }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;CMD&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;wget&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-q&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-O&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;http://127.0.0.1:8080/api/health&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">3s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="m">12</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">profiles</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;app&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">web</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l">./web</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">profiles</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;app&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">proxy</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">nginx:1.27-alpine</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="s2">&#34;${PROXY_PORT:-8080}:80&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">./proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">api</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_healthy }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">web</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_started }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">profiles</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;app&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">networks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">kb-p2-net</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">dbdata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">cachedata:</span></span></span></code></pre></div></div>
+</div>
+<p>几个设计点的取舍，都对应上面某条读数：</p>
+<ul>
+<li><strong>入口只有一个。</strong> 只有 <code>proxy</code> 暴露宿主端口（<code>${PROXY_PORT:-8080}</code>），<code>api</code> 与 <code>web</code> 的 <code>8080/tcp</code>、<code>80/tcp</code> 只在容器网络里。生产同理：宿主端口越少，能被打的洞越少。</li>
+<li><strong><code>db</code> 的端口只在 override 里。</strong> <code>127.0.0.1:3307:3306</code> 是开发期便利（避开本机已占用的 3306），绑 <code>127.0.0.1</code> 而不是 <code>0.0.0.0</code>；主干不带这个字段，CI 与生产加载主干就自然没有它。</li>
+<li><strong><code>proxy</code> 对 <code>api</code> 用健康门、对 <code>web</code> 用 <code>service_started</code>。</strong> nginx 起来时如果 upstream 名字解析不到会直接退出，<code>api</code> 是它必须等的那一个；<code>web</code> 只提供静态文件，<code>service_started</code> 够用。</li>
+<li><strong>卷名交给 compose 加前缀。</strong> 实际落地的名字是 <code>kb-p2_dbdata</code>（<code>config</code> 的读数），所以手工 <code>docker volume rm</code> 之前要按这个名字找，不要写 <code>dbdata</code>。</li>
+<li><strong><code>name: kb-p2</code> 必须写死。</strong> 项目名会进卷名、网络名、容器名。中文目录名场景下 Compose 会把非法字符过滤掉，过滤空了就报 <code>project name must not be empty</code>——本轮在一个中文命名的临时目录里（文件内容与它完全相同、只是目录换成 ASCII 名的对照组正常通过）直接撞到过这条报错，加上 <code>name:</code> 就好。</li>
+</ul>
+<p>复现清单（每条命令都跑过，预期读数在上文）：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-19" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="14">
+  <div class="td-code__viewport" id="td-code-1f006964-fence-19-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> <span class="nb">cd</span> 示例/贯穿示例
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --services                       <span class="c1"># 只应看到 cache 与 db</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app up -d --wait              <span class="c1"># 冷 18.4 秒 / 热 7.1 秒</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps                                      <span class="c1"># 三个 healthy，proxy/web 起来</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s http://127.0.0.1:8080/api/health               <span class="c1"># {&#34;status&#34;:&#34;UP&#34;,&#34;db&#34;:&#34;UP&#34;,&#34;cache&#34;:&#34;UP&#34;}</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s -o /dev/null -w <span class="s2">&#34;%{http_code}\n&#34;</span> http://127.0.0.1:8080/
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose <span class="nb">exec</span> db sh -c <span class="s1">&#39;mysql -uroot -p&#34;$DB_PW&#34; kbdemo -e &#34;SELECT 1;&#34;&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose down                                    <span class="c1"># 注意：不带 --profile 会漏三个</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app up -d --wait              <span class="c1"># 判据第 4 条：数据还在</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app watch                     <span class="c1"># 改 web/index.html，约 2 秒可见</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose -f compose.yaml -f compose.debug.yaml <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="go">    --profile app --profile debug up -d --wait            # 六个服务，本机 17.5 秒
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s http://127.0.0.1:8081/ <span class="p">|</span> grep -o <span class="s2">&#34;&lt;title&gt;[^&lt;]*&lt;/title&gt;&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app --profile debug down -v --remove-orphans   <span class="c1"># 收干净，会删数据</span>
+</span></span></code></pre></div></div>
+</div>
+<p>最后一条命令之前跑的是调试层：<code>adminer:4</code> 起来后 <code>127.0.0.1:8081</code> 直接给回 <code>&lt;title&gt;Login - Adminer&lt;/title&gt;</code>，而 <code>docker compose up --wait</code> 的日志里它自己也是 <code>Healthy</code>——可我在 <code>compose.debug.yaml</code> 里<strong>没有</strong>给它写健康检查。那是镜像自带的 <code>HEALTHCHECK</code> 在生效（与 4.6 的优先级读数同源：compose 不写，就用镜像的）。</p>
+<h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--与真实技术栈的差距">与真实技术栈的差距
+</h2>
+<p>本篇的栈是<strong>结构完整、内容占位</strong>：网络、卷、健康门、profiles、插值、watch 全是真的；服务实现是占位的。差距清单写清楚，免得读者把占位的量级当成真实的：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">位置</th>
+      <th scope="col">本篇</th>
+      <th scope="col">真实贯穿示例（第③段之后）</th>
+      <th scope="col">影响哪个结论</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>api</code></td>
+      <td>Go 单文件，两层镜像，<code>build</code> 1.0 秒</td>
+      <td>Spring Boot + Maven 多阶段（3.7）</td>
+      <td><code>rebuild</code> 档 4.1 秒不可外推</td>
+    </tr>
+    <tr>
+      <td><code>web</code></td>
+      <td>静态 HTML 进 nginx 镜像</td>
+      <td>Vue3 + Vite dev server（<code>usePolling</code> 那段才有实测对象）</td>
+      <td>HMR 三条解法目前只有口径</td>
+    </tr>
+    <tr>
+      <td><code>db</code></td>
+      <td><code>mysql:8.4</code> 官方镜像</td>
+      <td>MySQL 8.4 不变，但加 <code>configs</code> 挂载与初始化 SQL</td>
+      <td>健康检查探测命令不变</td>
+    </tr>
+    <tr>
+      <td>口令</td>
+      <td><code>.env</code> 里一个开发值</td>
+      <td><code>configs</code>/<code>secrets</code> 或外部注入</td>
+      <td>4.6 里「明文进 <code>config</code> 输出」那条判据要重跑</td>
+    </tr>
+    <tr>
+      <td>就绪判据</td>
+      <td><code>mysqladmin ping</code></td>
+      <td>同一命令，但库表初始化完成后才算真的好</td>
+      <td>需要 <code>service_completed_successfully</code> 那条链路（见 4.5）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--常见误读">常见误读
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">误读</th>
+      <th scope="col">实际</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>「<code>profiles</code> 是环境隔离，dev 和 prod 用不同 profile」</td>
+      <td>profile 决定<strong>一条命令带上哪些服务</strong>，不是「配置分环境」。环境差异该走多文件；用 profile 装环境，会出现「prod 的 up 忘了 <code>--profile prod</code> 就少起一层」</td>
+    </tr>
+    <tr>
+      <td>「override 里没写的字段会被清掉」</td>
+      <td>映射类深合并、<code>command</code> 这类标量整体替换、<code>ports</code>/<code>volumes</code> 追加。override 不写，主干的值仍然在</td>
+    </tr>
+    <tr>
+      <td>「<code>compose.debug.yaml</code> 也会自动合并，名字长得像就行」</td>
+      <td>只有 <code>compose.override.*</code> / <code>docker-compose.override.*</code> 是自动的，其它文件名要 <code>-f</code> 或 <code>COMPOSE_FILE</code></td>
+    </tr>
+    <tr>
+      <td>「<code>down</code> 就是把这套东西停干净」</td>
+      <td>不带 <code>--profile</code> 的 <code>down</code> 会漏起 profile 服务，网络因「仍在使用」删不掉；<code>--remove-orphans</code> 才是兜底</td>
+    </tr>
+    <tr>
+      <td>「<code>down -v</code> 是更彻底的清理，可以当习惯用」</td>
+      <td><code>-v</code> 删 named volume，也就是删数据。上面那条 <code>ERROR 1146</code> 就是它的结果</td>
+    </tr>
+    <tr>
+      <td>「<code>watch</code> 的 <code>rebuild</code> 快，所以 Java 项目也可以这么写」</td>
+      <td>本例 4.1 秒来自两层 COPY 的占位镜像。真实 Java 的构建成本没在本轮量过</td>
+    </tr>
+    <tr>
+      <td>「<code>up --wait</code> 返回 0 就说明业务可用」</td>
+      <td><code>--wait</code> 等的是「健康检查通过」。健康检查口径写窄（只 ping TCP），它就只保证那一格</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--要点总结">要点总结
+</h2>
+<ul>
+<li>三个机制各管一件事：多文件管<strong>环境差异</strong>，<code>profiles</code> 管<strong>一条命令带哪些服务</strong>，<code>.env</code> 管<strong>会变且不进版本库的值</strong>。</li>
+<li><code>profiles</code> 的过滤发生在模型加载阶段：不带 <code>--profile</code>，<code>config --services</code>、<code>pull</code>、<code>down</code> 全都看不到那些服务。这是本机最容易踩的一条。</li>
+<li>同名字段的合并语义分三类（深合并 / 整体替换 / 追加），<code>ports</code> 与 <code>volumes</code> 是<strong>追加</strong>；写了 <code>-f</code> 就没有自动 override 合并。</li>
+<li>第②段判据四条全部通过：一条命令起 5 个服务（冷 18.4 秒 / 热 7.1 秒）、三个带检查的服务 <code>healthy</code>、经 <code>proxy</code> 的 <code>/api/health</code> 与 <code>/</code> 都是 <code>200</code>（3.7 毫秒 / 2.2 毫秒）、<code>down</code> 后数据仍在。</li>
+<li>启动时间由 MySQL 的数据目录初始化决定，不由 compose 决定：卷为空 16.8 秒、卷已用 7.1 秒，两次差的就是 MySQL 初始化那 8 秒量级。</li>
+<li><code>down</code> / <code>down --remove-orphans</code> / <code>down -v</code> 是三件事：停可见服务、停全部服务、连数据一起删。写命令时按这三档想。</li>
+<li><code>watch</code> 三档的实测代价：<code>sync+restart</code> 2.0 秒（纯静态文件），<code>rebuild</code> 4.1 秒（占位镜像）；<code>sync</code> 档与真实 Java/Node 的数字本轮没量到。</li>
+<li>Windows 下「改文件不热更」先分清是「数据没过去」还是「事件没过去」，后者用轮询或 <code>develop.watch</code> 的 <code>sync</code> 兜。</li>
+</ul>
+<h2 id="pg-19529b6bbeb23498cd20a6fbde70171f--本篇未验证项">本篇未验证项
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>COMPOSE_FILE</code> 在 Windows 上的分隔符</td>
+      <td>未实测</td>
+      <td>正文按官方口径写 <code>;</code>，Linux 是 <code>:</code>；本轮全部用 <code>-f</code></td>
+    </tr>
+    <tr>
+      <td>Vite 的 <code>usePolling</code> / <code>hmr.clientPort</code> 三件套能否让热更真的生效</td>
+      <td>未实测</td>
+      <td>示例的 <code>web</code> 没有 dev server，需要第③段之后的 Vue3 真服务才能验；判据已写在表里</td>
+    </tr>
+    <tr>
+      <td>容器内 inotify 事件在 9p 挂载上不传播</td>
+      <td>未实测（机制成立）</td>
+      <td>需要镜像里跑 <code>inotifywait</code> 并对照宿主改动；已列为 4.8 的补测项</td>
+    </tr>
+    <tr>
+      <td>Java（Spring Boot）走 <code>rebuild</code> 档的实际耗时</td>
+      <td>未实测</td>
+      <td>本机无 Maven 依赖缓存；占位服务的 4.1 秒不能替代</td>
+    </tr>
+    <tr>
+      <td>Redis 的键活过 <strong>compose 级</strong> <code>down</code>（不带 <code>-v</code>）</td>
+      <td>未实测</td>
+      <td>本轮那个键是在重启之后写的；容器级已在第①段验过，卷与挂载相同但删除粒度不同，下一步把它补进判据第 4 条</td>
+    </tr>
+    <tr>
+      <td><code>adminer</code> 经 <code>-f compose.debug.yaml</code> + <code>--profile debug</code> 真起并出登录页</td>
+      <td>已实测</td>
+      <td>六个服务 17.5 秒起齐，<code>127.0.0.1:8081</code> 回 <code>&lt;title&gt;Login - Adminer&lt;/title&gt;</code>，<code>up --wait</code> 里它是 <code>Healthy</code>（镜像自带 <code>HEALTHCHECK</code>）</td>
+    </tr>
+    <tr>
+      <td><code>!override</code> 收回追加列表</td>
+      <td>已实测</td>
+      <td><code>ports</code> 只剩 <code>9100</code>，<code>volumes</code>/<code>environment</code> 用 <code>!override {}</code> 变 <code>null</code></td>
+    </tr>
+    <tr>
+      <td><code>!remove</code> 摘掉列表中的<strong>一条</strong></td>
+      <td>未跑通</td>
+      <td>本机这一版对 <code>ports: !remove &quot;9002:80&quot;</code> 报 <code>cannot override services.s.ports</code>；<code>!remove</code> 配列表形式的写法没再试</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+</div>
+
+
+
+    
+	
+  
+
+    
+	
+  
+
+
+
+      </main>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":true,"description":"复制 Markdown 文本","disabledReason":"","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":"/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/index.md"},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":true,"description":"查阅 Markdown 源码","disabledReason":"","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":"/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/index.md"},{"available":false,"description":"查阅编辑历史","disabledReason":"查阅编辑历史: 暂不可用","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":""},{"available":false,"description":"编辑当前页面","disabledReason":"编辑当前页面: 暂不可用","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":""},{"available":false,"description":"添加子页面","disabledReason":"添加子页面: 暂不可用","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":""},{"available":false,"description":"提交文档议题","disabledReason":"提交文档议题: 暂不可用","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":""},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":false,"description":"打印完整章节","disabledReason":"打印完整章节: 暂不可用","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":""},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":false,"description":"切换语言","disabledReason":"切换语言: 暂不可用","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":true,"description":"外观","disabledReason":"","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Ink","Terminal","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"},{"available":true,"disabledReason":"","id":"slate","title":"Slate","value":"slate"},{"available":true,"disabledReason":"","id":"ink","title":"Ink","value":"ink"},{"available":true,"disabledReason":"","id":"terminal","title":"Terminal","value":"terminal"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":false,"description":"GitHub","disabledReason":"GitHub: 暂不可用","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":""}],"commands":[],"language":"zh","quickLinks":[{"available":true,"description":"一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。","disabledReason":"","icon":"fa-solid fa-book","id":"quick_docs","keywords":["文档","docs"],"kind":"url","target":"self","title":"文档","url":"/docs/"}],"rootOrder":["docs"],"version":1}</script>
+
+<script src="/js/actions.min.c784a65471d30f25801832ad47eca4fc6e9681b4521bd2414655e6623aa58934.js" integrity="sha256-x4SmVHHTDyWAGDKtR&#43;yk/G6WgbRSG9JBRlXmYjqliTQ=" crossorigin="anonymous"></script>
+
+  </body>
+</html>

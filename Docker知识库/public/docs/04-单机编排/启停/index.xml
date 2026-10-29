@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>启停 on Docker 团队知识库</title>
+    <link>https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/</link>
+    <description>Recent content in 启停 on Docker 团队知识库</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    
+    
+    
+      <lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate>
+    
+    
+      <atom:link href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+        <title>常用命令、启动顺序控制与健康检查</title>
+        <link>https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F%E4%B8%8E%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F%E4%B8%8E%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5/</guid>
+        <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;strong&gt;实战落点&lt;/strong&gt;：示例链第②段 · 一条命令起全栈（本篇负责「起起来之后怎么看清现场」，读数全部来自同一套 &lt;code&gt;示例/贯穿示例/&lt;/code&gt; 栈）&#xA;&lt;strong&gt;示例版本&lt;/strong&gt;：需要 4.7~4.9 那三个 compose 文件；本篇不新产文件，只消费并验证它们的行为&#xA;&lt;strong&gt;前置依赖&lt;/strong&gt;：&lt;a href=&#34;../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/compose%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%BA%BF%E4%B8%8E%E6%96%87%E4%BB%B6%E5%85%A8%E5%AD%97%E6%AE%B5%E5%8F%82%E8%80%83/&#34;&gt;/docs/04-单机编排/定义/Compose语法基线与文件全字段参考/&lt;/a&gt;、&lt;a href=&#34;../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/&#34;&gt;/docs/02-核心操作/接上去/端口映射数据管理与权限时区/&lt;/a&gt;、&lt;a href=&#34;../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/&#34;&gt;/docs/00-导读/把环境搭好/环境准备/&lt;/a&gt;&#xA;&lt;strong&gt;本篇产出物&lt;/strong&gt;：一张「命令 → 本机是否真跑过 → 读数」对照表；一条被证伪的写法（裸 &lt;code&gt;depends_on&lt;/code&gt; 的失败日志与它的第二次假绿）；一套健康检查参数定法（含 MySQL 首次通过 8.6 秒的时间线）&#xA;&lt;strong&gt;拓展接口&lt;/strong&gt;：本篇的「健康门 + &lt;code&gt;--wait&lt;/code&gt;」在 6.4 滚动更新里被推翻（换成就绪探针与流量摘除）；「&lt;code&gt;down -v&lt;/code&gt; 删数据」在 7.2 症状索引里作为一条独立症状；「应用侧自己重连」这条在 6.6 CI 里被复用（CI 不用健康门，用一次性任务）&#xA;&lt;strong&gt;难度·耗时&lt;/strong&gt;：★★☆ · 50 分钟（含动手）&#xA;&lt;strong&gt;自测三题&lt;/strong&gt;：&lt;/p&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&lt;code&gt;docker compose stop cache&lt;/code&gt; 之后再改 &lt;code&gt;compose.yaml&lt;/code&gt; 里 cache 的配置，&lt;code&gt;docker compose start cache&lt;/code&gt; 会让改动生效吗？依据是什么？&lt;/li&gt;&#xA;&lt;li&gt;&lt;code&gt;up&lt;/code&gt; 报了 &lt;code&gt;dependency failed to start: container kb-p2-api-1 exited (1)&lt;/code&gt;，此刻 &lt;code&gt;db&lt;/code&gt; 容器是什么状态？&lt;/li&gt;&#xA;&lt;li&gt;同一个反面配置，第一次 &lt;code&gt;up&lt;/code&gt; 失败、第二次 &lt;code&gt;up --wait&lt;/code&gt; 全绿。这说明配置修好了吗？&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;/blockquote&gt;</description>
+      </item>
+    
+  </channel>
+</rss>

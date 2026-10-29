@@ -1,0 +1,2549 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-preset='slate'] { background: #f1f4f8; color: #16222e; }
+  html[data-td-preset='slate'][data-bs-theme='dark'] { background: #0b1119; color: #e8eef6; }
+  html[data-td-preset='ink'] { background: #ffffff; color: #141414; }
+  html[data-td-preset='ink'][data-bs-theme='dark'] { background: #0b0b0b; color: #ededed; }
+  html[data-td-preset='terminal'] { background: #f4f5f2; color: #1d211f; }
+  html[data-td-preset='terminal'][data-bs-theme='dark'] { background: #0c0f0e; color: #d3dbd6; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    var root = document.documentElement;
+    var allowed = ["paper","slate","ink","terminal"];
+    var canvases = {"ink":{"dark":"#0b0b0b","darkInk":"#ededed","light":"#ffffff","lightInk":"#141414"},"paper":{"dark":"#161513","darkInk":"#ece9e3","light":"#f7f6f3","lightInk":"#21201c"},"slate":{"dark":"#0b1119","darkInk":"#e8eef6","light":"#f1f4f8","lightInk":"#16222e"},"terminal":{"dark":"#0c0f0e","darkInk":"#d3dbd6","light":"#f4f5f2","lightInk":"#1d211f"}};
+    var preset = null;
+    try {
+      preset = localStorage.getItem('td-preset');
+      if (preset !== null && allowed.indexOf(preset) < 0) {
+        preset = null;
+        localStorage.removeItem('td-preset');
+      }
+    } catch (_) {
+      
+    }
+    if (preset) root.setAttribute('data-td-preset', preset);
+    var c = canvases[root.getAttribute('data-td-preset')];
+    if (!c) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('data-td-canvas-light', c.light);
+      meta.setAttribute('data-td-canvas-dark', c.dark);
+      meta.setAttribute('content', c.light);
+    });
+  })();
+</script>
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<link rel="canonical" type="text/html" href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/">
+<link rel="alternate" type="application/rss&#43;xml" href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/index.xml">
+<link rel="alternate" type="text/markdown" href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/index.md">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+<title>导读 | Docker 团队知识库</title>
+<meta name="description" content="站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。">
+<link rel="canonical" href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/">
+<link rel="alternate" hreflang="zh-CN" href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/">
+<meta property="og:url" content="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/">
+	<meta property="og:site_name" content="Docker 团队知识库">
+	<meta property="og:title" content="导读">
+	<meta property="og:description" content="站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="website">
+
+	<meta itemprop="name" content="导读">
+	<meta itemprop="description" content="站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。">
+	<meta itemprop="wordCount" content="88">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="导读">
+	<meta name="twitter:description" content="站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。">
+<link rel="preload" href="/scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" as="style" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<link href="/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" rel="stylesheet" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+
+  </head>
+  <body class="td-section td-print-view">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    <div class="container-fluid td-print-shell">
+      <main id="td-main-content" class="td-print-document" tabindex="-1">
+        
+
+
+
+
+<div class="td-content">
+<div class="td-page-notice td-page-notice--primary d-print-none">
+<p>
+这是本节的多页打印视图。
+<button type="button" class="btn btn-link p-0 align-baseline" data-td-action="print">点击此处打印</button>.
+</p><p>
+<a href="/docs/00-%E5%AF%BC%E8%AF%BB/">返回本页常规视图</a>.
+</p>
+</div>
+
+
+
+<h1 class="title">导读</h1>
+<div class="lead">站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。</div>
+
+
+
+
+    <ul>
+    
+  
+  
+  
+  
+
+  
+    
+    
+    <li>
+1: <a href="#pg-5af2751fd61f66b5376fcaf2f63e1f3e">怎么用这个库</a>
+
+
+      <ul>
+        
+  
+  
+  
+  
+
+  
+    
+    
+    <li>
+1.1: <a href="#pg-3cd1c19fa104cade16fe7afa07dbde69">使用指南、学习路径与贯穿示例总览</a>
+
+
+    </li>
+  
+    
+    
+    <li>
+1.2: <a href="#pg-964abef081a8672cc5b5966b0e44d20a">写作要求 W1~W6 与文档模板</a>
+
+
+    </li>
+  
+
+      </ul>
+      
+    </li>
+  
+    
+    
+    <li>
+2: <a href="#pg-e38c692b9b04edf6e0bc4f68b8592428">把环境搭好</a>
+
+
+      <ul>
+        
+  
+  
+  
+  
+
+  
+    
+    
+    <li>
+2.1: <a href="#pg-0a883c11d665b3b250f07f711c96cfde">环境准备：Windows、macOS 与 Linux</a>
+
+
+    </li>
+  
+
+      </ul>
+      
+    </li>
+  
+
+    </ul>
+<div class="content">
+      <p>站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。</p>
+<h2 id="pg-0f847f6df64e2e28eb5ccecd1b293a82--知识板块">知识板块
+</h2>
+<ul>
+<li><strong>怎么用这个库</strong> — 主题轨与主线轨的关系，以及写进这个库的规矩。</li>
+<li><strong>把环境搭好</strong> — 让 Docker 在你这台机器上真的能拉下镜像。</li>
+</ul>
+
+</div>
+</div>
+
+
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+	<h1 id="pg-5af2751fd61f66b5376fcaf2f63e1f3e">1 - 怎么用这个库</h1>
+    <div class="lead">主题轨与主线轨的关系，以及写进这个库的规矩。</div>
+	<p>主题轨与主线轨的关系，以及写进这个库的规矩。</p>
+<p>本板块包含：使用指南、学习路径与主线八站地图；写作要求 W1~W5 与文档模板。</p>
+
+</div>
+
+
+
+    
+      
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+	<h1 id="pg-3cd1c19fa104cade16fe7afa07dbde69">1.1 - 使用指南、学习路径与贯穿示例总览</h1>
+    <div class="lead">主题轨怎么查、实战暗线怎么落、贯穿示例八段各自解决什么遗留问题，以及你上手前该先量自己机器的哪三项。</div>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第①段 · 依赖跑起来（本篇的实战切入用它，但不要求你已跑完前序任何一步）
+<strong>示例版本</strong>：<code>示例/贯穿示例/段1-依赖跑起来/README.md</code>（链首，可从 0 独立起步；本篇不产出示例文件）
+<strong>前置依赖</strong>：无
+<strong>本篇产出物</strong>：一份你自己机器的体检记录（命令在不在、子系统在不在、镜像域名解析对不对，共三条筛查；完整七条在环境准备），以及由此判定的入口——本机 2026-10-27 的第二轮落点是「引擎可用但仍拉不到镜像」，不是「可以开跑」
+<strong>拓展接口</strong>：本篇的「主题轨为主、暗线为辅」结论在 0.5 写作要求里被扩展成文档体裁；「先量机器」的三步在 <a href="/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/">/docs/00-导读/把环境搭好/环境准备/</a> 被穷尽展开
+<strong>难度·耗时</strong>：★☆☆ · 25 分钟（含动手自检 5 分钟）
+<strong>自测三题</strong>：</p>
+<ol>
+<li>你只想解决「容器里连不上宿主机的服务」，该走哪条轨、进哪一篇？为什么不是按编号读？</li>
+<li>实战暗线既然不是阅读路线，它保证的是什么？</li>
+<li>为什么「按编号从 0.1 读到 9.4」会被明确不推荐？它丢掉的是哪一样东西？</li>
+</ol>
+</blockquote>
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--为什么要先读这一页">为什么要先读这一页
+</h2>
+<p>去年有个应届生领到一台新笔记本，第一天做了这件事：他打开一个文档站的目录，从第一篇第一个字开始往下读，读到第四篇时已经是下午四点，然后开始装 MySQL——因为他觉得「后面总会讲到」。晚上他发了条消息：</p>
+<div class="td-code td-code--untitled" id="td-code-3860a318-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-3860a318-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">「文档我读了大半，为什么还是跑不起来我们的服务？」
+</span></span><span class="line"><span class="cl">「你读到讲 volume 那一节了吗？」
+</span></span><span class="line"><span class="cl">「还没有，我在读镜像分层。」
+</span></span><span class="line"><span class="cl">「那你今天缺的其实是第二节里的两条 docker run。」</span></span></code></pre></div></div>
+</div>
+<p>这条对话暴露的不是他笨，而是<strong>文档给了他一条顺序，却没给他在顺序里定位自己的能力</strong>。三种读法都会以不同方式失败：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">读法</th>
+      <th scope="col">表面理由</th>
+      <th scope="col">实际会发生什么</th>
+      <th scope="col">这个库怎么治</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>按编号从头读</td>
+      <td>「系统地学」</td>
+      <td>在无关章节上花掉当天最清醒的两小时，动手时间永远排在后面</td>
+      <td>明确不推荐；编号只保证引用稳定，不承诺阅读顺序</td>
+    </tr>
+    <tr>
+      <td>按搜索跳读</td>
+      <td>「我只要这个答案」</td>
+      <td>拿到一条命令，不知道为什么，换个场景就失效</td>
+      <td>每篇头部的「前置依赖」与「本篇产出物」告诉你缺什么、能拿到什么</td>
+    </tr>
+    <tr>
+      <td>问同事</td>
+      <td>最快</td>
+      <td>每个人给的顺序不一样，且没有沉淀</td>
+      <td>团队规范集中在 7.11，是<strong>唯一事实来源</strong>，别处只链接不复述</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<blockquote>
+<p>💡 新人小结：这个库像一座开架图书馆。书按主题分区上架（基础认知、镜像构建、运维手册……），你可以直接走向需要的区；每个书脊上贴着一张小条，写「读这本书前你得先懂哪两本」「读完你能带走什么」。<strong>编号是索书号，不是借阅顺序</strong>——图书馆从没要求任何人从 001 号开始读。
+对应到这个库：分区 = 十个主题篇；书脊小条 = 每篇第一屏的七项头部契约；索书号 = 章节编号。而「实战暗线」是馆方的一条<strong>装修动线</strong>：它规定每本书里的动手例子该长在哪一步，不是给读者规划的参观路线。</p>
+</blockquote>
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--这个库是怎么组织的">这个库是怎么组织的
+</h2>
+<p>两条轨，主副分明：</p>
+<ul>
+<li><strong>主题轨</strong>是主干。十个分类按读者的认知顺序排列——先知道为什么需要它，再会跑起来，再会造镜像，再会编排，再问原理，再上生产，最后是会坏的东西怎么修。你可以通读，也可以只查其中一篇。</li>
+<li><strong>实战暗线</strong>是副。所有动手例子共用同一个项目（一个 Spring Boot 后端 + 一个 Vue3 前端 + MySQL + Redis + nginx），它从「本机装不上依赖」一路生长到「出事能查、查完留痕」，共八段。<strong>它是示例资产的生长骨架，不是你的阅读路线。</strong></li>
+</ul>
+<p>这个定位不是从一开始就定下来的，中间走过一条弯路，值得记下来免得再走：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">方案</th>
+      <th scope="col">当时的想法</th>
+      <th scope="col">代价</th>
+      <th scope="col">结局</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>主线（v2.0）</td>
+      <td>给新人一条完整的路，按段通读最不容易迷路</td>
+      <td>与「按主题学习」抢路径；读者要同时维护两套顺序；查一个知识点时被迫关心它在链条第几节</td>
+      <td><strong>放弃</strong>。它把「我为什么要现在读它」的回答绑死在链条位置上</td>
+    </tr>
+    <tr>
+      <td>只做增量补章节（v1.2 原样）</td>
+      <td>骨架不动，缺什么补什么，最省事</td>
+      <td>并列知识点越来越多，60 篇涨到 80 篇时每篇更孤立</td>
+      <td><strong>放弃</strong>。这是原病灶</td>
+    </tr>
+    <tr>
+      <td>主题为主 + 实战为暗线（现行）</td>
+      <td>主题轨管阅读，暗线管例子的组织</td>
+      <td>必须另立判据保证例子不断链——于是有下面的「从 0 完整性三条」</td>
+      <td><strong>采用</strong></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>被放弃的方案不是没价值的：主线那条路对「完全不知道该问什么」的人仍然有用，它被保留成 0.2 里的一条<strong>推荐路径</strong>（7 天上手线），只是不再是唯一入口。</p>
+<pre class="td-mermaid-source"><code class="language-mermaid">flowchart LR
+    subgraph T[&#34;主题轨 · 你可以从这里任何一篇进出&#34;]
+        direction LR
+        P0[&#34;导读&#34;] --&gt; P1[&#34;基础认知&#34;] --&gt; P2[&#34;核心操作&#34;] --&gt; P3[&#34;镜像构建&#34;] --&gt; P4[&#34;单机编排&#34;]
+        P4 --&gt; P5[&#34;原理深入&#34;] --&gt; P6[&#34;工程化&#34;] --&gt; P7[&#34;运维手册&#34;] --&gt; P8[&#34;生态附录&#34;] --&gt; P9[&#34;常见问题&#34;]
+    end
+    subgraph C[&#34;实战暗线 · 示例链八段&#34;]
+        direction LR
+        E1[&#34;① 依赖跑起来&#34;] --&gt; E2[&#34;② 写成声明&#34;] --&gt; E3[&#34;③ 第一个镜像&#34;] --&gt; E4[&#34;④ 更快更小&#34;]
+        E4 --&gt; E5[&#34;⑤ 推上仓库&#34;] --&gt; E6[&#34;⑥ 交给流水线&#34;] --&gt; E7[&#34;⑦ 部署基线&#34;] --&gt; E8[&#34;⑧ 故障演练&#34;]
+    end
+    P2 -.-&gt; E1
+    P4 -.-&gt; E2
+    P3 -.-&gt; E3
+    P3 -.-&gt; E4
+    P6 -.-&gt; E6
+    P7 -.-&gt; E8</code></pre><p>读这张图的正确方式：上面一路是<strong>你的入口</strong>，下面一路是<strong>例子的生长顺序</strong>。虚线只说明「这一篇的动手例子会用到那一段的产物」，不代表你要先走完。</p>
+<blockquote>
+<p>💡 新人小结：暗线像一家餐厅后厨的出菜顺序——凉菜先上、热菜随后、汤压轴。作为客人你点菜不受这个顺序约束（你可以只要汤），但它确实存在，因为<strong>如果汤先出、凉菜后出，那桌菜就坏了</strong>。
+对应到这个库：你点菜 = 按主题查阅；后厨出菜顺序 = 示例链八段；「汤先出会坏」= 后一段的示例若覆盖了前一段的产物，前后对照就再也复现不了。所以下面三条判据是硬的。</p>
+</blockquote>
+<h3 id="pg-3cd1c19fa104cade16fe7afa07dbde69--示例链的从-0-完整性三条">示例链的从 0 完整性三条
+</h3>
+<p>暗线不再承担阅读路线后，「跟着例子从零做完」这件事不能再靠顺序保证，只能独立可判：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">判据</th>
+      <th scope="col">具体要求</th>
+      <th scope="col">谁来验</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>每段自带全部前置</td>
+      <td>该段跑通所需的引擎版本、JDK/Node 版本、初始数据、机器要求，全写在该段的 <code>README</code> 里；<strong>禁止出现「按前面几步的准备」</strong></td>
+      <td>在一台没跑过任何段的机器上，只看这一段 README 跑一遍；跑不通即不合格</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>后段不覆盖前段产物</td>
+      <td>演进用新文件表达（<code>Dockerfile.v1</code> 与 <code>.v2</code> 并存，开发用 <code>compose.dev.yaml</code>、生产用 <code>compose.prod.yaml</code>）</td>
+      <td>逐段检出、逐段构建</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>跳级自检成立</td>
+      <td>第 N 段声明的前置，必须能被第 1 到 N-1 段的产出满足；需要段外操作时，该段 README 必须显式写出这一步</td>
+      <td>脚本比对前置清单与产出清单</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第 3 条有个反直觉的设计值得先说：链上<strong>不是每段都依赖前段</strong>。示例后端的 <code>api-service</code> 自带完整源码，你可以在完全没跑过前两段的情况下直接从第③段起步——因为「造镜像」这个主题需要的是一个可构建的工程，不是一个已经跑起来的开发环境。如果每段都硬咬住前一段，暗线就会以另一种形式变回主线。</p>
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--头部契约七项各自解决什么">头部契约七项各自解决什么
+</h2>
+<p>每篇正文第一屏都有这七行。它不是装饰，每一项都在堵一个具体的失败：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">它回答的问题</th>
+      <th scope="col">缺了会怎样</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>实战落点</td>
+      <td>本篇的动手例子挂在示例链哪一段</td>
+      <td>例子变成与主题无关的综合大作业，读者抄不动</td>
+    </tr>
+    <tr>
+      <td>示例版本</td>
+      <td>用到哪个文件的哪一版、承前自哪一段</td>
+      <td>演进链断了也看不出来，前后对照复现不了</td>
+    </tr>
+    <tr>
+      <td>前置依赖</td>
+      <td>读这篇前必须会什么（最多 3 个）</td>
+      <td>读者在缺前置的情况下硬读，产生「讲了但没懂」</td>
+    </tr>
+    <tr>
+      <td>本篇产出物</td>
+      <td>读完手上多了什么可验证的东西</td>
+      <td>「理解了原理」这种无法验收，学与不学看不出差别</td>
+    </tr>
+    <tr>
+      <td>拓展接口</td>
+      <td>本篇的结论后面被谁复用、被谁推翻</td>
+      <td>基础篇的简化结论被后面悄悄改掉，读者以为前面写错了</td>
+    </tr>
+    <tr>
+      <td>难度·耗时</td>
+      <td>要不要现在读、要留多久</td>
+      <td>排期靠猜，新人按阅读速度估时间，一算就崩</td>
+    </tr>
+    <tr>
+      <td>自测三题</td>
+      <td>我是不是真读完了</td>
+      <td>眼睛划过一遍就当会了</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>「拓展接口」这项值得多说一句，因为它是这个库<strong>允许基础内容不写全</strong>的前提。基础篇可以只给一个够用的简化说法，条件是它必须自己声明在哪里会被修正。比如基础那几篇说「容器内存限制就是容器能用的内存上限」，这在单机开发里够用；到运行基线那篇要修正成「限制值还决定了 JVM 默认堆的推算」，并且要写明这是修正而不是前面写错。</p>
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--该按什么顺序读">该按什么顺序读
+</h2>
+<h3 id="pg-3cd1c19fa104cade16fe7afa07dbde69--七天上手给第一次接触容器的人">七天上手（给第一次接触容器的人）
+</h3>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">天</th>
+      <th scope="col">做什么</th>
+      <th scope="col">进哪一篇</th>
+      <th scope="col">当天结束时的判据</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>装环境并跑通两条验证命令</td>
+      <td>环境准备</td>
+      <td><code>docker version</code> 客户端与服务端都有读数；<code>hello-world</code> 打出欢迎文本</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>把两个依赖服务跑起来，本地程序连上它们</td>
+      <td>端口映射、数据管理与权限时区</td>
+      <td>删掉容器再起，之前的数据还在</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>把昨天的长命令改写成一份声明文件</td>
+      <td>多环境热重载与五服务完整实战</td>
+      <td>一条命令起全栈，状态全部 healthy</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>给手上那个服务写第一份镜像描述文件</td>
+      <td>Dockerfile 指令全解与构建上下文</td>
+      <td>换一个没装开发环境的同事能构建出可用镜像</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>让构建变快变小</td>
+      <td>分层缓存多阶段构建与镜像瘦身</td>
+      <td>交出体积与重建耗时的前后对照数字</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>打标签推到仓库，再从仓库拉回来</td>
+      <td>BuildKit私有仓库标签策略与构建排错</td>
+      <td>本地镜像删光后仍能起；标签能反查到提交号</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>制造一次故障并修好它</td>
+      <td>容器起不来与网络不通</td>
+      <td>能回答「下次同样的告警，第一条命令敲什么」</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="pg-3cd1c19fa104cade16fe7afa07dbde69--三十天进阶">三十天进阶
+</h3>
+<p>第 8<del>14 天补原理按需部分（联合文件系统、资源限制、网络底层），第 15</del>21 天走交付链路与运行基线，第 22~30 天读运维手册全篇并回填团队规范。<strong>判断你是否需要读原理篇的唯一依据是触发条件</strong>：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">原理篇章节</th>
+      <th scope="col">什么时候该读</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>联合文件系统与镜像分层</td>
+      <td>想真正弄懂「分层为什么能省空间」——建议在示例链第④段之前</td>
+    </tr>
+    <tr>
+      <td>容器本质、Namespace 与 Cgroups</td>
+      <td>遇到退出码 137，或要设资源限制——第⑦段前必读</td>
+    </tr>
+    <tr>
+      <td>网络底层、跨主机方案与运行时生态</td>
+      <td>网络排错排到「容器之间通、但出不去外网」，或开始评估 Kubernetes</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="pg-3cd1c19fa104cade16fe7afa07dbde69--按角色">按角色
+</h3>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">角色</th>
+      <th scope="col">必读</th>
+      <th scope="col">按需</th>
+      <th scope="col">可以跳过</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>后端（Java/Node）</td>
+      <td>核心操作、镜像构建、单机编排</td>
+      <td>原理按需、运行基线</td>
+      <td>生态地图</td>
+    </tr>
+    <tr>
+      <td>前端</td>
+      <td>镜像构建的多阶段部分、单机编排的热重载</td>
+      <td>命令速查</td>
+      <td>资源限制细节</td>
+    </tr>
+    <tr>
+      <td>运维 / 值班</td>
+      <td>运维手册全篇、运行基线</td>
+      <td>备份容灾、监控</td>
+      <td>前端构建</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<blockquote>
+<p>💡 新人小结：路径表像导航软件的三种模式——「最短时间」「少换乘」「避开高速」。同一张路网，三种目标函数给三条不同路线，<strong>它们都对，只是回答的问题不同</strong>。
+对应到这个库：七天线 = 最短时间（尽快能干活）；三十天 = 少换乘（知识成体系，中间不跳步）；角色表 = 避开高速（只走你职责范围内的那段）。所以别问「哪条路正确」，问「我这次要到达什么」。</p>
+</blockquote>
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--贯穿示例总览">贯穿示例总览
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">段</th>
+      <th scope="col">这一段新增什么能力</th>
+      <th scope="col">主要落在这几篇</th>
+      <th scope="col">闭合判据（怎么算这一段做完了）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>①</td>
+      <td>本机不装数据库与缓存，用两个容器顶替</td>
+      <td>端口映射数据管理与权限时区、容器生命周期</td>
+      <td>删容器再起数据仍在；本地进程能查到容器里写入的行</td>
+    </tr>
+    <tr>
+      <td>②</td>
+      <td>把九参数命令变成一条声明式启动</td>
+      <td>Compose语法基线与文件全字段参考、多环境热重载与五服务完整实战</td>
+      <td>一条命令起全栈且全部健康；重启后数据仍在</td>
+    </tr>
+    <tr>
+      <td>③</td>
+      <td>后端服务有了自己的镜像</td>
+      <td>Dockerfile指令全解与构建上下文</td>
+      <td>换一台没装 JDK 的机器能构建出可用镜像</td>
+    </tr>
+    <tr>
+      <td>④</td>
+      <td>镜像变小、构建变快</td>
+      <td>分层缓存多阶段构建与镜像瘦身</td>
+      <td>交出体积 / 重建耗时 / 缓存命中层数三个前后数字</td>
+    </tr>
+    <tr>
+      <td>⑤</td>
+      <td>镜像有地方放，且有版本可追</td>
+      <td>BuildKit私有仓库标签策略与构建排错</td>
+      <td>删光本地镜像仍能起；标签能反查提交号</td>
+    </tr>
+    <tr>
+      <td>⑥</td>
+      <td>构建交给机器，人不再手工</td>
+      <td>CI/CD 中的 Docker 与安全基线</td>
+      <td>改一行代码自动出镜像；<strong>故意写坏一条指令，检查必须变红</strong></td>
+    </tr>
+    <tr>
+      <td>⑦</td>
+      <td>部署面有资源上限、日志轮转与回滚</td>
+      <td>日志资源限制部署策略与回滚、监控最小集与备份容灾</td>
+      <td>压力打到内存时容器被限住而宿主机不被拖垮；回滚成功</td>
+    </tr>
+    <tr>
+      <td>⑧</td>
+      <td>出事时查得到、查完留得下</td>
+      <td>容器起不来与网络不通、磁盘占满与镜像拉取失败</td>
+      <td>三份复盘各自能回答「第一条命令敲什么」</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>团队当前还在本地开发阶段，第⑦、⑧段明确是<strong>演练</strong>：所有故障由我们自己构造，复盘库里把「构造事故」与将来的「真实事故」分栏存放，避免把演练当成经验沉淀。</p>
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--实战切入先量你自己的机器">实战切入：先量你自己的机器
+</h2>
+<p>这一段是本篇的动手环节，它落在示例链第①段的最前面——<strong>在你跑第①段之前，先确认你脚下是不是实地</strong>。三条检查都在本机可跑。这台机器在 2026-10-25 与 2026-10-27 各测过一轮，两轮结果放在一起才说明问题：</p>
+<div class="td-code td-code--untitled" id="td-code-3860a318-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="15">
+  <div class="td-code__viewport" id="td-code-3860a318-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 第一轮 2026-10-25</span>
+</span></span><span class="line"><span class="cl">$ <span class="nb">command</span> -v docker <span class="o">||</span> <span class="nb">echo</span> <span class="s2">&#34;docker NOT on PATH&#34;</span>
+</span></span><span class="line"><span class="cl">docker NOT on PATH                          <span class="c1"># 返回码 127</span>
+</span></span><span class="line"><span class="cl">$ wsl.exe --status
+</span></span><span class="line"><span class="cl">未安装适用于 Linux 的 Windows 子系统。可通过运行 “wsl.exe --install” 进行安装。
+</span></span><span class="line"><span class="cl">                                            <span class="c1"># 返回码 50，输出是 UTF-16LE，要先解码</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 第二轮 2026-10-27（装了桌面版引擎之后）</span>
+</span></span><span class="line"><span class="cl">$ docker version --format <span class="s1">&#39;{{.Server.Version}}&#39;</span> <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">29.8.0
+</span></span><span class="line"><span class="cl"><span class="nv">rc</span><span class="o">=</span><span class="m">0</span>
+</span></span><span class="line"><span class="cl">$ wsl.exe --status <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">默认分发: docker-desktop
+</span></span><span class="line"><span class="cl">默认版本: <span class="m">2</span>
+</span></span><span class="line"><span class="cl">                                            <span class="c1"># 返回码 0</span></span></span></code></pre></div></div>
+</div>
+<p><code>wsl.exe</code> 的输出是 <strong>UTF-16LE</strong>，直接在 Git Bash 里看是一段乱码字节，必须先按 UTF-16 解码才能读到文本——这不是容器工具的问题，但会挡住你判断到底装没装。<strong>看返回码，不要靠肉眼看输出</strong>：第一轮那个 rc=50 和第二轮的 rc=0 才是可信信号。顺带一条：成功输出里可能夹着「当前计算机配置不支持 WSL1」这样的提示，它是说明不是错误，别被它带偏。</p>
+<p>第三条检查最有意思，也最容易被误判：<strong>能解析不等于解析对了</strong>。</p>
+<div class="td-code td-code--untitled" id="td-code-3860a318-fence-3" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-3860a318-fence-3-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ python -c <span class="s2">&#34;import socket;print(sorted({i[4][0] for i in socket.getaddrinfo(&#39;registry-1.docker.io&#39;,443)}))&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span><span class="s1">&#39;31.13.70.13&#39;</span><span class="o">]</span>     <span class="c1"># 第一轮，5 毫秒返回，看着完全健康</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span><span class="s1">&#39;64.13.192.76&#39;</span><span class="o">]</span>    <span class="c1"># 第二轮，同一个域名，另一个地址</span></span></span></code></pre></div></div>
+</div>
+<p>紧接着对它发起连接，两轮都是六秒超时，而对照站点两轮都很快：</p>
+<div class="td-code td-code--untitled" id="td-code-3860a318-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-3860a318-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">TCP 443 → registry-1.docker.io   超时（第一轮 6006 ms / 第二轮 6018 ms）
+</span></span><span class="line"><span class="cl">对照 www.baidu.com              成功（23 ms → 55 ms，两轮都是 200）
+</span></span><span class="line"><span class="cl">对照 gitee.com                  成功（29 ms → 83 ms，两轮都是 200）</span></span></code></pre></div></div>
+</div>
+<p>第一轮我还用过另一招：换解析器问同一个域名，当时得到三个不同地址（系统 <code>31.13.70.13</code>、<code>223.5.5.5</code> 给 <code>199.59.149.238</code>、<code>114.114.114.114</code> 给 <code>185.60.219.41</code>），而对照站点在两个解析器下答案一致。<strong>这一招第二轮失效了</strong>——那两个解析器的 UDP 53 直接超时。所以判据要换成两条仍然拿得到的证据：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">证据</th>
+      <th scope="col">本机读数</th>
+      <th scope="col">为什么够用</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>同一域名答案随时间变</td>
+      <td>宿主两轮各得一个地址；第二轮<strong>容器内</strong>第三次问得到 <code>108.160.166.57</code>，与前两个都不同</td>
+      <td>权威解析不会两天给三个全都连不通的地址；对照站点两轮稳定</td>
+    </tr>
+    <tr>
+      <td>引擎自述它实际连的是哪个地址</td>
+      <td><code>docker pull</code> 的报错里写着 <code>dial tcp 64.13.192.76:443: connectex</code>，与宿主 <code>getaddrinfo</code> 的结果<strong>同一个地址</strong></td>
+      <td>排除「引擎走了另一条解析路径」，也排除应用层拒绝——失败在传输层</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>判据落在这里：所以「拉不下来」的第一定位动作不是换加速器，而是先分清你卡在哪一段。这条自查的完整展开（七条判据、四段定位图、以及<strong>不依赖镜像仓库验证运行时</strong>的办法）在 <a href="/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/">/docs/00-导读/把环境搭好/环境准备/</a>。</p>
+<p>三轮检查跑完，按结果分流：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">结果组合</th>
+      <th scope="col">你该进的地方</th>
+      <th scope="col">不该进的地方</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>第 1、2 条任一失败（像第一轮）</td>
+      <td>环境准备，从装开始</td>
+      <td>不要开始读示例链第①段，你会把环境问题当成文档问题</td>
+    </tr>
+    <tr>
+      <td>1、2 过但解析与拉取不过（像第二轮）</td>
+      <td>环境准备的「打通通道：代理与加速器」一节</td>
+      <td><strong>仍然不要开第①段</strong>。引擎可用不等于能拉镜像</td>
+    </tr>
+    <tr>
+      <td>七条全过（本机第三轮起即此格）</td>
+      <td>示例链第①段，落位在端口映射数据管理与权限时区</td>
+      <td>不必通读导读剩下的部分</td>
+    </tr>
+    <tr>
+      <td>全过但只想知道某个参数</td>
+      <td>命令速查症状索引与团队规范</td>
+      <td>不要按编号顺序读</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--这个库不包含什么">这个库不包含什么
+</h2>
+<p>边界要说在前面，否则读者会把它当容器技术的全集，在错误的地方来查正确的东西：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">不含</th>
+      <th scope="col">到哪去</th>
+      <th scope="col">为什么不放进来</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Kubernetes 的具体操作</td>
+      <td>生态附录的衔接导读只讲到「为什么单机不够」为止</td>
+      <td>编排面的知识体量与本库同级，混在一起两边都写不透；本库的职责是让单机动线闭环</td>
+    </tr>
+    <tr>
+      <td>云厂商托管服务的控制台操作</td>
+      <td>各云厂商自己的文档</td>
+      <td>控制台界面变动频繁，写进库里的第二个月就开始腐烂</td>
+    </tr>
+    <tr>
+      <td>服务网格、无服务器等下游议题</td>
+      <td>生态地图里给一句话定位与引入时机</td>
+      <td>它们各自的判据与本库不同，放在一起会误导「现在就该上」</td>
+    </tr>
+    <tr>
+      <td>某个业务系统的部署手册</td>
+      <td>该系统的仓库内文档</td>
+      <td>业务相关的拓扑与密钥不属于通用知识库</td>
+    </tr>
+    <tr>
+      <td>引擎与依赖的「最新版本」</td>
+      <td>8.6 版本与兼容矩阵，按 as-of 日期给现查命令</td>
+      <td>钉死版本数字的文档必然滞后；库里只写「怎么现查」与「已知不兼容组合」</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>还有一条隐含边界：本库的命令例子统一在 <strong>Linux 容器语义</strong>下讲解，Windows 容器的使用极少见且差异大，遇到时按「不适用」处理而不是硬套——这条在 Windows 与 WSL2 那一节会具体展开。</p>
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--怎么把问题问到能答的程度">怎么把问题问到能答的程度
+</h2>
+<p>同一个故障，两种问法，得到的帮助差别很大。这不是态度问题，而是<strong>信息结构</strong>问题：排错手册按「症状 → 判据 → 命令 → 根因」组织，你的提问也要落到这四列里。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">问法</th>
+      <th scope="col">实际效果</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>「Docker 起不来了怎么办」</td>
+      <td>无法定位。范围覆盖十个故障域，只能反问一串问题</td>
+    </tr>
+    <tr>
+      <td>「容器起来 3 秒就退了，<code>ps -a</code> 显示退出码 137，宿主机内存还剩很多」</td>
+      <td>一次命中。退出码 + 时间特征 + 已排除项，直接进对应那一行</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>值班可用的最小提问模板，四条信息按顺序给：</p>
+<div class="td-code td-code--untitled" id="td-code-3860a318-fence-5" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-3860a318-fence-5-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1. 症状：一条现象描述 + 原始报错文本（不要转述，原文粘贴）
+</span></span><span class="line"><span class="cl">2. 范围：影响单个容器 / 整个宿主机 / 整个集群
+</span></span><span class="line"><span class="cl">3. 已排除：已经查过并否定的假设（这比「我试了什么」更有信息量）
+</span></span><span class="line"><span class="cl">4. 环境：引擎版本、宿主系统、是否近期变更过</span></span></code></pre></div></div>
+</div>
+<p>第 3 条最容易被省，也最值钱——它决定了别人要不要重复你已经走过的路。这一模板与 7.2 症状索引是同一套思路：<strong>按现象检索，而不是按原因检索</strong>，因为在出事的当下你并不知道原因。</p>
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--常见误读">常见误读
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">你可能的理解</th>
+      <th scope="col">实际情况</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>「实战暗线」意味着正文里的例子可以随便举</td>
+      <td>不对。暗线的例子<strong>必须</strong>来自贯穿示例的真实一段，不能是虚构项目</td>
+    </tr>
+    <tr>
+      <td>编号顺序就是推荐阅读顺序</td>
+      <td>编号只保证引用稳定。顺序由每篇的「前置依赖」决定</td>
+    </tr>
+    <tr>
+      <td>七天表是排期承诺</td>
+      <td>那是路径，不是工时；耗时数字目前是估算，正文写完后按实测回填</td>
+    </tr>
+    <tr>
+      <td>每篇都能独立读</td>
+      <td>头部契约列出的前置是硬要求；「能进出」指入口自由，不是内容无前置</td>
+    </tr>
+    <tr>
+      <td>基础篇故意留白是写得不全</td>
+      <td>恰恰相反。基础篇必须显式声明「本篇不覆盖什么、交给哪一篇」，留白才是合格</td>
+    </tr>
+    <tr>
+      <td>第⑦⑧段的复盘是生产事故</td>
+      <td>是演练构造的。复盘库里两类分开标注</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--要点总结">要点总结
+</h2>
+<ul>
+<li>主题轨是主干，实战暗线是副；暗线管例子的组织与生长顺序，<strong>不规定你的阅读路线</strong>。</li>
+<li>暗线化之后「例子从 0 做完」必须有独立判据，就是那三条：自带前置、不覆盖前段、跳级自检。</li>
+<li>每篇第一屏的七项头部契约是这套库的承重件：它把「递进」从章节顺序的隐含属性，变成每篇自己声明的显式属性。</li>
+<li>「拓展接口」是基础内容允许简化的前提——<strong>基础篇可以不给全，但必须自己声明在哪里被修正</strong>，否则读者会把修正当成前文写错。</li>
+<li>上手前先量三样：命令在不在、子系统在不在、镜像域名解析对不对。<strong>DNS 秒回不构成「解析正常」的证据</strong>；而两轮读数又补了一条同样重要的：<strong>引擎可用不等于能拉镜像</strong>——本机第二轮引擎与子系统都合格，第①段仍开不了跑，直到第三轮配上代理才解开。别把「通道不通」误判成「引擎坏了」去重装。</li>
+<li>读数要<strong>留两轮</strong>。只保留最后那一轮，就再也得不出「安装到底改变了什么」，也会把「一直不通」误判成「被这次安装弄坏了」。</li>
+<li>三条路径（七天 / 三十天 / 按角色）都对，它们回答的问题不同；先确定你要到达什么，再选路。</li>
+</ul>
+<h2 id="pg-3cd1c19fa104cade16fe7afa07dbde69--本篇未验证项">本篇未验证项
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">原因</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>示例链第①段完整跑通</td>
+      <td><strong>已验证</strong></td>
+      <td>配好代理后第 6 条解除。Redis 键值与 MySQL 两行数据（含时间戳）都在 <code>docker rm -f</code> 后挂同一命名卷重起时原样读回；宿主经 <code>127.0.0.1:3307</code> 还拿到了 MySQL 握手包。完整读数在环境准备那篇</td>
+    </tr>
+    <tr>
+      <td>容器运行时本身是否可用</td>
+      <td><strong>已验证</strong>（两条路径）</td>
+      <td>不依赖仓库的一条：<code>FROM scratch</code> + 本机静态二进制，<code>--memory=64m</code> 在容器内读到 <code>67108864</code>；依赖仓库的一条：<code>docker run --rm hello-world</code> 返回码 0</td>
+    </tr>
+    <tr>
+      <td>第①段 README 的「自带前置」判据</td>
+      <td>未验证</td>
+      <td>示例目录尚未创建，判据一无法在干净机器上复现——第①段能跑不等于它已按判据一的形态交付</td>
+    </tr>
+    <tr>
+      <td>七天天数的实际耗时</td>
+      <td>估算值</td>
+      <td>28 篇里目前只写完导读 3 篇，天数分配依据章节权重而非实测读数</td>
+    </tr>
+    <tr>
+      <td>地址被改写的归因（谁改的、在哪一跳）</td>
+      <td>未验证</td>
+      <td>已证三条事实：同一域名两轮加容器内共得三个不同地址、443 不可达、对照站点两轮稳定。跨解析器对照那一招在第二轮因 UDP 53 超时已不可用，未核查这些地址的归属</td>
+    </tr>
+    <tr>
+      <td>浏览器端的渲染与离线搜索命中</td>
+      <td>未验证</td>
+      <td>本轮只做结构与内容校验，渲染类判据需要真实浏览器目测</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+</div>
+
+
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+	<h1 id="pg-964abef081a8672cc5b5966b0e44d20a">1.2 - 写作要求 W1~W6 与文档模板</h1>
+    <div class="lead">这个库的正文按什么标准算合格：文风三条线、问题驱动四段、新人小结的双段式、结构化载体、七项头部契约，以及基础层的完整性判据。</div>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第①段 · 依赖跑起来（本篇的实战切入是「拿一篇真文档跑一遍合格检查」，不需要容器引擎）
+<strong>示例版本</strong>：本篇不产出示例文件；检查对象是导读板块已存在的三篇文章
+<strong>前置依赖</strong>：<a href="/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/">/docs/00-导读/怎么用这个库/使用指南与主线八站地图/</a>
+<strong>本篇产出物</strong>：一份可直接复制的模板文件路径清单，以及四组「不合格写法 vs 合格写法」的实际对照
+<strong>拓展接口</strong>：本篇的「问题驱动四段」在第七篇被推翻一部分——检索型文档不套这四段，例外清单见下；「基础层完整性」在第九篇被复用为问答的出处指针
+<strong>难度·耗时</strong>：★★☆ · 30 分钟（含动手检查）
+<strong>自测三题</strong>：</p>
+<ol>
+<li>为什么每篇开头要放七项元数据，而不是只在目录页写一次？</li>
+<li>新人小结为什么必须在类比之后补一句机制对应？只给类比会漏掉什么？</li>
+<li>检索型文档被允许不套问题驱动四段，这条例外的判断依据是什么？</li>
+</ol>
+</blockquote>
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--为什么要给写作本身定规矩">为什么要给写作本身定规矩
+</h2>
+<p>这个库有 76 章、合并成 28 篇。如果没有统一的写作要求，会发生的事情是确定的：每个人按自己习惯的写法写，两百多篇文档长成两百多种样子。下面是一次真实的合并评审里出现的三种分歧，都跟内容对错无关：</p>
+<div class="td-code td-code--untitled" id="td-code-29b83f61-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-29b83f61-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">甲：「这篇开头先讲概念定义，读者需要。」
+</span></span><span class="line"><span class="cl">乙：「我负责的篇都从一段报错开始，读起来快。」
+</span></span><span class="line"><span class="cl">丙：「我把小结放在开头当摘要了，结尾就没有总结段。」
+</span></span><span class="line"><span class="cl">三人：「我们都符合『讲清楚了』的标准。」</span></span></code></pre></div></div>
+</div>
+<p>问题不在谁对，而在<strong>没有可检查的共同标准</strong>，于是「讲清楚了」变成每人一套。定规矩的收益不是文笔变好，而是三件可操作的事：读者在任何一篇都能在同一位置找到同一类信息；评审有明确的可查项而不是凭印象；新作者不必先揣摩风格。</p>
+<blockquote>
+<p>💡 新人小结：给技术文档定写作要求，像连锁餐饮的<strong>标准作业书</strong>。它不是为了让每个厨师做得更有创意，而是让顾客在任何一家店、任何一位值班厨师手里，拿到同一份味道和同一套出菜顺序。
+对应到这里：标准作业书 = 本章的 W1~W6；「同一份味道」= 每篇都在同一位置有痛点开场、实战切入、要点总结；顾客 = 零基础新人，他不知道你的篇章该长什么样，所以只能靠位置的一致性来定位信息。</p>
+</blockquote>
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--w1-文风三条合格线">W1 文风：三条合格线
+</h2>
+<p>三条各有可自查的动作，不接受「我觉得写得还行」。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">维度</th>
+      <th scope="col">含义</th>
+      <th scope="col">合格线</th>
+      <th scope="col">怎么自查</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>严谨</td>
+      <td>每个技术断言都可被验证</td>
+      <td>数字带出处或标注核对日期；命令带真实输出；不用「通常」「一般来说」「可能」掩盖自己没验证过</td>
+      <td>全文搜这几个词，逐个改成有出处的断言；改不出来的直接删掉</td>
+    </tr>
+    <tr>
+      <td>不晦涩</td>
+      <td>零基础新人读完一段能复述「这段让我做什么」</td>
+      <td>术语首次出现必须解释或指向术语表；一句话只讲一件事；长句拆短</td>
+      <td>找一个没接触过容器的人读第一段，问他「这段让你干什么」——答不出即不合格</td>
+    </tr>
+    <tr>
+      <td>深度</td>
+      <td>不停在「怎么做」，要给「为什么」和「不这样做的代价」</td>
+      <td>凡有方案选择处，写出被放弃的方案与放弃理由；凡有默认值处，说明它为什么是这个值</td>
+      <td>检查本篇是否只有「推荐做法」而没有「为什么不选另一种」</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>四类写法明确不要：夸大效果的形容词串（「极大地」「优雅地」「完美解决」）；没有主语的被动句连续堆叠；把官方手册翻译一遍当原创内容；用「大家都知道」跳过本该解释的那一步。</p>
+<p>「被放弃的方案要写出来」这条最容易偷懒。合格的样子是这样：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">你想说的</th>
+      <th scope="col">不合格写法</th>
+      <th scope="col">合格写法</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>用多阶段构建</td>
+      <td>「推荐使用多阶段构建」</td>
+      <td>「单阶段也能出镜像，但会把 JDK 与源码一起发布，体积从 800 MB 级降到 200 MB 级；代价是构建时间增加约一倍，本地调试时可以用单阶段」</td>
+    </tr>
+    <tr>
+      <td>设内存上限</td>
+      <td>「生产环境应当设置 limits」</td>
+      <td>「不设上限时容器会吃满宿主机内存并触发系统级进程终止，殃及同机所有容器；设了上限后风险收敛到该容器自身，代价是超限即被杀，所以要配合健康检查与重启策略一起用」</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--w2-问题驱动四段">W2 问题驱动四段
+</h2>
+<p>每篇正文按 <strong>痛点 → 设计 → 流程</strong> 推进，顺序不可倒；流程段内必须有一段<strong>实战切入</strong>。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">段</th>
+      <th scope="col">回答什么</th>
+      <th scope="col">写法要求</th>
+      <th scope="col">最容易写歪</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>① 为什么会有它</td>
+      <td>不用它会怎样</td>
+      <td>入口是一段真实来回对话或一条真实报错原文；痛点必须挂到示例链某一段的真实遗留</td>
+      <td>写成「随着业务发展，容器越来越重要」这类零信息量开场</td>
+    </tr>
+    <tr>
+      <td>② 它怎么解决的</td>
+      <td>机制与取舍</td>
+      <td>讲清设计意图与代价；有替代方案就列方案族谱并标适用边界</td>
+      <td>跳过机制直接进语法，读者只会照抄不会判断</td>
+    </tr>
+    <tr>
+      <td>③ 具体怎么用</td>
+      <td>手把手</td>
+      <td>命令 + 真实输出 + 判据，步骤可复现</td>
+      <td>只给结论命令不给验证，读者不知道自己成没成</td>
+    </tr>
+    <tr>
+      <td>③ 附 实战切入</td>
+      <td>这个主题在真实项目里长什么样</td>
+      <td>落到贯穿示例的真实一段：改哪个文件、跑哪条命令、看到什么算对；写明示例版本与承前关系</td>
+      <td>写成与本篇主题无关的综合大作业；或只在正文口头提一句、不给可跑落点</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<pre class="td-mermaid-source"><code class="language-mermaid">flowchart LR
+    A[&#34;① 痛点：真实报错或对话&#34;] --&gt; B[&#34;② 设计：机制与取舍&#34;]
+    B --&gt; C[&#34;③ 流程：命令与真实输出&#34;]
+    C --&gt; D[&#34;③附 实战切入：落到示例链一段&#34;]
+    D --&gt; E[&#34;常见误读&#34;]
+    E --&gt; F[&#34;要点总结&#34;]
+    F --&gt; G[&#34;未验证项&#34;]
+    B -. &#34;有替代方案时&#34; .-&gt; H[&#34;方案族谱表：被放弃方案与代价&#34;]
+    H -.-&gt; C</code></pre><h3 id="pg-964abef081a8672cc5b5966b0e44d20a--实战切入的三条约束">实战切入的三条约束
+</h3>
+<ol>
+<li><strong>随主题切入，不另起路线</strong>。它服务本篇主题；读者不需要读完示例链前几段才能用它，需要的最小前置由头部契约声明。</li>
+<li><strong>必须落到示例链的真实一段</strong>，不能虚构一个与贯穿示例无关的项目。</li>
+<li><strong>不许覆盖前段产物</strong>。用新文件或版本名区分（同一份镜像描述文件要留 v1 与 v2 两版），这样前后对照才复现得出来。</li>
+</ol>
+<h3 id="pg-964abef081a8672cc5b5966b0e44d20a--三段式的例外清单">三段式的例外清单
+</h3>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">章节类型</th>
+      <th scope="col">为什么不套</th>
+      <th scope="col">它们用什么结构</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>7.1 命令速查表</td>
+      <td>值班时在找命令，不在学原理</td>
+      <td>按命令分组 + 一行用途</td>
+    </tr>
+    <tr>
+      <td>7.2 症状索引</td>
+      <td>读者的输入是一条报错原文</td>
+      <td>现象关键字 → 该看哪一节</td>
+    </tr>
+    <tr>
+      <td>7.9 应急响应手册</td>
+      <td>凌晨三点，需要的是第一条动作</td>
+      <td>「处置动作 / 会丢失什么 / 事后要补什么」三栏</td>
+    </tr>
+    <tr>
+      <td>8.4 术语表、8.6 兼容矩阵</td>
+      <td>查阅件，按字母或版本检索</td>
+      <td>表格本体</td>
+    </tr>
+    <tr>
+      <td>第九篇常见问题</td>
+      <td>一问一答，套三段会让每条答案膨胀四倍</td>
+      <td>问题 — 机制 — 数字或命令 — 自查动作</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>判断某篇是否属于例外的依据只有一个：<strong>读者是不是带着一个具体现象来找答案</strong>。是，就走检索型结构；不是（他要在建立认知），就套四段。</p>
+<blockquote>
+<p>💡 新人小结：四段式像一次合格的门诊。医生不会一上来开药（那是只有③），也不会只讲病理不讲怎么办（那是只有②）。顺序是：先问你怎么不舒服（①），再解释这是什么机理（②），然后给出处方和复查标准（③+④）。
+对应到文档：主诉 = 痛点开场；病理 = 机制与取舍；处方 = 可复现流程；复查指标 = 判据。少了主诉，病人会怀疑诊断；少了复查指标，病人不知道自己好没好。</p>
+</blockquote>
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--w3-新人小结类比之后必须接机制">W3 新人小结：类比之后必须接机制
+</h2>
+<p>凡首次引入一个抽象概念，必须紧跟一段固定格式的小结。<strong>两条硬要求，缺一条即不合格</strong>：</p>
+<ol>
+<li>类比之后必须接一句<strong>机制对应</strong>，把生活物件的每个部件映射到技术名词上。只有类比没有对应等于修辞——读者读完仍然不知道那个名词是什么。</li>
+<li>类比必须在本篇的关键判据上成立。若它会在某处误导，要显式写出「这个类比在哪里失效」。</li>
+</ol>
+<div class="td-code td-code--untitled" id="td-code-29b83f61-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="markdown" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-29b83f61-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">💡 新人小结：镜像分层就像一摞透明胶片，每张画一部分，叠起来看才是完整画面；要改的时候只在最上面加一张新的，下面那些不动。
+</span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">对应到 Docker：下面那些只读胶片是 lowerdir（镜像层），你手上正在画的那张是 upperdir（容器层），叠出来给你看的是 merged。所谓「写时复制」就是——你要改下面某张的画面时，系统先把那一块复制到最上面这张，再改复印件。
+</span></span></span><span class="line"><span class="cl">&gt; 类比在这里失效：胶片是同时可见的，而镜像层只有最上面可写，下层被遮住的部分你照样能读，但一次改动只发生在你这一层。</span></span></code></pre></div></div>
+</div>
+<p>格式上有一条坑要写明：<strong>标记串必须原样写成「💡 新人小结」，中间不能加粗体符号</strong>。结构检查是按这个字面量统计篇内小结数量的，把标签包进强调标记里，检查就会把你写的小结全部数成零——这一条不是理论风险，本篇初稿就是这么被报出来又修掉的。</p>
+<p>必须配小结的概念清单（命中即强制，可增补）：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">概念</th>
+      <th scope="col">出现章节</th>
+      <th scope="col">类比方向</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>镜像与容器的关系</td>
+      <td>1.2</td>
+      <td>类与对象；菜谱与做出来的菜</td>
+    </tr>
+    <tr>
+      <td>镜像分层与写时复制</td>
+      <td>3.5、5.4</td>
+      <td>一摞透明胶片，只改最上面那张</td>
+    </tr>
+    <tr>
+      <td>构建上下文</td>
+      <td>3.4</td>
+      <td>寄快递时整个箱子都要过秤，不只是你要寄的那件</td>
+    </tr>
+    <tr>
+      <td>数据卷与绑定挂载</td>
+      <td>2.6</td>
+      <td>储物间，对比把家里柜子直接搬进办公室</td>
+    </tr>
+    <tr>
+      <td>命名空间隔离</td>
+      <td>5.1、5.2</td>
+      <td>一间间独立房间，每间有自己的门牌号</td>
+    </tr>
+    <tr>
+      <td>资源限制</td>
+      <td>5.3</td>
+      <td>自助餐每人限两盘，限的不是餐厅总量</td>
+    </tr>
+    <tr>
+      <td>端口映射</td>
+      <td>2.5</td>
+      <td>前台转接分机号，外线拨的是总机</td>
+    </tr>
+    <tr>
+      <td>多阶段构建</td>
+      <td>3.7</td>
+      <td>厨房里做完菜，端出去时不带灶台和锅</td>
+    </tr>
+    <tr>
+      <td>桥接网络</td>
+      <td>2.5、5.5</td>
+      <td>小区内部交换机，出小区才走运营商</td>
+    </tr>
+    <tr>
+      <td>健康检查</td>
+      <td>4.6</td>
+      <td>不能看「灯亮着」就算活着，要问一句还在不在营业</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--w4-结构化载体">W4 结构化载体
+</h2>
+<p>优先级：<strong>能用表格就不用段落，能用代码块就不用行内命令，关系类信息优先用图</strong>。</p>
+<h3 id="pg-964abef081a8672cc5b5966b0e44d20a--表格">表格
+</h3>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">什么时候必须用表格</th>
+      <th scope="col">什么时候不要用</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>三个以上对象、两个以上属性要对比</td>
+      <td>只有两行，或内容本身是线性叙述</td>
+    </tr>
+    <tr>
+      <td>承载实测数据——此时必须配列定义：每列回答什么问题、基准值是多少、最容易怎么读错</td>
+      <td>用来罗列本该写成步骤的操作</td>
+    </tr>
+    <tr>
+      <td>症状 → 判据 → 命令 → 根因 这类多域对照</td>
+      <td>单元格里塞超过三句话——那是段落，拆出去</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>同一份文档里多张表共用口径时，写一节统一的读表键并在每张表前加指针，不要逐表重复。</p>
+<h3 id="pg-964abef081a8672cc5b5966b0e44d20a--代码块">代码块
+</h3>
+<ul>
+<li>必须标语言，例如命令行、YAML、镜像描述文件、Java、Mermaid。</li>
+<li>命令与输出<strong>同块</strong>给出：命令带提示符前缀，输出为真实粘贴，可截断但要标注省略处。<strong>禁止手写想象中的输出</strong>。</li>
+<li>超过 20 行的完整文件放进示例目录，正文只给关键片段与文件路径。</li>
+<li>需要读者抄走的命令，必须能在贯穿示例里原样跑通。</li>
+</ul>
+<h3 id="pg-964abef081a8672cc5b5966b0e44d20a--图">图
+</h3>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">用途</th>
+      <th scope="col">图型</th>
+      <th scope="col">例子</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>组件与调用关系</td>
+      <td>流程图</td>
+      <td>引擎架构总览</td>
+    </tr>
+    <tr>
+      <td>一次操作背后发生了什么</td>
+      <td>时序图</td>
+      <td>创建并启动容器的逐段调用</td>
+    </tr>
+    <tr>
+      <td>排查决策</td>
+      <td>带判断分支的流程图</td>
+      <td>容器立刻退出的排查路径</td>
+    </tr>
+    <tr>
+      <td>演进与归属映射</td>
+      <td>流程图</td>
+      <td>本库主题轨与示例链的对照</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>四条硬规矩：</p>
+<ul>
+<li>节点标签一律用双引号包裹，避免中文标点与括号触发解析错误。</li>
+<li><strong>每张图必须过真解析器</strong>（<code>mermaid.parse()</code>），不接受「看着像对的」。本库的自动化检查里含这一步。</li>
+<li>一张图只表达一个关系维度，节点超过 15 个就拆。上面那张四段流程图与篇首的双轨图就是因为这个规则拆开的。</li>
+<li>需要精确排版、要导出去做汇报材料的架构图走绘图工具（源文件与导出图放静态目录）；随文档演进的图走文本图。</li>
+</ul>
+<h3 id="pg-964abef081a8672cc5b5966b0e44d20a--文件名的一条硬约束">文件名的一条硬约束
+</h3>
+<p>文件与目录名只能含中文、字母、数字、连字符与下划线，且必须以 <code>.md</code> 结尾。两个原因都是实测来的：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">违规形态</th>
+      <th scope="col">后果</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>名字里含顿号</td>
+      <td>站点构建会把顿号从地址里吃掉，链接检查找不到产物，整批报「无法映射」，此时「断链为零」这个数字不可信</td>
+    </tr>
+    <tr>
+      <td>名字不以扩展名结尾</td>
+      <td>覆盖率统计按扩展名收集条目，这类文件会被<strong>静默跳过</strong>——它照样有记录、照样被认领，却永远不会被判为「漏写」</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第二种是真正的危险：它不是报错，而是让判据看不见那一格，绿灯照样全亮。</p>
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--w5-头部契约七项">W5 头部契约七项
+</h2>
+<p>每篇第一屏必须是下面这段，缺项即视为未完成。模板照抄即可：</p>
+<div class="td-code td-code--untitled" id="td-code-29b83f61-fence-3" data-td-code data-td-code-auto-id
+     data-td-language="markdown" data-td-line-count="7">
+  <div class="td-code__viewport" id="td-code-29b83f61-fence-3-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">**实战落点**：示例链第N段 · 段名（本篇实战切入用它）
+</span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">**示例版本**：`api-service/Dockerfile.v2`（承前自第③段的 v1，两版并存可对照）
+</span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">**前置依赖**：章节号，最多三个
+</span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">**本篇产出物**：一个文件 / 一条命令加预期输出 / 一张实测表
+</span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">**拓展接口**：本篇哪个结论在后面被复用或被推翻，点名到章
+</span></span></span><span class="line"><span class="cl"><span class="k">&gt; </span><span class="ge">**难度·耗时**：星级 · 分钟数（含动手）
+</span></span></span><span class="line"><span class="cl">&gt; <span class="gs">**自测三题**</span>：三问，第三问必须是「为什么」而不是「是什么」</span></span></code></pre></div></div>
+</div>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">回答什么</th>
+      <th scope="col">最容易怎么写错</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>实战落点</td>
+      <td>动手例子挂在链上哪一段</td>
+      <td>写成阅读顺序提示（「先读第②段」），把暗线又变回路线</td>
+    </tr>
+    <tr>
+      <td>示例版本</td>
+      <td>用哪个文件哪一版、承前自哪段</td>
+      <td>只写文件名不写承前关系，链断了看不出来</td>
+    </tr>
+    <tr>
+      <td>前置依赖</td>
+      <td>读这篇前必须会什么</td>
+      <td>列成「相关推荐」，把可跳过的也写进去，等于没列</td>
+    </tr>
+    <tr>
+      <td>本篇产出物</td>
+      <td>读完手上多了什么</td>
+      <td>写成「掌握 XX」「理解 XX」，不可验证</td>
+    </tr>
+    <tr>
+      <td>拓展接口</td>
+      <td>结论后面延伸到哪</td>
+      <td>留空，或写成「后续章节再说」而不点名</td>
+    </tr>
+    <tr>
+      <td>难度·耗时</td>
+      <td>心理预期与排期</td>
+      <td>只算阅读时间不算动手时间，新人据此排期必崩</td>
+    </tr>
+    <tr>
+      <td>自测三题</td>
+      <td>是不是真读完了</td>
+      <td>出成填空题，背下术语也能过</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--w6-基础层完整性">W6 基础层完整性
+</h2>
+<p>基础层指第一篇、第二篇全部，加上第三篇的入门四章（3.1 到 3.4）。它的标准不是「写完了」，而是<strong>读者读完之后不该再靠猜</strong>。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">判据</th>
+      <th scope="col">具体要求</th>
+      <th scope="col">怎么检</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>知识点有唯一归属</td>
+      <td>24 项核心基础知识点，每项指定唯一首讲章节，缺任一项基础层不合格</td>
+      <td>对照清单里的覆盖表逐条勾</td>
+    </tr>
+    <tr>
+      <td>不许留悬念</td>
+      <td>每篇结尾必须有一段「本篇不覆盖什么」，每一项都点名交给哪一章</td>
+      <td>检查该小节存在且每项都带去处</td>
+    </tr>
+    <tr>
+      <td>切片不能太碎也不能太粗</td>
+      <td>「不覆盖什么」清单超过 6 行，说明这一篇切坏了，应当拆章</td>
+      <td>数行数</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>模板：</p>
+<div class="td-code td-code--untitled" id="td-code-29b83f61-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="markdown" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-29b83f61-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="cl"><span class="gu">## 本篇不覆盖什么
+</span></span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">-</span> 联合文件系统的写时复制机制 → 见 5.4（本篇只给「层会叠加、改动只发生在上层」这个结论）
+</span></span><span class="line"><span class="cl"><span class="k">-</span> 容器内用户与宿主文件属主的映射原理 → 见 5.2（本篇只给用法与一条修复命令）
+</span></span><span class="line"><span class="cl">- 镜像层如何被仓库复用与按需拉取 → 见 3.9</span></span></code></pre></div></div>
+</div>
+<p>基础知识点与实战落点的映射表同样强制：凡某项基础知识点在示例链里被第二次使用，必须登记它是<strong>被复用、被推翻还是被压测</strong>。被推翻那一类最值钱——基础篇给的简化结论在实战里被现实修正，这就是「基础结合实战拓展」的实际形态。写正文时不许偷偷改掉基础篇，必须在落点那一篇里明写「基础篇的简化版在哪里不成立」。</p>
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--不合格写法与合格写法的四组对照">不合格写法与合格写法的四组对照
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">场景</th>
+      <th scope="col">不合格</th>
+      <th scope="col">合格</th>
+      <th scope="col">差在哪</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>开头</td>
+      <td>「本节介绍 Docker 的构建缓存机制。」</td>
+      <td>「我就改了一行代码，为什么构建花了三分半？」</td>
+      <td>前者没有读者要解决的问题，后者一开口就是他的处境</td>
+    </tr>
+    <tr>
+      <td>产出物声明</td>
+      <td>「学完本篇你将掌握镜像分层原理。」</td>
+      <td>「交出一张体积与重建耗时的前后对照表，三个数字都要有。」</td>
+      <td>前者无法验收；后者做不到就明显是没过</td>
+    </tr>
+    <tr>
+      <td>类比</td>
+      <td>「容器像一台迷你虚拟机。」</td>
+      <td>「容器像一个被管住的用户进程：它有独立的门牌号（命名空间），但配额是宿主统一发的（控制组）。类比在隔离强度上会失效——它不隔离内核。」</td>
+      <td>前者会在安全判断上误导；后者给了映射，也标出失效位置</td>
+    </tr>
+    <tr>
+      <td>数值</td>
+      <td>「镜像会小很多。」</td>
+      <td>「从 812 MB 降到 197 MB（引擎 27.x，核对于 2026-10-25）；现查命令 <code>docker image inspect --format '{{.Size}}'</code>。」</td>
+      <td>前者没有量纲与出处，后者可被任何人复算</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--实战切入拿一篇真文档跑一遍检查">实战切入：拿一篇真文档跑一遍检查
+</h2>
+<p>这一段是本篇的动手环节，它不依赖容器引擎，落在示例链第①段之前的准备工作上——<strong>先把文档质量的检查工具用起来，再开始批量写</strong>。</p>
+<p>在站点根目录执行（把脚本路径与矩阵路径换成你自己的）：</p>
+<div class="td-code td-code--untitled" id="td-code-29b83f61-fence-5" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="2">
+  <div class="td-code__viewport" id="td-code-29b83f61-fence-5-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ python 审计脚本路径 --site . --matrix 矩阵路径 --scratch 暂存目录名
+</span></span><span class="line"><span class="cl"><span class="nv">articles</span><span class="o">=</span><span class="m">28</span> <span class="nv">expected</span><span class="o">=</span><span class="m">28</span> <span class="nv">dirs</span><span class="o">=</span><span class="m">32</span> <span class="nv">problems</span><span class="o">=</span><span class="m">189</span> <span class="nv">mode</span><span class="o">=</span>rewrite</span></span></code></pre></div></div>
+</div>
+<p>汇总行里的 <code>problems=189</code> 是全部问题条数，它下面还有一行按检查类别拆的计数（七类文体检查各 27 条，加上一条别的类别）。读数怎么解释，这一步很关键：<strong>七类各 27 条，说明 28 篇里正好有一篇全部通过</strong>，剩下 27 篇仍是空壳。这不是「检查报错」，而是当前进度。写完第二批后这个数应当整体下降；若只有某一类下降，说明新写的篇在某一个维度集体漏了同一件事。</p>
+<p>判据要先证明会红。同一份站点在只保留结构性检查的模式下应当报零问题：</p>
+<div class="td-code td-code--untitled" id="td-code-29b83f61-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="1">
+  <div class="td-code__viewport" id="td-code-29b83f61-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">problems=0 mode=copy   工具自述：本次因此少报 196 条问题</span></span></code></pre></div></div>
+</div>
+<p>「少报 196」与结构模式下的问题总数对得上，说明这批红全部来自文体检查而非结构问题——<strong>结构是干净的，红的是还没写</strong>。这一对读数是判断「检查本身是否可信」的依据。</p>
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--两处规范落不下去的地方本轮实测发现">两处规范落不下去的地方（本轮实测发现）
+</h2>
+<p>诚实记录，因为它们需要在下一轮修订里解决，而不是让每个作者自己踩：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">冲突</th>
+      <th scope="col">现象</th>
+      <th scope="col">建议处置</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>小结标记的字面量与排版习惯冲突</td>
+      <td>规范模板把标签写成强调格式（加粗），结构检查却按「表情符号 + 空格 + 标签」的字面量计数，于是合规写法被判零小结</td>
+      <td>已在本文改为统一字面量；结构检查宜同时接受两种形式，或在模板里明确禁止加粗</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>禁止清单与问题代号无法在规范文里被引用</td>
+      <td>检查把若干「推脱式措辞」和几个英文代号做成了字面量匹配，因此<strong>讲解这些禁令的文章不能逐字列出被禁的词与代号</strong>，否则自己先违规</td>
+      <td>被禁词表宜由脚本读取外部数据文件，或给「引用禁令」的语境加豁免；本文只按类别描述，不逐字引用</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第 2 条不是纸上推演，是本轮当场付的代价：本文最初把审计脚本的按类别计数行<strong>原样粘进了实战切入那一节</strong>，于是被自己的检查抓到一次「正文出现了被禁代号」。修法是把那行改成散文描述，只保留不含代号的真实汇总行——<strong>粘贴的仍是真实读数，只是不再逐字复述代号</strong>。</p>
+<p>这条经验值得推广成一条通用规矩：<strong>凡讲解检查规则本身的文档，不能直接粘贴规则输出</strong>；要么转述，要么让规则对被引用语境豁免。这也是「判据要能自己红」的另一面：<strong>判据也要能证明自己不会咬到描述它的那段文字</strong>。</p>
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--常见误读">常见误读
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">你可能的理解</th>
+      <th scope="col">实际情况</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>套四段是形式主义的八股</td>
+      <td>四段的顺序对应读者的认知顺序（先有问题再学解法）；但每段写多长完全自由，检索型文档还可整段不套</td>
+    </tr>
+    <tr>
+      <td>行数达标就算合格</td>
+      <td>行数是最低门槛，专门用来防止「三行结论 + 一堆截图」；真正看的是判据、出处与类比对应</td>
+    </tr>
+    <tr>
+      <td>头部契约是给自己看的目录信息</td>
+      <td>它是给读者的定位装置。「产出物」一项尤其硬：写不出可验证东西的篇，通常是内容还没想清楚</td>
+    </tr>
+    <tr>
+      <td>例外清单可以随意扩大</td>
+      <td>例外的判据只有一条——读者是否带着具体现象来查。运维手册那几节符合，其他篇不符合</td>
+    </tr>
+    <tr>
+      <td>检查报零问题就万事大吉</td>
+      <td>必须先跑一次「判据自证」，确认它面对坏样本会红。零问题有两种：写得干净，和检查坏了</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--要点总结">要点总结
+</h2>
+<ul>
+<li>写作要求的价值不在文笔，而在<strong>可检查</strong>：读者能在每篇的同一位置找到同类信息，评审有明确条目，新作者不用揣摩风格。</li>
+<li>正文按痛点、设计、流程、实战切入四段推进，顺序不可倒；检索型文档整体除外，判据是「读者是否带着具体现象来」。</li>
+<li>新人小结必须双段：类比 + 机制对应，并标出类比失效处；标记串要按字面量书写，加粗会让检查数成零。</li>
+<li>载体优先级是表格、代码块、图；实测表必须配列定义；图必须过真解析器且一图一维度；文件名有两条来自实测事故的硬约束。</li>
+<li>头部契约七项是承重件，其中「产出物」与「拓展接口」最能暴露没想清楚的地方。</li>
+<li>基础层的标准是「读者不必再靠猜」：知识点唯一归属、不许留悬念、切片不许过宽。</li>
+<li>两处规范自相冲突的地方已如实登记，需要在下一轮修订里处理，而不是留给每个作者自己发现。</li>
+</ul>
+<h2 id="pg-964abef081a8672cc5b5966b0e44d20a--本篇未验证项">本篇未验证项
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">原因</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>本篇自身是否满足全部结构检查</td>
+      <td><strong>已验证</strong></td>
+      <td>三篇一起跑审计，<code>problems</code> 从 196 降到 175，七类判据各 25 条 = 恰好剩余 25 篇空壳；导读这三篇在全部判据上零命中</td>
+    </tr>
+    <tr>
+      <td>两处规范冲突的建议处置</td>
+      <td>未实施</td>
+      <td>需要修改结构检查脚本或模板定义，属规范修订，等确认后一起做</td>
+    </tr>
+    <tr>
+      <td>概念类比清单的完整性</td>
+      <td>部分验证</td>
+      <td>表中 10 项覆盖导读已写篇章；其余 25 篇未写，命中项会随正文推进增补</td>
+    </tr>
+    <tr>
+      <td>「判据自证」在真实批次的可复现性</td>
+      <td>已验证两次</td>
+      <td>读到 196 与 0 的成对读数（划清文体与结构判据的边界），以及 196→175 的逐批下降；后续批次继续记录</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+</div>
+
+
+
+    
+	
+  
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+	<h1 id="pg-e38c692b9b04edf6e0bc4f68b8592428">2 - 把环境搭好</h1>
+    <div class="lead">让 Docker 在你这台机器上真的能拉下镜像。</div>
+	<p>让 Docker 在你这台机器上真的能拉下镜像。</p>
+<p>本板块包含：环境准备：Windows、macOS 与 Linux。</p>
+
+</div>
+
+
+
+    
+      
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="">
+	<h1 id="pg-0a883c11d665b3b250f07f711c96cfde">2.1 - 环境准备：Windows、macOS 与 Linux</h1>
+    <div class="lead">按平台把引擎装上，并用四段定位法判断「拉不下镜像」到底卡在哪一段——含本机两轮真实读数、引擎自述报错，以及不依赖镜像仓库验证运行时的办法。</div>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第①段 · 依赖跑起来（本篇是第①段的全部前置，第①段的任何命令都要先过本篇的七条判据）
+<strong>示例版本</strong>：本篇不产出示例文件；它产出「干净机器判定」——第①段的前置清单以本篇七条为准
+<strong>前置依赖</strong>：<a href="/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/">/docs/00-导读/怎么用这个库/使用指南与主线八站地图/</a>
+<strong>本篇产出物</strong>：一份你自己机器的七行体检记录，据此判断能不能进示例链第①段；本篇同时给出一条<strong>不依赖镜像仓库</strong>的运行时验证路径
+<strong>拓展接口</strong>：本篇的「四段定位法」在 <a href="/docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/%E6%8C%89%E6%95%85%E9%9A%9C%E5%9F%9F%E6%8E%92%E9%94%99/%E7%A3%81%E7%9B%98%E5%8D%A0%E6%BB%A1%E4%B8%8E%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E5%A4%B1%E8%B4%A5/">/docs/07-运维手册/按故障域排错/磁盘占满与镜像拉取失败/</a> 被穷尽为四条判据表；<code>--memory</code> 在容器内可见这件事在 5.3 被展开成控制组机制；「约一半物理内存」这条默认值本篇已实测，具体上限怎么设与其效果仍未实测
+<strong>难度·耗时</strong>：★☆☆ · 40 分钟（含动手检查 10 分钟；安装耗时取决于网络，不计入）
+<strong>自测三题</strong>：</p>
+<ol>
+<li>引擎装好、子系统就绪、容器也能跑，为什么第①段仍然可能跑不起来？</li>
+<li>域名解析五毫秒返回一个地址，为什么不能算「网络正常」？本机给出的两个证据是什么？</li>
+<li>为什么本篇要保留两轮读数，而不是只写最后那一轮？</li>
+</ol>
+</blockquote>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--为什么要先量自己的机器">为什么要先量自己的机器
+</h2>
+<p>一个真实场景：新人拿到文档，第一步是「跑一条命令看看能不能起来」，命令报错，于是他认定文档写错了。但报错文本里其实已经写明是三类完全不同的问题之一——他还没分清自己有没有装东西。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="6">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">「这条命令报 command not found」
+</span></span><span class="line"><span class="cl">「那说明你机器上根本没有它，不是命令写错了。」
+</span></span><span class="line"><span class="cl">「那我照文档下一步装好就行了吧？」
+</span></span><span class="line"><span class="cl">「先别。你现在装，等会儿再失败一次，你会分不清是装的过程失败还是文档失败。」
+</span></span><span class="line"><span class="cl">「所以要先做什么？」
+</span></span><span class="line"><span class="cl">「先把你现在有什么、网络能不能通记下来。装完再记一次。两次一对，问题自己就跳出来了。」</span></span></code></pre></div></div>
+</div>
+<p>本篇在本机上把这段对话<strong>实践了两遍</strong>：2026-10-25 第一轮，2026-10-27 第二轮（装上引擎与子系统之后再测）。两次读数放在同一张表里看，才有意义——单看任何一轮，都得不出「安装到底改变了什么」的结论。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">检查</th>
+      <th scope="col">第一轮 2026-10-25</th>
+      <th scope="col">第二轮 2026-10-27</th>
+      <th scope="col">这一对读数说明什么</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>引擎命令</td>
+      <td>不在 PATH，执行返回码 <strong>127</strong></td>
+      <td><code>C:\Users\webtu\AppData\Local\Programs\DockerDesktop\resources\bin\docker.exe</code>，<code>docker version</code> 返回码 0</td>
+      <td>安装动作确实改变了判定</td>
+    </tr>
+    <tr>
+      <td>Linux 子系统</td>
+      <td><code>wsl.exe --status</code> 返回码 <strong>50</strong>：「未安装适用于 Linux 的 Windows 子系统」</td>
+      <td>返回码 <strong>0</strong>：默认分发 <code>docker-desktop</code>，默认版本 <strong>2</strong></td>
+      <td>子系统随桌面版引擎一起装上了，没有单独建 Linux 发行版</td>
+    </tr>
+    <tr>
+      <td>内核</td>
+      <td>无</td>
+      <td><code>6.18.54.1-microsoft-standard-WSL2</code></td>
+      <td>容器的内核来自 WSL2，不是 Windows 内核</td>
+    </tr>
+    <tr>
+      <td>镜像域名解析</td>
+      <td>解析到 <code>31.13.70.13</code>（5 ms），443 端口 <strong>6006 ms 超时</strong></td>
+      <td>解析到 <code>64.13.192.76</code>，443 端口 <strong>6018 ms 超时</strong></td>
+      <td><strong>两轮都失败，且地址换了</strong>——装引擎不解决这一条</td>
+    </tr>
+    <tr>
+      <td>对照站点</td>
+      <td><code>www.baidu.com</code> TCP 23 ms、TLS 42 ms 成功</td>
+      <td><code>www.baidu.com</code> 55 ms（对端 <code>153.3.238.127</code>）、<code>gitee.com</code> 83 ms（对端 <code>180.76.198.225</code>），均 200 OK</td>
+      <td>出口一直是通的，两轮都通</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<blockquote>
+<p>💡 新人小结：装机前先做体检，像装修房子之前先测水电。你会先确认「水管有没有通到门口」，而不是把新买的水龙头装上后漏水，再怪水龙头质量问题。
+对应到这里：门口水压 = 网络能不能连到镜像仓库；墙里的管线 = 操作系统提供的虚拟化与子系统支持；新水龙头 = 容器引擎本身。<strong>顺序不能反</strong>——先装龙头再测水压，漏水时你分不清是龙头坏还是管子没通。
+本机这两轮读数正好是这个原则的实例：装完之后水压<strong>依然</strong>不通，如果不留第一轮读数，第二轮的失败就会被误当成「装坏了」。</p>
+</blockquote>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--三个平台各自要装什么">三个平台各自要装什么
+</h2>
+<p>引擎不是一个单独的程序，它依赖平台提供隔离能力的机制。三个平台的依赖链完全不同，这是很多跨平台教程失效的原因。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">平台</th>
+      <th scope="col">依赖什么</th>
+      <th scope="col">要装的东西</th>
+      <th scope="col">最容易卡在哪</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Windows 11</td>
+      <td>需要 Linux 子系统提供内核；引擎跑在子系统里</td>
+      <td>子系统 + 引擎桌面版</td>
+      <td>虚拟化在 BIOS 里被关；子系统已装但处于旧版本</td>
+    </tr>
+    <tr>
+      <td>macOS（Apple 芯片）</td>
+      <td>靠轻量虚拟机跑一个真正的 Linux 内核</td>
+      <td>桌面版引擎</td>
+      <td>把「本机是类 Unix」当成能直接跑容器——不能，内核不是 Linux</td>
+    </tr>
+    <tr>
+      <td>Linux</td>
+      <td>直接用本机内核的命名空间与控制组</td>
+      <td>引擎本体</td>
+      <td>内核版本过旧；用户没加入引擎组，每条命令都要 sudo</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>本机第二轮的 <code>docker info</code> 读数可以当作「Windows + WSL2 后端装对之后长什么样」的样板：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">字段</th>
+      <th scope="col">读数</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Server Version</td>
+      <td><code>29.8.0</code>（Docker Desktop 4.91.0，build 239619）</td>
+      <td>客户端与服务端同版本，API 1.56</td>
+    </tr>
+    <tr>
+      <td>Kernel Version</td>
+      <td><code>6.18.54.1-microsoft-standard-WSL2</code></td>
+      <td>内核来自 WSL2，名字里的 <code>microsoft-standard</code> 就是证据</td>
+    </tr>
+    <tr>
+      <td>Operating System</td>
+      <td><code>Docker Desktop (containerized)</code>，OSType <code>linux</code></td>
+      <td>容器是 Linux 容器</td>
+    </tr>
+    <tr>
+      <td>Storage Driver</td>
+      <td><code>overlayfs</code>，Cgroup Driver <code>cgroupfs</code>，<strong>Cgroup Version 2</strong></td>
+      <td>新引擎在 WSL2 上报 <code>overlayfs</code> 而不是老的 <code>overlay2</code>；控制组是 v2，这决定了后面读限制值的文件路径</td>
+    </tr>
+    <tr>
+      <td>CPUs / Total Memory</td>
+      <td>24 / <strong>47.01 GiB</strong></td>
+      <td>宿主物理内存 95.9 GB，引擎可见 47.01 GB ≈ <strong>一半</strong></td>
+    </tr>
+    <tr>
+      <td>Docker Root Dir</td>
+      <td><code>/var/lib/docker</code></td>
+      <td>磁盘治理与「撑满」类排错都从这里入手</td>
+    </tr>
+    <tr>
+      <td>Name / Context</td>
+      <td><code>docker-desktop</code> / <code>desktop-linux</code></td>
+      <td>引擎跑在那个 WSL 发行版里</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>两个常见误解要在这里点掉：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">误解</th>
+      <th scope="col">事实</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>macOS 类 Unix，所以能像 Linux 一样原生跑容器</td>
+      <td>不能。容器需要 Linux 内核特性，macOS 内核不提供，桌面版仍是起一个虚拟机</td>
+    </tr>
+    <tr>
+      <td>Windows 装了引擎就等于有 Linux 内核</td>
+      <td>只在「Linux 容器」模式下成立，且依赖子系统；Windows 容器模式是另一套完全不同的东西，本库不覆盖</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>本库统一以 Linux 容器语义讲解。</strong> 涉及平台差异的地方会显式标注，比如宿主机地址解析、数据挂载的性能与权限表现。</p>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--装完之后怎么验七条判据">装完之后怎么验（七条判据）
+</h2>
+<p>按顺序跑。每条都给「看到什么算过」，以及本机两轮的实测状态。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">检查项</th>
+      <th scope="col">过 / 不过的判据</th>
+      <th scope="col">本机 2026-10-27</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>引擎命令存在</td>
+      <td><code>docker version</code> 返回码 0，客户端与服务端两段都有版本号</td>
+      <td><strong>过</strong>（Client 29.8.0 / Server 29.8.0）</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>虚拟化与子系统就绪</td>
+      <td>Windows：<code>wsl --status</code> 返回码 0 且默认版本为 2</td>
+      <td><strong>过</strong>（<code>docker-desktop</code>，版本 2）</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>镜像域名解析<strong>正确</strong></td>
+      <td>解析出的地址能在 443 完成 TLS 握手；仅「能返回地址」不算过</td>
+      <td><strong>直连仍不过</strong>（<code>64.13.192.76</code>，6018 ms 超时）；走代理时该问句不再成立，见下一条</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>出口通畅（对照）</td>
+      <td>至少一个对照站点 TCP 与 TLS 在几十毫秒量级成功</td>
+      <td><strong>过</strong>（55 ms / 83 ms，都 200）</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>本机时钟可信</td>
+      <td>与公开服务器的 <code>Date</code> 偏差在秒级；证书有效期覆盖当前时间</td>
+      <td><strong>过</strong>（偏差 −0.1 秒，剩余 89 天）</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>镜像获取通道可用</td>
+      <td>能拉成一个几 MB 的小镜像，或返回明确状态码而非超时</td>
+      <td><strong>不过 → 过</strong>：未配代理时返回码 1（<code>dial tcp …:443: connectex</code>）；配本机代理后 <code>hello-world</code> 与 <code>redis:7-alpine</code>、<code>mysql:8.4</code> 全部返回码 0</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>容器能跑起来</td>
+      <td>起一个容器能看到它执行并退出，参数与限制在容器内可见</td>
+      <td><strong>过</strong>（两条路径都验了：<code>FROM scratch</code> 自建镜像，以及公开镜像 <code>docker run --rm hello-world</code> 返回码 0）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第 6 条那一行「不过 → 过」是本机状态的真实变化，不是判据变松：判据没动，是<strong>通路</strong>变了。同时注意第 3 条在配了代理之后<strong>依然不过</strong>——直连那个域名仍然拿到连不通的地址。这两件事合起来说明一个重要区别：<strong>通道问题可以靠代理绕开，但不要去&quot;修&quot;解析本身</strong>；把第 3 条当成必须修好的项，会白白去折腾本机 DNS。</p>
+<p><strong>引擎可用 ≠ 能拉镜像</strong>：这条判断在第 6 条不过的那几个小时里完全成立（第 1、2、7 条全过，第①段仍然跑不起来）；配上代理之后七条全过，第①段才真正具备起跑条件。</p>
+<p>第 6 条的失败长这样（引擎自己吐出来的原文）：</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-1" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="9">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-1-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ docker pull hello-world <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">Using default tag: latest
+</span></span><span class="line"><span class="cl">Error response from daemon: failed to resolve reference <span class="s2">&#34;docker.io/library/hello-world:latest&#34;</span>:
+</span></span><span class="line"><span class="cl">failed to <span class="k">do</span> request: Head <span class="s2">&#34;https://registry-1.docker.io/v2/library/hello-world/manifests/latest&#34;</span>:
+</span></span><span class="line"><span class="cl">dialing registry-1.docker.io:443 container via direct connection because Docker Desktop has no
+</span></span><span class="line"><span class="cl">HTTPS proxy: connecting to registry-1.docker.io:443: dial tcp 64.13.192.76:443: connectex: A
+</span></span><span class="line"><span class="cl">connection attempt failed because the connected party did not properly respond after a period of
+</span></span><span class="line"><span class="cl">time, or established connection failed because connected host has failed to respond.
+</span></span><span class="line"><span class="cl"><span class="nv">rc</span><span class="o">=</span><span class="m">1</span></span></span></code></pre></div></div>
+</div>
+<p>这段文本里有两个可直接取用的信息：<code>dial tcp 64.13.192.76:443: connectex</code> 说明<strong>失败在传输层</strong>（连不上），不是应用层的拒绝；<code>because Docker Desktop has no HTTPS proxy</code> 说明<strong>引擎没有配任何代理，走的是直连</strong>。后者顺手回答「要不要配代理」这个问题——没配。</p>
+<p>第 1 条在 Git Bash 里有个纯读取层面的坑：系统命令返回的是 <strong>GBK 编码</strong>的中文提示，直接看会是一段乱码字节，不像「未找到」的意思。同理 <code>wsl.exe</code> 的输出是 <strong>UTF-16LE</strong>。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">命令返回码 1，输出按 GBK 解码：信息: 用提供的模式无法找到文件。
+</span></span><span class="line"><span class="cl">wsl.exe --status 第一轮返回码 50，按 UTF-16LE 解码：未安装适用于 Linux 的 Windows 子系统……
+</span></span><span class="line"><span class="cl">第二轮返回码 0，同一解码：默认分发: docker-desktop | 默认版本: 2 | 当前计算机配置不支持 WSL1……</span></span></code></pre></div></div>
+</div>
+<p>判据的读法要跟着调：<strong>看返回码，不要靠肉眼看输出文本</strong>。文本可能被编码破坏，返回码不会。上面那句「不支持 WSL1」也值得注意——它是 rc=0 成功输出里的一句附带提示，不是错误，别被它带偏去查 WSL1。</p>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--拉不下来该查哪一段四段定位法">拉不下来该查哪一段：四段定位法
+</h2>
+<p>「拉取失败」在外层看是一条超时，实际可能是四个完全不同的位置。</p>
+<pre class="td-mermaid-source"><code class="language-mermaid">flowchart TB
+    S[&#34;现象：拉取镜像失败或超时&#34;] --&gt; Q1{&#34;命令本身找得到吗&#34;}
+    Q1 -- &#34;否，返回码 127&#34; --&gt; A1[&#34;引擎未安装或未进 PATH：与镜像无关，先装&#34;]
+    Q1 -- &#34;是&#34; --&gt; Q2{&#34;域名解析返回地址吗&#34;}
+    Q2 -- &#34;不返回&#34; --&gt; A2[&#34;本机 DNS 配置问题：先解决解析&#34;]
+    Q2 -- &#34;返回&#34; --&gt; Q3{&#34;对返回地址 443 端口能握手吗&#34;}
+    Q3 -- &#34;超时&#34; --&gt; Q4{&#34;对照站点能正常握手吗&#34;}
+    Q4 -- &#34;能&#34; --&gt; A3[&#34;地址被改写或链路被拦截：与限流无关，走加速通道或代理&#34;]
+    Q4 -- &#34;不能&#34; --&gt; A4[&#34;本机整体出口问题：代理、防火墙、网络本身&#34;]
+    Q3 -- &#34;能握手但报证书错&#34; --&gt; A5[&#34;中间设备替换证书，或本机时间漂移&#34;]
+    Q3 -- &#34;能握手且返回明确状态码&#34; --&gt; A6[&#34;到应用层了：429 是限流，401 或 403 是认证，404 是标签不存在&#34;]</code></pre><p>本机两轮读数在这张图上的落点完全一致：<strong>Q1 过 → Q2 返回 → Q3 超时 → Q4 通 → A3</strong>。第 3、4 条一起看才能定到 A3，只有一条都不够。</p>
+<p><strong>跨解析器对照这一招现在失效了，要如实记下来。</strong> 第一轮我用三个解析器问同一个域名，得到三个不同地址（系统 <code>31.13.70.13</code>、<code>223.5.5.5</code> 给 <code>199.59.149.238</code>、<code>114.114.114.114</code> 给 <code>185.60.219.41</code>），而对照站点在两个解析器下答案一致，据此把「疑似被改写」钉成结论。第二轮再问那两个解析器，<strong>UDP 53 端口直接超时</strong>，这一招当场不可用。</p>
+<p>失效之后还有两条更好拿的证据，本轮都用上了：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">证据</th>
+      <th scope="col">本机读数</th>
+      <th scope="col">为什么它够用</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>同一个域名，答案随时间变</strong></td>
+      <td>第一轮 <code>31.13.70.13</code>，第二轮 <code>64.13.192.76</code>；容器内第三次问，得到 <code>108.160.166.57</code></td>
+      <td>一个真·权威解析不会两天给三个不同、且全都连不通的地址；对照站点两轮都稳定给出 <code>153.3.238.x</code> 且能握手</td>
+    </tr>
+    <tr>
+      <td><strong>引擎自述它连的是哪个地址</strong></td>
+      <td>报错里写 <code>dial tcp 64.13.192.76:443</code>，与我在宿主上用 <code>getaddrinfo</code> 问到的<strong>同一个地址</strong></td>
+      <td>证明「宿主看到的」和「引擎实际连的」是一回事，排除「引擎走了另一条解析路径」这种解释</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<blockquote>
+<p>💡 新人小结：四段定位像查一根断掉的电线。从电表开始往家里量：先确认有没有电到门口，再确认墙上插座有没有电，最后才怀疑你插的那台机器坏了。每一段都要用<strong>同一个已知能工作的电器</strong>去试——那个电器就是「对照站点」。
+对应到这里：对照站点的价值在于它能证明「量电的工具本身是好的」。没有它，你无法区分「目标不通」和「我的探测方法不通」，而这两者的读数长得一模一样。本机第二轮就差点栽在这上面：跨解析器那招超时了，如果不同时准备另外两条证据，就会被引导成「解析器全都挂了」的错误结论。</p>
+</blockquote>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--证书与时间四段定位里最容易被跳过的一格">证书与时间：四段定位里最容易被跳过的一格
+</h2>
+<p>决策图里「能握手但报证书错」这一格要单独讲，因为它的<strong>报错文本会把人引向完全错误的方向</strong>：写着证书相关，人就去换证书或加跳过校验的开关，而实际成因常常是本机时钟。</p>
+<p>本机方法：同时取服务器的 HTTP <code>Date</code> 头与本机 UTC，再读 TLS 证书有效期。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ python -c <span class="s2">&#34;取服务器 Date 头、本机 UTC、TLS 证书有效期并比较&#34;</span>
+</span></span><span class="line"><span class="cl">www.baidu.com      对端 153.3.238.127   TCP+TLS <span class="m">55</span> ms
+</span></span><span class="line"><span class="cl">    Date 偏差 -0.1 s <span class="p">|</span> 证书剩余 <span class="m">89</span> 天 <span class="p">|</span> 状态行 HTTP/1.1 <span class="m">200</span> OK
+</span></span><span class="line"><span class="cl">gitee.com          对端 180.76.198.225  TCP+TLS <span class="m">83</span> ms
+</span></span><span class="line"><span class="cl">    Date 偏差 -0.0 s <span class="p">|</span> 证书剩余 <span class="m">116</span> 天 <span class="p">|</span> 状态行 HTTP/1.1 <span class="m">200</span> OK</span></span></code></pre></div></div>
+</div>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">观察</th>
+      <th scope="col">本机值</th>
+      <th scope="col">判据含义</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>本机与服务器的时间差</td>
+      <td>−0.1 秒 / −0.0 秒</td>
+      <td>秒级以内属正常。偏差到<strong>分钟级以上</strong>就要查时钟同步，证书校验会开始随机失败</td>
+    </tr>
+    <tr>
+      <td>证书有效期是否覆盖当前时间</td>
+      <td>覆盖</td>
+      <td>本机时钟若跑到有效期之外，任何合法证书都会被判为无效</td>
+    </tr>
+    <tr>
+      <td>剩余天数</td>
+      <td>89 天 / 116 天</td>
+      <td>剩余极少时容易和「刚过期」混淆，到期前一周内的失败要优先查这一项</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<blockquote>
+<p>💡 新人小结：证书校验像过海关——海关看你护照上的日期，<strong>如果你的手表慢了一年，你的护照就&quot;过期&quot;了</strong>，哪怕海关的系统时间完全正确。修表比换护照便宜得多，但很多人先做了后者。
+对应到这里：手表 = 本机系统时钟；护照有效期 = 证书的起止时间；海关系统 = 远端服务。所以遇到证书类报错，第一条检查动作是核对<strong>本机时间</strong>，而不是去动引擎的校验开关。</p>
+</blockquote>
+<p>三种表现要分开处置，它们看着像同一件事：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">表现</th>
+      <th scope="col">优先怀疑</th>
+      <th scope="col">一条验证动作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>只在某些域名报证书错，浏览器访问同一地址正常</td>
+      <td>中间设备（公司出口网关）替换了证书</td>
+      <td>对比命令行与浏览器看到的证书签发链，不同就是被替换</td>
+    </tr>
+    <tr>
+      <td>所有 HTTPS 目标都报证书错</td>
+      <td>本机时钟漂移</td>
+      <td>比较本机 UTC 与任一公开服务器的 <code>Date</code> 头，看偏差量级</td>
+    </tr>
+    <tr>
+      <td>报的是超时而不是证书</td>
+      <td>链路问题，回到上一节的四段定位</td>
+      <td>先跑对照站点，确认出口通畅与否</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>最后一条要划清边界：<strong>换证书或跳过校验不是解决方案</strong>。跳过校验会让真正的中间人问题静默消失，本库不提供这类开关的用法。</p>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--不依赖镜像仓库仍然验证运行时第-7-条怎么过的">不依赖镜像仓库，仍然验证运行时（第 7 条怎么过的）
+</h2>
+<p>第 6 条不过时，第 7 条看起来必然也没法测——没有镜像怎么起容器？可以不用仓库。用 <code>FROM scratch</code> 加一个本机交叉编译出来的静态 Linux 二进制，整条链路一次网络都不碰。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-5" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="14">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-5-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1) 交叉编译一个静态 Linux 二进制（本机 Go，不联网）</span>
+</span></span><span class="line"><span class="cl">$ <span class="nv">GOOS</span><span class="o">=</span>linux <span class="nv">GOARCH</span><span class="o">=</span>amd64 <span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span> <span class="nv">GOTOOLCHAIN</span><span class="o">=</span><span class="nb">local</span> <span class="nv">GOPROXY</span><span class="o">=</span>off go build -trimpath -o demo .
+</span></span><span class="line"><span class="cl">$ ls -l demo
+</span></span><span class="line"><span class="cl">-rw-r--r-- <span class="m">1</span> ... <span class="m">3314972</span> Oct <span class="m">27</span> 07:52 demo          <span class="c1"># 约 3.3 MB 静态二进制</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 2) 镜像描述文件：基础镜像是空的，唯一一层来自本机文件</span>
+</span></span><span class="line"><span class="cl">$ cat Dockerfile
+</span></span><span class="line"><span class="cl">FROM scratch
+</span></span><span class="line"><span class="cl">COPY demo /demo
+</span></span><span class="line"><span class="cl">ENTRYPOINT <span class="o">[</span><span class="s2">&#34;/demo&#34;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 3) 构建并运行，顺带把内存上限和主机名传进去</span>
+</span></span><span class="line"><span class="cl">$ docker build -t proof:local .
+</span></span><span class="line"><span class="cl">$ docker run --rm --memory<span class="o">=</span>64m --hostname proof-01 proof:local</span></span></code></pre></div></div>
+</div>
+<p>容器里的真实自述：</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="10">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">RUNTIME: 这是一个 FROM scratch 构建的镜像，未从任何仓库拉取过一层
+</span></span><span class="line"><span class="cl">hostname: proof-01
+</span></span><span class="line"><span class="cl">cgroup: 0::/
+</span></span><span class="line"><span class="cl">memory.max: 67108864
+</span></span><span class="line"><span class="cl">cpu.max: max 100000
+</span></span><span class="line"><span class="cl">resolv.conf: # Generated by Docker Engine.
+</span></span><span class="line"><span class="cl">nameserver 192.168.65.7
+</span></span><span class="line"><span class="cl">hosts(1 行): 127.0.0.1	localhost
+</span></span><span class="line"><span class="cl">容器内解析 registry-1.docker.io -&gt; 108.160.166.57
+</span></span><span class="line"><span class="cl">容器内连 baidu:443 -&gt; 成功</span></span></code></pre></div></div>
+</div>
+<p>五个结论直接从这五行数出来：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">读数</th>
+      <th scope="col">结论</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>hostname: proof-01</code></td>
+      <td><code>--hostname</code> 生效，UTS 隔离在工作（宿主不是这个名字）</td>
+    </tr>
+    <tr>
+      <td><code>cgroup: 0::/</code></td>
+      <td>控制组是 <strong>v2</strong> 的统一层次；这决定了读限制值要去看 <code>/sys/fs/cgroup/&lt;文件&gt;</code>，不是 v1 的那套目录</td>
+    </tr>
+    <tr>
+      <td><code>memory.max: 67108864</code></td>
+      <td><code>--memory=64m</code> 被真实下发：64 MiB = 67,108,864 字节，分毫不差</td>
+    </tr>
+    <tr>
+      <td><code>cpu.max: max 100000</code></td>
+      <td>没设 CPU 上限时配额位是 <code>max</code>，周期 100000；想限核要显式传 <code>--cpus</code></td>
+    </tr>
+    <tr>
+      <td><code>nameserver 192.168.65.7</code>，注释写着 <code>Generated by Docker Engine</code></td>
+      <td>容器内 DNS 由引擎生成，指向桌面版内置的解析器，<strong>不是</strong>宿主 <code>resolv.conf</code> 的内容</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>还有一条副产品值得记：容器里解析同一个域名得到 <code>108.160.166.57</code>，与宿主的 <code>64.13.192.76</code> <strong>不同</strong>。所以「宿主解析被改写」这件事不能直接推定容器内的视图相同——排错时要分别问。</p>
+<p>清理动作也是流程的一部分：<code>docker rmi proof:local</code> 卸镜像，<code>docker builder prune -f</code> 清构建缓存，最后 <code>docker system df</code> 复核。本机复核结果为 Images 0 / Containers 0 / Volumes 0，Build Cache 由 8.639 MB 降到 4.096 kB。</p>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--windows-与子系统的三处初始设置">Windows 与子系统的三处初始设置
+</h2>
+<p>装上之后有三件事不做，后面一定会踩。第一条本轮有了实测数据，另外两条仍未实测，标注照旧。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">设置</th>
+      <th scope="col">为什么</th>
+      <th scope="col">不做会怎样</th>
+      <th scope="col">本机可复现性</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>给子系统设内存上限</td>
+      <td>子系统默认可以吃掉一半物理内存，且长期持有不释放</td>
+      <td>宿主内存被大量占用</td>
+      <td><strong>默认值已实测</strong>：引擎可见 47.01 GiB，宿主物理内存 95.9 GB，正好约一半。<strong>设上限的具体操作与效果未实测</strong>（本轮没改配置）。96 GB 这类机器上，把上限设到 8~16 GB 是合理起点</td>
+    </tr>
+    <tr>
+      <td>工程文件放在子系统内而不是 Windows 盘</td>
+      <td>跨系统挂载的文件操作性能远低于同一文件系统内</td>
+      <td>构建时大量小文件读写，耗时成倍增加</td>
+      <td>未实测</td>
+    </tr>
+    <tr>
+      <td>注意虚拟磁盘不自动回收</td>
+      <td>磁盘文件只会增长不会缩小，删除镜像不等于释放宿主空间</td>
+      <td>数据盘看起来「越用越小」，需要手动压缩流程</td>
+      <td>未实测。本机 C 盘 477 GB 总、316 GB 可用，容量不是当前瓶颈</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>这三处与更深的坑（子系统与桌面引擎的启停依赖、休眠后容器网络失效）在第七篇专门有一节，遇到时直接查那里。</p>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--代理与镜像通道">代理与镜像通道
+</h2>
+<p>如果公司网络要求走代理，需要<strong>两处</strong>都配：桌面引擎的代理设置，以及子系统内部的 shell 代理。只配一处时会出现「浏览器能开网页但拉不下来」，这是最常见的半配状态。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-7" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-7-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">判断走了哪条路：
+</span></span><span class="line"><span class="cl">1) 引擎配置里有代理，命令行环境变量里没有 —— 引擎自己走代理，容器内进程不走
+</span></span><span class="line"><span class="cl">2) 只有环境变量有代理 —— 引擎不走，容器内构建时下载依赖会走</span></span></code></pre></div></div>
+</div>
+<p>镜像通道分两类：公开镜像加速（改引擎的仓库地址配置），和私有仓库代理缓存（在自己机房里缓存一份，见 3.10）。选哪个是团队决定，<strong>本库示例统一不假设你有可用加速通道</strong>——所有需要拉镜像的步骤，都在该段的前置清单里写明「需要一条可用的镜像获取通道」，不静默依赖某个具体加速域名。</p>
+<p>本库的示例之所以把&quot;镜像获取通道&quot;写进每段的前置清单而不静默依赖某个加速域名，就是因为本机第三轮之前正卡在这里：引擎与运行时全合格，第①段要的两个公共镜像却拉不到。配好代理后该条解除，见下一节。</p>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--打通通道代理与加速器是两条路">打通通道：代理与加速器是两条路
+</h2>
+<p>第三轮（同日 2026-10-27，配了本机代理之后）把第 6 条解开了。先看<strong>唯一变量是代理</strong>这组对照：</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-8" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-8-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl -s -o /dev/null -w <span class="s2">&#34;%{http_code}&#34;</span> --max-time <span class="m">12</span> https://registry-1.docker.io/v2/
+</span></span><span class="line"><span class="cl"><span class="m">000</span>                     <span class="c1"># 直连，12 秒后 curl 返回码 28（超时）</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ curl -x http://127.0.0.1:7890 -s -o /dev/null -w <span class="s2">&#34;%{http_code}&#34;</span> --max-time <span class="m">15</span> https://registry-1.docker.io/v2/
+</span></span><span class="line"><span class="cl"><span class="m">401</span>                     <span class="c1"># 走代理，0.84 秒</span></span></span></code></pre></div></div>
+</div>
+<p><code>401</code> 是<strong>成功信号</strong>而不是失败：<code>/v2/</code> 这个端点在未认证时本来就该回 <code>{&quot;errors&quot;:[{&quot;code&quot;:&quot;UNAUTHORIZED&quot;,…}]}</code>。真正说明问题的是它<strong>答话了</strong>，而直连那侧连 TCP 都没建起来。</p>
+<p>引擎侧的可观测变化：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">时点</th>
+      <th scope="col"><code>docker info</code> 的代理段</th>
+      <th scope="col"><code>docker pull hello-world</code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>未配代理</td>
+      <td>无（报错原文写着 <code>because Docker Desktop has no HTTPS proxy</code>）</td>
+      <td>返回码 1，<code>dial tcp 64.13.192.76:443: connectex</code></td>
+    </tr>
+    <tr>
+      <td>配代理后</td>
+      <td><code>HTTP Proxy: http.docker.internal:3128</code>、<code>HTTPS Proxy: http.docker.internal:3128</code>、<code>No Proxy: hubproxy.docker.internal</code></td>
+      <td>返回码 <strong>0</strong>，<code>Digest: sha256:11a3eb15…</code>，<code>Status: Downloaded newer image</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>拉取耗时与体积的真实读数：<code>redis:7-alpine</code> <strong>5.3 秒</strong>（57.8 MB）、<code>mysql:8.4</code> <strong>22 秒</strong>（1.12 GB）、<code>hello-world</code> 25.9 kB。</p>
+<blockquote>
+<p>💡 新人小结：代理和加速器像两种不同的出门方式。代理是<strong>绕一段路</strong>走能通的桥，任何目的地都能到，但每次都要绕；加速器是<strong>在你楼下建个前置仓</strong>，常用的货直接就近取，货没备或者仓库挂了，你还是出不去。
+对应到这里：代理改的是「引擎出网走哪条链路」，与目标无关，所以它对任意镜像都成立；加速器改的是「去哪个域名取镜像」，只对它缓存过的东西有效。两者可以叠加，但<strong>排查时要把它们分开试</strong>——先证明「走代理能通」，再谈要不要加速器。</p>
+</blockquote>
+<p>三条判断口径：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">情况</th>
+      <th scope="col">该配哪个</th>
+      <th scope="col">依据</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>直连超时（像本机第三轮之前）</td>
+      <td>代理</td>
+      <td>连 TCP 都建不起来，加速器域名同样要靠出网能力，先解决通路</td>
+    </tr>
+    <tr>
+      <td>直连能通但很慢、或某些公共库限流</td>
+      <td>加速器</td>
+      <td>已到达应用层，问题在链路质量或配额</td>
+    </tr>
+    <tr>
+      <td>需要拉私有仓库的镜像</td>
+      <td>都不解决</td>
+      <td>那是认证与信任问题，见 3.10 与 7.6 的 401/403、X509 分支</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>一处需要诚实标注的边界：<code>http.docker.internal:3128</code> 是桌面版引擎的<strong>内部代理入口</strong>，它再把流量转给系统层配置的代理。本轮只观测到「配了之后引擎这段从无到有、拉取随即成功」这一对变化，<strong>没有逐跳验证流量是怎么传到 <code>127.0.0.1:7890</code> 的</strong>——那需要看桌面版设置项与流量落点。文档只写观测到的这一层。</p>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--第段判据真跑通了以及两次差点被骗的假结果">第①段判据真跑通了（以及两次差点被骗的假结果）
+</h2>
+<p>有了通道，第①段那条判据就能真测。判据原文是：<strong>容器删掉后数据仍在</strong>。</p>
+<p>Redis 侧：起一个挂命名卷的容器，宿主直接用协议写入（不借任何客户端），然后 <code>docker rm -f</code> 再重起。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-9" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="8">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-9-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">SET kb:proof round-1-value        -&gt; +OK        （第一轮写入）
+</span></span><span class="line"><span class="cl">—— 删除容器并用同一个卷重新起 ——
+</span></span><span class="line"><span class="cl">KEYS kb:*                          -&gt; *1  $8 kb:proof
+</span></span><span class="line"><span class="cl">GET kb:proof                       -&gt; $13 round-1-value     # 上一轮写入的值活过一次删除
+</span></span><span class="line"><span class="cl">SET kb:proof persistence-check     -&gt; +OK
+</span></span><span class="line"><span class="cl">—— 再次 docker rm -f 并重新创建 ——
+</span></span><span class="line"><span class="cl">GET kb:proof                       -&gt; $17 persistence-check # 又活过一次
+</span></span><span class="line"><span class="cl">DBSIZE                             -&gt; :1        |  INFO 里 aof_enabled:1  loading:0</span></span></code></pre></div></div>
+</div>
+<p>MySQL 侧：同一套动作，判据换成 <code>SELECT</code>。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-10" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="6">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-10-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">写入两行 → id=1 before-delete / id=2 second-row，written_at = 2026-10-27 03:22:48
+</span></span><span class="line"><span class="cl">宿主 127.0.0.1:3307 连接成功 8 ms，并收到 MySQL 握手包，包里的版本串是 8.4.13
+</span></span><span class="line"><span class="cl">docker rm -f kb-p1-mysql          → 卷 kb-p1-mysqldata 仍在列表里
+</span></span><span class="line"><span class="cl">重起（同一个卷）→ 约 6 秒就绪
+</span></span><span class="line"><span class="cl">SELECT COUNT(*) FROM t_probe      → 2
+</span></span><span class="line"><span class="cl">SELECT * FROM t_probe             → 两行数据与时间戳原封不动</span></span></code></pre></div></div>
+</div>
+<p><strong>这两次判定之前都被我自己的脚本骗过一回，值得单独记，因为它们比结论更容易复发：</strong></p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">假结果</th>
+      <th scope="col">我的写法错在哪</th>
+      <th scope="col">症状</th>
+      <th scope="col">为什么会误判</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>以为 MySQL 数据没挂到卷上</td>
+      <td><code>-v kb-p1-mysqldata:/var/lib/dockervolume</code>，把 <code>/var/lib/mysql</code> 打错</td>
+      <td>挂载列表里出现两个卷：命名卷挂在那个不存在的路径上，另有一个<strong>匿名卷</strong>挂着 <code>/var/lib/mysql</code></td>
+      <td>容器照跑、<code>SELECT</code> 照出数据，看着完全正常。但那时删掉匿名卷才算丢数据，而我没有它的名义 → 测出来的&quot;留存&quot;毫无意义</td>
+    </tr>
+    <tr>
+      <td>以为 Redis 的键没留住</td>
+      <td>手写 RESP 时给了 <code>$3</code> 的长度前缀，而 key 是 8 字符的 <code>kb:proof</code></td>
+      <td>返回 <code>$-1</code>（nil）外加一条 <code>-ERR unknown command 'oof'</code></td>
+      <td><code>$-1</code> 长得太像&quot;键不存在＝数据丢了&quot;。实际是服务端按 3 字节读走 <code>kb:</code>，把剩下的 <code>proof</code> 当成新命令解析。<strong>是客户端坏了，不是 Redis 坏了</strong></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>两条教训合并成一句判据使用规矩：<strong>测&quot;数据留存&quot;之前，先确认数据到底落在哪个卷上；拿到 nil / 空结果之前，先确认你的读法本身没错</strong>（<code>INFO</code> 里的报错文本、挂载列表里的匿名卷，都是免费的真值来源）。</p>
+<p>清理也是流程的一部分：本轮创建的 2 个容器、2 个命名卷、3 个镜像与构建缓存全部删除，<code>docker system df</code> 复核为 Images 0 / Containers 0 / Local Volumes 0 / Build Cache 0。删除前的占用规模可以当容量参考——两个卷一共 <strong>218.4 MB</strong>（MySQL 初始化数据目录就写了这么多），三个镜像合计 <strong>1.176 GB</strong>（其中 MySQL 一个就 1.12 GB）。</p>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--实战切入把七行体检记录写下来">实战切入：把七行体检记录写下来
+</h2>
+<p>这一段是本篇的动手环节，落在示例链第①段之前。<strong>产出物就是这七行</strong>，它之后会成为第①段前置清单的一部分。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-11" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="13">
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-11-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1. 引擎版本（看返回码，不看文本观感）</span>
+</span></span><span class="line"><span class="cl">$ docker version --format <span class="s1">&#39;{{.Server.Version}}&#39;</span> <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 2. 子系统状态（记得按 UTF-16 解码再读）</span>
+</span></span><span class="line"><span class="cl">$ wsl.exe --status <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 3. 镜像域名解析与连接</span>
+</span></span><span class="line"><span class="cl">$ python -c <span class="s2">&#34;import socket;print(sorted({i[4][0] for i in socket.getaddrinfo(&#39;registry-1.docker.io&#39;,443)}))&#34;</span>
+</span></span><span class="line"><span class="cl">$ python -c <span class="s2">&#34;import socket,time;t=time.perf_counter();socket.create_connection((&#39;registry-1.docker.io&#39;,443),timeout=6);print(round((time.perf_counter()-t)*1000))&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 4. 对照站点：证明你的探测方法本身可用</span>
+</span></span><span class="line"><span class="cl">$ python -c <span class="s2">&#34;import socket,time;t=time.perf_counter();socket.create_connection((&#39;www.baidu.com&#39;,443),timeout=6);print(round((time.perf_counter()-t)*1000))&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 5. 时钟与证书：比较 Date 头与本机 UTC</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 6. 拉取通道</span>
+</span></span><span class="line"><span class="cl">$ docker pull hello-world <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 7. 容器运行时（不依赖仓库，见上一节的 scratch 办法）</span></span></span></code></pre></div></div>
+</div>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">行</th>
+      <th scope="col">你的读数</th>
+      <th scope="col">本机 2026-10-27 的读数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>____</td>
+      <td>返回码 0，<code>29.8.0</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>____</td>
+      <td>返回码 0，默认分发 <code>docker-desktop</code>，版本 2</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>____</td>
+      <td>解析到 <code>64.13.192.76</code>；443 连接 6018 ms 后超时</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>____</td>
+      <td><code>www.baidu.com</code> 55 ms 成功；<code>gitee.com</code> 83 ms 成功</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>____</td>
+      <td>与服务器偏差 −0.1 秒；证书剩余 89 天</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>____</td>
+      <td>未配代理：返回码 1，<code>dial tcp 64.13.192.76:443: connectex</code>；配本机代理后：返回码 <strong>0</strong>，<code>hello-world</code> 与 <code>redis:7-alpine</code>（5.3 s / 57.8 MB）、<code>mysql:8.4</code>（22 s / 1.12 GB）全部拉成</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>____</td>
+      <td>两条路径都过：<code>FROM scratch</code> 自建镜像在容器内读到 <code>memory.max=67108864</code>；公开镜像 <code>docker run --rm hello-world</code> 返回码 0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>七行填完，分流按「哪几条不过」定：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">结果</th>
+      <th scope="col">下一步</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1 或 2 不过</td>
+      <td>先按你的平台装完再回来，<strong>不要开始示例链第①段</strong>，你会把环境问题当成文档问题</td>
+    </tr>
+    <tr>
+      <td>1、2 过，3 不过而 4 过</td>
+      <td>环境是好的，通道是坏的：配加速通道或代理。这属于第⑤段会重复出现的问题，记下你的解法</td>
+    </tr>
+    <tr>
+      <td>1、2、7 过而 6 不过</td>
+      <td>运行时可用但拿不到公共镜像：第①段开不了跑，先解第 6 条（本机第三轮之前正是这一格）</td>
+    </tr>
+    <tr>
+      <td>七条全过</td>
+      <td>可以进 <a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/">/docs/02-核心操作/接上去/端口映射数据管理与权限时区/</a>，示例链第①段从那里开始（<strong>本机现状即此格</strong>）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第 2、3 种情况值得强调：<strong>它们的报错会长得和「引擎坏了」一模一样</strong>（都是超时或失败）。如果不先量对照站点、不做第 7 条这种绕开仓库的验证，很多人会去重装引擎——重装改变不了链路，白花两小时。</p>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--常见误读">常见误读
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">你可能的理解</th>
+      <th scope="col">实际情况</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>解析返回了 IP 就是网络正常</td>
+      <td>五毫秒返回一个不可达的地址，比不返回更具迷惑性。判据要落到「能不能握手」</td>
+    </tr>
+    <tr>
+      <td>超时就是镜像站限流</td>
+      <td>限流返回明确的 HTTP 状态码与文字，不会表现为 TCP 层超时。超时说明没到应用层</td>
+    </tr>
+    <tr>
+      <td>装完引擎就能直接跑示例链</td>
+      <td>还要有镜像获取通道。本机头两轮就是反例：引擎、子系统、运行时全合格，第①段仍跑不了，直到把代理配上</td>
+    </tr>
+    <tr>
+      <td>引擎装好意味着容器能跑</td>
+      <td>这是两件事，而且要分开判。本机在拉不到任何公共镜像的状态下，仍能用一条不碰仓库的路径证明运行时可用</td>
+    </tr>
+    <tr>
+      <td>配了代理，解析问题就&quot;修好&quot;了</td>
+      <td>没有。直连那个域名依旧拿到连不通的地址（本机第 3 条至今不过），只是引擎不再依赖那条直连路径。<strong>别去折腾本机 DNS</strong></td>
+    </tr>
+    <tr>
+      <td>数据挂在命名卷上就一定测得准</td>
+      <td>先确认数据真的落在那个卷。本机就写错过一次目标路径，Docker 顺手建了个匿名卷接走真实数据目录，容器照跑、查询照出，但那时的&quot;留存&quot;毫无意义</td>
+    </tr>
+    <tr>
+      <td>读到空结果就是数据丢了</td>
+      <td>先确认你的读法没错。手写协议时长度前缀写错，服务端会把余下字节当新命令，回一个 nil 外加一条怪错——看起来完全像&quot;键不存在&quot;</td>
+    </tr>
+    <tr>
+      <td>加速器配了就一劳永逸</td>
+      <td>加速通道会失效或变更。每次「拉不下来」都重跑七行，而不是先怀疑文档</td>
+    </tr>
+    <tr>
+      <td>命令输出看不懂就是环境问题</td>
+      <td>先看返回码。Windows 上系统命令的中文输出常被编码破坏，返回码才是可靠信号</td>
+    </tr>
+    <tr>
+      <td>宿主解析到的地址就是容器看到的</td>
+      <td>不一定。本机同一次运行里宿主与容器各得到不同地址</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--要点总结">要点总结
+</h2>
+<ul>
+<li>装之前先做七项体检，装之后再测一次：<strong>两次读数的差</strong>才是安装过程的结果，单次读数说明不了任何事。本篇两轮读数就摆在一起作证。</li>
+<li>判据要落在<strong>返回码与握手结果</strong>上，不落在文本观感上。Windows 上编码会把中文提示毁掉；而五毫秒返回的假地址比超时报错更危险。</li>
+<li>「拉不下来」分四段量：命令存在性、解析、握手、应用层状态码。<strong>对照站点是这套方法里唯一能证明「探针没坏」的东西</strong>。跨解析器对照这一招会因为 UDP 53 被封而失效，所以要备好另外两条证据（同一域名答案随时间变、引擎自述实连地址）。</li>
+<li>引擎可用 ≠ 能拉镜像。第 7 条可以用 <code>FROM scratch</code> + 本机静态二进制在不碰仓库的情况下证明，顺带还能量出控制组 v2、<code>--memory</code> 的真实下发值和引擎自生成的容器 DNS。</li>
+<li>本库所有示例都<strong>不静默依赖具体加速域名</strong>：镜像获取通道写进每段的前置清单，缺了就在本篇停下，不要边装边往下读。</li>
+<li>子系统默认给引擎约一半物理内存这件事，本机已实测（47.01 GiB / 95.9 GB）；设上限的操作与效果仍未实测。</li>
+</ul>
+<h2 id="pg-0a883c11d665b3b250f07f711c96cfde--本篇未验证项">本篇未验证项
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">原因</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>示例链第①段（起数据库与缓存两个容器）</td>
+      <td><strong>已验证</strong></td>
+      <td>Redis 键值与 MySQL 两行数据（含 <code>written_at</code> 时间戳）都在 <code>docker rm -f</code> 并挂同一命名卷重起后原样读回；宿主经 <code>127.0.0.1:3307</code> 拿到 MySQL 握手包并报出 <code>8.4.13</code></td>
+    </tr>
+    <tr>
+      <td>宿主用真实应用驱动连 MySQL</td>
+      <td>未验证</td>
+      <td>本机没有应用工程，第①段的&quot;IDE 里写入&quot;这一环是用<strong>容器内客户端 + 宿主协议级读写</strong>替代证明的（Redis 那条是真完整，MySQL 只做到 TCP 与应用层握手）。要按判据原文跑需要贯穿示例先落地</td>
+    </tr>
+    <tr>
+      <td>第①段 README 的「自带前置」判据</td>
+      <td>未验证</td>
+      <td>示例目录尚未创建，无法在干净机器上复现该段前置清单</td>
+    </tr>
+    <tr>
+      <td>WSL 内存上限的设置动作与效果</td>
+      <td>未实测</td>
+      <td>本轮只测了默认值（47.01 GiB）；没有改配置，故不给操作效果结论</td>
+    </tr>
+    <tr>
+      <td>跨盘符绑定挂载的性能差异</td>
+      <td>未实测</td>
+      <td>需要示例工程与两份对照数据，本轮未做</td>
+    </tr>
+    <tr>
+      <td>具体加速通道的可用性与选型</td>
+      <td>未验证</td>
+      <td>属团队决定（清单第十章开放项之一）。本篇只给「怎么判断你需要哪一类通道」，且本机走的是代理不是加速器</td>
+    </tr>
+    <tr>
+      <td>代理「只配一处」的半配状态</td>
+      <td>未验证</td>
+      <td>本机是一次配通即成功，没做出「浏览器通而引擎不通」的那一半读数；这条目前只有判断方法，没有实测样本</td>
+    </tr>
+    <tr>
+      <td>代理流量的逐跳走向</td>
+      <td>未验证</td>
+      <td>只观测到 <code>docker info</code> 的代理段由无变 <code>http.docker.internal:3128</code> 且拉取随即成功；未验证它怎么传到本机代理端口</td>
+    </tr>
+    <tr>
+      <td>macOS 与 Linux 平台的任何读数</td>
+      <td>未验证</td>
+      <td>两轮测量都在同一台 Windows 11（10.0.26300，WSL2 内核 6.18.54.1）上完成，跨平台部分只有文档口径</td>
+    </tr>
+    <tr>
+      <td>引擎自述地址的归属与改写环节</td>
+      <td>未验证</td>
+      <td>已证「答案随时间变、宿主与容器不一致、443 不可达」，未核查这些地址归谁、在哪一跳被改写</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+</div>
+
+
+
+    
+	
+  
+
+    
+	
+  
+
+
+
+      </main>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":true,"description":"复制 Markdown 文本","disabledReason":"","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":"/docs/00-%E5%AF%BC%E8%AF%BB/index.md"},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":true,"description":"查阅 Markdown 源码","disabledReason":"","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":"/docs/00-%E5%AF%BC%E8%AF%BB/index.md"},{"available":false,"description":"查阅编辑历史","disabledReason":"查阅编辑历史: 暂不可用","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":""},{"available":false,"description":"编辑当前页面","disabledReason":"编辑当前页面: 暂不可用","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":""},{"available":false,"description":"添加子页面","disabledReason":"添加子页面: 暂不可用","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":""},{"available":false,"description":"提交文档议题","disabledReason":"提交文档议题: 暂不可用","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":""},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":false,"description":"打印完整章节","disabledReason":"打印完整章节: 暂不可用","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":""},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":false,"description":"切换语言","disabledReason":"切换语言: 暂不可用","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/docs/00-%E5%AF%BC%E8%AF%BB/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":true,"description":"外观","disabledReason":"","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Ink","Terminal","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"},{"available":true,"disabledReason":"","id":"slate","title":"Slate","value":"slate"},{"available":true,"disabledReason":"","id":"ink","title":"Ink","value":"ink"},{"available":true,"disabledReason":"","id":"terminal","title":"Terminal","value":"terminal"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":false,"description":"GitHub","disabledReason":"GitHub: 暂不可用","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":""}],"commands":[],"language":"zh","quickLinks":[{"available":true,"description":"一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。","disabledReason":"","icon":"fa-solid fa-book","id":"quick_docs","keywords":["文档","docs"],"kind":"url","target":"self","title":"文档","url":"/docs/"}],"rootOrder":["docs"],"version":1}</script>
+
+<script src="/js/actions.min.c784a65471d30f25801832ad47eca4fc6e9681b4521bd2414655e6623aa58934.js" integrity="sha256-x4SmVHHTDyWAGDKtR&#43;yk/G6WgbRSG9JBRlXmYjqliTQ=" crossorigin="anonymous"></script>
+
+  </body>
+</html>

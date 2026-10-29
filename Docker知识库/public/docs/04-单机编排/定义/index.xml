@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>定义 on Docker 团队知识库</title>
+    <link>https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/</link>
+    <description>Recent content in 定义 on Docker 团队知识库</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    
+    
+    
+      <lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate>
+    
+    
+      <atom:link href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+        <title>为什么需要 Compose、语法基线与文件全字段参考</title>
+        <link>https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/compose%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%BA%BF%E4%B8%8E%E6%96%87%E4%BB%B6%E5%85%A8%E5%AD%97%E6%AE%B5%E5%8F%82%E8%80%83/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/compose%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%BA%BF%E4%B8%8E%E6%96%87%E4%BB%B6%E5%85%A8%E5%AD%97%E6%AE%B5%E5%8F%82%E8%80%83/</guid>
+        <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;strong&gt;实战落点&lt;/strong&gt;：示例链第②段 · 一条命令起全栈（本篇负责「第②段那份文件凭什么长这样」，为 4.7~4.9 的动手准备好语法基线）&#xA;&lt;strong&gt;示例版本&lt;/strong&gt;：消费 &lt;code&gt;示例/贯穿示例/compose.yaml&lt;/code&gt;（本篇不产出文件，但每一条字段读数的来源都是它）；本篇的判据实验另外用了 10 份一次性最小样本，写在正文里可直接复制&#xA;&lt;strong&gt;前置依赖&lt;/strong&gt;：&lt;a href=&#34;../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/&#34;&gt;/docs/02-核心操作/接上去/端口映射数据管理与权限时区/&lt;/a&gt;、&lt;a href=&#34;../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E8%B7%91%E8%B5%B7%E6%9D%A5/%E9%95%9C%E5%83%8F%E7%AE%A1%E7%90%86%E4%B8%8E%E5%AE%B9%E5%99%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/&#34;&gt;/docs/02-核心操作/跑起来/镜像管理与容器生命周期/&lt;/a&gt;、&lt;a href=&#34;../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/&#34;&gt;/docs/00-导读/把环境搭好/环境准备/&lt;/a&gt;&#xA;&lt;strong&gt;本篇产出物&lt;/strong&gt;：团队语法基线的一句话结论（并要求在 7.11 落地为唯一事实来源）；一张「哪些写错法会被 &lt;code&gt;config&lt;/code&gt; 拦住、哪些不会」的实测表；一张 services 字段速查表，逐列标出本机是否验证过&#xA;&lt;strong&gt;拓展接口&lt;/strong&gt;：本篇的「&lt;code&gt;config&lt;/code&gt; 是唯一的真相来源」这条判据在 4.7 多文件合并与 6.6 CI 里被反复复用；「已废弃 &lt;code&gt;version:&lt;/code&gt; 字段」在 8.6 版本兼容矩阵里作为一条独立条目；「中文目录名导致项目名为空」在 7.2 症状索引里单列&#xA;&lt;strong&gt;难度·耗时&lt;/strong&gt;：★☆☆ · 40 分钟（读 + 三条动手判据）&#xA;&lt;strong&gt;自测三题&lt;/strong&gt;：&lt;/p&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;为什么 &lt;code&gt;docker compose config&lt;/code&gt; 输出的模型和你写进文件的内容不完全一样？举两个具体字段。&lt;/li&gt;&#xA;&lt;li&gt;&lt;code&gt;version: &amp;quot;3.8&amp;quot;&lt;/code&gt; 这一行现在会被拒绝吗？依据是什么？旧教程里还有哪三行属于同一类？&lt;/li&gt;&#xA;&lt;li&gt;一份文件放在中文目录里、没写 &lt;code&gt;name:&lt;/code&gt;，报什么错？为什么？&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;/blockquote&gt;</description>
+      </item>
+    
+  </channel>
+</rss>

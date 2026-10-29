@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>怎么用这个库 on Docker 团队知识库</title>
+    <link>https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/</link>
+    <description>Recent content in 怎么用这个库 on Docker 团队知识库</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    
+    
+    
+      <lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate>
+    
+    
+      <atom:link href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+        <title>使用指南、学习路径与贯穿示例总览</title>
+        <link>https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/</guid>
+        <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;strong&gt;实战落点&lt;/strong&gt;：示例链第①段 · 依赖跑起来（本篇的实战切入用它，但不要求你已跑完前序任何一步）&#xA;&lt;strong&gt;示例版本&lt;/strong&gt;：&lt;code&gt;示例/贯穿示例/段1-依赖跑起来/README.md&lt;/code&gt;（链首，可从 0 独立起步；本篇不产出示例文件）&#xA;&lt;strong&gt;前置依赖&lt;/strong&gt;：无&#xA;&lt;strong&gt;本篇产出物&lt;/strong&gt;：一份你自己机器的体检记录（命令在不在、子系统在不在、镜像域名解析对不对，共三条筛查；完整七条在环境准备），以及由此判定的入口——本机 2026-10-27 的第二轮落点是「引擎可用但仍拉不到镜像」，不是「可以开跑」&#xA;&lt;strong&gt;拓展接口&lt;/strong&gt;：本篇的「主题轨为主、暗线为辅」结论在 0.5 写作要求里被扩展成文档体裁；「先量机器」的三步在 &lt;a href=&#34;../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/&#34;&gt;/docs/00-导读/把环境搭好/环境准备/&lt;/a&gt; 被穷尽展开&#xA;&lt;strong&gt;难度·耗时&lt;/strong&gt;：★☆☆ · 25 分钟（含动手自检 5 分钟）&#xA;&lt;strong&gt;自测三题&lt;/strong&gt;：&lt;/p&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;你只想解决「容器里连不上宿主机的服务」，该走哪条轨、进哪一篇？为什么不是按编号读？&lt;/li&gt;&#xA;&lt;li&gt;实战暗线既然不是阅读路线，它保证的是什么？&lt;/li&gt;&#xA;&lt;li&gt;为什么「按编号从 0.1 读到 9.4」会被明确不推荐？它丢掉的是哪一样东西？&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;/blockquote&gt;</description>
+      </item>
+    <item>
+        <title>写作要求 W1~W6 与文档模板</title>
+        <link>https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E5%86%99%E4%BD%9C%E8%A6%81%E6%B1%82%E4%B8%8E%E6%96%87%E6%A1%A3%E6%A8%A1%E6%9D%BF/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E5%86%99%E4%BD%9C%E8%A6%81%E6%B1%82%E4%B8%8E%E6%96%87%E6%A1%A3%E6%A8%A1%E6%9D%BF/</guid>
+        <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;strong&gt;实战落点&lt;/strong&gt;：示例链第①段 · 依赖跑起来（本篇的实战切入是「拿一篇真文档跑一遍合格检查」，不需要容器引擎）&#xA;&lt;strong&gt;示例版本&lt;/strong&gt;：本篇不产出示例文件；检查对象是导读板块已存在的三篇文章&#xA;&lt;strong&gt;前置依赖&lt;/strong&gt;：&lt;a href=&#34;../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/&#34;&gt;/docs/00-导读/怎么用这个库/使用指南与主线八站地图/&lt;/a&gt;&#xA;&lt;strong&gt;本篇产出物&lt;/strong&gt;：一份可直接复制的模板文件路径清单，以及四组「不合格写法 vs 合格写法」的实际对照&#xA;&lt;strong&gt;拓展接口&lt;/strong&gt;：本篇的「问题驱动四段」在第七篇被推翻一部分——检索型文档不套这四段，例外清单见下；「基础层完整性」在第九篇被复用为问答的出处指针&#xA;&lt;strong&gt;难度·耗时&lt;/strong&gt;：★★☆ · 30 分钟（含动手检查）&#xA;&lt;strong&gt;自测三题&lt;/strong&gt;：&lt;/p&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;为什么每篇开头要放七项元数据，而不是只在目录页写一次？&lt;/li&gt;&#xA;&lt;li&gt;新人小结为什么必须在类比之后补一句机制对应？只给类比会漏掉什么？&lt;/li&gt;&#xA;&lt;li&gt;检索型文档被允许不套问题驱动四段，这条例外的判断依据是什么？&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;/blockquote&gt;</description>
+      </item>
+    
+  </channel>
+</rss>

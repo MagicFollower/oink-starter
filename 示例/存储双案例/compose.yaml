@@ -1,0 +1,41 @@
+name: kbst
+services:
+  db:
+    image: mysql:8.4
+    container_name: kbst-db
+    environment:
+      MYSQL_ROOT_PASSWORD: KbSt#Test2026
+      MYSQL_DATABASE: kbdb
+    volumes:
+      - mysqldata:/var/lib/mysql            # ① 命名卷：数据库的真数据（唯一正确的落点）
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro   # ② 只读 bind：初始化 SQL
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pKbSt#Test2026"]
+      interval: 5s
+      timeout: 3s
+      retries: 40
+    stop_grace_period: 40s
+    restart: unless-stopped
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: kbst-web
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./web-content:/usr/share/nginx/html         # ③ 可写 bind：站点内容，宿主改了立刻可见
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro  # ④ 只读 bind（单文件）：配置
+      - weblogs:/var/log/nginx                       # ⑤ 命名卷：日志（要活过容器删除）
+      - img2:/usr/share/nginx/html2                  # ⑥ 空命名卷挂到「镜像里没这个目录」的位置：测预填充
+      - img2:/probe/volume-on-missing-path        # ⑥ 卷挂到「镜像里不存在的路径」：挂载点是谁建的
+    tmpfs:
+      - /cache:size=32m,mode=1777                    # ⑦ tmpfs：只活着这一次，且算进内存配额
+    ports:
+      - "18899:80"
+    restart: unless-stopped
+
+volumes:
+  mysqldata:
+  weblogs:
+  img2:

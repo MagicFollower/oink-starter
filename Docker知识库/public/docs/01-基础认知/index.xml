@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>基础认知 on Docker 团队知识库</title>
+    <link>https://example.org/docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/</link>
+    <description>Recent content in 基础认知 on Docker 团队知识库</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    
+    
+    
+    
+      <atom:link href="https://example.org/docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+  </channel>
+</rss>

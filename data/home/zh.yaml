@@ -1,37 +1,37 @@
 sections: [hero, cards, cta]
 
+# 首页数据源与站点标题是两处独立配置：只改 hugo.yaml 的 title 会出现「标题改了一半」。
 hero:
   align: center
-  eyebrow: 开源项目起步模板
+  eyebrow: 内部技术知识库 · 零基础可进
   title_lines:
-    - words: [{ text: 你的项目， }]
-    - words: [{ text: 清楚讲明白。 }]
-  lead: 一个可以直接修改的项目首页，容纳文档、动态与长篇指南。
+    - words: [{ text: Docker 知识库 }]
+  lead: 一条贯穿示例链随主题切入，十篇主题文档按认知顺序铺开——示例链不是阅读路线，主题讲到哪，动手就切到哪一段。
   actions:
-    - { label: 阅读文档, url: docs/, icon: fa-solid fa-book, style: primary }
-    - { label: 跟随教程, url: book/, icon: fa-solid fa-arrow-right, style: ghost }
+    - { label: 开始阅读, url: docs/00-导读/, icon: fa-solid fa-book, style: primary }
+    - { label: 浏览全部文档, url: docs/, icon: fa-solid fa-layer-group, style: ghost }
 
 cards:
-  eyebrow: 从清晰结构开始
-  title: 每类内容都有自己的位置
+  eyebrow: 两条入口
+  title: 先选一条路进来
   columns: 3
   items:
-    - title: 博客
-      desc: 发布文章、设计记录与版本公告。
-      icon: fa-solid fa-pen-nib
-      url: blog/
-    - title: 文档
-      desc: 按简介、快速上手、教程与参考组织资料。
-      icon: fa-solid fa-book-open
-      url: docs/
-    - title: 书籍
-      desc: 用连续的阅读体验讲清一套完整工作流。
-      icon: fa-solid fa-graduation-cap
-      url: book/
+    - title: 主线八站地图
+      desc: 八站各自的起点痛点、覆盖章节、产出物与判据；按主线通读就从这里对齐进度。
+      icon: fa-solid fa-route
+      url: docs/00-导读/怎么用这个库/使用指南与主线八站地图/
+    - title: 镜像构建
+      desc: Dockerfile 指令与构建上下文、分层与依赖缓存设计、多阶段与瘦身，到私有仓库与构建排错。
+      icon: fa-solid fa-box-archive
+      url: docs/03-镜像构建/
+    - title: 运维手册
+      desc: 命令速查、按症状检索、六个故障域排错、性能测量路径与值班应急 runbook。
+      icon: fa-solid fa-wrench
+      url: docs/07-运维手册/
 
 cta:
-  title: 把这个模板变成你的站点。
-  text: 修改项目名称与网址，替换示例文案，然后发布。
-  label: 开始使用
-  url: docs/get-started/
+  title: 别先读目录，先把依赖跑起来
+  text: 站①只要两条 docker run：起 MySQL 与 Redis，让 IDE 里的 Spring Boot 连上它们，再证明容器删掉之后数据还在。
+  label: 快速开始
+  url: docs/00-导读/把环境搭好/环境准备/
   style: primary

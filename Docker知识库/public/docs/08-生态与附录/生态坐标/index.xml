@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>生态坐标 on Docker 团队知识库</title>
+    <link>https://example.org/docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/%E7%94%9F%E6%80%81%E5%9D%90%E6%A0%87/</link>
+    <description>Recent content in 生态坐标 on Docker 团队知识库</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    
+    
+    
+      <lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate>
+    
+    
+      <atom:link href="https://example.org/docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/%E7%94%9F%E6%80%81%E5%9D%90%E6%A0%87/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+        <title>容器生态地图、Kubernetes 衔接与替代品</title>
+        <link>https://example.org/docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/%E7%94%9F%E6%80%81%E5%9D%90%E6%A0%87/%E5%AE%B9%E5%99%A8%E7%94%9F%E6%80%81%E5%9C%B0%E5%9B%BE%E4%B8%8Ekubernetes%E8%A1%94%E6%8E%A5/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://example.org/docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/%E7%94%9F%E6%80%81%E5%9D%90%E6%A0%87/%E5%AE%B9%E5%99%A8%E7%94%9F%E6%80%81%E5%9C%B0%E5%9B%BE%E4%B8%8Ekubernetes%E8%A1%94%E6%8E%A5/</guid>
+        <description></description>
+      </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>把环境搭好 on Docker 团队知识库</title>
+    <link>https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/</link>
+    <description>Recent content in 把环境搭好 on Docker 团队知识库</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    
+    
+    
+      <lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate>
+    
+    
+      <atom:link href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+        <title>环境准备：Windows、macOS 与 Linux</title>
+        <link>https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/</link>
+        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+        
+        <guid>https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/</guid>
+        <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;strong&gt;实战落点&lt;/strong&gt;：示例链第①段 · 依赖跑起来（本篇是第①段的全部前置，第①段的任何命令都要先过本篇的七条判据）&#xA;&lt;strong&gt;示例版本&lt;/strong&gt;：本篇不产出示例文件；它产出「干净机器判定」——第①段的前置清单以本篇七条为准&#xA;&lt;strong&gt;前置依赖&lt;/strong&gt;：&lt;a href=&#34;../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/&#34;&gt;/docs/00-导读/怎么用这个库/使用指南与主线八站地图/&lt;/a&gt;&#xA;&lt;strong&gt;本篇产出物&lt;/strong&gt;：一份你自己机器的七行体检记录，据此判断能不能进示例链第①段；本篇同时给出一条&lt;strong&gt;不依赖镜像仓库&lt;/strong&gt;的运行时验证路径&#xA;&lt;strong&gt;拓展接口&lt;/strong&gt;：本篇的「四段定位法」在 &lt;a href=&#34;../../../docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/%E6%8C%89%E6%95%85%E9%9A%9C%E5%9F%9F%E6%8E%92%E9%94%99/%E7%A3%81%E7%9B%98%E5%8D%A0%E6%BB%A1%E4%B8%8E%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E5%A4%B1%E8%B4%A5/&#34;&gt;/docs/07-运维手册/按故障域排错/磁盘占满与镜像拉取失败/&lt;/a&gt; 被穷尽为四条判据表；&lt;code&gt;--memory&lt;/code&gt; 在容器内可见这件事在 5.3 被展开成控制组机制；「约一半物理内存」这条默认值本篇已实测，具体上限怎么设与其效果仍未实测&#xA;&lt;strong&gt;难度·耗时&lt;/strong&gt;：★☆☆ · 40 分钟（含动手检查 10 分钟；安装耗时取决于网络，不计入）&#xA;&lt;strong&gt;自测三题&lt;/strong&gt;：&lt;/p&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;引擎装好、子系统就绪、容器也能跑，为什么第①段仍然可能跑不起来？&lt;/li&gt;&#xA;&lt;li&gt;域名解析五毫秒返回一个地址，为什么不能算「网络正常」？本机给出的两个证据是什么？&lt;/li&gt;&#xA;&lt;li&gt;为什么本篇要保留两轮读数，而不是只写最后那一轮？&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;/blockquote&gt;</description>
+      </item>
+    
+  </channel>
+</rss>

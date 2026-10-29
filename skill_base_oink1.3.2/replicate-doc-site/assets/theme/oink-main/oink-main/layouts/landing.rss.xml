@@ -1,4 +1,0 @@
-{{- /* A declared RSS output must be a real feed. The shared renderer uses
-     ordinary page summaries and omits data-driven Landing sections. */ -}}
-{{- .Store.Set "tdOutputFormat" "rss" -}}
-{{- partial "content/rss.html" . -}}

@@ -1,0 +1,842 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-preset='slate'] { background: #f1f4f8; color: #16222e; }
+  html[data-td-preset='slate'][data-bs-theme='dark'] { background: #0b1119; color: #e8eef6; }
+  html[data-td-preset='ink'] { background: #ffffff; color: #141414; }
+  html[data-td-preset='ink'][data-bs-theme='dark'] { background: #0b0b0b; color: #ededed; }
+  html[data-td-preset='terminal'] { background: #f4f5f2; color: #1d211f; }
+  html[data-td-preset='terminal'][data-bs-theme='dark'] { background: #0c0f0e; color: #d3dbd6; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    var root = document.documentElement;
+    var allowed = ["paper","slate","ink","terminal"];
+    var canvases = {"ink":{"dark":"#0b0b0b","darkInk":"#ededed","light":"#ffffff","lightInk":"#141414"},"paper":{"dark":"#161513","darkInk":"#ece9e3","light":"#f7f6f3","lightInk":"#21201c"},"slate":{"dark":"#0b1119","darkInk":"#e8eef6","light":"#f1f4f8","lightInk":"#16222e"},"terminal":{"dark":"#0c0f0e","darkInk":"#d3dbd6","light":"#f4f5f2","lightInk":"#1d211f"}};
+    var preset = null;
+    try {
+      preset = localStorage.getItem('td-preset');
+      if (preset !== null && allowed.indexOf(preset) < 0) {
+        preset = null;
+        localStorage.removeItem('td-preset');
+      }
+    } catch (_) {
+      
+    }
+    if (preset) root.setAttribute('data-td-preset', preset);
+    var c = canvases[root.getAttribute('data-td-preset')];
+    if (!c) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('data-td-canvas-light', c.light);
+      meta.setAttribute('data-td-canvas-dark', c.dark);
+      meta.setAttribute('content', c.light);
+    });
+  })();
+</script>
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<link rel="canonical" type="text/html" href="https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/">
+<link rel="alternate" type="application/rss&#43;xml" href="https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/index.xml">
+<link rel="alternate" type="text/markdown" href="https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/index.md">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+<title>接上去 | Docker 团队知识库</title>
+<meta name="description" content="端口、数据、属主——本地开发最常卡住的三样。">
+<link rel="canonical" href="https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/">
+<link rel="alternate" hreflang="zh-CN" href="https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/">
+<meta property="og:url" content="https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/">
+	<meta property="og:site_name" content="Docker 团队知识库">
+	<meta property="og:title" content="接上去">
+	<meta property="og:description" content="端口、数据、属主——本地开发最常卡住的三样。">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="website">
+
+	<meta itemprop="name" content="接上去">
+	<meta itemprop="description" content="端口、数据、属主——本地开发最常卡住的三样。">
+	<meta itemprop="wordCount" content="45">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="接上去">
+	<meta name="twitter:description" content="端口、数据、属主——本地开发最常卡住的三样。">
+<link rel="preload" href="/scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" as="style" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<link href="/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" rel="stylesheet" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+
+  </head>
+  <body class="td-section td-print-view">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    <div class="container-fluid td-print-shell">
+      <main id="td-main-content" class="td-print-document" tabindex="-1">
+        
+
+
+
+
+<div class="td-content">
+<div class="td-page-notice td-page-notice--primary d-print-none">
+<p>
+这是本节的多页打印视图。
+<button type="button" class="btn btn-link p-0 align-baseline" data-td-action="print">点击此处打印</button>.
+</p><p>
+<a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/">返回本页常规视图</a>.
+</p>
+</div>
+
+
+
+<h1 class="title">接上去</h1>
+<div class="lead">端口、数据、属主——本地开发最常卡住的三样。</div>
+
+
+
+
+    <ul>
+    
+  
+  
+  
+  
+
+  
+    
+    
+    <li>
+1: <a href="#pg-92f0e5ed9feb7017082df38b3dc1702a">端口映射、数据管理与权限时区编码</a>
+
+
+    </li>
+  
+
+    </ul>
+<div class="content">
+      <p>端口、数据、属主——本地开发最常卡住的三样。</p>
+<p>本板块包含：端口映射、数据管理与权限时区编码。</p>
+
+</div>
+</div>
+
+
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="">
+	<h1 id="pg-92f0e5ed9feb7017082df38b3dc1702a">1 - 端口映射、数据管理与权限时区编码</h1>
+    <div class="lead">四种内置网络模式与自定义网络 DNS；volume、bind mount、tmpfs 选型与备份；UID/GID 映射、TZ 与中文乱码。</div>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第①段 · 依赖跑起来（本篇的实战切入就是第①段的完整复现，本机已跑通）
+<strong>示例版本</strong>：无前置示例文件依赖；本篇自己产出第①段所需的两条启动命令与验证命令，用官方 <code>redis:7-alpine</code>、<code>mysql:8.4</code> 直接可跑
+<strong>前置依赖</strong>：<a href="/docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%8A%A8%E6%89%8B/%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%BF%90%E8%A1%8C%E5%AE%B9%E5%99%A8%E4%B8%8E%E5%9B%BE%E5%BD%A2%E5%8C%96%E5%B7%A5%E5%85%B7/">/docs/01-基础认知/第一次动手/第一次运行容器与图形化工具/</a>、<a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E8%B7%91%E8%B5%B7%E6%9D%A5/%E9%95%9C%E5%83%8F%E7%AE%A1%E7%90%86%E4%B8%8E%E5%AE%B9%E5%99%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">/docs/02-核心操作/跑起来/镜像管理与容器生命周期/</a>、<a href="/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/">/docs/00-导读/把环境搭好/环境准备/</a>
+<strong>本篇产出物</strong>：一条能跑的 <code>docker run</code>（带端口、带卷、带环境变量）+ 一次「删容器后数据仍在」的验证记录；一张把绑定挂载与命名卷的量差测出来的对照表
+<strong>拓展接口</strong>：本篇的「自定义网络才有服务名解析」在 4.9 完整实战里被直接复用（compose 建的就是用户自定义网络）；「绑定挂载慢一个量级」在 4.8 热重载与 7.8 性能排查里分别被复用；容器内 root 与宿主属主的映射原理本篇只给现象，穷尽处是 5.2；<code>--memory</code> 的真实下发本篇量到了，机制与 OOM 归 5.3
+<strong>难度·耗时</strong>：★★☆ · 50 分钟（含动手）
+<strong>自测三题</strong>：</p>
+<ol>
+<li>为什么 <code>-p 6380:6379</code> 之后，宿主机上看到的进程不是 <code>redis-server</code>，而是容器后端？</li>
+<li>两个都在默认 bridge 上的容器为什么互相解析不到，而接进自定义网络就一条命令解决了？</li>
+<li>容器里 <code>date</code> 显示 03:34、宿主显示 11:34，这 8 小时差是容器的问题还是宿主的问题？依据是什么？</li>
+</ol>
+</blockquote>
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--为什么要先把这三件事分清楚">为什么要先把这三件事分清楚
+</h2>
+<p>一个人把服务跑起来，卡了半小时：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="8">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">「应用连不上我本地的 MySQL，容器明明在跑。」
+</span></span><span class="line"><span class="cl">「端口映射成什么的？」
+</span></span><span class="line"><span class="cl">「没写 -p，我在镜像里 EXPOSE 了 3306。」
+</span></span><span class="line"><span class="cl">「EXPOSE 不打开端口。而且你连的是 localhost:3306，宿主机上根本没有监听。」
+</span></span><span class="line"><span class="cl">「好，加了 -p 通了。另一个问题：我删了容器重建，数据没了。」
+</span></span><span class="line"><span class="cl">「那个卷是绑定挂载还是命名卷？……你把数据放容器可写层里了。」
+</span></span><span class="line"><span class="cl">「行。最后一个：日志时间比实际晚 8 小时，我以为数据库时钟坏了。」
+</span></span><span class="line"><span class="cl">「容器默认是 UTC。你的宿主是 +0800，差的是显示口径，不是时间。」</span></span></code></pre></div></div>
+</div>
+<p>这三个坑的共同点是：<strong>它们都不是&quot;Docker 的 bug&quot;，而是三个不同层面的&quot;东西在哪&quot;被搞混了</strong>——端口在谁身上、数据落在哪个文件系统、时间按哪个时区显示。这三件事一旦分清，第二篇剩下的一半内容会顺很多。</p>
+<blockquote>
+<p>💡 新人小结：<code>-p 6380:6379</code> 像公司前台转接。外面的人拨总机 <code>6380</code>，前台再转到你工位分机 <code>6379</code>；<strong>你工位上的人不需要知道总机号</strong>，也不因为总机换了号就得搬桌子。
+对应到 Docker：<code>6380</code> 是宿主机（准确说是容器运行环境那一侧）监听的端口，<code>6379</code> 是容器内进程监听的端口，冒号左边是&quot;外面拨的号&quot;、右边是&quot;里面接的号&quot;。容器内进程永远只看到 <code>6379</code>，所以下面第一条读数里容器自己登记的端口就是 6379。</p>
+</blockquote>
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--端口映射谁在监听哪个号">端口映射：谁在监听哪个号
+</h2>
+<p>五种写法都在本机跑过，读数是真实取到的。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">写法</th>
+      <th scope="col">宿主侧实际监听（<code>netstat -ano</code> 原文）</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>-p 6380:6379</code></td>
+      <td><code>TCP 0.0.0.0:6380 ... LISTENING</code>、<code>TCP [::]:6380 ... LISTENING</code>、另有 <code>TCP 127.0.0.1:6380 ... LISTENING</code></td>
+      <td>四个地址族都在，等于&quot;任何网卡都能进&quot;</td>
+    </tr>
+    <tr>
+      <td><code>-p 127.0.0.1:6381:6379</code></td>
+      <td>只有 <code>TCP 127.0.0.1:6381 ... LISTENING</code></td>
+      <td>绑定地址收窄到回环。<code>docker port</code> 显示 <code>6379/tcp -&gt; 127.0.0.1:6381</code></td>
+    </tr>
+    <tr>
+      <td><code>-p 6379</code></td>
+      <td><code>6379/tcp -&gt; 0.0.0.0:60993</code>、<code>6379/tcp -&gt; [::]:60993</code></td>
+      <td>宿主端口随机分配，必须用 <code>docker port</code> 才查得到</td>
+    </tr>
+    <tr>
+      <td><code>-p 8080:80</code>（本表未跑）</td>
+      <td>—</td>
+      <td>结构同上，只是把容器端口换成 80</td>
+    </tr>
+    <tr>
+      <td><code>--network host</code></td>
+      <td>容器内 <code>hostname</code> 返回 <code>docker-desktop</code></td>
+      <td>桌面版上「host」指那台 Linux 虚拟机的网络栈，<strong>不是你的 Windows</strong>。端口不映射，直接占 VM 的</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>容器那一侧看到什么，是这节最该记住的一条：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-1" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-1-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ docker exec m-p1 sh -c &#34;head -2 /proc/net/tcp&#34;
+</span></span><span class="line"><span class="cl">  sl  local_address rem_address   st ...
+</span></span><span class="line"><span class="cl">   0: 00000000:18EB 00000000:0000 0A ...   uid 999</span></span></code></pre></div></div>
+</div>
+<p><code>18EB</code> 是十六进制，换算过来正是 <strong>6379</strong>。也就是说容器里那份监听表上<strong>完全没有 6380 这个数</strong>——它根本不知道外面用了哪个号。这条读数是&quot;端口映射不影响应用内部&quot;的最硬证据。</p>
+<p>顺手一条判据：映射成功后从宿主发一次真实协议请求，比看状态更可靠。</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ （对 127.0.0.1:6380 发 RESP 命令 SET a1 v1 / GET a1）
+</span></span><span class="line"><span class="cl">+OK
+</span></span><span class="line"><span class="cl">$2
+</span></span><span class="line"><span class="cl">v1</span></span></code></pre></div></div>
+</div>
+<p>宿主端口被占时的报错长这样，认得它能省十分钟：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-3" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-3-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ docker run -d --name m-p5 -p 6380:6379 redis:7-alpine
+</span></span><span class="line"><span class="cl">docker: Error response from daemon: failed to set up container networking: driver failed
+</span></span><span class="line"><span class="cl">programming external connectivity on endpoint m-p5 (...): Bind for 0.0.0.0:6380 failed:
+</span></span><span class="line"><span class="cl">port is already allocated
+</span></span><span class="line"><span class="cl">[返回码 125]</span></span></code></pre></div></div>
+</div>
+<p>判据：<strong>换宿主端口，不要去动容器端口</strong>。上面这条错误里 <code>0.0.0.0:6380</code> 是宿主侧的冲突点，容器侧的 6379 从没参与竞争。</p>
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--容器之间怎么找到彼此">容器之间怎么找到彼此
+</h2>
+<p>这是本篇第二个&quot;东西在哪&quot;：<strong>名字解析发生在哪个网络里</strong>。三条命令的对照：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">场景</th>
+      <th scope="col">命令</th>
+      <th scope="col">本机读数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>目标容器在默认 bridge，发起容器也在默认 bridge</td>
+      <td><code>getent hosts m-p1</code></td>
+      <td>无结果</td>
+    </tr>
+    <tr>
+      <td>发起容器在自定义网络，目标<strong>没接进来</strong></td>
+      <td><code>getent hosts m-p1</code></td>
+      <td>无结果</td>
+    </tr>
+    <tr>
+      <td>把目标接进来之后再问</td>
+      <td><code>docker network connect kb-probe-net m-p1</code> → <code>getent hosts m-p1</code></td>
+      <td><code>172.28.99.2  m-p1  m-p1</code></td>
+    </tr>
+    <tr>
+      <td>用名字真连一次</td>
+      <td><code>redis-cli -h m-p1 ping</code></td>
+      <td><code>PONG</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>一个实验结论：<strong>容器名能不能被解析，取决于两个容器是不是在同一个用户自定义网络里</strong>，跟&quot;它们在不在同一台机器上&quot;无关。默认 bridge 上没有这套名字解析。</p>
+<p>配套读数，供排查时用：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="15">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ docker exec m-p1 cat /etc/resolv.conf
+</span></span><span class="line"><span class="cl"># Generated by Docker Engine.
+</span></span><span class="line"><span class="cl">nameserver 127.0.0.11
+</span></span><span class="line"><span class="cl">options ndots:0
+</span></span><span class="line"><span class="cl"># Based on host file: &#39;/etc/resolv.conf&#39; (internal resolver)
+</span></span><span class="line"><span class="cl"># ExtServers: [host(192.168.65.7)]
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ docker exec m-p1 ip -4 addr show eth0 | head -2
+</span></span><span class="line"><span class="cl">2: eth0@if5: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 ...
+</span></span><span class="line"><span class="cl">    inet 172.17.0.2/16 ...
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ docker exec m-p1 ip route | head -3
+</span></span><span class="line"><span class="cl">default via 172.17.0.1 dev eth0
+</span></span><span class="line"><span class="cl">172.17.0.0/16 dev eth0 scope link src 172.17.0.2
+</span></span><span class="line"><span class="cl">172.28.99.0/24 dev eth1 scope link src 172.28.99.2</span></span></code></pre></div></div>
+</div>
+<blockquote>
+<p>💡 新人小结：默认 bridge 像一栋没有内部电话系统的公寓楼——你只知道门牌号（IP），互相叫名字没人应；用户自定义网络则是<strong>给这组容器装了一台内部交换机</strong>，登记了名字，报名字就能接通。
+对应到 Docker：<code>nameserver 127.0.0.11</code> 是引擎内置的解析器，它只服务<strong>用户自定义网络</strong>的登记表；<code>172.17.0.2/16</code> 是默认 bridge 的地址，<code>eth1</code> 上的 <code>172.28.99.2/24</code> 才是接进自定义网络后拿到的、能被名字解析到的地址。所以一个容器可以同时在两个网络里，各自一个 IP。</p>
+</blockquote>
+<p>四种内置网络模式怎么挑：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">模式</th>
+      <th scope="col">什么时候用</th>
+      <th scope="col">代价</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>bridge</code>（默认）</td>
+      <td>单机绝大多数场景</td>
+      <td>默认网络上没有名字解析，要用 <code>-p</code> 暴露、用 IP 互访</td>
+    </tr>
+    <tr>
+      <td>用户自定义 bridge</td>
+      <td><strong>只要有两个以上容器互访就用它</strong></td>
+      <td>要多建一个网络；这是本篇建议的默认选择</td>
+    </tr>
+    <tr>
+      <td><code>host</code></td>
+      <td>追求最少一跳、且明确知道自己在 Linux 宿主上</td>
+      <td>桌面版上它指的是那台 VM，不是你的 Windows；端口直接占用、隔离性也掉了</td>
+    </tr>
+    <tr>
+      <td><code>none</code></td>
+      <td>完全不需要网络，或要自己插别的网络</td>
+      <td>连回环以外都没有，需要显式 <code>network connect</code> 补</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>判据：新建容器后<strong>先问一次名字再连一次端口</strong>，两步都过才算网络配好；只看 <code>docker ps</code> 有 <code>0.0.0.0:6380-&gt;6379/tcp</code> 不算，那只能证明映射建立了，证明不了解析和连通。</p>
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--数据放在哪三种挂载与它们的落点">数据放在哪：三种挂载与它们的落点
+</h2>
+<p>先看图，再看本机实测的挂载表——<strong>这张图就是&quot;删容器会不会丢数据&quot;的答案</strong>。</p>
+<pre class="td-mermaid-source"><code class="language-mermaid">flowchart LR
+    C[&#34;容器内路径&#34;] --&gt;|&#34;命名卷 -v 名字:/data&#34;| V[&#34;/dev/sdd 上的 ext4&#34;]
+    C --&gt;|&#34;绑定挂载 -v 宿主目录:/mnt&#34;| B[&#34;Windows 目录，走 9p 协议&#34;]
+    C --&gt;|&#34;tmpfs --tmpfs /t&#34;| M[&#34;内存，容器没了就没了&#34;]
+    C --&gt;|&#34;什么都不挂（写可写层）&#34;| L[&#34;容器可写层，rm 之后一起没&#34;]
+    V --&gt; S[&#34;数据保留，跨容器可见&#34;]
+    B --&gt; W[&#34;文件在宿主上，用资源管理器能看到&#34;]
+    M --&gt; X[&#34;不落盘，重启即失&#34;]
+    L --&gt; Y[&#34;最危险的默认&#34;]</code></pre><p>本机同时挂三种，容器里的 <code>mount</code> 表把差异说得非常直白：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ docker run -d --name m-mix -v kb-probe-vol:/data -v &lt;Windows目录&gt;:/mnt --tmpfs /t redis:7-alpine
+</span></span><span class="line"><span class="cl">$ docker exec m-mix sh -c &#34;mount | grep -E &#39; /data | /mnt | /t &#39;&#34;
+</span></span><span class="line"><span class="cl">/dev/sdd on /data type ext4 (rw,relatime)
+</span></span><span class="line"><span class="cl">C:\ on /mnt type 9p (rw,noatime,aname=drvfs;path=C:\;uid=0;gid=0;metadata;symlinkroot=/mnt/host/,cache=0x5,access=client,msize=65536,trans=fd,rfd=5,wfd=5)
+</span></span><span class="line"><span class="cl">tmpfs on /t type tmpfs (rw,nosuid,nodev,noexec,relatime)</span></span></code></pre></div></div>
+</div>
+<p>三行读法：<strong><code>ext4</code> 说明命名卷的真身在 Linux 文件系统里（一个虚拟磁盘文件内部），<code>9p</code> 说明绑定挂载是跨协议访问 Windows 目录，<code>tmpfs</code> 那行带着 <code>noexec</code>——连在上面执行程序都不行。</strong> 三种数据的&quot;物理位置&quot;根本不是一回事，所以备份、性能、权限行为全都不同。</p>
+<blockquote>
+<p>💡 新人小结：命名卷像把东西存在<strong>公司仓库</strong>——你换了工位（重建容器）货还在，取货要用仓库单号（卷名）；绑定挂载像把<strong>家里的柜子直接搬进办公室</strong>——同一批东西，两边都能伸手拿，但你家和办公室之间那条走廊（这里就是 9p）比办公室内部走动感人得多。
+对应到 Docker：卷名 <code>kb-probe-vol</code> 对应单号，落点 <code>/var/lib/docker/volumes/&lt;名&gt;/_data</code>；绑定挂载的宿主目录与容器内 <code>/mnt</code> 指向同一批文件，代价是跨文件系统协议；容器可写层则像&quot;东西塞在你座位底下&quot;，扔椅子（<code>docker rm</code>）就一起扔了。</p>
+</blockquote>
+<h3 id="pg-92f0e5ed9feb7017082df38b3dc1702a--量出来的差距以及两次假读数">量出来的差距，以及两次假读数
+</h3>
+<p>同一段工作（写 300 个小文件 + <code>dd</code> 写一个 64 MiB 文件 + <code>sync</code>）分别落在绑定挂载与命名卷上，各跑三轮：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">轮次</th>
+      <th scope="col">绑定挂载（Windows 目录，9p）</th>
+      <th scope="col">命名卷（ext4）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>1082 ms</td>
+      <td>421 ms</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1068 ms</td>
+      <td>429 ms</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>1036 ms</td>
+      <td>409 ms</td>
+    </tr>
+    <tr>
+      <td>中位</td>
+      <td><strong>1068 ms</strong></td>
+      <td><strong>421 ms</strong></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>docker run --rm alpine true</code> 的固定开销中位是 <strong>398 ms</strong>。扣掉它：绑定挂载约 <strong>670 ms</strong>，命名卷约 <strong>23 ms</strong>，<strong>差约 29 倍</strong>。宿主侧核对确实写出了 301 个文件、<code>big.bin</code> 为 <code>67108864</code> 字节（正好 64 MiB）。</p>
+<p>两条关于测量本身的说明，比结论更容易复发：</p>
+<ol>
+<li><strong>第一次尝试得到过&quot;0 ms&quot;这种不可能的数。</strong> 原因是我在容器里用 <code>date +%s%N</code> 取纳秒，而这个镜像的 <code>date</code> 是精简实现，本机直接验它的行为：<code>date +%s%N</code> 返回 <code>1793072365</code>——<strong>纳秒位被静默丢掉了</strong>，于是 <code>(t2-t)/1000000</code> 恒为 0。改用宿主侧墙钟差值 + 减基线才拿到真数。</li>
+<li><strong>基线里有一次 5613 ms 的离群值</strong>（第一轮冷启动）。所以我取中位数而不是最小值或单次读数，并把三轮原始值一起留下。</li>
+</ol>
+<p>还有两个&quot;看着像通过其实没测到东西&quot;的坑，都是本轮现场踩的：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">现象</th>
+      <th scope="col">成因</th>
+      <th scope="col">怎么防</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>测&quot;删容器后数据是否留在命名卷&quot;，但结果毫无意义</td>
+      <td>我把挂载目标路径写错了，Docker <strong>顺手建了一个匿名卷</strong>接走真正的数据目录，容器照跑、查询照出</td>
+      <td>动手前先 <code>docker inspect --format '{{range .Mounts}}…'</code>，确认目标路径挂的是<strong>你以为的那个卷</strong></td>
+    </tr>
+    <tr>
+      <td><code>docker rm -f</code> 之后卷越积越多</td>
+      <td>镜像里有 <code>VOLUME /data</code> 声明，每次不带卷名起容器都会建一个匿名卷；<code>docker rm</code> 不清理它们，只有 <code>--rm</code> 会</td>
+      <td>本轮实测：一轮 <code>-d</code> 实验后遗留 <strong>4 个匿名卷</strong>，创建时间正好对上那四次运行，<code>docker system df</code> 却只报 0B（它们是空的）——所以&quot;看大小&quot;发现不了</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<blockquote>
+<p>💡 新人小结：<code>docker inspect</code> 的挂载列表像快递面单。<strong>tmpfs 这一项在面单上是查不到的</strong>——本机三个挂载（卷、绑定、tmpfs），<code>.Mounts</code> 只列了前两个。
+对应到操作：想知道容器到底挂了几样东西，<code>docker inspect</code> 和容器内 <code>mount</code> 要<strong>都看一次</strong>；只看前者会漏掉 <code>--tmpfs</code>，也看不见那个不该出现的匿名卷。</p>
+</blockquote>
+<h3 id="pg-92f0e5ed9feb7017082df38b3dc1702a--三种挂载怎么选">三种挂载怎么选
+</h3>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">需求</th>
+      <th scope="col">选</th>
+      <th scope="col">理由（含本机证据）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>数据库、缓存等要活过容器重建的数据</td>
+      <td>命名卷</td>
+      <td>落在 ext4 上，删容器不动卷；本轮 Redis 与 MySQL 两次验证都通过（见实战切入）</td>
+    </tr>
+    <tr>
+      <td>要把宿主上的源码、配置文件给容器读</td>
+      <td>绑定挂载</td>
+      <td>必须双向可见时用。但<strong>别把数据目录放这儿</strong>：约 29 倍量差</td>
+    </tr>
+    <tr>
+      <td>临时缓存、编译中间产物、不能留痕的敏感数据</td>
+      <td>tmpfs</td>
+      <td>内存盘，容器没了就没；注意默认带 <code>noexec</code></td>
+    </tr>
+    <tr>
+      <td>什么也没挂</td>
+      <td>——</td>
+      <td>这叫&quot;写进可写层&quot;，是最危险的默认。宁可显式挂一个卷</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--权限容器里的-root-和宿主上是谁">权限：容器里的 root 和宿主上是谁
+</h2>
+<p>容器默认是谁，本机读数：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-7" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-7-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ docker exec m-mix id
+</span></span><span class="line"><span class="cl">uid=0(root) gid=0(root) groups=0(root),1(bin),2(daemon),3(sys),4(adm),6(disk),10(wheel),...
+</span></span><span class="line"><span class="cl">$ docker exec m-mix grep -E &#39;^(Uid|Gid)&#39; /proc/self/status
+</span></span><span class="line"><span class="cl">Uid:	0	0	0	0
+</span></span><span class="line"><span class="cl">Gid:	0	0	0	0</span></span></code></pre></div></div>
+</div>
+<p><code>Uid:</code> 那一行四个数都是 0，说明<strong>这台机器没有开用户命名空间重映射</strong>——容器里的 root 就是引擎那侧真实 uid 0。（重映射开启后这四个数会指向一个高位段，那属于 5.8 的范围。）</p>
+<p>改身份与写文件的组合结果，是这节最有用的表：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">怎么起</th>
+      <th scope="col">容器内身份</th>
+      <th scope="col">写绑定挂载</th>
+      <th scope="col">写完后容器里 <code>stat -c '%u:%g'</code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>默认</td>
+      <td><code>uid=0(root)</code></td>
+      <td>成功</td>
+      <td><code>0:0</code></td>
+    </tr>
+    <tr>
+      <td><code>--user 1000:1000</code></td>
+      <td><code>uid=1000 gid=1000(redis)</code></td>
+      <td><strong>也成功</strong></td>
+      <td><code>1000:1000</code></td>
+    </tr>
+    <tr>
+      <td><code>--user 1000:1000</code> 写命名卷里的非本人目录</td>
+      <td>见下方说明</td>
+      <td>未测</td>
+      <td>未测</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第二行值得停一下：<strong>Windows 上的绑定挂载是非 root 也能写</strong>。原因就在上面那条 <code>mount</code> 里——9p 挂载带了 <code>uid=0;gid=0;metadata</code>，权限判定方式与原生 Linux 文件系统不同。这在开发期&quot;帮了你&quot;（不会因为属主卡住），但它会让人<strong>养成在 Linux 生产上也这么写的习惯</strong>，那里就没有这个宽容度了。所以本篇给的规矩是：<strong>别把 Windows 上验证过的属主行为当成可移植的结论。</strong></p>
+<p>命名卷里的属主也有一个真实读数，注意它和上面那条不是一回事：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-8" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-8-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ docker run --rm -v kb-own:/data redis:7-alpine sh -c &#39;echo probe &gt; /data/m.txt; stat -c &#34;%u:%g %A %n&#34; /data /data/m.txt&#39;
+</span></span><span class="line"><span class="cl">999:1000 drwxr-xr-x /data
+</span></span><span class="line"><span class="cl">0:0      -rw-------  /data/m.txt</span></span></code></pre></div></div>
+</div>
+<p><code>/data</code> 这个<strong>目录本身</strong>属于 <code>999:1000</code>，因为卷第一次被创建时按镜像里 <code>/data</code> 的属主初始化（镜像里有 <code>redis:x:999:1000::/home/redis:/sbin/nologin</code>）。而 root 写进去的文件就是 <code>0:0</code>。这条读数我用两个独立容器复现过两次。<strong>换镜像时目录属主跟着镜像走</strong>，这就是&quot;应用换了非 root 用户之后突然写不进老卷&quot;的常见成因。</p>
+<blockquote>
+<p>💡 新人小结：属主像小区门禁卡的登记名字。卡（文件）本身没变，但你换了一个人刷卡（换 <code>--user</code> 或换镜像里的用户），物业按<strong>登记名</strong>决定让不让进；而卷目录的登记名在建卷那一刻就按&quot;当初那把卡&quot;写死了，后来换了人也不自动改。
+对应到 Docker：卷的目录属主来自镜像首次初始化，不随你之后传的 <code>--user</code> 变；要么建卷/首次运行时就把属主设对，要么在编排里显式指定运行用户并保证目录属主匹配。</p>
+</blockquote>
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--时区与中文三处口径别搞混">时区与中文：三处口径别搞混
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">位置</th>
+      <th scope="col">本机读数</th>
+      <th scope="col">结论</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>容器默认</td>
+      <td><code>Tue Oct 27 03:34:28 UTC 2026</code>，<code>TZ</code> 未设</td>
+      <td>容器是 UTC</td>
+    </tr>
+    <tr>
+      <td>只设 <code>-e TZ=Asia/Shanghai</code></td>
+      <td><code>Tue Oct 27 11:34:28 CST 2026</code>，<code>date +%z</code> 给 <code>+0800</code></td>
+      <td>一个环境变量就改显示口径，<strong>不改存储的时间点</strong></td>
+    </tr>
+    <tr>
+      <td>挂载 <code>/etc/localtime:ro</code> 再 <code>date</code></td>
+      <td>仍然 <code>03:34:29 UTC</code></td>
+      <td>在桌面版上这招<strong>没用</strong>——你挂进来的是那台 Linux 虚拟机的时区文件，它本来就是 UTC</td>
+    </tr>
+    <tr>
+      <td>宿主同一时刻</td>
+      <td><code>2026-10-27T11:34:29+0800</code></td>
+      <td>与容器那一行相差 8 小时的是显示，不是时刻</td>
+    </tr>
+    <tr>
+      <td>引擎日志</td>
+      <td><code>2026-10-27T03:34:23.808Z 1:C 27 Oct 2026 03:34:23.808 * Redis is starting</code></td>
+      <td><strong>一行里两个时间戳都是 UTC</strong>：前者是引擎加的时间戳，后者是应用自己打的</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>日志时间排查的判据：<strong>先看有没有 <code>Z</code></strong>。带 <code>Z</code> 是 UTC，要换算才能和宿主时间对齐；不带 <code>Z</code> 的时间戳取决于应用内 <code>TZ</code>。设 <code>TZ</code> 只影响<strong>应用自己打印的那一段</strong>，引擎加的时间戳永远是 UTC。</p>
+<p>中文的问题更朴素，也更常踩：同一个终端里可能混着三种编码。本轮在同一条命令链里就同时撞到过：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">来源</th>
+      <th scope="col">输出编码</th>
+      <th scope="col">直接按 UTF-8 读会看到什么</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>where docker</code> 等 Windows 自带命令</td>
+      <td>GBK 一类本地代码页</td>
+      <td>一句本来说明&quot;没找到&quot;的话，变成一串乱码字节</td>
+    </tr>
+    <tr>
+      <td><code>wsl.exe</code></td>
+      <td>UTF-16LE</td>
+      <td>连长度都不对，看起来像垃圾数据</td>
+    </tr>
+    <tr>
+      <td><code>docker</code> 与 <code>alpine</code> 里的命令</td>
+      <td>UTF-8</td>
+      <td>正常</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>判据：<strong>先确认解码方式，再判断&quot;是不是坏了&quot;</strong>。乱码出现在读的那一端，不是容器里写坏了。</p>
+<p>镜像本身可能根本没有 locale 数据，这点也量了：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-9" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-9-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ docker run --rm redis:7-alpine sh -c &#34;locale | head -1; ls /usr/share/locale | head -1; printf &#39;中文&#39;&#34;
+</span></span><span class="line"><span class="cl">sh: locale: not found
+</span></span><span class="line"><span class="cl">ls: /usr/share/locale: No such file or directory
+</span></span><span class="line"><span class="cl">中文</span></span></code></pre></div></div>
+</div>
+<p>第三行才是重点：<strong>没有 locale 工具、没有语言包，UTF-8 的中文照样正确输出。</strong> 所以在精简镜像上，&ldquo;中文乱码&quot;极少是镜像缺语言包，绝大多数是宿主终端的解码或数据在写入前就被转错了编码。</p>
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--实战切入把示例链第段真跑一遍">实战切入：把示例链第①段真跑一遍
+</h2>
+<p>这一段就是第①段本体，全部命令本机跑通，读数照抄。要的东西：一个 MySQL、一个 Redis、两个命名卷，以及&quot;删容器之后数据还在&rdquo;。</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-10" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="11">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-10-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Redis：开 AOF，否则只有内存快照，删除容器后未必留得住</span>
+</span></span><span class="line"><span class="cl">$ docker run -d --name kb-p1-redis -p 6380:6379 -v kb-p1-data:/data <span class="se">\
+</span></span></span><span class="line"><span class="cl">    redis:7-alpine redis-server --appendonly yes
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 宿主直接发协议写入（这一步同时验端口映射与网络）</span>
+</span></span><span class="line"><span class="cl">$ （对 127.0.0.1:6380 发 SET kb:proof round-1-value） -&gt; +OK
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ docker rm -f kb-p1-redis          <span class="c1"># 只删容器，卷不动</span>
+</span></span><span class="line"><span class="cl">$ docker run -d --name kb-p1-redis -p 6380:6379 -v kb-p1-data:/data <span class="se">\
+</span></span></span><span class="line"><span class="cl">    redis:7-alpine redis-server --appendonly yes
+</span></span><span class="line"><span class="cl">$ （再发 GET kb:proof） -&gt; <span class="nv">$13</span>  round-1-value        <span class="c1"># 活过一次删除</span></span></span></code></pre></div></div>
+</div>
+<p>MySQL 侧同理，判据换成 <code>SELECT</code>：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-11" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="6">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-11-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ docker run -d --name kb-p1-mysql -p 3307:3306 -v kb-p1-mysqldata:/var/lib/mysql <span class="se">\
+</span></span></span><span class="line"><span class="cl">    -e <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>&lt;自己的密码&gt; -e <span class="nv">MYSQL_DATABASE</span><span class="o">=</span>kbdemo mysql:8.4
+</span></span><span class="line"><span class="cl">$ docker <span class="nb">exec</span> kb-p1-mysql mysqladmin ping -uroot -p&lt;密码&gt;     <span class="c1"># 约 6~9 秒后就绪</span>
+</span></span><span class="line"><span class="cl">$ docker <span class="nb">exec</span> kb-p1-mysql mysql -uroot -p&lt;密码&gt; kbdemo -e <span class="s2">&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    CREATE TABLE t_probe(id INT PRIMARY KEY, note VARCHAR(32), written_at DATETIME);
+</span></span></span><span class="line"><span class="cl"><span class="s2">    INSERT INTO t_probe VALUES (1,&#39;before-delete&#39;,NOW()),(2,&#39;second-row&#39;,NOW());&#34;</span></span></span></code></pre></div></div>
+</div>
+<p>删掉容器再重起之后：</p>
+<div class="td-code td-code--untitled" id="td-code-96931bbb-fence-12" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="7">
+  <div class="td-code__viewport" id="td-code-96931bbb-fence-12-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">$ docker rm -f kb-p1-mysql
+</span></span><span class="line"><span class="cl">$ docker volume ls | grep kb-p1        →  kb-p1-mysqldata 仍在列表里
+</span></span><span class="line"><span class="cl">$ （重新 docker run 同一个卷，约 6 秒就绪）
+</span></span><span class="line"><span class="cl">$ mysql -e &#34;SELECT COUNT(*) FROM t_probe;&#34;        →  2
+</span></span><span class="line"><span class="cl">$ mysql -e &#34;SELECT * FROM t_probe;&#34;
+</span></span><span class="line"><span class="cl">1  before-delete  2026-10-27 03:22:48
+</span></span><span class="line"><span class="cl">2  second-row     2026-10-27 03:22:48</span></span></code></pre></div></div>
+</div>
+<p>还有一条顺手验到的：<strong>宿主连上 <code>127.0.0.1:3307</code> 时收到了 MySQL 的握手包，包里的版本串是 <code>8.4.13</code></strong>。这一步不只是&quot;TCP 能连&quot;，而是应用层协议真的走通了——很多人验证端口映射只看 <code>docker ps</code> 的端口列，那是最弱的一条证据。</p>
+<p>两个必须写进流程的收尾动作：</p>
+<ol>
+<li><strong>确认你测的是那个卷</strong>。本轮出现过一次：挂载目标路径写错，Docker 建了个匿名卷接走真实数据目录，此时&quot;数据还在&quot;证明的不是命名卷。用 <code>docker inspect --format</code> 把挂载列出来看一眼，两秒钟。</li>
+<li><strong>确认你的读法没错</strong>。也出现过一次：手写协议报文时长度前缀和字段实际长度不一致，服务端把多余字节当成新命令，回了一个&quot;空值&quot;加一条怪错误——看起来完全像&quot;键没留住&quot;。用能自动算长度的客户端，或先用官方客户端验一次。</li>
+</ol>
+<p>清理也是流程的一部分：本轮创建的容器、卷、镜像全部删除，<code>docker system df</code> 复核为 Images 0 / Containers 0 / Local Volumes 0 / Build Cache 0。参考容量：<code>redis:7-alpine</code> 57.8 MB、<code>mysql:8.4</code> 1.12 GB，两个卷初始化后一共 218.4 MB。</p>
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--常见误读">常见误读
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">你可能的理解</th>
+      <th scope="col">实际情况</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>EXPOSE 3306</code> 之后宿主就能连这个端口</td>
+      <td><code>EXPOSE</code> 只是元数据（见 3.3）。宿主侧没有监听，连不上是必然</td>
+    </tr>
+    <tr>
+      <td><code>-p 6380:6379</code> 之后容器里的应用&quot;知道&quot;自己是 6380</td>
+      <td>容器内监听表里只有 6379，映射完全发生在外面</td>
+    </tr>
+    <tr>
+      <td>容器连不上就重装 Docker</td>
+      <td>名字解析问题、网络选错、宿主端口占用三类各有明确报错，先按报错定位</td>
+    </tr>
+    <tr>
+      <td>绑定挂载和命名卷只是写法不同</td>
+      <td>一个走 9p、一个走 ext4，本机量到约 29 倍的差；Windows 上把数据目录放绑定挂载会慢到影响开发</td>
+    </tr>
+    <tr>
+      <td>删容器才会丢数据，所以数据放哪儿无所谓</td>
+      <td>不放卷里就是放可写层，<code>docker rm</code> 一起丢；而且 <code>docker rm</code> 不会清掉匿名卷，会攒垃圾</td>
+    </tr>
+    <tr>
+      <td>容器里是 root，那宿主上创建的文件也归我</td>
+      <td>没开用户命名空间重映射时容器 root 对应引擎侧真实 uid 0；在 Windows 绑定挂载上这条表现又被 9p 的挂载参数改掉了，<strong>不能当可移植结论</strong></td>
+    </tr>
+    <tr>
+      <td>日志时间不对，是容器时间坏了</td>
+      <td>容器是 UTC、宿主是 +0800，差的是显示口径。设 <code>TZ</code> 只影响应用自己打的那一段</td>
+    </tr>
+    <tr>
+      <td>精简镜像里中文乱码，因为镜像缺中文包</td>
+      <td>没有 locale 工具也能正确输出中文。乱码通常是读的哪一端解码不对</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--本篇不覆盖什么">本篇不覆盖什么
+</h2>
+<p>按基础层的规矩，故意不讲的东西要点名交给谁：</p>
+<ul>
+<li>联合文件系统的写时复制机制，以及&quot;为什么镜像层能共享&quot; → <strong>5.4</strong>（本篇只给&quot;可写层随容器消失&quot;这个结论）。</li>
+<li>用户命名空间重映射（容器 root 在宿主上变成高位 uid）的原理与限制 → <strong>5.2</strong>、<strong>5.8</strong>（本篇只给&quot;这台机器没开重映射&quot;的读数）。</li>
+<li><code>--memory</code> / <code>--cpus</code> 怎么限制、超限为什么会被杀 → <strong>5.3</strong>（本篇只在容器里读到了 <code>memory.max</code> 这个数）。</li>
+<li>跨主机网络（overlay、macvlan）与为什么单机 bridge 不够 → <strong>5.5</strong>、<strong>5.6</strong>。</li>
+<li>镜像构建期怎么设文件属主（<code>COPY --chown</code>）与 <code>USER</code> 指令 → <strong>3.2</strong>、<strong>3.3</strong>（本篇只观察运行后的属主结果）。</li>
+<li>环境变量注入与配置文件分离的完整口径 → <strong>2.8 所在的另一篇</strong>（<a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E8%B7%91%E8%B5%B7%E6%9D%A5/%E8%BF%9B%E5%AE%B9%E5%99%A8%E8%B0%83%E8%AF%95%E4%B8%8E%E7%8A%B6%E6%80%81%E6%9F%A5%E7%9C%8B/">/docs/02-核心操作/跑起来/进容器调试与状态查看/</a>）。</li>
+<li>数据卷的备份与恢复操作规程 → <strong>6.6</strong>；误删卷的现场救援 → <strong>7.5</strong>。</li>
+<li>生产环境的资源限制、日志轮转与只读根文件系统怎么组合 → <strong>6.3</strong>、<strong>6.4</strong>。</li>
+</ul>
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--要点总结">要点总结
+</h2>
+<ul>
+<li>端口映射只发生在外面：容器内监听表上永远是自己的端口（本机读到十六进制 <code>18EB</code> = 6379）。<code>-p</code> 冒号<strong>左边是宿主、右边是容器</strong>，冲突永远报在左边那个号上。</li>
+<li><strong>只有用户自定义网络才有容器名解析</strong>（默认 bridge 上 <code>getent</code> 无结果，<code>network connect</code> 之后立刻解析到 <code>172.28.99.2</code> 并拿到 <code>PONG</code>）。两个以上容器互访就建一个自定义网络。</li>
+<li>三种挂载的落点各不相同：命名卷在 ext4 上、绑定挂载走 9p、tmpfs 在内存（还带 <code>noexec</code>）。Windows 上做绑定挂载的实测代价约 <strong>29 倍</strong>（净 670 ms 对 23 ms）。</li>
+<li>数据要活过容器重建就放命名卷，并且<strong>每次确认挂的是哪个卷</strong>：路径写错时 Docker 会静默建匿名卷；<code>docker rm</code> 不清理匿名卷，只有 <code>--rm</code> 会。</li>
+<li>属主三件事要分开：容器默认 root、<code>--user</code> 换身份、卷目录的初始属主跟着镜像。Windows 绑定挂载因为 9p 挂载参数而对非 root 写入异常宽容，<strong>这不是可移植结论</strong>。</li>
+<li>容器默认 UTC，<code>TZ</code> 只改应用自己打印的时间；引擎加的时间戳永远是 UTC。挂载 <code>/etc/localtime</code> 在桌面版上不改变事实。</li>
+<li>乱码先怀疑解码端：同一屏可能混着 GBK、UTF-16LE、UTF-8 三种编码，而精简镜像没有 locale 工具也能正确输出 UTF-8 中文。</li>
+<li>本篇两次&quot;看着通过其实没测到&quot;的经历本身就是判据：<strong>验留存前先确认卷，读空值前先确认读法。</strong></li>
+</ul>
+<h2 id="pg-92f0e5ed9feb7017082df38b3dc1702a--本篇未验证项">本篇未验证项
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">原因</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>--user 1000:1000</code> 写命名卷里属主不匹配的目录</td>
+      <td>未测</td>
+      <td>需要一个属主为 root 的卷内子目录做对照，本轮没布置；这是&quot;换用户后写不进老卷&quot;的正面复现，应在 3.2/5.8 相关批次补齐</td>
+    </tr>
+    <tr>
+      <td><code>COPY --chown</code> 的构建期行为</td>
+      <td>未测</td>
+      <td>属镜像构建篇（3.2），本篇只测运行后的属主结果</td>
+    </tr>
+    <tr>
+      <td>用户命名空间重映射开启后的 uid 表现</td>
+      <td>未验证</td>
+      <td>本机未开启（<code>/proc/self/status</code> 的 <code>Uid</code> 四个数都是 0），无对照环境</td>
+    </tr>
+    <tr>
+      <td>Linux 原生宿主上的绑定挂载性能</td>
+      <td>未验证</td>
+      <td>29 倍这个量差是 <strong>Windows 目录经 9p</strong> 的数，不能外推到 Linux 上的同机绑定挂载</td>
+    </tr>
+    <tr>
+      <td>计时实验的绝对值</td>
+      <td>参考值</td>
+      <td>差值法测得（含容器固定启动开销 398 ms 已扣除），机器负载会变；倍数关系三轮一致（1082/1068/1036 对 421/429/409），但别把 670 ms 当成契约数字</td>
+    </tr>
+    <tr>
+      <td><code>-p 8080:80</code> 这一档</td>
+      <td>未测</td>
+      <td>结构与 6380 那组相同，只换容器端口；为不凑数而没有实际跑，故不写成结论</td>
+    </tr>
+    <tr>
+      <td>卷备份与恢复操作规程</td>
+      <td>未验证</td>
+      <td>归 6.6。本篇只验&quot;数据跨容器存活&quot;，没做导出导入</td>
+    </tr>
+    <tr>
+      <td>示例链第①段作为<strong>交付物</strong>的 from-0 前置清单</td>
+      <td>未创建</td>
+      <td>命令与读数都真跑过，但示例目录还没落地，判据一仍需在干净机器上复现</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+</div>
+
+
+
+    
+	
+  
+
+
+
+      </main>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":true,"description":"复制 Markdown 文本","disabledReason":"","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":"/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/index.md"},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":true,"description":"查阅 Markdown 源码","disabledReason":"","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":"/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/index.md"},{"available":false,"description":"查阅编辑历史","disabledReason":"查阅编辑历史: 暂不可用","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":""},{"available":false,"description":"编辑当前页面","disabledReason":"编辑当前页面: 暂不可用","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":""},{"available":false,"description":"添加子页面","disabledReason":"添加子页面: 暂不可用","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":""},{"available":false,"description":"提交文档议题","disabledReason":"提交文档议题: 暂不可用","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":""},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":false,"description":"打印完整章节","disabledReason":"打印完整章节: 暂不可用","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":""},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":false,"description":"切换语言","disabledReason":"切换语言: 暂不可用","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":true,"description":"外观","disabledReason":"","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Ink","Terminal","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"},{"available":true,"disabledReason":"","id":"slate","title":"Slate","value":"slate"},{"available":true,"disabledReason":"","id":"ink","title":"Ink","value":"ink"},{"available":true,"disabledReason":"","id":"terminal","title":"Terminal","value":"terminal"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":false,"description":"GitHub","disabledReason":"GitHub: 暂不可用","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":""}],"commands":[],"language":"zh","quickLinks":[{"available":true,"description":"一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。","disabledReason":"","icon":"fa-solid fa-book","id":"quick_docs","keywords":["文档","docs"],"kind":"url","target":"self","title":"文档","url":"/docs/"}],"rootOrder":["docs"],"version":1}</script>
+
+<script src="/js/actions.min.c784a65471d30f25801832ad47eca4fc6e9681b4521bd2414655e6623aa58934.js" integrity="sha256-x4SmVHHTDyWAGDKtR&#43;yk/G6WgbRSG9JBRlXmYjqliTQ=" crossorigin="anonymous"></script>
+
+  </body>
+</html>

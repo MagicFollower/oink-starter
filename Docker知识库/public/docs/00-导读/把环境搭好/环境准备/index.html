@@ -1,0 +1,1779 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-preset='slate'] { background: #f1f4f8; color: #16222e; }
+  html[data-td-preset='slate'][data-bs-theme='dark'] { background: #0b1119; color: #e8eef6; }
+  html[data-td-preset='ink'] { background: #ffffff; color: #141414; }
+  html[data-td-preset='ink'][data-bs-theme='dark'] { background: #0b0b0b; color: #ededed; }
+  html[data-td-preset='terminal'] { background: #f4f5f2; color: #1d211f; }
+  html[data-td-preset='terminal'][data-bs-theme='dark'] { background: #0c0f0e; color: #d3dbd6; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    var root = document.documentElement;
+    var allowed = ["paper","slate","ink","terminal"];
+    var canvases = {"ink":{"dark":"#0b0b0b","darkInk":"#ededed","light":"#ffffff","lightInk":"#141414"},"paper":{"dark":"#161513","darkInk":"#ece9e3","light":"#f7f6f3","lightInk":"#21201c"},"slate":{"dark":"#0b1119","darkInk":"#e8eef6","light":"#f1f4f8","lightInk":"#16222e"},"terminal":{"dark":"#0c0f0e","darkInk":"#d3dbd6","light":"#f4f5f2","lightInk":"#1d211f"}};
+    var preset = null;
+    try {
+      preset = localStorage.getItem('td-preset');
+      if (preset !== null && allowed.indexOf(preset) < 0) {
+        preset = null;
+        localStorage.removeItem('td-preset');
+      }
+    } catch (_) {
+      
+    }
+    if (preset) root.setAttribute('data-td-preset', preset);
+    var c = canvases[root.getAttribute('data-td-preset')];
+    if (!c) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('data-td-canvas-light', c.light);
+      meta.setAttribute('data-td-canvas-dark', c.dark);
+      meta.setAttribute('content', c.light);
+    });
+  })();
+</script>
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<link rel="alternate" type="text/markdown" href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/index.md">
+
+<link rel="prev" href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/"><meta name="robots" content="index, follow">
+<link rel="icon" href="../../../../favicon.svg" type="image/svg+xml" />
+
+<title>环境准备：Windows、macOS 与 Linux | Docker 团队知识库</title>
+<meta name="description" content="按平台把引擎装上，并用四段定位法判断「拉不下镜像」到底卡在哪一段——含本机两轮真实读数、引擎自述报错，以及不依赖镜像仓库验证运行时的办法。">
+<link rel="canonical" href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/">
+<link rel="alternate" hreflang="zh-CN" href="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/">
+<meta property="og:url" content="https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/">
+	<meta property="og:site_name" content="Docker 团队知识库">
+	<meta property="og:title" content="环境准备：Windows、macOS 与 Linux">
+	<meta property="og:description" content="按平台把引擎装上，并用四段定位法判断「拉不下镜像」到底卡在哪一段——含本机两轮真实读数、引擎自述报错，以及不依赖镜像仓库验证运行时的办法。">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="docs">
+
+	<meta itemprop="name" content="环境准备：Windows、macOS 与 Linux">
+	<meta itemprop="description" content="按平台把引擎装上，并用四段定位法判断「拉不下镜像」到底卡在哪一段——含本机两轮真实读数、引擎自述报错，以及不依赖镜像仓库验证运行时的办法。">
+	<meta itemprop="wordCount" content="10629">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="环境准备：Windows、macOS 与 Linux">
+	<meta name="twitter:description" content="按平台把引擎装上，并用四段定位法判断「拉不下镜像」到底卡在哪一段——含本机两轮真实读数、引擎自述报错，以及不依赖镜像仓库验证运行时的办法。">
+<link rel="preload" href="../../../../scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" as="style" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<link href="../../../../scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="../../../../scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" rel="stylesheet" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<script>
+  (function () {
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script><script defer src="../../../../js/third_party/lunr.min.0c50d9002b85780a842afffb567bb54ede402dae7c6dc5997a018614d8044fc8.js" integrity="sha256-DFDZACuFeAqEKv/7Vnu1Tt5ALa58bcWZegGGFNgET8g=" crossorigin="anonymous"></script>
+
+  </head>
+  <body class="td-page td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="主导航">
+      <a href="../../../../" class="td-nav-brand" data-td-navbar-route
+         aria-label="Docker 团队知识库 — 首页">
+        <img src="../../../../icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Docker 团队知识库</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link active" href="../../../../docs/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="文档"
+  data-td-navbar-region="desktop" data-td-navbar-label="文档"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-book" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">文档</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+        <button type="button" class="td-nav-search-box" data-td-shell-search-open
+          title="搜索…" aria-label="搜索…"
+          aria-controls="td-shell-search" aria-expanded="false"><i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="td-nav-search-box__hint">搜索…</span>
+          <kbd class="td-nav-search-box__kbd" aria-hidden="true">/</kbd>
+        </button><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">风格</legend>
+      <div class="td-appearance__presets">
+        <label class="td-appearance__preset" title="默认">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="paper"
+            data-td-preset-value="paper" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513" checked>
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--paper" aria-hidden="true"><i class="td-shell-icon td-shell-icon--file-lines fa-solid fa-file-lines" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Paper</span><span class="visually-hidden"> (默认)</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="slate"
+            data-td-preset-value="slate" data-td-canvas-light="#f1f4f8" data-td-canvas-dark="#0b1119">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--slate" aria-hidden="true"><i class="td-shell-icon td-shell-icon--layers fa-solid fa-layer-group" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Slate</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="ink"
+            data-td-preset-value="ink" data-td-canvas-light="#ffffff" data-td-canvas-dark="#0b0b0b">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--ink" aria-hidden="true"><i class="td-shell-icon td-shell-icon--pen-nib fa-solid fa-pen-nib" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Ink</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="terminal"
+            data-td-preset-value="terminal" data-td-canvas-light="#f4f5f2" data-td-canvas-dark="#0c0f0e">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--terminal" aria-hidden="true"><i class="td-shell-icon td-shell-icon--terminal fa-solid fa-terminal" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Terminal</span></span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="打开导航" aria-label="打开导航"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none">
+          <div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="../../../../" aria-label="Docker 团队知识库 home">
+        <img src="../../../../icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Docker 团队知识库</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__search" data-td-shell-search-open
+        title="搜索…" aria-label="搜索…"
+        aria-controls="td-shell-search" aria-expanded="false"><i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="收起侧栏" aria-label="收起侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <button type="button" class="td-shell-search-btn td-shell-search-btn--drawer" data-td-shell-search-open
+        aria-controls="td-shell-search" aria-expanded="false">
+        <i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <span class="td-shell-search-btn__label">搜索…</span>
+        <span class="td-shell-search-btn__keys" aria-hidden="true"><kbd>/</kbd></span>
+      </button>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="关闭导航" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-root">
+  <button type="button" class="td-shell-root__trigger" data-td-shell-root-toggle
+    aria-haspopup="true" aria-expanded="false" aria-label="选择栏目">
+    <span class="td-shell-root__icon"><i class="fa-solid fa-compass" aria-hidden="true"></i></span>
+    <span class="td-shell-root__title">导读</span>
+    <i class="td-shell-icon td-shell-icon--chevrons-up-down fa-solid fa-sort" aria-hidden="true"></i>
+  </button>
+  <div class="td-shell-root__pop" hidden><a class="td-shell-root__item" href="../../../../docs/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-book" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">文档</span>
+        <span class="td-shell-root__item-desc">一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item td-is-active" href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/" aria-current="page">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-compass" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">导读</span>
+        <span class="td-shell-root__item-desc">站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。</span>
+      </span>
+      <span class="td-shell-root__check"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">基础认知</span>
+        <span class="td-shell-root__item-desc">先知道容器解决的是什么问题，再亲手跑起第一个容器。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-terminal" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">核心操作</span>
+        <span class="td-shell-root__item-desc">主线站①的日常命令面：把容器跑起来、看住它、连上网、留住数据。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/03-%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-box-archive" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">镜像构建</span>
+        <span class="td-shell-root__item-desc">主线站③④⑤：从第一份 Dockerfile，到别人也能 build、能拉。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">单机编排</span>
+        <span class="td-shell-root__item-desc">主线站②：把九参数的 docker run 变成一条 compose up。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-microscope" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">原理深入</span>
+        <span class="td-shell-root__item-desc">按需查阅层：不要求通读，每篇开头的触发条件告诉你什么时候该来。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/06-%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8E%E7%94%9F%E4%BA%A7/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-rocket" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">工程化与生产</span>
+        <span class="td-shell-root__item-desc">团队尚在本地开发阶段，本篇按「上生产前的准入基线 &#43; 演练」写，不假装有生产事故。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-wrench" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">运维手册</span>
+        <span class="td-shell-root__item-desc">使用频率最高的一篇，故障域各节一律按「症状 → 判据 → 命令 → 根因」四列写。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-book" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">生态与附录</span>
+        <span class="td-shell-root__item-desc">坐标与查阅件：什么时候该换工具，以及版本口径以谁为准。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/09-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-circle-question" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">常见问题</span>
+        <span class="td-shell-root__item-desc">压在全库最后：每条按「问题—机制—数字/命令—自查动作」四段作答，并指回正文判据。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a>
+  </div>
+</div>
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="章节导航"
+      data-td-sidebar-icon-policy="groups" data-td-sidebar-root-id="/docs/00-%E5%AF%BC%E8%AF%BB/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-docs00-e5afbce8afbb-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/" title="导读"
+        class="td-shell-tree__link"
+        id="m-docs00-e5afbce8afbb"><i class="fa-solid fa-compass" aria-hidden="true"></i><span>导读</span></a>
+      
+    </div><div id="m-docs00-e5afbce8afbb-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-has-child"
+      id="m-docs00-e5afbce8afbbe6808ee4b988e794a8e8bf99e4b8aae5ba93-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/" title="怎么用这个库"
+        class="td-shell-tree__link"
+        id="m-docs00-e5afbce8afbbe6808ee4b988e794a8e8bf99e4b8aae5ba93"><span>怎么用这个库</span></a>
+      <button type="button" class="td-shell-tree__chevron" data-td-shell-tree-toggle
+        aria-expanded="false" aria-controls="m-docs00-e5afbce8afbbe6808ee4b988e794a8e8bf99e4b8aae5ba93-children"
+        aria-label="展开章节: 怎么用这个库"
+        data-td-label-expand="展开章节: 怎么用这个库"
+        data-td-label-collapse="收起章节: 怎么用这个库"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></button>
+    </div><div id="m-docs00-e5afbce8afbbe6808ee4b988e794a8e8bf99e4b8aae5ba93-children" class="td-shell-tree__children">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--2"><li class="td-shell-tree__item td-leaf"
+      id="m-docs00-e5afbce8afbbe6808ee4b988e794a8e8bf99e4b8aae5ba93e4bdbfe794a8e68c87e58d97e4b88ee4b8bbe7babfe585abe7ab99e59cb0e59bbe-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/" title="使用指南、学习路径与贯穿示例总览"
+        class="td-shell-tree__link"
+        id="m-docs00-e5afbce8afbbe6808ee4b988e794a8e8bf99e4b8aae5ba93e4bdbfe794a8e68c87e58d97e4b88ee4b8bbe7babfe585abe7ab99e59cb0e59bbe"><span>使用指南、学习路径与贯穿示例总览</span></a>
+      
+    </div>
+  </li><li class="td-shell-tree__item td-leaf"
+      id="m-docs00-e5afbce8afbbe6808ee4b988e794a8e8bf99e4b8aae5ba93e58699e4bd9ce8a681e6b182e4b88ee69687e6a1a3e6a8a1e69dbf-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E5%86%99%E4%BD%9C%E8%A6%81%E6%B1%82%E4%B8%8E%E6%96%87%E6%A1%A3%E6%A8%A1%E6%9D%BF/" title="写作要求 W1~W6 与文档模板"
+        class="td-shell-tree__link"
+        id="m-docs00-e5afbce8afbbe6808ee4b988e794a8e8bf99e4b8aae5ba93e58699e4bd9ce8a681e6b182e4b88ee69687e6a1a3e6a8a1e69dbf"><span>写作要求 W1~W6 与文档模板</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li><li class="td-shell-tree__item td-has-child td-active-path"
+      id="m-docs00-e5afbce8afbbe68a8ae78eafe5a283e690ade5a5bd-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/" title="把环境搭好"
+        class="td-shell-tree__link"
+        id="m-docs00-e5afbce8afbbe68a8ae78eafe5a283e690ade5a5bd"><span>把环境搭好</span></a>
+      <button type="button" class="td-shell-tree__chevron" data-td-shell-tree-toggle
+        aria-expanded="true" aria-controls="m-docs00-e5afbce8afbbe68a8ae78eafe5a283e690ade5a5bd-children"
+        aria-label="收起章节: 把环境搭好"
+        data-td-label-expand="展开章节: 把环境搭好"
+        data-td-label-collapse="收起章节: 把环境搭好"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></button>
+    </div><div id="m-docs00-e5afbce8afbbe68a8ae78eafe5a283e690ade5a5bd-children" class="td-shell-tree__children td-is-open">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--2"><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-docs00-e5afbce8afbbe68a8ae78eafe5a283e690ade5a5bde78eafe5a283e58786e5a487-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/" aria-current="page" title="环境准备：Windows、macOS 与 Linux"
+        class="td-shell-tree__link active"
+        id="m-docs00-e5afbce8afbbe68a8ae78eafe5a283e690ade5a5bde78eafe5a283e58786e5a487"><span>环境准备：Windows、macOS 与 Linux</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+
+        </aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="展开侧栏" aria-label="展开侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            <div class="td-shell-topline">
+              <nav aria-label="breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="../../../../docs/">文档</a></li>
+  <li class="breadcrumb-item">
+    <a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/">导读</a></li>
+  <li class="breadcrumb-item">
+    <a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/">把环境搭好</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    环境准备：Windows、macOS 与 Linux</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span>
+              <div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="已复制 Markdown" data-td-t-copy-error="无法复制 Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__primary" data-td-action="copy_markdown" data-td-url="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/index.md"
+      title="复制 Markdown 文本" aria-label="复制 Markdown 文本">
+      <span class="td-page-actions__icon"><i class="td-shell-icon td-shell-icon--copy fa-regular fa-copy" aria-hidden="true"></i></span>
+      <span class="td-page-actions__icon td-page-actions__icon--done"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </button>
+    <button type="button" class="td-page-actions__toggle"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      title="操作" aria-label="操作"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="操作">
+    <li><button type="button" class="td-page-actions__item" data-td-action="copy_markdown" data-td-url="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/index.md">
+      <i class="fa-regular fa-copy" aria-hidden="true"></i><span>复制 Markdown 文本</span>
+    </button></li>
+    <li><a class="td-page-actions__item" data-td-action="view_markdown" href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/index.md" target="_blank" rel="noopener">
+      <i class="fa-brands fa-markdown" aria-hidden="true"></i><span>查阅 Markdown 源码</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="print_section" href="../../../../_print/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/">
+      <i class="fa-solid fa-print" aria-hidden="true"></i><span>打印完整章节</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>环境准备：Windows、macOS 与 Linux</h1>
+</div>
+
+	<div class="lead">按平台把引擎装上，并用四段定位法判断「拉不下镜像」到底卡在哪一段——含本机两轮真实读数、引擎自述报错，以及不依赖镜像仓库验证运行时的办法。</div>
+	<header class="td-article-meta">
+		
+</header>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第①段 · 依赖跑起来（本篇是第①段的全部前置，第①段的任何命令都要先过本篇的七条判据）
+<strong>示例版本</strong>：本篇不产出示例文件；它产出「干净机器判定」——第①段的前置清单以本篇七条为准
+<strong>前置依赖</strong>：<a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/">/docs/00-导读/怎么用这个库/使用指南与主线八站地图/</a>
+<strong>本篇产出物</strong>：一份你自己机器的七行体检记录，据此判断能不能进示例链第①段；本篇同时给出一条<strong>不依赖镜像仓库</strong>的运行时验证路径
+<strong>拓展接口</strong>：本篇的「四段定位法」在 <a href="../../../../docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/%E6%8C%89%E6%95%85%E9%9A%9C%E5%9F%9F%E6%8E%92%E9%94%99/%E7%A3%81%E7%9B%98%E5%8D%A0%E6%BB%A1%E4%B8%8E%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E5%A4%B1%E8%B4%A5/">/docs/07-运维手册/按故障域排错/磁盘占满与镜像拉取失败/</a> 被穷尽为四条判据表；<code>--memory</code> 在容器内可见这件事在 5.3 被展开成控制组机制；「约一半物理内存」这条默认值本篇已实测，具体上限怎么设与其效果仍未实测
+<strong>难度·耗时</strong>：★☆☆ · 40 分钟（含动手检查 10 分钟；安装耗时取决于网络，不计入）
+<strong>自测三题</strong>：</p>
+<ol>
+<li>引擎装好、子系统就绪、容器也能跑，为什么第①段仍然可能跑不起来？</li>
+<li>域名解析五毫秒返回一个地址，为什么不能算「网络正常」？本机给出的两个证据是什么？</li>
+<li>为什么本篇要保留两轮读数，而不是只写最后那一轮？</li>
+</ol>
+</blockquote>
+<h2 id="为什么要先量自己的机器">为什么要先量自己的机器<a class="td-heading-self-link" href="#%e4%b8%ba%e4%bb%80%e4%b9%88%e8%a6%81%e5%85%88%e9%87%8f%e8%87%aa%e5%b7%b1%e7%9a%84%e6%9c%ba%e5%99%a8" aria-label="标题锚点"></a>
+</h2>
+<p>一个真实场景：新人拿到文档，第一步是「跑一条命令看看能不能起来」，命令报错，于是他认定文档写错了。但报错文本里其实已经写明是三类完全不同的问题之一——他还没分清自己有没有装东西。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="6"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-0" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">「这条命令报 command not found」
+</span></span><span class="line"><span class="cl">「那说明你机器上根本没有它，不是命令写错了。」
+</span></span><span class="line"><span class="cl">「那我照文档下一步装好就行了吧？」
+</span></span><span class="line"><span class="cl">「先别。你现在装，等会儿再失败一次，你会分不清是装的过程失败还是文档失败。」
+</span></span><span class="line"><span class="cl">「所以要先做什么？」
+</span></span><span class="line"><span class="cl">「先把你现在有什么、网络能不能通记下来。装完再记一次。两次一对，问题自己就跳出来了。」</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>本篇在本机上把这段对话<strong>实践了两遍</strong>：2026-10-25 第一轮，2026-10-27 第二轮（装上引擎与子系统之后再测）。两次读数放在同一张表里看，才有意义——单看任何一轮，都得不出「安装到底改变了什么」的结论。</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">检查</th>
+      <th scope="col">第一轮 2026-10-25</th>
+      <th scope="col">第二轮 2026-10-27</th>
+      <th scope="col">这一对读数说明什么</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>引擎命令</td>
+      <td>不在 PATH，执行返回码 <strong>127</strong></td>
+      <td><code>C:\Users\webtu\AppData\Local\Programs\DockerDesktop\resources\bin\docker.exe</code>，<code>docker version</code> 返回码 0</td>
+      <td>安装动作确实改变了判定</td>
+    </tr>
+    <tr>
+      <td>Linux 子系统</td>
+      <td><code>wsl.exe --status</code> 返回码 <strong>50</strong>：「未安装适用于 Linux 的 Windows 子系统」</td>
+      <td>返回码 <strong>0</strong>：默认分发 <code>docker-desktop</code>，默认版本 <strong>2</strong></td>
+      <td>子系统随桌面版引擎一起装上了，没有单独建 Linux 发行版</td>
+    </tr>
+    <tr>
+      <td>内核</td>
+      <td>无</td>
+      <td><code>6.18.54.1-microsoft-standard-WSL2</code></td>
+      <td>容器的内核来自 WSL2，不是 Windows 内核</td>
+    </tr>
+    <tr>
+      <td>镜像域名解析</td>
+      <td>解析到 <code>31.13.70.13</code>（5 ms），443 端口 <strong>6006 ms 超时</strong></td>
+      <td>解析到 <code>64.13.192.76</code>，443 端口 <strong>6018 ms 超时</strong></td>
+      <td><strong>两轮都失败，且地址换了</strong>——装引擎不解决这一条</td>
+    </tr>
+    <tr>
+      <td>对照站点</td>
+      <td><code>www.baidu.com</code> TCP 23 ms、TLS 42 ms 成功</td>
+      <td><code>www.baidu.com</code> 55 ms（对端 <code>153.3.238.127</code>）、<code>gitee.com</code> 83 ms（对端 <code>180.76.198.225</code>），均 200 OK</td>
+      <td>出口一直是通的，两轮都通</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<blockquote>
+<p>💡 新人小结：装机前先做体检，像装修房子之前先测水电。你会先确认「水管有没有通到门口」，而不是把新买的水龙头装上后漏水，再怪水龙头质量问题。
+对应到这里：门口水压 = 网络能不能连到镜像仓库；墙里的管线 = 操作系统提供的虚拟化与子系统支持；新水龙头 = 容器引擎本身。<strong>顺序不能反</strong>——先装龙头再测水压，漏水时你分不清是龙头坏还是管子没通。
+本机这两轮读数正好是这个原则的实例：装完之后水压<strong>依然</strong>不通，如果不留第一轮读数，第二轮的失败就会被误当成「装坏了」。</p>
+</blockquote>
+<h2 id="三个平台各自要装什么">三个平台各自要装什么<a class="td-heading-self-link" href="#%e4%b8%89%e4%b8%aa%e5%b9%b3%e5%8f%b0%e5%90%84%e8%87%aa%e8%a6%81%e8%a3%85%e4%bb%80%e4%b9%88" aria-label="标题锚点"></a>
+</h2>
+<p>引擎不是一个单独的程序，它依赖平台提供隔离能力的机制。三个平台的依赖链完全不同，这是很多跨平台教程失效的原因。</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">平台</th>
+      <th scope="col">依赖什么</th>
+      <th scope="col">要装的东西</th>
+      <th scope="col">最容易卡在哪</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Windows 11</td>
+      <td>需要 Linux 子系统提供内核；引擎跑在子系统里</td>
+      <td>子系统 + 引擎桌面版</td>
+      <td>虚拟化在 BIOS 里被关；子系统已装但处于旧版本</td>
+    </tr>
+    <tr>
+      <td>macOS（Apple 芯片）</td>
+      <td>靠轻量虚拟机跑一个真正的 Linux 内核</td>
+      <td>桌面版引擎</td>
+      <td>把「本机是类 Unix」当成能直接跑容器——不能，内核不是 Linux</td>
+    </tr>
+    <tr>
+      <td>Linux</td>
+      <td>直接用本机内核的命名空间与控制组</td>
+      <td>引擎本体</td>
+      <td>内核版本过旧；用户没加入引擎组，每条命令都要 sudo</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>本机第二轮的 <code>docker info</code> 读数可以当作「Windows + WSL2 后端装对之后长什么样」的样板：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">字段</th>
+      <th scope="col">读数</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Server Version</td>
+      <td><code>29.8.0</code>（Docker Desktop 4.91.0，build 239619）</td>
+      <td>客户端与服务端同版本，API 1.56</td>
+    </tr>
+    <tr>
+      <td>Kernel Version</td>
+      <td><code>6.18.54.1-microsoft-standard-WSL2</code></td>
+      <td>内核来自 WSL2，名字里的 <code>microsoft-standard</code> 就是证据</td>
+    </tr>
+    <tr>
+      <td>Operating System</td>
+      <td><code>Docker Desktop (containerized)</code>，OSType <code>linux</code></td>
+      <td>容器是 Linux 容器</td>
+    </tr>
+    <tr>
+      <td>Storage Driver</td>
+      <td><code>overlayfs</code>，Cgroup Driver <code>cgroupfs</code>，<strong>Cgroup Version 2</strong></td>
+      <td>新引擎在 WSL2 上报 <code>overlayfs</code> 而不是老的 <code>overlay2</code>；控制组是 v2，这决定了后面读限制值的文件路径</td>
+    </tr>
+    <tr>
+      <td>CPUs / Total Memory</td>
+      <td>24 / <strong>47.01 GiB</strong></td>
+      <td>宿主物理内存 95.9 GB，引擎可见 47.01 GB ≈ <strong>一半</strong></td>
+    </tr>
+    <tr>
+      <td>Docker Root Dir</td>
+      <td><code>/var/lib/docker</code></td>
+      <td>磁盘治理与「撑满」类排错都从这里入手</td>
+    </tr>
+    <tr>
+      <td>Name / Context</td>
+      <td><code>docker-desktop</code> / <code>desktop-linux</code></td>
+      <td>引擎跑在那个 WSL 发行版里</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>两个常见误解要在这里点掉：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">误解</th>
+      <th scope="col">事实</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>macOS 类 Unix，所以能像 Linux 一样原生跑容器</td>
+      <td>不能。容器需要 Linux 内核特性，macOS 内核不提供，桌面版仍是起一个虚拟机</td>
+    </tr>
+    <tr>
+      <td>Windows 装了引擎就等于有 Linux 内核</td>
+      <td>只在「Linux 容器」模式下成立，且依赖子系统；Windows 容器模式是另一套完全不同的东西，本库不覆盖</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>本库统一以 Linux 容器语义讲解。</strong> 涉及平台差异的地方会显式标注，比如宿主机地址解析、数据挂载的性能与权限表现。</p>
+<h2 id="装完之后怎么验七条判据">装完之后怎么验（七条判据）<a class="td-heading-self-link" href="#%e8%a3%85%e5%ae%8c%e4%b9%8b%e5%90%8e%e6%80%8e%e4%b9%88%e9%aa%8c%e4%b8%83%e6%9d%a1%e5%88%a4%e6%8d%ae" aria-label="标题锚点"></a>
+</h2>
+<p>按顺序跑。每条都给「看到什么算过」，以及本机两轮的实测状态。</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">检查项</th>
+      <th scope="col">过 / 不过的判据</th>
+      <th scope="col">本机 2026-10-27</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>引擎命令存在</td>
+      <td><code>docker version</code> 返回码 0，客户端与服务端两段都有版本号</td>
+      <td><strong>过</strong>（Client 29.8.0 / Server 29.8.0）</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>虚拟化与子系统就绪</td>
+      <td>Windows：<code>wsl --status</code> 返回码 0 且默认版本为 2</td>
+      <td><strong>过</strong>（<code>docker-desktop</code>，版本 2）</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>镜像域名解析<strong>正确</strong></td>
+      <td>解析出的地址能在 443 完成 TLS 握手；仅「能返回地址」不算过</td>
+      <td><strong>直连仍不过</strong>（<code>64.13.192.76</code>，6018 ms 超时）；走代理时该问句不再成立，见下一条</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>出口通畅（对照）</td>
+      <td>至少一个对照站点 TCP 与 TLS 在几十毫秒量级成功</td>
+      <td><strong>过</strong>（55 ms / 83 ms，都 200）</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>本机时钟可信</td>
+      <td>与公开服务器的 <code>Date</code> 偏差在秒级；证书有效期覆盖当前时间</td>
+      <td><strong>过</strong>（偏差 −0.1 秒，剩余 89 天）</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>镜像获取通道可用</td>
+      <td>能拉成一个几 MB 的小镜像，或返回明确状态码而非超时</td>
+      <td><strong>不过 → 过</strong>：未配代理时返回码 1（<code>dial tcp …:443: connectex</code>）；配本机代理后 <code>hello-world</code> 与 <code>redis:7-alpine</code>、<code>mysql:8.4</code> 全部返回码 0</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>容器能跑起来</td>
+      <td>起一个容器能看到它执行并退出，参数与限制在容器内可见</td>
+      <td><strong>过</strong>（两条路径都验了：<code>FROM scratch</code> 自建镜像，以及公开镜像 <code>docker run --rm hello-world</code> 返回码 0）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第 6 条那一行「不过 → 过」是本机状态的真实变化，不是判据变松：判据没动，是<strong>通路</strong>变了。同时注意第 3 条在配了代理之后<strong>依然不过</strong>——直连那个域名仍然拿到连不通的地址。这两件事合起来说明一个重要区别：<strong>通道问题可以靠代理绕开，但不要去&quot;修&quot;解析本身</strong>；把第 3 条当成必须修好的项，会白白去折腾本机 DNS。</p>
+<p><strong>引擎可用 ≠ 能拉镜像</strong>：这条判断在第 6 条不过的那几个小时里完全成立（第 1、2、7 条全过，第①段仍然跑不起来）；配上代理之后七条全过，第①段才真正具备起跑条件。</p>
+<p>第 6 条的失败长这样（引擎自己吐出来的原文）：</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-1" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="9"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-1" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-1-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ docker pull hello-world <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">Using default tag: latest
+</span></span><span class="line"><span class="cl">Error response from daemon: failed to resolve reference <span class="s2">&#34;docker.io/library/hello-world:latest&#34;</span>:
+</span></span><span class="line"><span class="cl">failed to <span class="k">do</span> request: Head <span class="s2">&#34;https://registry-1.docker.io/v2/library/hello-world/manifests/latest&#34;</span>:
+</span></span><span class="line"><span class="cl">dialing registry-1.docker.io:443 container via direct connection because Docker Desktop has no
+</span></span><span class="line"><span class="cl">HTTPS proxy: connecting to registry-1.docker.io:443: dial tcp 64.13.192.76:443: connectex: A
+</span></span><span class="line"><span class="cl">connection attempt failed because the connected party did not properly respond after a period of
+</span></span><span class="line"><span class="cl">time, or established connection failed because connected host has failed to respond.
+</span></span><span class="line"><span class="cl"><span class="nv">rc</span><span class="o">=</span><span class="m">1</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>这段文本里有两个可直接取用的信息：<code>dial tcp 64.13.192.76:443: connectex</code> 说明<strong>失败在传输层</strong>（连不上），不是应用层的拒绝；<code>because Docker Desktop has no HTTPS proxy</code> 说明<strong>引擎没有配任何代理，走的是直连</strong>。后者顺手回答「要不要配代理」这个问题——没配。</p>
+<p>第 1 条在 Git Bash 里有个纯读取层面的坑：系统命令返回的是 <strong>GBK 编码</strong>的中文提示，直接看会是一段乱码字节，不像「未找到」的意思。同理 <code>wsl.exe</code> 的输出是 <strong>UTF-16LE</strong>。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="3"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-2" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">命令返回码 1，输出按 GBK 解码：信息: 用提供的模式无法找到文件。
+</span></span><span class="line"><span class="cl">wsl.exe --status 第一轮返回码 50，按 UTF-16LE 解码：未安装适用于 Linux 的 Windows 子系统……
+</span></span><span class="line"><span class="cl">第二轮返回码 0，同一解码：默认分发: docker-desktop | 默认版本: 2 | 当前计算机配置不支持 WSL1……</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>判据的读法要跟着调：<strong>看返回码，不要靠肉眼看输出文本</strong>。文本可能被编码破坏，返回码不会。上面那句「不支持 WSL1」也值得注意——它是 rc=0 成功输出里的一句附带提示，不是错误，别被它带偏去查 WSL1。</p>
+<h2 id="拉不下来该查哪一段四段定位法">拉不下来该查哪一段：四段定位法<a class="td-heading-self-link" href="#%e6%8b%89%e4%b8%8d%e4%b8%8b%e6%9d%a5%e8%af%a5%e6%9f%a5%e5%93%aa%e4%b8%80%e6%ae%b5%e5%9b%9b%e6%ae%b5%e5%ae%9a%e4%bd%8d%e6%b3%95" aria-label="标题锚点"></a>
+</h2>
+<p>「拉取失败」在外层看是一条超时，实际可能是四个完全不同的位置。</p>
+<figure class="td-diagram td-diagram--mermaid" data-td-diagram>
+  <div class="td-diagram__stage" data-td-diagram-stage></div>
+  <button class="td-diagram__expand d-print-none" type="button" hidden data-td-diagram-expand aria-haspopup="dialog"><i class="td-shell-icon td-shell-icon--expand fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i><span class="visually-hidden">放大图表</span>
+  </button>
+  <script type="application/json" data-td-diagram-source>"flowchart TB\n    S[\"现象：拉取镜像失败或超时\"] --\u003e Q1{\"命令本身找得到吗\"}\n    Q1 -- \"否，返回码 127\" --\u003e A1[\"引擎未安装或未进 PATH：与镜像无关，先装\"]\n    Q1 -- \"是\" --\u003e Q2{\"域名解析返回地址吗\"}\n    Q2 -- \"不返回\" --\u003e A2[\"本机 DNS 配置问题：先解决解析\"]\n    Q2 -- \"返回\" --\u003e Q3{\"对返回地址 443 端口能握手吗\"}\n    Q3 -- \"超时\" --\u003e Q4{\"对照站点能正常握手吗\"}\n    Q4 -- \"能\" --\u003e A3[\"地址被改写或链路被拦截：与限流无关，走加速通道或代理\"]\n    Q4 -- \"不能\" --\u003e A4[\"本机整体出口问题：代理、防火墙、网络本身\"]\n    Q3 -- \"能握手但报证书错\" --\u003e A5[\"中间设备替换证书，或本机时间漂移\"]\n    Q3 -- \"能握手且返回明确状态码\" --\u003e A6[\"到应用层了：429 是限流，401 或 403 是认证，404 是标签不存在\"]"</script>
+</figure><p>本机两轮读数在这张图上的落点完全一致：<strong>Q1 过 → Q2 返回 → Q3 超时 → Q4 通 → A3</strong>。第 3、4 条一起看才能定到 A3，只有一条都不够。</p>
+<p><strong>跨解析器对照这一招现在失效了，要如实记下来。</strong> 第一轮我用三个解析器问同一个域名，得到三个不同地址（系统 <code>31.13.70.13</code>、<code>223.5.5.5</code> 给 <code>199.59.149.238</code>、<code>114.114.114.114</code> 给 <code>185.60.219.41</code>），而对照站点在两个解析器下答案一致，据此把「疑似被改写」钉成结论。第二轮再问那两个解析器，<strong>UDP 53 端口直接超时</strong>，这一招当场不可用。</p>
+<p>失效之后还有两条更好拿的证据，本轮都用上了：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">证据</th>
+      <th scope="col">本机读数</th>
+      <th scope="col">为什么它够用</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>同一个域名，答案随时间变</strong></td>
+      <td>第一轮 <code>31.13.70.13</code>，第二轮 <code>64.13.192.76</code>；容器内第三次问，得到 <code>108.160.166.57</code></td>
+      <td>一个真·权威解析不会两天给三个不同、且全都连不通的地址；对照站点两轮都稳定给出 <code>153.3.238.x</code> 且能握手</td>
+    </tr>
+    <tr>
+      <td><strong>引擎自述它连的是哪个地址</strong></td>
+      <td>报错里写 <code>dial tcp 64.13.192.76:443</code>，与我在宿主上用 <code>getaddrinfo</code> 问到的<strong>同一个地址</strong></td>
+      <td>证明「宿主看到的」和「引擎实际连的」是一回事，排除「引擎走了另一条解析路径」这种解释</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<blockquote>
+<p>💡 新人小结：四段定位像查一根断掉的电线。从电表开始往家里量：先确认有没有电到门口，再确认墙上插座有没有电，最后才怀疑你插的那台机器坏了。每一段都要用<strong>同一个已知能工作的电器</strong>去试——那个电器就是「对照站点」。
+对应到这里：对照站点的价值在于它能证明「量电的工具本身是好的」。没有它，你无法区分「目标不通」和「我的探测方法不通」，而这两者的读数长得一模一样。本机第二轮就差点栽在这上面：跨解析器那招超时了，如果不同时准备另外两条证据，就会被引导成「解析器全都挂了」的错误结论。</p>
+</blockquote>
+<h2 id="证书与时间四段定位里最容易被跳过的一格">证书与时间：四段定位里最容易被跳过的一格<a class="td-heading-self-link" href="#%e8%af%81%e4%b9%a6%e4%b8%8e%e6%97%b6%e9%97%b4%e5%9b%9b%e6%ae%b5%e5%ae%9a%e4%bd%8d%e9%87%8c%e6%9c%80%e5%ae%b9%e6%98%93%e8%a2%ab%e8%b7%b3%e8%bf%87%e7%9a%84%e4%b8%80%e6%a0%bc" aria-label="标题锚点"></a>
+</h2>
+<p>决策图里「能握手但报证书错」这一格要单独讲，因为它的<strong>报错文本会把人引向完全错误的方向</strong>：写着证书相关，人就去换证书或加跳过校验的开关，而实际成因常常是本机时钟。</p>
+<p>本机方法：同时取服务器的 HTTP <code>Date</code> 头与本机 UTC，再读 TLS 证书有效期。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="5"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-4" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ python -c <span class="s2">&#34;取服务器 Date 头、本机 UTC、TLS 证书有效期并比较&#34;</span>
+</span></span><span class="line"><span class="cl">www.baidu.com      对端 153.3.238.127   TCP+TLS <span class="m">55</span> ms
+</span></span><span class="line"><span class="cl">    Date 偏差 -0.1 s <span class="p">|</span> 证书剩余 <span class="m">89</span> 天 <span class="p">|</span> 状态行 HTTP/1.1 <span class="m">200</span> OK
+</span></span><span class="line"><span class="cl">gitee.com          对端 180.76.198.225  TCP+TLS <span class="m">83</span> ms
+</span></span><span class="line"><span class="cl">    Date 偏差 -0.0 s <span class="p">|</span> 证书剩余 <span class="m">116</span> 天 <span class="p">|</span> 状态行 HTTP/1.1 <span class="m">200</span> OK</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">观察</th>
+      <th scope="col">本机值</th>
+      <th scope="col">判据含义</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>本机与服务器的时间差</td>
+      <td>−0.1 秒 / −0.0 秒</td>
+      <td>秒级以内属正常。偏差到<strong>分钟级以上</strong>就要查时钟同步，证书校验会开始随机失败</td>
+    </tr>
+    <tr>
+      <td>证书有效期是否覆盖当前时间</td>
+      <td>覆盖</td>
+      <td>本机时钟若跑到有效期之外，任何合法证书都会被判为无效</td>
+    </tr>
+    <tr>
+      <td>剩余天数</td>
+      <td>89 天 / 116 天</td>
+      <td>剩余极少时容易和「刚过期」混淆，到期前一周内的失败要优先查这一项</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<blockquote>
+<p>💡 新人小结：证书校验像过海关——海关看你护照上的日期，<strong>如果你的手表慢了一年，你的护照就&quot;过期&quot;了</strong>，哪怕海关的系统时间完全正确。修表比换护照便宜得多，但很多人先做了后者。
+对应到这里：手表 = 本机系统时钟；护照有效期 = 证书的起止时间；海关系统 = 远端服务。所以遇到证书类报错，第一条检查动作是核对<strong>本机时间</strong>，而不是去动引擎的校验开关。</p>
+</blockquote>
+<p>三种表现要分开处置，它们看着像同一件事：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">表现</th>
+      <th scope="col">优先怀疑</th>
+      <th scope="col">一条验证动作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>只在某些域名报证书错，浏览器访问同一地址正常</td>
+      <td>中间设备（公司出口网关）替换了证书</td>
+      <td>对比命令行与浏览器看到的证书签发链，不同就是被替换</td>
+    </tr>
+    <tr>
+      <td>所有 HTTPS 目标都报证书错</td>
+      <td>本机时钟漂移</td>
+      <td>比较本机 UTC 与任一公开服务器的 <code>Date</code> 头，看偏差量级</td>
+    </tr>
+    <tr>
+      <td>报的是超时而不是证书</td>
+      <td>链路问题，回到上一节的四段定位</td>
+      <td>先跑对照站点，确认出口通畅与否</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>最后一条要划清边界：<strong>换证书或跳过校验不是解决方案</strong>。跳过校验会让真正的中间人问题静默消失，本库不提供这类开关的用法。</p>
+<h2 id="不依赖镜像仓库仍然验证运行时第-7-条怎么过的">不依赖镜像仓库，仍然验证运行时（第 7 条怎么过的）<a class="td-heading-self-link" href="#%e4%b8%8d%e4%be%9d%e8%b5%96%e9%95%9c%e5%83%8f%e4%bb%93%e5%ba%93%e4%bb%8d%e7%84%b6%e9%aa%8c%e8%af%81%e8%bf%90%e8%a1%8c%e6%97%b6%e7%ac%ac-7-%e6%9d%a1%e6%80%8e%e4%b9%88%e8%bf%87%e7%9a%84" aria-label="标题锚点"></a>
+</h2>
+<p>第 6 条不过时，第 7 条看起来必然也没法测——没有镜像怎么起容器？可以不用仓库。用 <code>FROM scratch</code> 加一个本机交叉编译出来的静态 Linux 二进制，整条链路一次网络都不碰。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-5" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="14"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-5" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-5-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1) 交叉编译一个静态 Linux 二进制（本机 Go，不联网）</span>
+</span></span><span class="line"><span class="cl">$ <span class="nv">GOOS</span><span class="o">=</span>linux <span class="nv">GOARCH</span><span class="o">=</span>amd64 <span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span> <span class="nv">GOTOOLCHAIN</span><span class="o">=</span><span class="nb">local</span> <span class="nv">GOPROXY</span><span class="o">=</span>off go build -trimpath -o demo .
+</span></span><span class="line"><span class="cl">$ ls -l demo
+</span></span><span class="line"><span class="cl">-rw-r--r-- <span class="m">1</span> ... <span class="m">3314972</span> Oct <span class="m">27</span> 07:52 demo          <span class="c1"># 约 3.3 MB 静态二进制</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 2) 镜像描述文件：基础镜像是空的，唯一一层来自本机文件</span>
+</span></span><span class="line"><span class="cl">$ cat Dockerfile
+</span></span><span class="line"><span class="cl">FROM scratch
+</span></span><span class="line"><span class="cl">COPY demo /demo
+</span></span><span class="line"><span class="cl">ENTRYPOINT <span class="o">[</span><span class="s2">&#34;/demo&#34;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 3) 构建并运行，顺带把内存上限和主机名传进去</span>
+</span></span><span class="line"><span class="cl">$ docker build -t proof:local .
+</span></span><span class="line"><span class="cl">$ docker run --rm --memory<span class="o">=</span>64m --hostname proof-01 proof:local</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>容器里的真实自述：</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="10"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-6" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">RUNTIME: 这是一个 FROM scratch 构建的镜像，未从任何仓库拉取过一层
+</span></span><span class="line"><span class="cl">hostname: proof-01
+</span></span><span class="line"><span class="cl">cgroup: 0::/
+</span></span><span class="line"><span class="cl">memory.max: 67108864
+</span></span><span class="line"><span class="cl">cpu.max: max 100000
+</span></span><span class="line"><span class="cl">resolv.conf: # Generated by Docker Engine.
+</span></span><span class="line"><span class="cl">nameserver 192.168.65.7
+</span></span><span class="line"><span class="cl">hosts(1 行): 127.0.0.1	localhost
+</span></span><span class="line"><span class="cl">容器内解析 registry-1.docker.io -&gt; 108.160.166.57
+</span></span><span class="line"><span class="cl">容器内连 baidu:443 -&gt; 成功</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>五个结论直接从这五行数出来：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">读数</th>
+      <th scope="col">结论</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>hostname: proof-01</code></td>
+      <td><code>--hostname</code> 生效，UTS 隔离在工作（宿主不是这个名字）</td>
+    </tr>
+    <tr>
+      <td><code>cgroup: 0::/</code></td>
+      <td>控制组是 <strong>v2</strong> 的统一层次；这决定了读限制值要去看 <code>/sys/fs/cgroup/&lt;文件&gt;</code>，不是 v1 的那套目录</td>
+    </tr>
+    <tr>
+      <td><code>memory.max: 67108864</code></td>
+      <td><code>--memory=64m</code> 被真实下发：64 MiB = 67,108,864 字节，分毫不差</td>
+    </tr>
+    <tr>
+      <td><code>cpu.max: max 100000</code></td>
+      <td>没设 CPU 上限时配额位是 <code>max</code>，周期 100000；想限核要显式传 <code>--cpus</code></td>
+    </tr>
+    <tr>
+      <td><code>nameserver 192.168.65.7</code>，注释写着 <code>Generated by Docker Engine</code></td>
+      <td>容器内 DNS 由引擎生成，指向桌面版内置的解析器，<strong>不是</strong>宿主 <code>resolv.conf</code> 的内容</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>还有一条副产品值得记：容器里解析同一个域名得到 <code>108.160.166.57</code>，与宿主的 <code>64.13.192.76</code> <strong>不同</strong>。所以「宿主解析被改写」这件事不能直接推定容器内的视图相同——排错时要分别问。</p>
+<p>清理动作也是流程的一部分：<code>docker rmi proof:local</code> 卸镜像，<code>docker builder prune -f</code> 清构建缓存，最后 <code>docker system df</code> 复核。本机复核结果为 Images 0 / Containers 0 / Volumes 0，Build Cache 由 8.639 MB 降到 4.096 kB。</p>
+<h2 id="windows-与子系统的三处初始设置">Windows 与子系统的三处初始设置<a class="td-heading-self-link" href="#windows-%e4%b8%8e%e5%ad%90%e7%b3%bb%e7%bb%9f%e7%9a%84%e4%b8%89%e5%a4%84%e5%88%9d%e5%a7%8b%e8%ae%be%e7%bd%ae" aria-label="标题锚点"></a>
+</h2>
+<p>装上之后有三件事不做，后面一定会踩。第一条本轮有了实测数据，另外两条仍未实测，标注照旧。</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">设置</th>
+      <th scope="col">为什么</th>
+      <th scope="col">不做会怎样</th>
+      <th scope="col">本机可复现性</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>给子系统设内存上限</td>
+      <td>子系统默认可以吃掉一半物理内存，且长期持有不释放</td>
+      <td>宿主内存被大量占用</td>
+      <td><strong>默认值已实测</strong>：引擎可见 47.01 GiB，宿主物理内存 95.9 GB，正好约一半。<strong>设上限的具体操作与效果未实测</strong>（本轮没改配置）。96 GB 这类机器上，把上限设到 8~16 GB 是合理起点</td>
+    </tr>
+    <tr>
+      <td>工程文件放在子系统内而不是 Windows 盘</td>
+      <td>跨系统挂载的文件操作性能远低于同一文件系统内</td>
+      <td>构建时大量小文件读写，耗时成倍增加</td>
+      <td>未实测</td>
+    </tr>
+    <tr>
+      <td>注意虚拟磁盘不自动回收</td>
+      <td>磁盘文件只会增长不会缩小，删除镜像不等于释放宿主空间</td>
+      <td>数据盘看起来「越用越小」，需要手动压缩流程</td>
+      <td>未实测。本机 C 盘 477 GB 总、316 GB 可用，容量不是当前瓶颈</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>这三处与更深的坑（子系统与桌面引擎的启停依赖、休眠后容器网络失效）在第七篇专门有一节，遇到时直接查那里。</p>
+<h2 id="代理与镜像通道">代理与镜像通道<a class="td-heading-self-link" href="#%e4%bb%a3%e7%90%86%e4%b8%8e%e9%95%9c%e5%83%8f%e9%80%9a%e9%81%93" aria-label="标题锚点"></a>
+</h2>
+<p>如果公司网络要求走代理，需要<strong>两处</strong>都配：桌面引擎的代理设置，以及子系统内部的 shell 代理。只配一处时会出现「浏览器能开网页但拉不下来」，这是最常见的半配状态。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-7" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="3"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-7" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-7-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">判断走了哪条路：
+</span></span><span class="line"><span class="cl">1) 引擎配置里有代理，命令行环境变量里没有 —— 引擎自己走代理，容器内进程不走
+</span></span><span class="line"><span class="cl">2) 只有环境变量有代理 —— 引擎不走，容器内构建时下载依赖会走</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>镜像通道分两类：公开镜像加速（改引擎的仓库地址配置），和私有仓库代理缓存（在自己机房里缓存一份，见 3.10）。选哪个是团队决定，<strong>本库示例统一不假设你有可用加速通道</strong>——所有需要拉镜像的步骤，都在该段的前置清单里写明「需要一条可用的镜像获取通道」，不静默依赖某个具体加速域名。</p>
+<p>本库的示例之所以把&quot;镜像获取通道&quot;写进每段的前置清单而不静默依赖某个加速域名，就是因为本机第三轮之前正卡在这里：引擎与运行时全合格，第①段要的两个公共镜像却拉不到。配好代理后该条解除，见下一节。</p>
+<h2 id="打通通道代理与加速器是两条路">打通通道：代理与加速器是两条路<a class="td-heading-self-link" href="#%e6%89%93%e9%80%9a%e9%80%9a%e9%81%93%e4%bb%a3%e7%90%86%e4%b8%8e%e5%8a%a0%e9%80%9f%e5%99%a8%e6%98%af%e4%b8%a4%e6%9d%a1%e8%b7%af" aria-label="标题锚点"></a>
+</h2>
+<p>第三轮（同日 2026-10-27，配了本机代理之后）把第 6 条解开了。先看<strong>唯一变量是代理</strong>这组对照：</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-8" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="5"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-8" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-8-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ curl -s -o /dev/null -w <span class="s2">&#34;%{http_code}&#34;</span> --max-time <span class="m">12</span> https://registry-1.docker.io/v2/
+</span></span><span class="line"><span class="cl"><span class="m">000</span>                     <span class="c1"># 直连，12 秒后 curl 返回码 28（超时）</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ curl -x http://127.0.0.1:7890 -s -o /dev/null -w <span class="s2">&#34;%{http_code}&#34;</span> --max-time <span class="m">15</span> https://registry-1.docker.io/v2/
+</span></span><span class="line"><span class="cl"><span class="m">401</span>                     <span class="c1"># 走代理，0.84 秒</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p><code>401</code> 是<strong>成功信号</strong>而不是失败：<code>/v2/</code> 这个端点在未认证时本来就该回 <code>{&quot;errors&quot;:[{&quot;code&quot;:&quot;UNAUTHORIZED&quot;,…}]}</code>。真正说明问题的是它<strong>答话了</strong>，而直连那侧连 TCP 都没建起来。</p>
+<p>引擎侧的可观测变化：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">时点</th>
+      <th scope="col"><code>docker info</code> 的代理段</th>
+      <th scope="col"><code>docker pull hello-world</code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>未配代理</td>
+      <td>无（报错原文写着 <code>because Docker Desktop has no HTTPS proxy</code>）</td>
+      <td>返回码 1，<code>dial tcp 64.13.192.76:443: connectex</code></td>
+    </tr>
+    <tr>
+      <td>配代理后</td>
+      <td><code>HTTP Proxy: http.docker.internal:3128</code>、<code>HTTPS Proxy: http.docker.internal:3128</code>、<code>No Proxy: hubproxy.docker.internal</code></td>
+      <td>返回码 <strong>0</strong>，<code>Digest: sha256:11a3eb15…</code>，<code>Status: Downloaded newer image</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>拉取耗时与体积的真实读数：<code>redis:7-alpine</code> <strong>5.3 秒</strong>（57.8 MB）、<code>mysql:8.4</code> <strong>22 秒</strong>（1.12 GB）、<code>hello-world</code> 25.9 kB。</p>
+<blockquote>
+<p>💡 新人小结：代理和加速器像两种不同的出门方式。代理是<strong>绕一段路</strong>走能通的桥，任何目的地都能到，但每次都要绕；加速器是<strong>在你楼下建个前置仓</strong>，常用的货直接就近取，货没备或者仓库挂了，你还是出不去。
+对应到这里：代理改的是「引擎出网走哪条链路」，与目标无关，所以它对任意镜像都成立；加速器改的是「去哪个域名取镜像」，只对它缓存过的东西有效。两者可以叠加，但<strong>排查时要把它们分开试</strong>——先证明「走代理能通」，再谈要不要加速器。</p>
+</blockquote>
+<p>三条判断口径：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">情况</th>
+      <th scope="col">该配哪个</th>
+      <th scope="col">依据</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>直连超时（像本机第三轮之前）</td>
+      <td>代理</td>
+      <td>连 TCP 都建不起来，加速器域名同样要靠出网能力，先解决通路</td>
+    </tr>
+    <tr>
+      <td>直连能通但很慢、或某些公共库限流</td>
+      <td>加速器</td>
+      <td>已到达应用层，问题在链路质量或配额</td>
+    </tr>
+    <tr>
+      <td>需要拉私有仓库的镜像</td>
+      <td>都不解决</td>
+      <td>那是认证与信任问题，见 3.10 与 7.6 的 401/403、X509 分支</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>一处需要诚实标注的边界：<code>http.docker.internal:3128</code> 是桌面版引擎的<strong>内部代理入口</strong>，它再把流量转给系统层配置的代理。本轮只观测到「配了之后引擎这段从无到有、拉取随即成功」这一对变化，<strong>没有逐跳验证流量是怎么传到 <code>127.0.0.1:7890</code> 的</strong>——那需要看桌面版设置项与流量落点。文档只写观测到的这一层。</p>
+<h2 id="第段判据真跑通了以及两次差点被骗的假结果">第①段判据真跑通了（以及两次差点被骗的假结果）<a class="td-heading-self-link" href="#%e7%ac%ac%e6%ae%b5%e5%88%a4%e6%8d%ae%e7%9c%9f%e8%b7%91%e9%80%9a%e4%ba%86%e4%bb%a5%e5%8f%8a%e4%b8%a4%e6%ac%a1%e5%b7%ae%e7%82%b9%e8%a2%ab%e9%aa%97%e7%9a%84%e5%81%87%e7%bb%93%e6%9e%9c" aria-label="标题锚点"></a>
+</h2>
+<p>有了通道，第①段那条判据就能真测。判据原文是：<strong>容器删掉后数据仍在</strong>。</p>
+<p>Redis 侧：起一个挂命名卷的容器，宿主直接用协议写入（不借任何客户端），然后 <code>docker rm -f</code> 再重起。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-9" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="8"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-9" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-9-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">SET kb:proof round-1-value        -&gt; +OK        （第一轮写入）
+</span></span><span class="line"><span class="cl">—— 删除容器并用同一个卷重新起 ——
+</span></span><span class="line"><span class="cl">KEYS kb:*                          -&gt; *1  $8 kb:proof
+</span></span><span class="line"><span class="cl">GET kb:proof                       -&gt; $13 round-1-value     # 上一轮写入的值活过一次删除
+</span></span><span class="line"><span class="cl">SET kb:proof persistence-check     -&gt; +OK
+</span></span><span class="line"><span class="cl">—— 再次 docker rm -f 并重新创建 ——
+</span></span><span class="line"><span class="cl">GET kb:proof                       -&gt; $17 persistence-check # 又活过一次
+</span></span><span class="line"><span class="cl">DBSIZE                             -&gt; :1        |  INFO 里 aof_enabled:1  loading:0</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>MySQL 侧：同一套动作，判据换成 <code>SELECT</code>。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-10" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="6"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-10" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-10-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">写入两行 → id=1 before-delete / id=2 second-row，written_at = 2026-10-27 03:22:48
+</span></span><span class="line"><span class="cl">宿主 127.0.0.1:3307 连接成功 8 ms，并收到 MySQL 握手包，包里的版本串是 8.4.13
+</span></span><span class="line"><span class="cl">docker rm -f kb-p1-mysql          → 卷 kb-p1-mysqldata 仍在列表里
+</span></span><span class="line"><span class="cl">重起（同一个卷）→ 约 6 秒就绪
+</span></span><span class="line"><span class="cl">SELECT COUNT(*) FROM t_probe      → 2
+</span></span><span class="line"><span class="cl">SELECT * FROM t_probe             → 两行数据与时间戳原封不动</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p><strong>这两次判定之前都被我自己的脚本骗过一回，值得单独记，因为它们比结论更容易复发：</strong></p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">假结果</th>
+      <th scope="col">我的写法错在哪</th>
+      <th scope="col">症状</th>
+      <th scope="col">为什么会误判</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>以为 MySQL 数据没挂到卷上</td>
+      <td><code>-v kb-p1-mysqldata:/var/lib/dockervolume</code>，把 <code>/var/lib/mysql</code> 打错</td>
+      <td>挂载列表里出现两个卷：命名卷挂在那个不存在的路径上，另有一个<strong>匿名卷</strong>挂着 <code>/var/lib/mysql</code></td>
+      <td>容器照跑、<code>SELECT</code> 照出数据，看着完全正常。但那时删掉匿名卷才算丢数据，而我没有它的名义 → 测出来的&quot;留存&quot;毫无意义</td>
+    </tr>
+    <tr>
+      <td>以为 Redis 的键没留住</td>
+      <td>手写 RESP 时给了 <code>$3</code> 的长度前缀，而 key 是 8 字符的 <code>kb:proof</code></td>
+      <td>返回 <code>$-1</code>（nil）外加一条 <code>-ERR unknown command 'oof'</code></td>
+      <td><code>$-1</code> 长得太像&quot;键不存在＝数据丢了&quot;。实际是服务端按 3 字节读走 <code>kb:</code>，把剩下的 <code>proof</code> 当成新命令解析。<strong>是客户端坏了，不是 Redis 坏了</strong></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>两条教训合并成一句判据使用规矩：<strong>测&quot;数据留存&quot;之前，先确认数据到底落在哪个卷上；拿到 nil / 空结果之前，先确认你的读法本身没错</strong>（<code>INFO</code> 里的报错文本、挂载列表里的匿名卷，都是免费的真值来源）。</p>
+<p>清理也是流程的一部分：本轮创建的 2 个容器、2 个命名卷、3 个镜像与构建缓存全部删除，<code>docker system df</code> 复核为 Images 0 / Containers 0 / Local Volumes 0 / Build Cache 0。删除前的占用规模可以当容量参考——两个卷一共 <strong>218.4 MB</strong>（MySQL 初始化数据目录就写了这么多），三个镜像合计 <strong>1.176 GB</strong>（其中 MySQL 一个就 1.12 GB）。</p>
+<h2 id="实战切入把七行体检记录写下来">实战切入：把七行体检记录写下来<a class="td-heading-self-link" href="#%e5%ae%9e%e6%88%98%e5%88%87%e5%85%a5%e6%8a%8a%e4%b8%83%e8%a1%8c%e4%bd%93%e6%a3%80%e8%ae%b0%e5%bd%95%e5%86%99%e4%b8%8b%e6%9d%a5" aria-label="标题锚点"></a>
+</h2>
+<p>这一段是本篇的动手环节，落在示例链第①段之前。<strong>产出物就是这七行</strong>，它之后会成为第①段前置清单的一部分。</p>
+<div class="td-code td-code--untitled" id="td-code-e7f8e3bd-fence-11" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="13"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-e7f8e3bd-fence-11" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-e7f8e3bd-fence-11-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1. 引擎版本（看返回码，不看文本观感）</span>
+</span></span><span class="line"><span class="cl">$ docker version --format <span class="s1">&#39;{{.Server.Version}}&#39;</span> <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 2. 子系统状态（记得按 UTF-16 解码再读）</span>
+</span></span><span class="line"><span class="cl">$ wsl.exe --status <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 3. 镜像域名解析与连接</span>
+</span></span><span class="line"><span class="cl">$ python -c <span class="s2">&#34;import socket;print(sorted({i[4][0] for i in socket.getaddrinfo(&#39;registry-1.docker.io&#39;,443)}))&#34;</span>
+</span></span><span class="line"><span class="cl">$ python -c <span class="s2">&#34;import socket,time;t=time.perf_counter();socket.create_connection((&#39;registry-1.docker.io&#39;,443),timeout=6);print(round((time.perf_counter()-t)*1000))&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 4. 对照站点：证明你的探测方法本身可用</span>
+</span></span><span class="line"><span class="cl">$ python -c <span class="s2">&#34;import socket,time;t=time.perf_counter();socket.create_connection((&#39;www.baidu.com&#39;,443),timeout=6);print(round((time.perf_counter()-t)*1000))&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 5. 时钟与证书：比较 Date 头与本机 UTC</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 6. 拉取通道</span>
+</span></span><span class="line"><span class="cl">$ docker pull hello-world <span class="p">;</span> <span class="nb">echo</span> <span class="s2">&#34;rc=</span><span class="nv">$?</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 7. 容器运行时（不依赖仓库，见上一节的 scratch 办法）</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">行</th>
+      <th scope="col">你的读数</th>
+      <th scope="col">本机 2026-10-27 的读数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>____</td>
+      <td>返回码 0，<code>29.8.0</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>____</td>
+      <td>返回码 0，默认分发 <code>docker-desktop</code>，版本 2</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>____</td>
+      <td>解析到 <code>64.13.192.76</code>；443 连接 6018 ms 后超时</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>____</td>
+      <td><code>www.baidu.com</code> 55 ms 成功；<code>gitee.com</code> 83 ms 成功</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>____</td>
+      <td>与服务器偏差 −0.1 秒；证书剩余 89 天</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>____</td>
+      <td>未配代理：返回码 1，<code>dial tcp 64.13.192.76:443: connectex</code>；配本机代理后：返回码 <strong>0</strong>，<code>hello-world</code> 与 <code>redis:7-alpine</code>（5.3 s / 57.8 MB）、<code>mysql:8.4</code>（22 s / 1.12 GB）全部拉成</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>____</td>
+      <td>两条路径都过：<code>FROM scratch</code> 自建镜像在容器内读到 <code>memory.max=67108864</code>；公开镜像 <code>docker run --rm hello-world</code> 返回码 0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>七行填完，分流按「哪几条不过」定：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">结果</th>
+      <th scope="col">下一步</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1 或 2 不过</td>
+      <td>先按你的平台装完再回来，<strong>不要开始示例链第①段</strong>，你会把环境问题当成文档问题</td>
+    </tr>
+    <tr>
+      <td>1、2 过，3 不过而 4 过</td>
+      <td>环境是好的，通道是坏的：配加速通道或代理。这属于第⑤段会重复出现的问题，记下你的解法</td>
+    </tr>
+    <tr>
+      <td>1、2、7 过而 6 不过</td>
+      <td>运行时可用但拿不到公共镜像：第①段开不了跑，先解第 6 条（本机第三轮之前正是这一格）</td>
+    </tr>
+    <tr>
+      <td>七条全过</td>
+      <td>可以进 <a href="../../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/">/docs/02-核心操作/接上去/端口映射数据管理与权限时区/</a>，示例链第①段从那里开始（<strong>本机现状即此格</strong>）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>第 2、3 种情况值得强调：<strong>它们的报错会长得和「引擎坏了」一模一样</strong>（都是超时或失败）。如果不先量对照站点、不做第 7 条这种绕开仓库的验证，很多人会去重装引擎——重装改变不了链路，白花两小时。</p>
+<h2 id="常见误读">常见误读<a class="td-heading-self-link" href="#%e5%b8%b8%e8%a7%81%e8%af%af%e8%af%bb" aria-label="标题锚点"></a>
+</h2>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">你可能的理解</th>
+      <th scope="col">实际情况</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>解析返回了 IP 就是网络正常</td>
+      <td>五毫秒返回一个不可达的地址，比不返回更具迷惑性。判据要落到「能不能握手」</td>
+    </tr>
+    <tr>
+      <td>超时就是镜像站限流</td>
+      <td>限流返回明确的 HTTP 状态码与文字，不会表现为 TCP 层超时。超时说明没到应用层</td>
+    </tr>
+    <tr>
+      <td>装完引擎就能直接跑示例链</td>
+      <td>还要有镜像获取通道。本机头两轮就是反例：引擎、子系统、运行时全合格，第①段仍跑不了，直到把代理配上</td>
+    </tr>
+    <tr>
+      <td>引擎装好意味着容器能跑</td>
+      <td>这是两件事，而且要分开判。本机在拉不到任何公共镜像的状态下，仍能用一条不碰仓库的路径证明运行时可用</td>
+    </tr>
+    <tr>
+      <td>配了代理，解析问题就&quot;修好&quot;了</td>
+      <td>没有。直连那个域名依旧拿到连不通的地址（本机第 3 条至今不过），只是引擎不再依赖那条直连路径。<strong>别去折腾本机 DNS</strong></td>
+    </tr>
+    <tr>
+      <td>数据挂在命名卷上就一定测得准</td>
+      <td>先确认数据真的落在那个卷。本机就写错过一次目标路径，Docker 顺手建了个匿名卷接走真实数据目录，容器照跑、查询照出，但那时的&quot;留存&quot;毫无意义</td>
+    </tr>
+    <tr>
+      <td>读到空结果就是数据丢了</td>
+      <td>先确认你的读法没错。手写协议时长度前缀写错，服务端会把余下字节当新命令，回一个 nil 外加一条怪错——看起来完全像&quot;键不存在&quot;</td>
+    </tr>
+    <tr>
+      <td>加速器配了就一劳永逸</td>
+      <td>加速通道会失效或变更。每次「拉不下来」都重跑七行，而不是先怀疑文档</td>
+    </tr>
+    <tr>
+      <td>命令输出看不懂就是环境问题</td>
+      <td>先看返回码。Windows 上系统命令的中文输出常被编码破坏，返回码才是可靠信号</td>
+    </tr>
+    <tr>
+      <td>宿主解析到的地址就是容器看到的</td>
+      <td>不一定。本机同一次运行里宿主与容器各得到不同地址</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="要点总结">要点总结<a class="td-heading-self-link" href="#%e8%a6%81%e7%82%b9%e6%80%bb%e7%bb%93" aria-label="标题锚点"></a>
+</h2>
+<ul>
+<li>装之前先做七项体检，装之后再测一次：<strong>两次读数的差</strong>才是安装过程的结果，单次读数说明不了任何事。本篇两轮读数就摆在一起作证。</li>
+<li>判据要落在<strong>返回码与握手结果</strong>上，不落在文本观感上。Windows 上编码会把中文提示毁掉；而五毫秒返回的假地址比超时报错更危险。</li>
+<li>「拉不下来」分四段量：命令存在性、解析、握手、应用层状态码。<strong>对照站点是这套方法里唯一能证明「探针没坏」的东西</strong>。跨解析器对照这一招会因为 UDP 53 被封而失效，所以要备好另外两条证据（同一域名答案随时间变、引擎自述实连地址）。</li>
+<li>引擎可用 ≠ 能拉镜像。第 7 条可以用 <code>FROM scratch</code> + 本机静态二进制在不碰仓库的情况下证明，顺带还能量出控制组 v2、<code>--memory</code> 的真实下发值和引擎自生成的容器 DNS。</li>
+<li>本库所有示例都<strong>不静默依赖具体加速域名</strong>：镜像获取通道写进每段的前置清单，缺了就在本篇停下，不要边装边往下读。</li>
+<li>子系统默认给引擎约一半物理内存这件事，本机已实测（47.01 GiB / 95.9 GB）；设上限的操作与效果仍未实测。</li>
+</ul>
+<h2 id="本篇未验证项">本篇未验证项<a class="td-heading-self-link" href="#%e6%9c%ac%e7%af%87%e6%9c%aa%e9%aa%8c%e8%af%81%e9%a1%b9" aria-label="标题锚点"></a>
+</h2>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">原因</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>示例链第①段（起数据库与缓存两个容器）</td>
+      <td><strong>已验证</strong></td>
+      <td>Redis 键值与 MySQL 两行数据（含 <code>written_at</code> 时间戳）都在 <code>docker rm -f</code> 并挂同一命名卷重起后原样读回；宿主经 <code>127.0.0.1:3307</code> 拿到 MySQL 握手包并报出 <code>8.4.13</code></td>
+    </tr>
+    <tr>
+      <td>宿主用真实应用驱动连 MySQL</td>
+      <td>未验证</td>
+      <td>本机没有应用工程，第①段的&quot;IDE 里写入&quot;这一环是用<strong>容器内客户端 + 宿主协议级读写</strong>替代证明的（Redis 那条是真完整，MySQL 只做到 TCP 与应用层握手）。要按判据原文跑需要贯穿示例先落地</td>
+    </tr>
+    <tr>
+      <td>第①段 README 的「自带前置」判据</td>
+      <td>未验证</td>
+      <td>示例目录尚未创建，无法在干净机器上复现该段前置清单</td>
+    </tr>
+    <tr>
+      <td>WSL 内存上限的设置动作与效果</td>
+      <td>未实测</td>
+      <td>本轮只测了默认值（47.01 GiB）；没有改配置，故不给操作效果结论</td>
+    </tr>
+    <tr>
+      <td>跨盘符绑定挂载的性能差异</td>
+      <td>未实测</td>
+      <td>需要示例工程与两份对照数据，本轮未做</td>
+    </tr>
+    <tr>
+      <td>具体加速通道的可用性与选型</td>
+      <td>未验证</td>
+      <td>属团队决定（清单第十章开放项之一）。本篇只给「怎么判断你需要哪一类通道」，且本机走的是代理不是加速器</td>
+    </tr>
+    <tr>
+      <td>代理「只配一处」的半配状态</td>
+      <td>未验证</td>
+      <td>本机是一次配通即成功，没做出「浏览器通而引擎不通」的那一半读数；这条目前只有判断方法，没有实测样本</td>
+    </tr>
+    <tr>
+      <td>代理流量的逐跳走向</td>
+      <td>未验证</td>
+      <td>只观测到 <code>docker info</code> 的代理段由无变 <code>http.docker.internal:3128</code> 且拉取随即成功；未验证它怎么传到本机代理端口</td>
+    </tr>
+    <tr>
+      <td>macOS 与 Linux 平台的任何读数</td>
+      <td>未验证</td>
+      <td>两轮测量都在同一台 Windows 11（10.0.26300，WSL2 内核 6.18.54.1）上完成，跨平台部分只有文档口径</td>
+    </tr>
+    <tr>
+      <td>引擎自述地址的归属与改写环节</td>
+      <td>未验证</td>
+      <td>已证「答案随时间变、宿主与容器不一致、443 不可达」，未核查这些地址归谁、在哪一跳被改写</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="上一页 / 下一页">
+  <a class="td-pager__link td-pager__link--prev" href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/"
+    aria-label="上一页 - 把环境搭好" title="把环境搭好" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">把环境搭好</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="目录">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="隐藏目录" aria-label="隐藏目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="收起章节: 目录"
+            data-td-label-expand="展开章节: 目录"
+            data-td-label-collapse="收起章节: 目录"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">目录</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#为什么要先量自己的机器">为什么要先量自己的机器</a></li>
+    <li><a href="#三个平台各自要装什么">三个平台各自要装什么</a></li>
+    <li><a href="#装完之后怎么验七条判据">装完之后怎么验（七条判据）</a></li>
+    <li><a href="#拉不下来该查哪一段四段定位法">拉不下来该查哪一段：四段定位法</a></li>
+    <li><a href="#证书与时间四段定位里最容易被跳过的一格">证书与时间：四段定位里最容易被跳过的一格</a></li>
+    <li><a href="#不依赖镜像仓库仍然验证运行时第-7-条怎么过的">不依赖镜像仓库，仍然验证运行时（第 7 条怎么过的）</a></li>
+    <li><a href="#windows-与子系统的三处初始设置">Windows 与子系统的三处初始设置</a></li>
+    <li><a href="#代理与镜像通道">代理与镜像通道</a></li>
+    <li><a href="#打通通道代理与加速器是两条路">打通通道：代理与加速器是两条路</a></li>
+    <li><a href="#第段判据真跑通了以及两次差点被骗的假结果">第①段判据真跑通了（以及两次差点被骗的假结果）</a></li>
+    <li><a href="#实战切入把七行体检记录写下来">实战切入：把七行体检记录写下来</a></li>
+    <li><a href="#常见误读">常见误读</a></li>
+    <li><a href="#要点总结">要点总结</a></li>
+    <li><a href="#本篇未验证项">本篇未验证项</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      <div class="td-shell-aside-group td-shell-backlinks">
+  <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+    data-td-shell-tree-toggle data-td-shell-aside-keep-open
+    aria-expanded="true" aria-controls="td-shell-backlinks-children"
+    aria-label="收起章节: 反链"
+    data-td-label-expand="展开章节: 反链"
+    data-td-label-collapse="收起章节: 反链">
+    <span class="td-shell-aside-group__icon" aria-hidden="true"><i class="td-shell-icon td-shell-icon--link fa-solid fa-link" aria-hidden="true"></i></span>
+    <span class="td-shell-aside-group__title">反链</span>
+    <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+  </button>
+  <div id="td-shell-backlinks-children" class="td-shell-tree__children td-is-open">
+    <div class="td-shell-tree__children-inner">
+      <ul class="td-shell-backlinks__list">
+        <li class="td-shell-backlinks__item"><a href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/" title="主题轨怎么查、实战暗线怎么落、贯穿示例八段各自解决什么遗留问题，以及你上手前该先量自己机器的哪三项。">使用指南、学习路径与贯穿示例总览</a></li>
+        <li class="td-shell-backlinks__item"><a href="../../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/" title="四种内置网络模式与自定义网络 DNS；volume、bind mount、tmpfs 选型与备份；UID/GID 映射、TZ 与中文乱码。">端口映射、数据管理与权限时区编码</a></li>
+        <li class="td-shell-backlinks__item"><a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/compose%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%BA%BF%E4%B8%8E%E6%96%87%E4%BB%B6%E5%85%A8%E5%AD%97%E6%AE%B5%E5%8F%82%E8%80%83/" title="从九参数的 docker run 到一份 compose.yaml；compose-spec 与已废弃字段、旧教程辨识、services 与顶层字段的逐条实测。">为什么需要 Compose、语法基线与文件全字段参考</a></li>
+        <li class="td-shell-backlinks__item"><a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F%E4%B8%8E%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5/" title="up/down/ps/logs/exec/build 的真实语义与数据风险；depends_on 三种条件与健康检查优先级、探测命令集、start_period 怎么定。">常用命令、启动顺序控制与健康检查</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="显示目录" aria-label="显示目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors">Docker 团队知识库</span>
+  </span><span class="td-footer__all_rights_reserved">保留所有权利</span></div>
+  <div class="td-shell-footline__center">内部技术知识库 · 依据《Docker知识库内容结构与组织清单》v2.1 建设 · 主题 OINK v1.3.2（Apache 2.0，本地副本）</div>
+  <div class="td-shell-footline__right">
+    
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">风格</legend>
+      <div class="td-appearance__presets">
+        <label class="td-appearance__preset" title="默认">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="paper"
+            data-td-preset-value="paper" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513" checked>
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--paper" aria-hidden="true"><i class="td-shell-icon td-shell-icon--file-lines fa-solid fa-file-lines" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Paper</span><span class="visually-hidden"> (默认)</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="slate"
+            data-td-preset-value="slate" data-td-canvas-light="#f1f4f8" data-td-canvas-dark="#0b1119">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--slate" aria-hidden="true"><i class="td-shell-icon td-shell-icon--layers fa-solid fa-layer-group" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Slate</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="ink"
+            data-td-preset-value="ink" data-td-canvas-light="#ffffff" data-td-canvas-dark="#0b0b0b">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--ink" aria-hidden="true"><i class="td-shell-icon td-shell-icon--pen-nib fa-solid fa-pen-nib" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Ink</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="terminal"
+            data-td-preset-value="terminal" data-td-canvas-light="#f4f5f2" data-td-canvas-dark="#0c0f0e">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--terminal" aria-hidden="true"><i class="td-shell-icon td-shell-icon--terminal fa-solid fa-terminal" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Terminal</span></span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="键盘快捷键" aria-label="键盘快捷键"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="键盘快捷键">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>键盘快捷键</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">章节导航</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>在侧栏中移动</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>收起或展开章节</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>打开当前页面</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>上一个或下一个标题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>上一页或下一页</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">操作</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>/</kbd><kbd>F</kbd></span></dt>
+          <dd>搜索</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>\</kbd><kbd>C</kbd></span></dt>
+          <dd>命令面板</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>专注阅读模式</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>切换主题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>切换顶层页面</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":true,"description":"复制 Markdown 文本","disabledReason":"","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":"/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/index.md"},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":true,"description":"查阅 Markdown 源码","disabledReason":"","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":"/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/index.md"},{"available":false,"description":"查阅编辑历史","disabledReason":"查阅编辑历史: 暂不可用","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":""},{"available":false,"description":"编辑当前页面","disabledReason":"编辑当前页面: 暂不可用","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":""},{"available":false,"description":"添加子页面","disabledReason":"添加子页面: 暂不可用","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":""},{"available":false,"description":"提交文档议题","disabledReason":"提交文档议题: 暂不可用","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":""},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":true,"description":"打印完整章节","disabledReason":"","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":"/_print/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/"},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":false,"description":"切换语言","disabledReason":"切换语言: 暂不可用","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":true,"description":"外观","disabledReason":"","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Ink","Terminal","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"},{"available":true,"disabledReason":"","id":"slate","title":"Slate","value":"slate"},{"available":true,"disabledReason":"","id":"ink","title":"Ink","value":"ink"},{"available":true,"disabledReason":"","id":"terminal","title":"Terminal","value":"terminal"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":false,"description":"GitHub","disabledReason":"GitHub: 暂不可用","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":""}],"commands":[],"language":"zh","quickLinks":[{"available":true,"description":"一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。","disabledReason":"","icon":"fa-solid fa-book","id":"quick_docs","keywords":["文档","docs"],"kind":"url","target":"self","title":"文档","url":"/docs/"}],"rootOrder":["docs"],"version":1}</script>
+
+<script src="../../../../js/actions.min.c784a65471d30f25801832ad47eca4fc6e9681b4521bd2414655e6623aa58934.js" integrity="sha256-x4SmVHHTDyWAGDKtR&#43;yk/G6WgbRSG9JBRlXmYjqliTQ=" crossorigin="anonymous"></script>
+<script src="../../../../js/core.min.9d572929bf152f8c3018bd8c276e7338cecd5fdada90aefbf09c56c913fb7668.js" integrity="sha256-nVcpKb8VL4wwGL2MJ25zOM7NX9rakK778JxWyRP7dmg=" crossorigin="anonymous"></script>
+  <script src="../../../../third_party/mermaid/mermaid.min.581ed7d74bd9048d0e3a91363927d72ef22942d7722546b27f7cc29e35390eb8.js" integrity="sha256-WB7X10vZBI0OOpE2OSfXLvIpQtdyJUayf3zCnjU5Drg=" crossorigin="anonymous"></script>
+<div id="td-shell-search" class="td-shell-search" hidden
+     data-td-index-src="../../../../offline-search-index.zh.28e779bf03824cbfa8c3b9dcd8175812.json"
+     data-td-max-results="10"
+     data-td-t-empty="未找到结果"
+     data-td-t-loading="正在加载搜索索引……"
+     data-td-t-results="找到 {count} 条结果"
+     data-td-t-actions="操作"
+     data-td-t-page-actions="页面操作"
+     data-td-t-preferences="偏好设置"
+     data-td-t-commands="命令"
+     data-td-t-quick-links="快速链接"
+     data-td-t-no-commands="未找到匹配命令"
+     data-td-t-choice="请选择一项"
+     data-td-t-action-failed="无法完成此操作"
+     data-td-t-index-unavailable="页面索引暂不可用，操作仍可使用"
+     data-td-t-pages="页面">
+  <div class="td-shell-search__backdrop" data-td-shell-search-close></div>
+  <div class="td-shell-search__panel" role="dialog" aria-modal="true" aria-label="搜索…">
+    <div class="td-shell-search__head">
+      <i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="search" class="td-shell-search__input" placeholder="搜索…"
+             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+             role="combobox" aria-autocomplete="list" aria-haspopup="listbox"
+             aria-controls="td-shell-search-results" aria-expanded="false"
+             aria-label="搜索…" enterkeyhint="go">
+      <button type="button" class="td-shell-search__esc" data-td-shell-search-close
+        aria-label="关闭">
+        <kbd>esc</kbd>
+      </button>
+    </div>
+    <div id="td-shell-search-results" class="td-shell-search__list" role="listbox"
+      aria-label="搜索…"></div>
+    <div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"
+      data-td-shell-search-status></div>
+    <div class="td-shell-search__foot" aria-hidden="true">
+      <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
+      <span><kbd>↵</kbd> 打开</span>
+      <span><kbd>esc</kbd> 关闭</span>
+    </div>
+  </div>
+</div><dialog class="td-diagram-zoom d-print-none" data-td-diagram-zoom-dialog
+        aria-label="图表预览">
+  <div class="td-diagram-zoom__surface">
+    <div class="td-diagram-zoom__controls">
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-out><i class="td-shell-icon td-shell-icon--zoom-out fa-solid fa-magnifying-glass-minus" aria-hidden="true"></i><span class="visually-hidden">缩小</span>
+      </button>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-in><i class="td-shell-icon td-shell-icon--zoom-in fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i><span class="visually-hidden">放大</span>
+      </button>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-reset><i class="td-shell-icon td-shell-icon--reset fa-solid fa-arrows-rotate" aria-hidden="true"></i><span class="visually-hidden">复位视图</span>
+      </button>
+      <button class="td-diagram-zoom__control td-diagram-zoom__close" type="button" data-td-diagram-zoom-close><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i><span class="visually-hidden">关闭图表预览</span>
+      </button>
+    </div>
+    <div class="td-diagram-zoom__viewport" data-td-diagram-zoom-viewport>
+      <div class="td-diagram-zoom__canvas" data-td-diagram-zoom-canvas></div>
+    </div>
+  </div>
+</dialog>
+<script src="../../../../js/chunks/shell.min.4194e10aaa62c42f08b26df08079fd620326ddf0fe55fdd6ee9a2d44d16d61c0.js" integrity="sha256-QZThCqpixC8Ism3wgHn9YgMm3fD&#43;Vf3W7potRNFtYcA=" crossorigin="anonymous"></script><script src="../../../../js/chunks/keyboard.min.8a521e4a2d9464db41a80d088ef54dd1a3127943710baa3a3ea14e2e41cba227.js" integrity="sha256-ilIeSi2UZNtBqA0IjvVN0aMSeUNxC6o6PqFOLkHLoic=" crossorigin="anonymous"></script><script src="../../../../js/chunks/local-search.min.6e96fff4982b84f9eaece26beffefac00b7d27c36e1d325c8b4ac637a61055e1.js" integrity="sha256-bpb/9JgrhPnq7OJr7/76wAt9J8NuHTJci0rGN6YQVeE=" crossorigin="anonymous"></script><script src="../../../../js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="../../../../js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script src="../../../../js/chunks/code-block.min.08ea71e6304e5c0ef8d712c6e4d684eeeef2255aa6faeaed8acccc2a7a84ab1b.js" integrity="sha256-COpx5jBOXA741xLG5NaE7u7yJVqm&#43;urtiszMKnqEqxs=" crossorigin="anonymous"></script><script src="../../../../js/chunks/mermaid-zh.min.c45255dd802b7323f2f7aff76277f53b7e63d43b3911b41412906da75b71a748.js" integrity="sha256-xFJV3YArcyPy96/3Ynf1O35j1Ds5EbQUEpBtp1txp0g=" crossorigin="anonymous"></script>
+  </body>
+</html>

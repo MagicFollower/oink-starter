@@ -1,0 +1,1841 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-preset='slate'] { background: #f1f4f8; color: #16222e; }
+  html[data-td-preset='slate'][data-bs-theme='dark'] { background: #0b1119; color: #e8eef6; }
+  html[data-td-preset='ink'] { background: #ffffff; color: #141414; }
+  html[data-td-preset='ink'][data-bs-theme='dark'] { background: #0b0b0b; color: #ededed; }
+  html[data-td-preset='terminal'] { background: #f4f5f2; color: #1d211f; }
+  html[data-td-preset='terminal'][data-bs-theme='dark'] { background: #0c0f0e; color: #d3dbd6; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    var root = document.documentElement;
+    var allowed = ["paper","slate","ink","terminal"];
+    var canvases = {"ink":{"dark":"#0b0b0b","darkInk":"#ededed","light":"#ffffff","lightInk":"#141414"},"paper":{"dark":"#161513","darkInk":"#ece9e3","light":"#f7f6f3","lightInk":"#21201c"},"slate":{"dark":"#0b1119","darkInk":"#e8eef6","light":"#f1f4f8","lightInk":"#16222e"},"terminal":{"dark":"#0c0f0e","darkInk":"#d3dbd6","light":"#f4f5f2","lightInk":"#1d211f"}};
+    var preset = null;
+    try {
+      preset = localStorage.getItem('td-preset');
+      if (preset !== null && allowed.indexOf(preset) < 0) {
+        preset = null;
+        localStorage.removeItem('td-preset');
+      }
+    } catch (_) {
+      
+    }
+    if (preset) root.setAttribute('data-td-preset', preset);
+    var c = canvases[root.getAttribute('data-td-preset')];
+    if (!c) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('data-td-canvas-light', c.light);
+      meta.setAttribute('data-td-canvas-dark', c.dark);
+      meta.setAttribute('content', c.light);
+    });
+  })();
+</script>
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<link rel="alternate" type="text/markdown" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/index.md">
+
+<link rel="prev" href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/"><meta name="robots" content="index, follow">
+<link rel="icon" href="../../../../favicon.svg" type="image/svg+xml" />
+
+<title>多环境与扩展、开发期热重载与完整实战 | Docker 团队知识库</title>
+<meta name="description" content="override 合并与 profiles、.env 插值的真实语义；compose watch 三档实测代价；一键起 web &#43; api &#43; MySQL &#43; Redis &#43; nginx 并跑通第②段判据。">
+<link rel="canonical" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/">
+<link rel="alternate" hreflang="zh-CN" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/">
+<meta property="og:url" content="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/">
+	<meta property="og:site_name" content="Docker 团队知识库">
+	<meta property="og:title" content="多环境与扩展、开发期热重载与完整实战">
+	<meta property="og:description" content="override 合并与 profiles、.env 插值的真实语义；compose watch 三档实测代价；一键起 web &#43; api &#43; MySQL &#43; Redis &#43; nginx 并跑通第②段判据。">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="docs">
+
+	<meta itemprop="name" content="多环境与扩展、开发期热重载与完整实战">
+	<meta itemprop="description" content="override 合并与 profiles、.env 插值的真实语义；compose watch 三档实测代价；一键起 web &#43; api &#43; MySQL &#43; Redis &#43; nginx 并跑通第②段判据。">
+	<meta itemprop="wordCount" content="9916">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="多环境与扩展、开发期热重载与完整实战">
+	<meta name="twitter:description" content="override 合并与 profiles、.env 插值的真实语义；compose watch 三档实测代价；一键起 web &#43; api &#43; MySQL &#43; Redis &#43; nginx 并跑通第②段判据。">
+<link rel="preload" href="../../../../scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" as="style" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<link href="../../../../scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="../../../../scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" rel="stylesheet" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<script>
+  (function () {
+    var html = document.documentElement;
+    html.setAttribute('data-td-shell-no-anim', '');
+    try {
+      if (localStorage.getItem('td-shell-sidebar-collapsed') === '1'
+          && window.matchMedia('(min-width: 768px)').matches) {
+        html.setAttribute('data-td-shell-sidebar', 'collapsed');
+      }
+      var width = parseInt(localStorage.getItem('td-shell-sidebar-w'), 10);
+      if (width > 0) html.style.setProperty('--td-shell-sidebar-w', width + 'px');
+      if (localStorage.getItem('td-shell-toc-collapsed') === '1'
+          && window.matchMedia('(min-width: 1200px)').matches) {
+        html.setAttribute('data-td-shell-toc', 'collapsed');
+      }
+      var blogIndex = localStorage.getItem('td-blog-index');
+      if (blogIndex === 'cards' || blogIndex === 'list' || blogIndex === 'table') {
+        html.setAttribute('data-td-blog-index', blogIndex);
+      }
+      if (sessionStorage.getItem('td-kbd-zen') === '1') {
+        html.setAttribute('data-td-kbd-zen', '');
+      }
+    } catch (_) {}
+  })();
+</script><script defer src="../../../../js/third_party/lunr.min.0c50d9002b85780a842afffb567bb54ede402dae7c6dc5997a018614d8044fc8.js" integrity="sha256-DFDZACuFeAqEKv/7Vnu1Tt5ALa58bcWZegGGFNgET8g=" crossorigin="anonymous"></script>
+
+  </head>
+  <body class="td-page td-shell-chrome td-shell-chrome--navbar">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    
+<header class="td-site-header d-print-none" data-td-header>
+  <div class="td-site-container">
+    <nav class="td-site-nav" aria-label="主导航">
+      <a href="../../../../" class="td-nav-brand" data-td-navbar-route
+         aria-label="Docker 团队知识库 — 首页">
+        <img src="../../../../icons/logo.svg" alt="" class="td-nav-logo" width="22" height="22">
+        <span class="td-nav-title">Docker 团队知识库</span>
+      </a><div class="td-nav-links td-nav-menu-zone"><a class="nav-link active" href="../../../../docs/"
+  data-td-navbar-level="0" data-td-navbar-kind="link" data-td-navbar-route
+  aria-label="文档"
+  data-td-navbar-region="desktop" data-td-navbar-label="文档"
+  data-td-navbar-external="false">
+  <i class="fa-solid fa-book" aria-hidden="true"></i>
+  <span class="td-navbar-entry__label">文档</span></a>
+
+      </div><div class="td-nav-links td-nav-util-zone">
+        <button type="button" class="td-nav-search-box" data-td-shell-search-open
+          title="搜索…" aria-label="搜索…"
+          aria-controls="td-shell-search" aria-expanded="false"><i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="td-nav-search-box__hint">搜索…</span>
+          <kbd class="td-nav-search-box__kbd" aria-hidden="true">/</kbd>
+        </button><div class="td-appearance td-nav-appearance" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-nav-util" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-navbar" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-navbar" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">风格</legend>
+      <div class="td-appearance__presets">
+        <label class="td-appearance__preset" title="默认">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="paper"
+            data-td-preset-value="paper" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513" checked>
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--paper" aria-hidden="true"><i class="td-shell-icon td-shell-icon--file-lines fa-solid fa-file-lines" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Paper</span><span class="visually-hidden"> (默认)</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="slate"
+            data-td-preset-value="slate" data-td-canvas-light="#f1f4f8" data-td-canvas-dark="#0b1119">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--slate" aria-hidden="true"><i class="td-shell-icon td-shell-icon--layers fa-solid fa-layer-group" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Slate</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="ink"
+            data-td-preset-value="ink" data-td-canvas-light="#ffffff" data-td-canvas-dark="#0b0b0b">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--ink" aria-hidden="true"><i class="td-shell-icon td-shell-icon--pen-nib fa-solid fa-pen-nib" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Ink</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-navbar" value="terminal"
+            data-td-preset-value="terminal" data-td-canvas-light="#f4f5f2" data-td-canvas-dark="#0c0f0e">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--terminal" aria-hidden="true"><i class="td-shell-icon td-shell-icon--terminal fa-solid fa-terminal" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Terminal</span></span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-navbar" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div><button class="td-nav-util td-site-nav__menu-toggle" type="button" data-td-shell-drawer-open
+          title="打开导航" aria-label="打开导航"
+          aria-controls="td-shell-sidebar" aria-expanded="false"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+    <div class="container-fluid td-outer">
+      <div class="td-main td-shell-layout td-shell-layout--w-normal"
+           style="--td-shell-sidebar-min: 220px; --td-shell-sidebar-max: 480px;">
+        <aside id="td-shell-sidebar" class="td-shell-sidebar d-print-none">
+          <div class="td-shell-sidebar__panel">
+  <div class="td-shell-sidebar__header">
+    <div class="td-shell-sidebar__brand-row">
+      <a class="td-shell-sidebar__brand" href="../../../../" aria-label="Docker 团队知识库 home">
+        <img src="../../../../icons/logo.svg" alt="" width="20" height="20">
+        <span class="td-shell-wordmark">Docker 团队知识库</span>
+      </a>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__search" data-td-shell-search-open
+        title="搜索…" aria-label="搜索…"
+        aria-controls="td-shell-search" aria-expanded="false"><i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__collapse" data-td-shell-sidebar-toggle
+        title="收起侧栏" aria-label="收起侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-sidebar__header-row td-shell-sidebar__header-row--drawer-only">
+      <button type="button" class="td-shell-search-btn td-shell-search-btn--drawer" data-td-shell-search-open
+        aria-controls="td-shell-search" aria-expanded="false">
+        <i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <span class="td-shell-search-btn__label">搜索…</span>
+        <span class="td-shell-search-btn__keys" aria-hidden="true"><kbd>/</kbd></span>
+      </button>
+      <button type="button" class="td-shell-iconbtn td-shell-sidebar__close" data-td-shell-drawer-close
+        aria-label="关闭导航" aria-controls="td-shell-sidebar"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="td-shell-root">
+  <button type="button" class="td-shell-root__trigger" data-td-shell-root-toggle
+    aria-haspopup="true" aria-expanded="false" aria-label="选择栏目">
+    <span class="td-shell-root__icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+    <span class="td-shell-root__title">单机编排</span>
+    <i class="td-shell-icon td-shell-icon--chevrons-up-down fa-solid fa-sort" aria-hidden="true"></i>
+  </button>
+  <div class="td-shell-root__pop" hidden><a class="td-shell-root__item" href="../../../../docs/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-book" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">文档</span>
+        <span class="td-shell-root__item-desc">一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/00-%E5%AF%BC%E8%AF%BB/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-compass" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">导读</span>
+        <span class="td-shell-root__item-desc">站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-cubes" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">基础认知</span>
+        <span class="td-shell-root__item-desc">先知道容器解决的是什么问题，再亲手跑起第一个容器。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-terminal" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">核心操作</span>
+        <span class="td-shell-root__item-desc">主线站①的日常命令面：把容器跑起来、看住它、连上网、留住数据。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/03-%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-box-archive" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">镜像构建</span>
+        <span class="td-shell-root__item-desc">主线站③④⑤：从第一份 Dockerfile，到别人也能 build、能拉。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item td-is-active" href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/" aria-current="page">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">单机编排</span>
+        <span class="td-shell-root__item-desc">主线站②：把九参数的 docker run 变成一条 compose up。</span>
+      </span>
+      <span class="td-shell-root__check"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-microscope" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">原理深入</span>
+        <span class="td-shell-root__item-desc">按需查阅层：不要求通读，每篇开头的触发条件告诉你什么时候该来。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/06-%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8E%E7%94%9F%E4%BA%A7/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-rocket" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">工程化与生产</span>
+        <span class="td-shell-root__item-desc">团队尚在本地开发阶段，本篇按「上生产前的准入基线 &#43; 演练」写，不假装有生产事故。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-wrench" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">运维手册</span>
+        <span class="td-shell-root__item-desc">使用频率最高的一篇，故障域各节一律按「症状 → 判据 → 命令 → 根因」四列写。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-book" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">生态与附录</span>
+        <span class="td-shell-root__item-desc">坐标与查阅件：什么时候该换工具，以及版本口径以谁为准。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a><a class="td-shell-root__item" href="../../../../docs/09-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/">
+      <span class="td-shell-root__icon"><i class="fa-solid fa-circle-question" aria-hidden="true"></i></span>
+      <span class="td-shell-root__meta">
+        <span class="td-shell-root__item-title">常见问题</span>
+        <span class="td-shell-root__item-desc">压在全库最后：每条按「问题—机制—数字/命令—自查动作」四段作答，并指回正文判据。</span>
+      </span>
+      <span class="td-shell-root__check td-is-hidden"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </a>
+  </div>
+</div>
+  </div>
+  <div class="td-shell-sidebar__viewport" data-td-shell-sidebar-scroll>
+    <div id="td-sidebar-menu" class="td-shell-tree-wrap">
+  <nav class="td-shell-tree" id="td-section-nav" aria-label="章节导航"
+      data-td-sidebar-icon-policy="groups" data-td-sidebar-root-id="/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/">
+    <ul class="td-shell-tree__list td-shell-tree__list--0">
+      <li class="td-shell-tree__item td-has-child td-active-path td-shell-tree__item--root"
+      id="m-docs04-e58d95e69cbae7bc96e68e92-li">
+    <div class="td-shell-tree__row td-shell-tree__row--root">
+      <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/" title="单机编排"
+        class="td-shell-tree__link"
+        id="m-docs04-e58d95e69cbae7bc96e68e92"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>单机编排</span></a>
+      
+    </div><div id="m-docs04-e58d95e69cbae7bc96e68e92-children" class="td-shell-tree__children td-shell-tree__children--static">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--1"><li class="td-shell-tree__item td-has-child"
+      id="m-docs04-e58d95e69cbae7bc96e68e92e5ae9ae4b989-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/" title="定义"
+        class="td-shell-tree__link"
+        id="m-docs04-e58d95e69cbae7bc96e68e92e5ae9ae4b989"><span>定义</span></a>
+      <button type="button" class="td-shell-tree__chevron" data-td-shell-tree-toggle
+        aria-expanded="false" aria-controls="m-docs04-e58d95e69cbae7bc96e68e92e5ae9ae4b989-children"
+        aria-label="展开章节: 定义"
+        data-td-label-expand="展开章节: 定义"
+        data-td-label-collapse="收起章节: 定义"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></button>
+    </div><div id="m-docs04-e58d95e69cbae7bc96e68e92e5ae9ae4b989-children" class="td-shell-tree__children">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--2"><li class="td-shell-tree__item td-leaf"
+      id="m-docs04-e58d95e69cbae7bc96e68e92e5ae9ae4b989composee8afade6b395e59fbae7babfe4b88ee69687e4bbb6e585a8e5ad97e6aeb5e58f82e88083-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/compose%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%BA%BF%E4%B8%8E%E6%96%87%E4%BB%B6%E5%85%A8%E5%AD%97%E6%AE%B5%E5%8F%82%E8%80%83/" title="为什么需要 Compose、语法基线与文件全字段参考"
+        class="td-shell-tree__link"
+        id="m-docs04-e58d95e69cbae7bc96e68e92e5ae9ae4b989composee8afade6b395e59fbae7babfe4b88ee69687e4bbb6e585a8e5ad97e6aeb5e58f82e88083"><span>为什么需要 Compose、语法基线与文件全字段参考</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li><li class="td-shell-tree__item td-has-child"
+      id="m-docs04-e58d95e69cbae7bc96e68e92e590afe5819c-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/" title="启停"
+        class="td-shell-tree__link"
+        id="m-docs04-e58d95e69cbae7bc96e68e92e590afe5819c"><span>启停</span></a>
+      <button type="button" class="td-shell-tree__chevron" data-td-shell-tree-toggle
+        aria-expanded="false" aria-controls="m-docs04-e58d95e69cbae7bc96e68e92e590afe5819c-children"
+        aria-label="展开章节: 启停"
+        data-td-label-expand="展开章节: 启停"
+        data-td-label-collapse="收起章节: 启停"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></button>
+    </div><div id="m-docs04-e58d95e69cbae7bc96e68e92e590afe5819c-children" class="td-shell-tree__children">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--2"><li class="td-shell-tree__item td-leaf"
+      id="m-docs04-e58d95e69cbae7bc96e68e92e590afe5819ce5b8b8e794a8e591bde4bba4e590afe58aa8e9a1bae5ba8fe4b88ee581a5e5bab7e6a380e69fa5-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F%E4%B8%8E%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5/" title="常用命令、启动顺序控制与健康检查"
+        class="td-shell-tree__link"
+        id="m-docs04-e58d95e69cbae7bc96e68e92e590afe5819ce5b8b8e794a8e591bde4bba4e590afe58aa8e9a1bae5ba8fe4b88ee581a5e5bab7e6a380e69fa5"><span>常用命令、启动顺序控制与健康检查</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li><li class="td-shell-tree__item td-has-child td-active-path"
+      id="m-docs04-e58d95e69cbae7bc96e68e92e697a5e5b8b8-li">
+    <div class="td-shell-tree__row">
+      <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/" title="日常"
+        class="td-shell-tree__link"
+        id="m-docs04-e58d95e69cbae7bc96e68e92e697a5e5b8b8"><span>日常</span></a>
+      <button type="button" class="td-shell-tree__chevron" data-td-shell-tree-toggle
+        aria-expanded="true" aria-controls="m-docs04-e58d95e69cbae7bc96e68e92e697a5e5b8b8-children"
+        aria-label="收起章节: 日常"
+        data-td-label-expand="展开章节: 日常"
+        data-td-label-collapse="收起章节: 日常"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></button>
+    </div><div id="m-docs04-e58d95e69cbae7bc96e68e92e697a5e5b8b8-children" class="td-shell-tree__children td-is-open">
+        <div class="td-shell-tree__children-inner">
+          <ul class="td-shell-tree__list td-shell-tree__list--2"><li class="td-shell-tree__item td-leaf td-active-path"
+      id="m-docs04-e58d95e69cbae7bc96e68e92e697a5e5b8b8e5a49ae78eafe5a283e783ade9878de8bdbde4b88ee4ba94e69c8de58aa1e5ae8ce695b4e5ae9ee68898-li">
+    <div class="td-shell-tree__row td-shell-active">
+      <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/" aria-current="page" title="多环境与扩展、开发期热重载与完整实战"
+        class="td-shell-tree__link active"
+        id="m-docs04-e58d95e69cbae7bc96e68e92e697a5e5b8b8e5a49ae78eafe5a283e783ade9878de8bdbde4b88ee4ba94e69c8de58aa1e5ae8ce695b4e5ae9ee68898"><span>多环境与扩展、开发期热重载与完整实战</span></a>
+      
+    </div>
+  </li></ul>
+        </div>
+      </div>
+  </li></ul>
+        </div>
+      </div>
+  </li>
+    </ul>
+  </nav>
+</div>
+    <div class="td-shell-sidebar__aside" data-td-shell-aside-slot hidden></div>
+  </div>
+  <div class="td-shell-sidebar__resizer" data-td-shell-resizer aria-hidden="true"></div>
+</div>
+
+        </aside>
+        <div class="td-shell-drawer-backdrop d-md-none d-print-none" data-td-shell-drawer-close></div>
+        <div class="td-shell-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-sidebar-toggle
+    title="展开侧栏" aria-label="展开侧栏"><i class="td-shell-icon td-shell-icon--panel-left fa-solid fa-table-columns" aria-hidden="true"></i></button>
+</div>
+
+        <main id="td-main-content" class="td-shell-main" tabindex="-1">
+          <article class="td-shell-article">
+            
+            <div class="td-shell-topline">
+              <nav aria-label="breadcrumb" class="td-breadcrumbs">
+  <ol class="breadcrumb">
+  <li class="breadcrumb-item">
+    <a href="../../../../docs/">文档</a></li>
+  <li class="breadcrumb-item">
+    <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/">单机编排</a></li>
+  <li class="breadcrumb-item">
+    <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/">日常</a></li>
+  <li class="breadcrumb-item active" aria-current="page">
+    多环境与扩展、开发期热重载与完整实战</li>
+  </ol>
+</nav>
+              <span class="td-shell-topline__spacer"></span>
+              <div class="td-page-actions d-print-none" data-td-page-actions data-td-page-context
+  data-td-t-copied="已复制 Markdown" data-td-t-copy-error="无法复制 Markdown">
+  <div class="td-page-actions__group">
+    <button type="button" class="td-page-actions__primary" data-td-action="copy_markdown" data-td-url="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/index.md"
+      title="复制 Markdown 文本" aria-label="复制 Markdown 文本">
+      <span class="td-page-actions__icon"><i class="td-shell-icon td-shell-icon--copy fa-regular fa-copy" aria-hidden="true"></i></span>
+      <span class="td-page-actions__icon td-page-actions__icon--done"><i class="td-shell-icon td-shell-icon--check fa-solid fa-check" aria-hidden="true"></i></span>
+    </button>
+    <button type="button" class="td-page-actions__toggle"
+      data-td-page-actions-toggle aria-expanded="false" aria-controls="td-page-actions-menu"
+      title="操作" aria-label="操作"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i>
+    </button>
+  </div>
+  <ul class="td-page-actions__menu" id="td-page-actions-menu" data-td-page-actions-menu
+    aria-label="操作">
+    <li><button type="button" class="td-page-actions__item" data-td-action="copy_markdown" data-td-url="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/index.md">
+      <i class="fa-regular fa-copy" aria-hidden="true"></i><span>复制 Markdown 文本</span>
+    </button></li>
+    <li><a class="td-page-actions__item" data-td-action="view_markdown" href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/index.md" target="_blank" rel="noopener">
+      <i class="fa-brands fa-markdown" aria-hidden="true"></i><span>查阅 Markdown 源码</span>
+    </a></li>
+    <li class="td-page-actions__separator" role="separator"></li>
+    <li><a class="td-page-actions__item" data-td-action="print_section" href="../../../../_print/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/">
+      <i class="fa-solid fa-print" aria-hidden="true"></i><span>打印完整章节</span>
+    </a></li>
+  </ul>
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-td-page-context-status></span>
+</div>
+
+            </div>
+            
+<div class="td-content">
+	<div class="td-page-heading">
+  <h1>多环境与扩展、开发期热重载与完整实战</h1>
+</div>
+
+	<div class="lead">override 合并与 profiles、.env 插值的真实语义；compose watch 三档实测代价；一键起 web + api + MySQL + Redis + nginx 并跑通第②段判据。</div>
+	<header class="td-article-meta">
+		
+</header>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第②段 · 一条命令起全栈（本篇就是第②段的落点，本机已跑通并留下逐条读数）
+<strong>示例版本</strong>：本篇直接产出 <code>示例/贯穿示例/</code> 下的 <code>compose.yaml</code>、<code>compose.override.yaml</code>、<code>compose.debug.yaml</code>、<code>.env</code> 四个文件，拷进站点即可构建；其中 <code>api</code> 是 Go 写的占位服务（真实贯穿示例是 Spring Boot，原因见「与真实技术栈的差距」一节）
+<strong>前置依赖</strong>：<a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/compose%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%BA%BF%E4%B8%8E%E6%96%87%E4%BB%B6%E5%85%A8%E5%AD%97%E6%AE%B5%E5%8F%82%E8%80%83/">/docs/04-单机编排/定义/Compose语法基线与文件全字段参考/</a>、<a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F%E4%B8%8E%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5/">/docs/04-单机编排/启停/常用命令启动顺序与健康检查/</a>、<a href="../../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/">/docs/02-核心操作/接上去/端口映射数据管理与权限时区/</a>
+<strong>本篇产出物</strong>：一套能跑的三层 compose 文件（主干 + override + debug）+ 第②段判据的通过记录（冷启 18.4 秒、热启 7.1 秒、经 proxy 两个端点都 200、<code>down</code> 后数据仍在）+ <code>watch</code> 两档的真实耗时
+<strong>拓展接口</strong>：本篇的「网络与卷设计」在 6.2 生产编排里被推翻（换成显式外部网络与备份策略）；「override 自动合并」这条规则在 6.6 CI 里被复用（CI 只加载主干）；「<code>down -v</code> 删数据」在 7.2 症状索引里作为一条独立症状收录
+<strong>难度·耗时</strong>：★★★ · 60 分钟（含动手，全套命令本机跑过一遍）
+<strong>自测三题</strong>：</p>
+<ol>
+<li><code>docker compose down</code> 之后 <code>docker ps</code> 仍能看到三个容器，最可能的原因是什么？该用哪条命令收干净？</li>
+<li>同目录下有 <code>compose.override.yaml</code> 和 <code>compose.debug.yaml</code>，为什么一个自动生效、一个不生效？</li>
+<li><code>watch</code> 的 <code>sync+restart</code> 与 <code>rebuild</code> 两档，各自在你机器上的实际代价由什么决定？</li>
+</ol>
+</blockquote>
+<h2 id="为什么要拆成三个文件而不是在一个-composeyaml-里改来改去">为什么要拆成三个文件，而不是在一个 <code>compose.yaml</code> 里改来改去<a class="td-heading-self-link" href="#%e4%b8%ba%e4%bb%80%e4%b9%88%e8%a6%81%e6%8b%86%e6%88%90%e4%b8%89%e4%b8%aa%e6%96%87%e4%bb%b6%e8%80%8c%e4%b8%8d%e6%98%af%e5%9c%a8%e4%b8%80%e4%b8%aa-composeyaml-%e9%87%8c%e6%94%b9%e6%9d%a5%e6%94%b9%e5%8e%bb" aria-label="标题锚点"></a>
+</h2>
+<p>团队里最先出现的那个 compose 文件，往往就是开发自己的一份：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="text" data-td-line-count="8"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-0" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">「本地起 full stack，我要 3306 直通宿主方便用 Navicat 连。」
+</span></span><span class="line"><span class="cl">「好。」（改了 db.ports）
+</span></span><span class="line"><span class="cl">「CI 里也用它？」
+</span></span><span class="line"><span class="cl">「CI 不用那个端口，但我把 build 参数改了……现在 CI 挂在镜像构建上。」
+</span></span><span class="line"><span class="cl">「生产也用这个？」
+</span></span><span class="line"><span class="cl">「生产口令不能写死在里面，我用 ${DB_ROOT_PW}，然后……」
+</span></span><span class="line"><span class="cl">「然后线上有人忘了设环境变量，起不来。」
+</span></span><span class="line"><span class="cl">「而且昨天有人把改过的这份文件提交了，把 dev 的 3306 直通带上了生产。」</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>这条路的终点的确实存在的：<strong>一份文件同时背三个环境的差异，差异靠人脑记</strong>。多文件不是「更正式」，而是把「哪个文件在什么时候生效」变成工具规则，不再依赖记忆。</p>
+<p>机制上有三件事各自独立，混在一起想就乱：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">机制</th>
+      <th scope="col">解决什么</th>
+      <th scope="col">谁决定它生效</th>
+      <th scope="col">本机实测的边界</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>多文件合并（<code>-f</code> / 同名 override）</td>
+      <td>环境差异分层</td>
+      <td>文件命名与加载顺序</td>
+      <td>同目录 <code>compose.override.yaml</code> 自动合并；<code>compose.debug.yaml</code> <strong>不</strong>自动合并</td>
+    </tr>
+    <tr>
+      <td><code>profiles</code></td>
+      <td>同一份文件里，哪些服务默认不起</td>
+      <td>命令行是否给 <code>--profile</code></td>
+      <td>不给 <code>--profile app</code> 时，<code>api</code>/<code>web</code>/<code>proxy</code> 在模型里根本不存在</td>
+    </tr>
+    <tr>
+      <td><code>.env</code> 插值</td>
+      <td>把端口、口令这类会变的值挪出文件</td>
+      <td>变量是否存在</td>
+      <td>变量缺失时 <code>:?</code> 会硬失败，普通引用只给空串</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>一个服务最终出现在模型里，要同时过<strong>两道门</strong>：它所在的那个文件被加载了，并且它的 profile 被点名了。本机把这两道门分开量了一次——<code>adminer</code> 这个服务同时写了 <code>profiles: [&quot;debug&quot;]</code>，文件叫 <code>compose.debug.yaml</code>（不会被自动加载）：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">命令</th>
+      <th scope="col">模型里的服务</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>docker compose config --services</code>（只加载主干 + 自动 override）</td>
+      <td><code>cache db</code></td>
+      <td>应用层和调试层都不在</td>
+    </tr>
+    <tr>
+      <td><code>docker compose -f compose.yaml -f compose.debug.yaml config --services</code></td>
+      <td><code>cache db</code></td>
+      <td>文件加载了，但 <code>debug</code> 这道门没开</td>
+    </tr>
+    <tr>
+      <td><code>docker compose -f compose.yaml -f compose.debug.yaml --profile debug config --services</code></td>
+      <td><code>db adminer cache</code></td>
+      <td>两道门都过，<code>adminer</code> 出现</td>
+    </tr>
+    <tr>
+      <td><code>docker compose -f compose.yaml -f compose.debug.yaml --profile debug --profile app config --services</code></td>
+      <td><code>db adminer cache api web proxy</code></td>
+      <td>六个服务全入选</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>改文件之前 <code>adminer</code> 没写 <code>profiles</code> 那一行，第二条命令的结果是 <code>db adminer cache</code>——只靠 <code>-f</code> 就把它带进来了。这正是「以为环境隔离了、其实没有」的真实形态，所以示例文件里那行 <code>profiles: [&quot;debug&quot;]</code> 不是装饰。</p>
+<blockquote>
+<p>💡 新人小结：<strong>profiles 像会议室的门牌，不是门锁</strong>。<code>profiles: [&quot;app&quot;]</code> 只是给服务挂了块「应用层」的牌子，默认这条命令不会把牌子念到；你喊 <code>--profile app</code>，它才把挂这块牌子的服务一起带走。所以「加了 profile 就默认不起」不是 Docker 记错了，而是你没报名字。类比之后接机制：Compose 在加载阶段按 <code>--profile</code> 过滤服务集合，被过滤掉的服务连配置模型都不进——下面第一条读数里 <code>config --services</code> 只列出两个服务，就是这个过滤的结果。</p>
+</blockquote>
+<h2 id="先看默认模型有多小profiles-的实测边界">先看默认模型有多小：profiles 的实测边界<a class="td-heading-self-link" href="#%e5%85%88%e7%9c%8b%e9%bb%98%e8%ae%a4%e6%a8%a1%e5%9e%8b%e6%9c%89%e5%a4%9a%e5%b0%8fprofiles-%e7%9a%84%e5%ae%9e%e6%b5%8b%e8%be%b9%e7%95%8c" aria-label="标题锚点"></a>
+</h2>
+<p>主干文件把 <code>api</code>、<code>web</code>、<code>proxy</code> 三个服务打上 <code>profiles: [&quot;app&quot;]</code>（见下一节），然后什么都不加：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-1" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="3"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-1" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-1-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --services
+</span></span><span class="line"><span class="cl"><span class="go">cache
+</span></span></span><span class="line"><span class="cl"><span class="go">db
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>加上 profile 才出现另外三个：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-2" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="6"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-2" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-2-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app config --services
+</span></span><span class="line"><span class="cl"><span class="go">cache
+</span></span></span><span class="line"><span class="cl"><span class="go">db
+</span></span></span><span class="line"><span class="cl"><span class="go">api
+</span></span></span><span class="line"><span class="cl"><span class="go">web
+</span></span></span><span class="line"><span class="cl"><span class="go">proxy
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>这条读数比看上去重要。它意味着：<strong><code>docker compose up</code>（不带 <code>--profile</code>）不会起应用层，<code>docker compose config --format json</code> 的模型里也没有 <code>api</code></strong>。上一轮我自己就踩在这里——脚本直接取 <code>services[&quot;api&quot;]</code> 抛 <code>KeyError</code>，看着像配置文件坏了，其实是模型里根本没有这个键。同理，<code>pull</code> 也不看 profile：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-3" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-3" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-3-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose pull
+</span></span><span class="line"><span class="cl"><span class="go"> Image mysql:8.4 Pulling
+</span></span></span><span class="line"><span class="cl"><span class="go"> Image redis:7-alpine Pulling
+</span></span></span><span class="line"><span class="cl"><span class="go"> Image mysql:8.4 Pulled
+</span></span></span><span class="line"><span class="cl"><span class="go"> Image redis:7-alpine Pulled
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>只拉了 <code>db</code> 和 <code>cache</code> 两个镜像，<code>nginx:1.27-alpine</code> 与两个 <code>build</code> 服务都不在这条命令的职责里。CI 里想「预拉全部依赖」必须显式带上 profile，否则镜像缓存永远缺一块。</p>
+<p>而 <code>compose.debug.yaml</code>（里面只有一个 <code>adminer</code>，用来演示调试面板）默认完全不参与：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="8"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-4" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile debug config --services
+</span></span><span class="line"><span class="cl"><span class="go">cache
+</span></span></span><span class="line"><span class="cl"><span class="go">db
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose -f compose.yaml -f compose.debug.yaml --profile debug config --services
+</span></span><span class="line"><span class="cl"><span class="go">db
+</span></span></span><span class="line"><span class="cl"><span class="go">adminer
+</span></span></span><span class="line"><span class="cl"><span class="go">cache
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>原因是 Compose 只自动加载<strong>两个</strong>文件名：主干 <code>compose.yaml</code>（或 <code>compose.yml</code>、<code>docker-compose.yml</code>）与同目录的 <code>compose.override.yaml</code>（或 <code>compose.override.yml</code>、<code>docker-compose.override.yml</code>）。其它名字一律要 <code>-f</code> 点名，或者交给 <code>COMPOSE_FILE</code> 环境变量。所以团队里约定「多环境文件叫 <code>compose.&lt;环境&gt;.yaml</code>」的同时，必须同时约定<strong>加载方式</strong>：<code>-f compose.yaml -f compose.debug.yaml</code>，或 <code>COMPOSE_FILE=compose.yaml:compose.debug.yaml</code>（分隔符在 Linux 是 <code>:</code>，Windows 上要用 <code>;</code>，这一条本机未实测）。</p>
+<div class="td-callout td-callout--warning" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span class="td-callout__label">警告</span></div>
+  <div class="td-callout__body">
+<p>一旦你写了 <code>-f</code>，自动合并就没了。S4 那次反面实验用 <code>-f compose.yaml -f compose.badstart.yaml</code>，<code>config</code> 出来 <code>api.environment</code> 是 <code>{&quot;DB_HOST&quot;:&quot;db&quot;,&quot;REDIS_HOST&quot;:&quot;cache&quot;,&quot;STRICT&quot;:&quot;1&quot;}</code>——override 里那句 <code>LOG_LEVEL: debug</code> 没跟上来。端口上的表现更直观，读自另一次 <code>-f compose.yaml -f compose.debug.yaml</code> 的真跑：那次 <code>docker ps</code> 里 <code>db</code> 的端口列是 <code>3306/tcp, 33060/tcp</code>（没有任何宿主映射），而自动合并的几次都是 <code>127.0.0.1:3307-&gt;3306/tcp</code>。排查「我明明改了 override 怎么没生效」，先看命令里有没有 <code>-f</code>。</p>
+  </div>
+</div><h2 id="三层文件各自放什么">三层文件各自放什么<a class="td-heading-self-link" href="#%e4%b8%89%e5%b1%82%e6%96%87%e4%bb%b6%e5%90%84%e8%87%aa%e6%94%be%e4%bb%80%e4%b9%88" aria-label="标题锚点"></a>
+</h2>
+<p>本机的分工是这样落地的（完整文件在 <code>示例/贯穿示例/</code>）：</p>
+<p>主干 <code>compose.yaml</code> 只放<strong>三个环境都成立</strong>的事实：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-5" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="17"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-5" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-5-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">kb-p2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">db</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">mysql:8.4</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">MYSQL_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l">${DB_ROOT_PW:?在 .env 里设一个}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">MYSQL_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="l">kbdemo</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">dbdata:/var/lib/mysql</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;CMD&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;mysqladmin&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;ping&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-h&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;127.0.0.1&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-uroot&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-p${DB_ROOT_PW}&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">3s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="m">20</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l">20s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># cache / api / web / proxy 见 4.9 完整实战一节</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p><code>compose.override.yaml</code> 只放<strong>开发期收窄</strong>的东西：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="11"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-6" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">api</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="l">debug</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">develop</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">watch</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l">rebuild</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">./api</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">db</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="s2">&#34;127.0.0.1:3307:3306&#34;</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p><code>compose.debug.yaml</code> 放<strong>要点名才有</strong>的东西（<code>adminer</code> 挂 8081，只在 <code>--profile debug</code> 时入选）。<code>.env</code> 放<strong>不能进版本库的值</strong>：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-7" data-td-code data-td-code-auto-id
+     data-td-language="ini" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-7" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-7-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ini" data-lang="ini"><span class="line"><span class="cl"><span class="na">DB_ROOT_PW</span><span class="o">=</span><span class="s">local-dev-only</span>
+</span></span><span class="line"><span class="cl"><span class="na">PROXY_PORT</span><span class="o">=</span><span class="s">8080</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>合并后的真实模型（<code>docker compose --profile app config --format json</code> 的节选）能直接读出「哪一句来自哪个文件」：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">字段</th>
+      <th scope="col">合并后的值</th>
+      <th scope="col">来源</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>api.environment</code></td>
+      <td><code>{&quot;DB_HOST&quot;:&quot;db&quot;,&quot;LOG_LEVEL&quot;:&quot;debug&quot;,&quot;REDIS_HOST&quot;:&quot;cache&quot;}</code></td>
+      <td><code>LOG_LEVEL</code> 来自 override</td>
+    </tr>
+    <tr>
+      <td><code>db.ports</code></td>
+      <td><code>[{&quot;mode&quot;:&quot;ingress&quot;,&quot;host_ip&quot;:&quot;127.0.0.1&quot;,&quot;target&quot;:3306,&quot;published&quot;:&quot;3307&quot;,&quot;protocol&quot;:&quot;tcp&quot;}]</code></td>
+      <td>来自 override（主干里 <code>db</code> 没有 <code>ports</code>）</td>
+    </tr>
+    <tr>
+      <td><code>api.depends_on</code></td>
+      <td><code>{&quot;cache&quot;:{&quot;condition&quot;:&quot;service_healthy&quot;,&quot;required&quot;:true},&quot;db&quot;:{...}}</code></td>
+      <td>主干</td>
+    </tr>
+    <tr>
+      <td><code>proxy.ports</code></td>
+      <td><code>[{&quot;mode&quot;:&quot;ingress&quot;,&quot;target&quot;:80,&quot;published&quot;:&quot;8080&quot;,&quot;protocol&quot;:&quot;tcp&quot;}]</code></td>
+      <td><code>8080</code> 是 <code>.env</code> 的 <code>PROXY_PORT</code> 插值结果</td>
+    </tr>
+    <tr>
+      <td><code>networks</code></td>
+      <td><code>{&quot;default&quot;:{&quot;name&quot;:&quot;kb-p2-net&quot;,&quot;ipam&quot;:{}}}</code></td>
+      <td>主干显式命名</td>
+    </tr>
+    <tr>
+      <td><code>volumes</code></td>
+      <td><code>{&quot;cachedata&quot;:{&quot;name&quot;:&quot;kb-p2_cachedata&quot;},&quot;dbdata&quot;:{&quot;name&quot;:&quot;kb-p2_dbdata&quot;}}</code></td>
+      <td>名字被加了项目前缀</td>
+    </tr>
+    <tr>
+      <td>顶层 <code>name</code></td>
+      <td><code>kb-p2</code></td>
+      <td>主干</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>compose ls</code> 也会把两个文件都列出来，这是「override 到底有没有被合并进去」最快的自检：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-8" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="3"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-8" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-8-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose ls
+</span></span><span class="line"><span class="cl"><span class="go"> NAME                STATUS              CONFIG FILES
+</span></span></span><span class="line"><span class="cl"><span class="go"> kb-p2   running(5)  ...\compose.yaml,...\compose.override.yaml
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<h2 id="同名字段怎么合并规则不直觉所以逐条量">同名字段怎么合并：规则不直觉，所以逐条量<a class="td-heading-self-link" href="#%e5%90%8c%e5%90%8d%e5%ad%97%e6%ae%b5%e6%80%8e%e4%b9%88%e5%90%88%e5%b9%b6%e8%a7%84%e5%88%99%e4%b8%8d%e7%9b%b4%e8%a7%89%e6%89%80%e4%bb%a5%e9%80%90%e6%9d%a1%e9%87%8f" aria-label="标题锚点"></a>
+</h2>
+<p>这是最容易写错的一节。<strong>映射类字段深合并、列表类字段按语义分两种</strong>，「override 会覆盖主干」这句话在列表上不成立。下面每一行都是本机用一个两文件小样（主干 + override，服务只有一个 <code>s</code>）跑 <code>config --format json</code> 得到的：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">字段</th>
+      <th scope="col">主干写</th>
+      <th scope="col">override 写</th>
+      <th scope="col">合并结果</th>
+      <th scope="col">结论</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>ports</code></td>
+      <td><code>[&quot;8001:6379&quot;]</code></td>
+      <td><code>[&quot;8002:6379&quot;]</code></td>
+      <td>两条都在</td>
+      <td><strong>追加</strong>（按宿主端口去重，不是替换）</td>
+    </tr>
+    <tr>
+      <td><code>volumes</code></td>
+      <td><code>base-vol:/data</code></td>
+      <td><code>over-vol:/extra</code></td>
+      <td>两条都在</td>
+      <td><strong>追加</strong></td>
+    </tr>
+    <tr>
+      <td><code>command</code></td>
+      <td><code>[&quot;redis-server&quot;,&quot;--appendonly&quot;,&quot;no&quot;]</code></td>
+      <td><code>[&quot;redis-server&quot;,&quot;--maxmemory&quot;,&quot;64mb&quot;]</code></td>
+      <td>只剩 override</td>
+      <td><strong>整体替换</strong></td>
+    </tr>
+    <tr>
+      <td><code>environment</code></td>
+      <td><code>A=1, SHARED=base</code></td>
+      <td><code>B=2, SHARED=override</code></td>
+      <td><code>A=1, B=2, SHARED=override</code></td>
+      <td><strong>按键合并</strong>，同键后者胜</td>
+    </tr>
+    <tr>
+      <td><code>networks</code>（列表写法）</td>
+      <td><code>[n1]</code></td>
+      <td><code>[n2]</code></td>
+      <td><code>n1</code> 与 <code>n2</code> 都在</td>
+      <td><strong>并集</strong></td>
+    </tr>
+    <tr>
+      <td><code>deploy.resources.limits</code></td>
+      <td><code>memory: 128m</code></td>
+      <td><code>cpus: &quot;0.5&quot;</code></td>
+      <td><code>memory:134217728</code> 与 <code>cpus:0.5</code> 都在</td>
+      <td><strong>深合并</strong>（映射逐层合并，<code>128m</code> 被规范化成字节）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>后果很具体：想用 override「改掉」一个端口而不是「再加一个」，靠删行不行——两文件都在时容器会同时监听 <code>8001</code> 与 <code>8002</code>。真要收窄，用 YAML 标签把整段列表强制替换：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-9" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="6"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-9" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-9-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> 主干：ports: <span class="o">[</span><span class="s2">&#34;9001:80&#34;</span>,<span class="s2">&#34;9002:80&#34;</span><span class="o">]</span>，volumes: v1:/a 与 v2:/b，environment: <span class="nv">KEEP</span><span class="o">=</span><span class="m">1</span> <span class="nv">DROP</span><span class="o">=</span><span class="m">2</span>
+</span></span><span class="line"><span class="cl"><span class="gp">#</span> override：ports: !override <span class="o">[</span><span class="s2">&#34;9100:80&#34;</span><span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --format json
+</span></span><span class="line"><span class="cl"><span class="go">  !override 后 ports       = [{&#34;mode&#34;:&#34;ingress&#34;,&#34;target&#34;:80,&#34;published&#34;:&#34;9100&#34;,&#34;protocol&#34;:&#34;tcp&#34;}]
+</span></span></span><span class="line"><span class="cl"><span class="go">  !override 后 volumes     = null      # volumes: !override []
+</span></span></span><span class="line"><span class="cl"><span class="go">  !override 后 environment = null      # environment: !override {}
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>三条读数说明 <code>!override</code> 是<strong>整段替换</strong>而不是逐条比对，替换成空列表就等于删掉。反过来想用 <code>!remove</code> 精确摘掉一条：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-10" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-10" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-10-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> override：ports: !remove <span class="s2">&#34;9002:80&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">rc=1 cannot override services.s.ports
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>本机这一版（v5.5.1）不吃这个形状的 <code>!remove</code>——要按值摘除，得写成 <code>!remove</code> 加列表的形式再试，或者干脆用 <code>!override</code> 把留下的部分整段写出来。团队约定就一条：<strong>列表类字段的「减」不靠猜测，写完必须用 <code>config</code> 看合并结果</strong>。</p>
+<blockquote>
+<p>💡 新人小结：<strong>override 不是「改正主干」，是「往主干上贴便利贴」</strong>。便利贴可以补充（<code>environment</code> 多了 <code>B=2</code>）、可以改写同一格（<code>SHARED</code> 从 <code>base</code> 变 <code>override</code>）、也能往一列清单里再加一行（<code>ports</code> 变两条），但不能凭空让原来那行消失——想让整张清单换掉，得写「整段替换」的记号（<code>!override</code>）。类比之后接机制：这些规则来自 compose-spec 对每种字段的合并语义定义，<code>config --format json</code> 就是那台能把规则讲清楚的机器。</p>
+</blockquote>
+<div class="td-callout td-callout--note" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-circle-info" aria-hidden="true"></i><span class="td-callout__label">说明</span></div>
+  <div class="td-callout__body">
+<p><code>deploy</code> 在本机是 1.28 之后重新启用的字段，但 <code>deploy.resources</code> 之外的 swarm 专属字段（<code>placement.constraints</code> 之类）在 compose v2 单机上被忽略——这条本机未实测，看到旧教程用 <code>deploy.placement</code> 调亲和性时按 swarm 语境判断。</p>
+  </div>
+</div><h2 id="一条命令起全栈第段判据长什么样">一条命令起全栈：第②段判据长什么样<a class="td-heading-self-link" href="#%e4%b8%80%e6%9d%a1%e5%91%bd%e4%bb%a4%e8%b5%b7%e5%85%a8%e6%a0%88%e7%ac%ac%e6%ae%b5%e5%88%a4%e6%8d%ae%e9%95%bf%e4%bb%80%e4%b9%88%e6%a0%b7" aria-label="标题锚点"></a>
+</h2>
+<p>现在把主干、override、<code>.env</code> 合起来跑一次。判据必须写成能被机器回答的形式，四条缺一不可：</p>
+<ol>
+<li><strong>一条命令</strong>：<code>docker compose --profile app up -d --wait</code>，不预先 <code>create</code> 任何东西。</li>
+<li><strong>全部就绪</strong>：<code>ps</code> 表里每个带健康检查的服务都是 <code>healthy</code>。</li>
+<li><strong>入口可达</strong>：从宿主机经 <code>proxy</code> 打到 <code>api</code> 与 <code>web</code>，两个请求都 <code>200</code>。</li>
+<li><strong>数据活过重起</strong>：<code>down</code>（不带 <code>-v</code>）之后 <code>up -d --wait</code>，先前写入的数据还在。</li>
+</ol>
+<p>第 1、2、3 条的读数：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-11" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="15"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-11" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-11-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app up -d --wait     <span class="c1"># 用时 18.4 秒（冷，含两个 build）</span>
+</span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps
+</span></span><span class="line"><span class="cl"><span class="go">NAME            IMAGE               SERVICE   STATUS                    PORTS
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-api-1     kb-p2-api           api       Up 5 seconds (healthy)    8080/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-cache-1   redis:7-alpine      cache     Up 16 seconds (healthy)   6379/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-db-1      mysql:8.4           db        Up 16 seconds (healthy)   127.0.0.1:3307-&gt;3306/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-proxy-1   nginx:1.27-alpine   proxy     Up Less than a second     0.0.0.0:8080-&gt;80/tcp, [::]:8080-&gt;80/tcp
+</span></span></span><span class="line"><span class="cl"><span class="go">kb-p2-web-1     kb-p2-web           web       Up 16 seconds             80/tcp
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s http://127.0.0.1:8080/api/health
+</span></span><span class="line"><span class="cl"><span class="go">{&#34;status&#34;:&#34;UP&#34;,&#34;db&#34;:&#34;UP&#34;,&#34;cache&#34;:&#34;UP&#34;}|http=200|耗时=0.003729s
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s -o /dev/null -w <span class="s2">&#34;首页 http=%{http_code}&#34;</span> http://127.0.0.1:8080/
+</span></span><span class="line"><span class="cl"><span class="go">首页 http=200 耗时=0.002235s
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>第 4 条的读数（先写两行数据，<code>down</code>，再 <code>up</code>）：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-12" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="4"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-12" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-12-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose <span class="nb">exec</span> db sh -c <span class="s1">&#39;mysql -uroot -p… kbdemo -e &#34;SELECT * FROM t_note ORDER BY id;&#34;&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="go">id	note
+</span></span></span><span class="line"><span class="cl"><span class="go">1	before-down
+</span></span></span><span class="line"><span class="cl"><span class="go">2	warm-start
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>四行都在，<code>down</code> 到 <code>up</code> 之间没有做过任何备份动作。这一条本轮只量了 MySQL：redis 侧的同一个键（<code>seg2</code>）是在重启<strong>之后</strong>才写进去的，所以「redis 的键活过 compose 级 <code>down</code>」这条在本批次里不算已验；它在第①段用容器级 <code>docker rm</code> 验过（见 <a href="../../../../docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/">/docs/02-核心操作/接上去/端口映射数据管理与权限时区/</a> 的「实战切入」一节），挂载与卷类型完全相同，只是当时的删除粒度不同。</p>
+<p>四个「用时」放在一起看，才知道 18.4 秒花在哪：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">场景</th>
+      <th scope="col">命令</th>
+      <th scope="col">用时</th>
+      <th scope="col">差在哪</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>冷（卷是空的，两个服务要 build）</td>
+      <td><code>up -d --wait</code></td>
+      <td>18.4 秒</td>
+      <td>MySQL 首次初始化数据目录 + 两次 build</td>
+    </tr>
+    <tr>
+      <td>热（卷已有数据，容器都在）</td>
+      <td><code>up -d --wait</code></td>
+      <td>7.1 秒</td>
+      <td>只做「等到 healthy」，无创建无初始化</td>
+    </tr>
+    <tr>
+      <td>卷被删但镜像已 build</td>
+      <td><code>up -d --wait</code></td>
+      <td>16.8 秒</td>
+      <td>又付了一次 MySQL 初始化</td>
+    </tr>
+    <tr>
+      <td>强制重建全部容器</td>
+      <td><code>up -d --wait --force-recreate</code></td>
+      <td>18.2 秒</td>
+      <td>五个容器重建 + 两轮健康等待</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>启动时间主要由<strong>MySQL 的数据目录初始化</strong>决定，不是 compose 本身慢。同一批取数里另有一组对照：把 <code>interval</code> 收到 2 秒、不设 <code>start_period</code>，MySQL 8.4 从容器起来到第一次探测通过是 <strong>8.6 秒</strong>，中间记录到 3 次失败探测（<code>FailingStreak</code> 走到 3，最后一次输出 <code>mysqld is alive</code>）。这里的 <code>start_period: 20s</code> 就是照着这个量级放的，细节见 <a href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F%E4%B8%8E%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5/">/docs/04-单机编排/启停/常用命令启动顺序与健康检查/</a>。</p>
+<p>启动与流量的方向画出来是这样（<code>depends_on</code> 决定创建顺序，HTTP 流量方向是另一件事）：</p>
+<figure class="td-diagram td-diagram--mermaid" data-td-diagram>
+  <div class="td-diagram__stage" data-td-diagram-stage></div>
+  <button class="td-diagram__expand d-print-none" type="button" hidden data-td-diagram-expand aria-haspopup="dialog"><i class="td-shell-icon td-shell-icon--expand fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i><span class="visually-hidden">放大图表</span>
+  </button>
+  <script type="application/json" data-td-diagram-source>"flowchart LR\n    HOST[\"宿主 127.0.0.1:8080\"] --\u003e PX[\"proxy\u003cbr/\u003enginx:1.27-alpine\"]\n    PX --\u003e|\"/api/ 前缀\"| API[\"api\u003cbr/\u003ekb-p2-api\"]\n    PX --\u003e|\"/ 前缀\"| WEB[\"web\u003cbr/\u003ekb-p2-web\"]\n    API --\u003e|\"依赖：等 healthy\"| DB[(\"db\u003cbr/\u003emysql:8.4\")]\n    API --\u003e|\"依赖：等 healthy\"| CACHE[(\"cache\u003cbr/\u003eredis:7-alpine\")]\n    API -.-\u003e|\"proxy 等 api healthy 才起\"| PX\n    DB --- DV[(\"卷 kb-p2_dbdata\")]\n    CACHE --- CV[(\"卷 kb-p2_cachedata\")]"</script>
+</figure><h2 id="down-的三种收场为什么不能凭手感写"><code>down</code> 的三种收场：为什么不能凭手感写<a class="td-heading-self-link" href="#down-%e7%9a%84%e4%b8%89%e7%a7%8d%e6%94%b6%e5%9c%ba%e4%b8%ba%e4%bb%80%e4%b9%88%e4%b8%8d%e8%83%bd%e5%87%ad%e6%89%8b%e6%84%9f%e5%86%99" aria-label="标题锚点"></a>
+</h2>
+<p><code>down</code> 在 04 篇里是最容易出事的一条命令，因为它同时决定「容器停不停」和「数据留不留」。本机三种写法的结果：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">写法</th>
+      <th scope="col">结果</th>
+      <th scope="col">读数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>down</code>（不带 <code>--profile</code>）</td>
+      <td>只停掉模型里有的 <code>db</code>/<code>cache</code>；<code>api</code>/<code>web</code>/<code>proxy</code> 三个仍在跑，网络删不掉</td>
+      <td>用时 2.0 秒；随后 <code>docker ps</code> 列出三个 <code>Up</code> 容器，<code>docker network ls</code> 里 <code>kb-p2-net</code> 还在；<code>down</code> 的日志里出现 <code>Network kb-p2-net Resource is still in use</code></td>
+    </tr>
+    <tr>
+      <td><code>--profile app down --remove-orphans</code></td>
+      <td>五个容器全部停并删，网络删掉，卷保留</td>
+      <td>日志逐条 <code>Stopped</code>/<code>Removed</code>，最后 <code>Network kb-p2-net Removed</code></td>
+    </tr>
+    <tr>
+      <td><code>down -v</code></td>
+      <td>连卷一起删（数据没了），但同样漏掉 profile 服务，网络仍报「仍在使用」</td>
+      <td>用时 1.6 秒；<code>Volume kb-p2_dbdata Removed</code>；再 <code>up</code> 后 <code>ERROR 1146 (42S02) at line 1: Table 'kbdemo.t_note' doesn't exist</code>，redis <code>dbsize</code> 为 <code>0</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>两条结论要分开记：</p>
+<ul>
+<li><strong>profile 决定 <code>down</code> 的作用范围。</strong> 起的时候带了 <code>--profile app</code>，停的时候也必须带；不带就是「只停我看得到的那两个」。补救办法是 <code>--remove-orphans</code>，它按项目标签把不属于当前模型的容器一起收掉。</li>
+<li><strong><code>-v</code> 是删数据的开关，不是「清得更干净」的开关。</strong> 上面的 <code>ERROR 1146</code> 就是它的回执：容器、网络、卷全部重建，MySQL 的数据目录是空的，表自然不存在。</li>
+</ul>
+<blockquote>
+<p>💡 新人小结：<code>down</code> 像退房，<code>down -v</code> 像退房之后把房间重新装修一遍——两件事的费用不是一个量级，而且第二件不可撤销。类比之后接机制：<code>down</code> 删的是「项目派生的运行时对象」（容器、默认网络），<code>-v</code> 额外删掉 compose 声明的 named volume，而 named volume 是唯一活过容器生命周期的那份（02 篇里已经用备份命令验证过它的落点在 <code>/var/lib/docker/volumes/.../_data</code>，Windows 上挂在 WSL2 的 <code>/dev/sdd</code>）。</p>
+</blockquote>
+<p>要留数据但清干净，用 <code>stop</code> + <code>start</code> 而不是 <code>down</code>：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-14" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="7"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-14" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-14-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose stop cache          <span class="c1"># 容器保留，只是停了</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps --format <span class="s2">&#34;{{.Service}}\t{{.State}}\t{{.Health}}&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">api	running	healthy
+</span></span></span><span class="line"><span class="cl"><span class="go">db	running	healthy
+</span></span></span><span class="line"><span class="cl"><span class="go">proxy	running
+</span></span></span><span class="line"><span class="cl"><span class="go">web	running
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose start cache         <span class="c1"># 原容器原样起来</span>
+</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p><code>stop</code>/<code>start</code> 不重建容器，因此配置改动不会生效——这一条与 4.4 里 <code>--no-recreate</code> 的读数同源。</p>
+<h2 id="热重载watch-的三档与它们的真实代价">热重载：<code>watch</code> 的三档与它们的真实代价<a class="td-heading-self-link" href="#%e7%83%ad%e9%87%8d%e8%bd%bdwatch-%e7%9a%84%e4%b8%89%e6%a1%a3%e4%b8%8e%e5%ae%83%e4%bb%ac%e7%9a%84%e7%9c%9f%e5%ae%9e%e4%bb%a3%e4%bb%b7" aria-label="标题锚点"></a>
+</h2>
+<p>开发期最烦的是「改一行等三分钟」。Compose 的 <code>develop.watch</code> 把这件事分成三档，档位差别就是「要不要重建镜像」：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">档位</th>
+      <th scope="col">做什么</th>
+      <th scope="col">适用</th>
+      <th scope="col">本机实测代价</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>sync</code></td>
+      <td>把改的文件推进容器，不动进程</td>
+      <td>解释型语言 + 自动重载（PHP、Node 带 <code>--reload</code>、Rails）</td>
+      <td>未单独实测（示例里没有这种服务）</td>
+    </tr>
+    <tr>
+      <td><code>sync+restart</code></td>
+      <td>推进文件，然后重启容器内进程</td>
+      <td>静态资源、需要重启才生效的纯配置文件</td>
+      <td>从落盘到 <code>curl</code> 看到新内容 <strong>2.0 秒</strong></td>
+    </tr>
+    <tr>
+      <td><code>rebuild</code></td>
+      <td>重新构建镜像并重建容器</td>
+      <td>需要编译的语言、依赖变化</td>
+      <td><strong>4.1 秒</strong>（本例的占位服务只有两层）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>sync+restart</code> 那次的证据链：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-15" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="14"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-15" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-15-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> watch 已在后台跑（docker compose --profile app watch --no-up）
+</span></span><span class="line"><span class="cl"><span class="gp">#</span> 宿主改 web/index.html，加一行 &lt;p&gt;watch-marker-…&lt;/p&gt;
+</span></span><span class="line"><span class="cl"><span class="go">Watch enabled
+</span></span></span><span class="line"><span class="cl"><span class="go">Syncing service &#34;web&#34; after 1 changes were detected
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-web-1 Restarting
+</span></span></span><span class="line"><span class="cl"><span class="go"> Container kb-p2-web-1 Started
+</span></span></span><span class="line"><span class="cl"><span class="go">service(s) [&#34;web&#34;] restarted
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps --format <span class="s2">&#34;{{.Service}}\t{{.Status}}&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">api	Up 37 seconds (healthy)
+</span></span></span><span class="line"><span class="cl"><span class="go">cache	Up 29 seconds (healthy)
+</span></span></span><span class="line"><span class="cl"><span class="go">db	Up 29 seconds (healthy)
+</span></span></span><span class="line"><span class="cl"><span class="go">proxy	Up 31 seconds
+</span></span></span><span class="line"><span class="cl"><span class="go">web	Up 1 second          # 只有它被重启了
+</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>配置文件里对应这两档的写法：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-16" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="12"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-16" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-16-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">web</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">develop</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">watch</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l">sync+restart</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">./web/index.html</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l">/usr/share/nginx/html/index.html</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">api</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">develop</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">watch</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span>- <span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l">rebuild</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">./api</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p><code>config</code> 里能看到被规范化后的形状（<code>target</code> 只在 <code>sync</code> 系需要，<code>rebuild</code> 不带它）：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-17" data-td-code data-td-code-auto-id
+     data-td-language="json" data-td-line-count="2"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-17" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-17-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span><span class="nt">&#34;watch&#34;</span><span class="p">:</span> <span class="p">[{</span><span class="nt">&#34;path&#34;</span><span class="p">:</span> <span class="s2">&#34;…\\web\\index.html&#34;</span><span class="p">,</span> <span class="nt">&#34;action&#34;</span><span class="p">:</span> <span class="s2">&#34;sync+restart&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="nt">&#34;target&#34;</span><span class="p">:</span> <span class="s2">&#34;/usr/share/nginx/html/index.html&#34;</span><span class="p">,</span> <span class="nt">&#34;exec&#34;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&#34;command&#34;</span><span class="p">:</span> <span class="kc">null</span><span class="p">}}]}</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p><code>rebuild</code> 档的 4.1 秒要老实标注它不能外推：这个占位服务的 Dockerfile 只有 <code>FROM alpine</code> + <code>COPY</code> 一步，本机 <code>docker compose build --no-cache api</code> 是 <strong>1.0 秒</strong>，缓存命中是 <strong>0.5 秒</strong>。换成真实 Spring Boot，<code>rebuild</code> 里多出依赖解析与打包，量级完全不同——本轮没有 Maven 环境，那个数没量到，写进 4.8 的判据里作为待补项而不是结论。</p>
+<div class="td-callout td-callout--tip" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-lightbulb" aria-hidden="true"></i><span class="td-callout__label">提示</span></div>
+  <div class="td-callout__body">
+<p><code>watch</code> 与 <code>up</code> 的关系：<code>docker compose up --watch</code> 与单独跑 <code>docker compose watch</code> 等价；<code>--no-up</code> 用于「栈已经起来了，只挂监视器」，本机的两次实测都是这么起的。<code>watch</code> 是<strong>前台会话</strong>，用脚本起它要注意 <code>docker</code> CLI 会派生 <code>docker-compose</code> 子进程，父进程被终止时子进程还活着并占着日志文件句柄——本轮就在这里踩过一次，目录删不掉，最后按子进程 pid 收的。</p>
+  </div>
+</div><h2 id="windows-下的-bind-mount-与-hmr现象成因与解法">Windows 下的 bind mount 与 HMR：现象、成因与解法<a class="td-heading-self-link" href="#windows-%e4%b8%8b%e7%9a%84-bind-mount-%e4%b8%8e-hmr%e7%8e%b0%e8%b1%a1%e6%88%90%e5%9b%a0%e4%b8%8e%e8%a7%a3%e6%b3%95" aria-label="标题锚点"></a>
+</h2>
+<p>前端开发常见的一句抱怨是「容器里跑 Vite，改文件浏览器不热更」。三个独立的坑叠在一起，要分开验：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">症状</th>
+      <th scope="col">成因</th>
+      <th scope="col">解法</th>
+      <th scope="col">本机状态</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>改文件完全没反应，容器内也不见新内容</td>
+      <td>挂载写错（路径大小写、Docker Desktop 文件共享未放行该盘）</td>
+      <td>先 <code>docker compose exec web ls -l /app</code> 看容器里看到的到底是什么</td>
+      <td>未实测（示例的 <code>web</code> 是构建进镜像的静态文件，不是 bind mount）</td>
+    </tr>
+    <tr>
+      <td>容器内文件变了，但监听器不触发</td>
+      <td>Windows 侧的 9p/DrvFs 挂载不把 inotify 事件传进容器，只有数据变化可见</td>
+      <td>Vite 打开轮询：<code>server.watch.usePolling = true</code>（配 <code>interval</code>，常见 300 毫秒起）；或改用 <code>develop.watch</code> 的 <code>sync</code> 由 compose 主动推</td>
+      <td>机制成立，<strong>本轮未实测</strong>；02 篇量到的「bind mount 走 9p、比命名卷慢一个量级」是同一条链上的另一环</td>
+    </tr>
+    <tr>
+      <td>浏览器连的是 <code>localhost:5173</code> 但 WebSocket 失败</td>
+      <td>HMR 的 WS 端口/主机与 dev server 不一致：容器里监听 <code>127.0.0.1</code> 外面进不来</td>
+      <td><code>server.host = true</code> 监听所有网卡 + <code>ports</code> 把 5173 publish 出来 + 必要时 <code>server.hmr.clientPort = 5173</code>；<code>/api</code> 前缀交给 <code>proxy</code> 服务而不是 Vite 的 <code>proxy</code></td>
+      <td>未实测，属配置口径；给判据：浏览器 Network 里 WS 请求的目标地址应与 <code>docker compose port web 5173</code> 的读数一致</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><code>docker compose port</code> 这条命令在排查第三种症状时最省事——它直接回答「compose 认为这个服务的外部地址是什么」，而不是让人去翻 <code>ps</code> 的 <code>PORTS</code> 列。Java 侧的对应做法（devtools + 挂载 <code>target/classes</code>、或直接让 IDE 跑在 <code>kb-p2-net</code> 上）同样只给口径，本轮没有 Java 容器可跑，标在本篇未验证项里。</p>
+<blockquote>
+<p>💡 新人小结：文件共享挂载像<strong>隔着一扇玻璃窗递东西</strong>——东西（内容）你看得见也拿得到，但窗那边的人不知道你什么时候递的（事件传不过去）。所以「改文件不热更」常常不是没生效，是没人通知它。接机制：<code>usePolling</code> 就是让窗那边的人每隔几百毫秒自己探头看一眼，代价是 CPU 与延迟，换来行为可预测。</p>
+</blockquote>
+<h2 id="完整实战五个服务的栈是怎么长出来的">完整实战：五个服务的栈是怎么长出来的<a class="td-heading-self-link" href="#%e5%ae%8c%e6%95%b4%e5%ae%9e%e6%88%98%e4%ba%94%e4%b8%aa%e6%9c%8d%e5%8a%a1%e7%9a%84%e6%a0%88%e6%98%af%e6%80%8e%e4%b9%88%e9%95%bf%e5%87%ba%e6%9d%a5%e7%9a%84" aria-label="标题锚点"></a>
+</h2>
+<p>主干文件完整贴一次（<code>api</code>/<code>web</code>/<code>proxy</code> 三个都挂在 <code>profiles: [&quot;app&quot;]</code> 下，因为它们是「应用层」，CI 预拉依赖时不该被卷进来）：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-18" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="50"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-18" data-td-copy-mode="all"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-18-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">cache</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">redis:7-alpine</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;redis-server&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;--appendonly&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;yes&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">cachedata:/data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;CMD&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;redis-cli&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;ping&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">2s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="m">10</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">api</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l">./api</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">DB_HOST</span><span class="p">:</span><span class="w"> </span><span class="l">db</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">REDIS_HOST</span><span class="p">:</span><span class="w"> </span><span class="l">cache</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">db</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_healthy }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">cache</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_healthy }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;CMD&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;wget&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-q&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-O&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;http://127.0.0.1:8080/api/health&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">3s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="m">12</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">profiles</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;app&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">web</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l">./web</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">profiles</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;app&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">proxy</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">nginx:1.27-alpine</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="s2">&#34;${PROXY_PORT:-8080}:80&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">./proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">api</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_healthy }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">web</span><span class="p">:</span><span class="w"> </span>{<span class="w"> </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_started }</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">profiles</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;app&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">networks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">kb-p2-net</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">dbdata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="l">cachedata:</span></span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>几个设计点的取舍，都对应上面某条读数：</p>
+<ul>
+<li><strong>入口只有一个。</strong> 只有 <code>proxy</code> 暴露宿主端口（<code>${PROXY_PORT:-8080}</code>），<code>api</code> 与 <code>web</code> 的 <code>8080/tcp</code>、<code>80/tcp</code> 只在容器网络里。生产同理：宿主端口越少，能被打的洞越少。</li>
+<li><strong><code>db</code> 的端口只在 override 里。</strong> <code>127.0.0.1:3307:3306</code> 是开发期便利（避开本机已占用的 3306），绑 <code>127.0.0.1</code> 而不是 <code>0.0.0.0</code>；主干不带这个字段，CI 与生产加载主干就自然没有它。</li>
+<li><strong><code>proxy</code> 对 <code>api</code> 用健康门、对 <code>web</code> 用 <code>service_started</code>。</strong> nginx 起来时如果 upstream 名字解析不到会直接退出，<code>api</code> 是它必须等的那一个；<code>web</code> 只提供静态文件，<code>service_started</code> 够用。</li>
+<li><strong>卷名交给 compose 加前缀。</strong> 实际落地的名字是 <code>kb-p2_dbdata</code>（<code>config</code> 的读数），所以手工 <code>docker volume rm</code> 之前要按这个名字找，不要写 <code>dbdata</code>。</li>
+<li><strong><code>name: kb-p2</code> 必须写死。</strong> 项目名会进卷名、网络名、容器名。中文目录名场景下 Compose 会把非法字符过滤掉，过滤空了就报 <code>project name must not be empty</code>——本轮在一个中文命名的临时目录里（文件内容与它完全相同、只是目录换成 ASCII 名的对照组正常通过）直接撞到过这条报错，加上 <code>name:</code> 就好。</li>
+</ul>
+<p>复现清单（每条命令都跑过，预期读数在上文）：</p>
+<div class="td-code td-code--untitled" id="td-code-1f006964-fence-19" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="14"><div class="td-code__utilities td-code__utilities--compact">
+  <button class="td-code__copy" type="button" hidden data-td-code-copy
+          data-td-code-target="td-code-1f006964-fence-19" data-td-copy-mode="command"
+          data-td-label-copy="复制代码"
+          data-td-label-copied="已复制"
+          data-td-label-error="复制失败"
+          aria-label="复制代码" title="复制代码">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+  </button>
+</div>
+  <div class="td-code__viewport" id="td-code-1f006964-fence-19-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> <span class="nb">cd</span> 示例/贯穿示例
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --services                       <span class="c1"># 只应看到 cache 与 db</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app up -d --wait              <span class="c1"># 冷 18.4 秒 / 热 7.1 秒</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose ps                                      <span class="c1"># 三个 healthy，proxy/web 起来</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s http://127.0.0.1:8080/api/health               <span class="c1"># {&#34;status&#34;:&#34;UP&#34;,&#34;db&#34;:&#34;UP&#34;,&#34;cache&#34;:&#34;UP&#34;}</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s -o /dev/null -w <span class="s2">&#34;%{http_code}\n&#34;</span> http://127.0.0.1:8080/
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose <span class="nb">exec</span> db sh -c <span class="s1">&#39;mysql -uroot -p&#34;$DB_PW&#34; kbdemo -e &#34;SELECT 1;&#34;&#39;</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose down                                    <span class="c1"># 注意：不带 --profile 会漏三个</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app up -d --wait              <span class="c1"># 判据第 4 条：数据还在</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app watch                     <span class="c1"># 改 web/index.html，约 2 秒可见</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose -f compose.yaml -f compose.debug.yaml <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="go">    --profile app --profile debug up -d --wait            # 六个服务，本机 17.5 秒
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> curl -s http://127.0.0.1:8081/ <span class="p">|</span> grep -o <span class="s2">&#34;&lt;title&gt;[^&lt;]*&lt;/title&gt;&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app --profile debug down -v --remove-orphans   <span class="c1"># 收干净，会删数据</span>
+</span></span></code></pre></div></div>
+  <span class="visually-hidden" role="status" aria-live="polite" data-td-code-status></span>
+</div>
+<p>最后一条命令之前跑的是调试层：<code>adminer:4</code> 起来后 <code>127.0.0.1:8081</code> 直接给回 <code>&lt;title&gt;Login - Adminer&lt;/title&gt;</code>，而 <code>docker compose up --wait</code> 的日志里它自己也是 <code>Healthy</code>——可我在 <code>compose.debug.yaml</code> 里<strong>没有</strong>给它写健康检查。那是镜像自带的 <code>HEALTHCHECK</code> 在生效（与 4.6 的优先级读数同源：compose 不写，就用镜像的）。</p>
+<h2 id="与真实技术栈的差距">与真实技术栈的差距<a class="td-heading-self-link" href="#%e4%b8%8e%e7%9c%9f%e5%ae%9e%e6%8a%80%e6%9c%af%e6%a0%88%e7%9a%84%e5%b7%ae%e8%b7%9d" aria-label="标题锚点"></a>
+</h2>
+<p>本篇的栈是<strong>结构完整、内容占位</strong>：网络、卷、健康门、profiles、插值、watch 全是真的；服务实现是占位的。差距清单写清楚，免得读者把占位的量级当成真实的：</p>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">位置</th>
+      <th scope="col">本篇</th>
+      <th scope="col">真实贯穿示例（第③段之后）</th>
+      <th scope="col">影响哪个结论</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>api</code></td>
+      <td>Go 单文件，两层镜像，<code>build</code> 1.0 秒</td>
+      <td>Spring Boot + Maven 多阶段（3.7）</td>
+      <td><code>rebuild</code> 档 4.1 秒不可外推</td>
+    </tr>
+    <tr>
+      <td><code>web</code></td>
+      <td>静态 HTML 进 nginx 镜像</td>
+      <td>Vue3 + Vite dev server（<code>usePolling</code> 那段才有实测对象）</td>
+      <td>HMR 三条解法目前只有口径</td>
+    </tr>
+    <tr>
+      <td><code>db</code></td>
+      <td><code>mysql:8.4</code> 官方镜像</td>
+      <td>MySQL 8.4 不变，但加 <code>configs</code> 挂载与初始化 SQL</td>
+      <td>健康检查探测命令不变</td>
+    </tr>
+    <tr>
+      <td>口令</td>
+      <td><code>.env</code> 里一个开发值</td>
+      <td><code>configs</code>/<code>secrets</code> 或外部注入</td>
+      <td>4.6 里「明文进 <code>config</code> 输出」那条判据要重跑</td>
+    </tr>
+    <tr>
+      <td>就绪判据</td>
+      <td><code>mysqladmin ping</code></td>
+      <td>同一命令，但库表初始化完成后才算真的好</td>
+      <td>需要 <code>service_completed_successfully</code> 那条链路（见 4.5）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="常见误读">常见误读<a class="td-heading-self-link" href="#%e5%b8%b8%e8%a7%81%e8%af%af%e8%af%bb" aria-label="标题锚点"></a>
+</h2>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">误读</th>
+      <th scope="col">实际</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>「<code>profiles</code> 是环境隔离，dev 和 prod 用不同 profile」</td>
+      <td>profile 决定<strong>一条命令带上哪些服务</strong>，不是「配置分环境」。环境差异该走多文件；用 profile 装环境，会出现「prod 的 up 忘了 <code>--profile prod</code> 就少起一层」</td>
+    </tr>
+    <tr>
+      <td>「override 里没写的字段会被清掉」</td>
+      <td>映射类深合并、<code>command</code> 这类标量整体替换、<code>ports</code>/<code>volumes</code> 追加。override 不写，主干的值仍然在</td>
+    </tr>
+    <tr>
+      <td>「<code>compose.debug.yaml</code> 也会自动合并，名字长得像就行」</td>
+      <td>只有 <code>compose.override.*</code> / <code>docker-compose.override.*</code> 是自动的，其它文件名要 <code>-f</code> 或 <code>COMPOSE_FILE</code></td>
+    </tr>
+    <tr>
+      <td>「<code>down</code> 就是把这套东西停干净」</td>
+      <td>不带 <code>--profile</code> 的 <code>down</code> 会漏起 profile 服务，网络因「仍在使用」删不掉；<code>--remove-orphans</code> 才是兜底</td>
+    </tr>
+    <tr>
+      <td>「<code>down -v</code> 是更彻底的清理，可以当习惯用」</td>
+      <td><code>-v</code> 删 named volume，也就是删数据。上面那条 <code>ERROR 1146</code> 就是它的结果</td>
+    </tr>
+    <tr>
+      <td>「<code>watch</code> 的 <code>rebuild</code> 快，所以 Java 项目也可以这么写」</td>
+      <td>本例 4.1 秒来自两层 COPY 的占位镜像。真实 Java 的构建成本没在本轮量过</td>
+    </tr>
+    <tr>
+      <td>「<code>up --wait</code> 返回 0 就说明业务可用」</td>
+      <td><code>--wait</code> 等的是「健康检查通过」。健康检查口径写窄（只 ping TCP），它就只保证那一格</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="要点总结">要点总结<a class="td-heading-self-link" href="#%e8%a6%81%e7%82%b9%e6%80%bb%e7%bb%93" aria-label="标题锚点"></a>
+</h2>
+<ul>
+<li>三个机制各管一件事：多文件管<strong>环境差异</strong>，<code>profiles</code> 管<strong>一条命令带哪些服务</strong>，<code>.env</code> 管<strong>会变且不进版本库的值</strong>。</li>
+<li><code>profiles</code> 的过滤发生在模型加载阶段：不带 <code>--profile</code>，<code>config --services</code>、<code>pull</code>、<code>down</code> 全都看不到那些服务。这是本机最容易踩的一条。</li>
+<li>同名字段的合并语义分三类（深合并 / 整体替换 / 追加），<code>ports</code> 与 <code>volumes</code> 是<strong>追加</strong>；写了 <code>-f</code> 就没有自动 override 合并。</li>
+<li>第②段判据四条全部通过：一条命令起 5 个服务（冷 18.4 秒 / 热 7.1 秒）、三个带检查的服务 <code>healthy</code>、经 <code>proxy</code> 的 <code>/api/health</code> 与 <code>/</code> 都是 <code>200</code>（3.7 毫秒 / 2.2 毫秒）、<code>down</code> 后数据仍在。</li>
+<li>启动时间由 MySQL 的数据目录初始化决定，不由 compose 决定：卷为空 16.8 秒、卷已用 7.1 秒，两次差的就是 MySQL 初始化那 8 秒量级。</li>
+<li><code>down</code> / <code>down --remove-orphans</code> / <code>down -v</code> 是三件事：停可见服务、停全部服务、连数据一起删。写命令时按这三档想。</li>
+<li><code>watch</code> 三档的实测代价：<code>sync+restart</code> 2.0 秒（纯静态文件），<code>rebuild</code> 4.1 秒（占位镜像）；<code>sync</code> 档与真实 Java/Node 的数字本轮没量到。</li>
+<li>Windows 下「改文件不热更」先分清是「数据没过去」还是「事件没过去」，后者用轮询或 <code>develop.watch</code> 的 <code>sync</code> 兜。</li>
+</ul>
+<h2 id="本篇未验证项">本篇未验证项<a class="td-heading-self-link" href="#%e6%9c%ac%e7%af%87%e6%9c%aa%e9%aa%8c%e8%af%81%e9%a1%b9" aria-label="标题锚点"></a>
+</h2>
+<div class="td-table-scroll" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>COMPOSE_FILE</code> 在 Windows 上的分隔符</td>
+      <td>未实测</td>
+      <td>正文按官方口径写 <code>;</code>，Linux 是 <code>:</code>；本轮全部用 <code>-f</code></td>
+    </tr>
+    <tr>
+      <td>Vite 的 <code>usePolling</code> / <code>hmr.clientPort</code> 三件套能否让热更真的生效</td>
+      <td>未实测</td>
+      <td>示例的 <code>web</code> 没有 dev server，需要第③段之后的 Vue3 真服务才能验；判据已写在表里</td>
+    </tr>
+    <tr>
+      <td>容器内 inotify 事件在 9p 挂载上不传播</td>
+      <td>未实测（机制成立）</td>
+      <td>需要镜像里跑 <code>inotifywait</code> 并对照宿主改动；已列为 4.8 的补测项</td>
+    </tr>
+    <tr>
+      <td>Java（Spring Boot）走 <code>rebuild</code> 档的实际耗时</td>
+      <td>未实测</td>
+      <td>本机无 Maven 依赖缓存；占位服务的 4.1 秒不能替代</td>
+    </tr>
+    <tr>
+      <td>Redis 的键活过 <strong>compose 级</strong> <code>down</code>（不带 <code>-v</code>）</td>
+      <td>未实测</td>
+      <td>本轮那个键是在重启之后写的；容器级已在第①段验过，卷与挂载相同但删除粒度不同，下一步把它补进判据第 4 条</td>
+    </tr>
+    <tr>
+      <td><code>adminer</code> 经 <code>-f compose.debug.yaml</code> + <code>--profile debug</code> 真起并出登录页</td>
+      <td>已实测</td>
+      <td>六个服务 17.5 秒起齐，<code>127.0.0.1:8081</code> 回 <code>&lt;title&gt;Login - Adminer&lt;/title&gt;</code>，<code>up --wait</code> 里它是 <code>Healthy</code>（镜像自带 <code>HEALTHCHECK</code>）</td>
+    </tr>
+    <tr>
+      <td><code>!override</code> 收回追加列表</td>
+      <td>已实测</td>
+      <td><code>ports</code> 只剩 <code>9100</code>，<code>volumes</code>/<code>environment</code> 用 <code>!override {}</code> 变 <code>null</code></td>
+    </tr>
+    <tr>
+      <td><code>!remove</code> 摘掉列表中的<strong>一条</strong></td>
+      <td>未跑通</td>
+      <td>本机这一版对 <code>ports: !remove &quot;9002:80&quot;</code> 报 <code>cannot override services.s.ports</code>；<code>!remove</code> 配列表形式的写法没再试</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+	<div class="td-page-end">
+  
+  
+  
+  <nav class="td-pager d-print-none" data-td-pager
+  aria-label="上一页 / 下一页">
+  <a class="td-pager__link td-pager__link--prev" href="../../../../docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/"
+    aria-label="上一页 - 日常" title="日常" data-td-pager-prev>
+    <span class="td-pager__arrow" aria-hidden="true">←</span><span class="td-pager__title" dir="auto">日常</span>
+  </a>
+</nav>
+  
+</div>
+
+</div>
+
+
+          </article>
+        </main>
+        <aside class="td-shell-toc d-print-none" aria-label="目录">
+  <div class="td-shell-toc__panel">
+    
+    <div class="td-shell-aside" data-td-shell-aside>
+      <div class="td-shell-aside-group td-shell-aside-group--toc">
+        <div class="td-shell-aside-group__row"><button type="button" class="td-shell-aside-group__rail-toggle" data-td-shell-right-toggle
+            title="隐藏目录" aria-label="隐藏目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+          <button type="button" class="td-shell-tree__row td-shell-aside-group__head"
+            data-td-shell-tree-toggle data-td-shell-aside-keep-open
+            aria-expanded="true" aria-controls="td-shell-aside-toc"
+            aria-label="收起章节: 目录"
+            data-td-label-expand="展开章节: 目录"
+            data-td-label-collapse="收起章节: 目录"><span class="td-shell-aside-group__icon td-shell-aside-group__icon--toc" aria-hidden="true"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></span>
+            <span class="td-shell-aside-group__title">目录</span>
+            <span class="td-shell-tree__chevron" aria-hidden="true"><i class="td-shell-icon td-shell-icon--chevron-down fa-solid fa-angle-down" aria-hidden="true"></i></span>
+          </button>
+        </div>
+        <div id="td-shell-aside-toc" class="td-shell-tree__children td-is-open">
+          <div class="td-shell-tree__children-inner">
+            <div class="td-shell-toc__inner" data-proofer-ignore>
+  <div class="td-shell-toc__body" id="td-shell-toc-body">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#为什么要拆成三个文件而不是在一个-composeyaml-里改来改去">为什么要拆成三个文件，而不是在一个 <code>compose.yaml</code> 里改来改去</a></li>
+    <li><a href="#先看默认模型有多小profiles-的实测边界">先看默认模型有多小：profiles 的实测边界</a></li>
+    <li><a href="#三层文件各自放什么">三层文件各自放什么</a></li>
+    <li><a href="#同名字段怎么合并规则不直觉所以逐条量">同名字段怎么合并：规则不直觉，所以逐条量</a></li>
+    <li><a href="#一条命令起全栈第段判据长什么样">一条命令起全栈：第②段判据长什么样</a></li>
+    <li><a href="#down-的三种收场为什么不能凭手感写"><code>down</code> 的三种收场：为什么不能凭手感写</a></li>
+    <li><a href="#热重载watch-的三档与它们的真实代价">热重载：<code>watch</code> 的三档与它们的真实代价</a></li>
+    <li><a href="#windows-下的-bind-mount-与-hmr现象成因与解法">Windows 下的 bind mount 与 HMR：现象、成因与解法</a></li>
+    <li><a href="#完整实战五个服务的栈是怎么长出来的">完整实战：五个服务的栈是怎么长出来的</a></li>
+    <li><a href="#与真实技术栈的差距">与真实技术栈的差距</a></li>
+    <li><a href="#常见误读">常见误读</a></li>
+    <li><a href="#要点总结">要点总结</a></li>
+    <li><a href="#本篇未验证项">本篇未验证项</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </div>
+  </div>
+</aside>
+<div class="td-shell-toc-float d-print-none">
+  <button type="button" class="td-shell-iconbtn" data-td-shell-right-toggle
+    title="显示目录" aria-label="显示目录"><i class="td-shell-icon td-shell-icon--menu fa-solid fa-bars" aria-hidden="true"></i></button>
+</div>
+      </div>
+      <footer class="td-shell-footline d-print-none" data-td-shell-footer>
+  <div class="td-shell-footline__copy"><span class="td-footer__copyright">&copy; 2026
+    <span class="td-footer__authors">Docker 团队知识库</span>
+  </span><span class="td-footer__all_rights_reserved">保留所有权利</span></div>
+  <div class="td-shell-footline__center">内部技术知识库 · 依据《Docker知识库内容结构与组织清单》v2.1 建设 · 主题 OINK v1.3.2（Apache 2.0，本地副本）</div>
+  <div class="td-shell-footline__right">
+    
+    <div class="td-appearance td-shell-footline__theme td-appearance--up" data-td-appearance>
+  <button type="button" class="td-appearance__trigger td-shell-iconbtn" data-td-appearance-trigger
+    aria-haspopup="dialog" aria-expanded="false" aria-controls="td-appearance-footer" title="外观" aria-label="外观"><span class="td-appearance__icon" data-td-theme-icon><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i></span></button>
+  <dialog class="td-appearance__panel" id="td-appearance-footer" aria-label="外观">
+    <div class="td-appearance__head">
+      <span class="td-appearance__title" aria-hidden="true">外观</span>
+      <button type="button" class="td-appearance__close" data-td-appearance-close
+        title="关闭外观设置" aria-label="关闭外观设置"><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">风格</legend>
+      <div class="td-appearance__presets">
+        <label class="td-appearance__preset" title="默认">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="paper"
+            data-td-preset-value="paper" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513" checked>
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--paper" aria-hidden="true"><i class="td-shell-icon td-shell-icon--file-lines fa-solid fa-file-lines" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Paper</span><span class="visually-hidden"> (默认)</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="slate"
+            data-td-preset-value="slate" data-td-canvas-light="#f1f4f8" data-td-canvas-dark="#0b1119">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--slate" aria-hidden="true"><i class="td-shell-icon td-shell-icon--layers fa-solid fa-layer-group" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Slate</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="ink"
+            data-td-preset-value="ink" data-td-canvas-light="#ffffff" data-td-canvas-dark="#0b0b0b">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--ink" aria-hidden="true"><i class="td-shell-icon td-shell-icon--pen-nib fa-solid fa-pen-nib" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Ink</span></span>
+          </span>
+        </label>
+        <label class="td-appearance__preset">
+          <input class="td-appearance__input" type="radio" name="td-preset-footer" value="terminal"
+            data-td-preset-value="terminal" data-td-canvas-light="#f4f5f2" data-td-canvas-dark="#0c0f0e">
+          <span class="td-appearance__card">
+            <span class="td-appearance__preset-icon td-appearance__preset-icon--terminal" aria-hidden="true"><i class="td-shell-icon td-shell-icon--terminal fa-solid fa-terminal" aria-hidden="true"></i></span>
+            <span class="td-appearance__name">
+              <span>Terminal</span></span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <fieldset class="td-appearance__group">
+      <legend class="td-appearance__legend">明暗</legend>
+      <div class="td-appearance__modes">
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="light"
+            data-bs-theme-value="light">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--sun fa-solid fa-sun" aria-hidden="true"></i><span>亮色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="dark"
+            data-bs-theme-value="dark">
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--moon fa-solid fa-moon" aria-hidden="true"></i><span>暗色</span>
+          </span>
+        </label>
+        <label class="td-appearance__mode">
+          <input class="td-appearance__input" type="radio" name="td-mode-footer" value="auto"
+            data-bs-theme-value="auto" checked>
+          <span class="td-appearance__segment"><i class="td-shell-icon td-shell-icon--contrast fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span>跟随系统</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+    <p class="td-appearance__note" data-td-appearance-note hidden>浏览器未保存设置，此选择仅在当前页面有效。</p>
+  </dialog>
+</div>
+    <div class="td-shell-keyboard td-nav-hover-menu" data-td-nav-hover>
+  <button type="button" class="td-shell-iconbtn td-shell-keyboard__trigger"
+    data-td-nav-hover-trigger data-td-nav-hover-open
+    title="键盘快捷键" aria-label="键盘快捷键"
+    aria-expanded="false"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i></button>
+  <div class="td-nav-hover-menu__pop td-shell-keyboard-help" role="group"
+    aria-label="键盘快捷键">
+    <div class="td-shell-keyboard-help__header"><i class="td-shell-icon td-shell-icon--circle-question fa-solid fa-circle-question" aria-hidden="true"></i><strong>键盘快捷键</strong>
+    </div>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-navigation">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-navigation">章节导航</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>W</kbd><kbd>S</kbd><kbd>↑</kbd><kbd>↓</kbd></span></dt>
+          <dd>在侧栏中移动</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>A</kbd><kbd>D</kbd><kbd>←</kbd><kbd>→</kbd></span></dt>
+          <dd>收起或展开章节</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Enter</kbd><kbd>G</kbd></span></dt>
+          <dd>打开当前页面</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>J</kbd><kbd>K</kbd></span></dt>
+          <dd>上一个或下一个标题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>Q</kbd><kbd>E</kbd></span></dt>
+          <dd>上一页或下一页</dd>
+        </div>
+      </dl>
+    </section>
+    <section class="td-shell-keyboard-help__section" aria-labelledby="td-shell-shortcuts-actions">
+      <p class="td-shell-keyboard-help__section-title" id="td-shell-shortcuts-actions">操作</p>
+      <dl>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>/</kbd><kbd>F</kbd></span></dt>
+          <dd>搜索</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>\</kbd><kbd>C</kbd></span></dt>
+          <dd>命令面板</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>H</kbd></span></dt>
+          <dd>专注阅读模式</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>T</kbd></span></dt>
+          <dd>切换主题</dd>
+        </div>
+        <div class="td-shell-keyboard-help__row">
+          <dt><span class="td-kbd-sequence"><kbd>R</kbd></span></dt>
+          <dd>切换顶层页面</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</div>
+  </div>
+</footer>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":true,"description":"复制 Markdown 文本","disabledReason":"","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":"/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/index.md"},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":true,"description":"查阅 Markdown 源码","disabledReason":"","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":"/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/index.md"},{"available":false,"description":"查阅编辑历史","disabledReason":"查阅编辑历史: 暂不可用","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":""},{"available":false,"description":"编辑当前页面","disabledReason":"编辑当前页面: 暂不可用","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":""},{"available":false,"description":"添加子页面","disabledReason":"添加子页面: 暂不可用","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":""},{"available":false,"description":"提交文档议题","disabledReason":"提交文档议题: 暂不可用","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":""},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":true,"description":"打印完整章节","disabledReason":"","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":"/_print/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/"},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":false,"description":"切换语言","disabledReason":"切换语言: 暂不可用","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":true,"description":"外观","disabledReason":"","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Ink","Terminal","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"},{"available":true,"disabledReason":"","id":"slate","title":"Slate","value":"slate"},{"available":true,"disabledReason":"","id":"ink","title":"Ink","value":"ink"},{"available":true,"disabledReason":"","id":"terminal","title":"Terminal","value":"terminal"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":false,"description":"GitHub","disabledReason":"GitHub: 暂不可用","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":""}],"commands":[],"language":"zh","quickLinks":[{"available":true,"description":"一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。","disabledReason":"","icon":"fa-solid fa-book","id":"quick_docs","keywords":["文档","docs"],"kind":"url","target":"self","title":"文档","url":"/docs/"}],"rootOrder":["docs"],"version":1}</script>
+
+<script src="../../../../js/actions.min.c784a65471d30f25801832ad47eca4fc6e9681b4521bd2414655e6623aa58934.js" integrity="sha256-x4SmVHHTDyWAGDKtR&#43;yk/G6WgbRSG9JBRlXmYjqliTQ=" crossorigin="anonymous"></script>
+<script src="../../../../js/core.min.9d572929bf152f8c3018bd8c276e7338cecd5fdada90aefbf09c56c913fb7668.js" integrity="sha256-nVcpKb8VL4wwGL2MJ25zOM7NX9rakK778JxWyRP7dmg=" crossorigin="anonymous"></script>
+  <script src="../../../../third_party/mermaid/mermaid.min.581ed7d74bd9048d0e3a91363927d72ef22942d7722546b27f7cc29e35390eb8.js" integrity="sha256-WB7X10vZBI0OOpE2OSfXLvIpQtdyJUayf3zCnjU5Drg=" crossorigin="anonymous"></script>
+<div id="td-shell-search" class="td-shell-search" hidden
+     data-td-index-src="../../../../offline-search-index.zh.28e779bf03824cbfa8c3b9dcd8175812.json"
+     data-td-max-results="10"
+     data-td-t-empty="未找到结果"
+     data-td-t-loading="正在加载搜索索引……"
+     data-td-t-results="找到 {count} 条结果"
+     data-td-t-actions="操作"
+     data-td-t-page-actions="页面操作"
+     data-td-t-preferences="偏好设置"
+     data-td-t-commands="命令"
+     data-td-t-quick-links="快速链接"
+     data-td-t-no-commands="未找到匹配命令"
+     data-td-t-choice="请选择一项"
+     data-td-t-action-failed="无法完成此操作"
+     data-td-t-index-unavailable="页面索引暂不可用，操作仍可使用"
+     data-td-t-pages="页面">
+  <div class="td-shell-search__backdrop" data-td-shell-search-close></div>
+  <div class="td-shell-search__panel" role="dialog" aria-modal="true" aria-label="搜索…">
+    <div class="td-shell-search__head">
+      <i class="td-shell-icon td-shell-icon--search fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="search" class="td-shell-search__input" placeholder="搜索…"
+             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+             role="combobox" aria-autocomplete="list" aria-haspopup="listbox"
+             aria-controls="td-shell-search-results" aria-expanded="false"
+             aria-label="搜索…" enterkeyhint="go">
+      <button type="button" class="td-shell-search__esc" data-td-shell-search-close
+        aria-label="关闭">
+        <kbd>esc</kbd>
+      </button>
+    </div>
+    <div id="td-shell-search-results" class="td-shell-search__list" role="listbox"
+      aria-label="搜索…"></div>
+    <div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"
+      data-td-shell-search-status></div>
+    <div class="td-shell-search__foot" aria-hidden="true">
+      <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
+      <span><kbd>↵</kbd> 打开</span>
+      <span><kbd>esc</kbd> 关闭</span>
+    </div>
+  </div>
+</div><dialog class="td-diagram-zoom d-print-none" data-td-diagram-zoom-dialog
+        aria-label="图表预览">
+  <div class="td-diagram-zoom__surface">
+    <div class="td-diagram-zoom__controls">
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-out><i class="td-shell-icon td-shell-icon--zoom-out fa-solid fa-magnifying-glass-minus" aria-hidden="true"></i><span class="visually-hidden">缩小</span>
+      </button>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-in><i class="td-shell-icon td-shell-icon--zoom-in fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i><span class="visually-hidden">放大</span>
+      </button>
+      <button class="td-diagram-zoom__control" type="button" data-td-diagram-zoom-reset><i class="td-shell-icon td-shell-icon--reset fa-solid fa-arrows-rotate" aria-hidden="true"></i><span class="visually-hidden">复位视图</span>
+      </button>
+      <button class="td-diagram-zoom__control td-diagram-zoom__close" type="button" data-td-diagram-zoom-close><i class="td-shell-icon td-shell-icon--x fa-solid fa-xmark" aria-hidden="true"></i><span class="visually-hidden">关闭图表预览</span>
+      </button>
+    </div>
+    <div class="td-diagram-zoom__viewport" data-td-diagram-zoom-viewport>
+      <div class="td-diagram-zoom__canvas" data-td-diagram-zoom-canvas></div>
+    </div>
+  </div>
+</dialog>
+<script src="../../../../js/chunks/shell.min.4194e10aaa62c42f08b26df08079fd620326ddf0fe55fdd6ee9a2d44d16d61c0.js" integrity="sha256-QZThCqpixC8Ism3wgHn9YgMm3fD&#43;Vf3W7potRNFtYcA=" crossorigin="anonymous"></script><script src="../../../../js/chunks/keyboard.min.8a521e4a2d9464db41a80d088ef54dd1a3127943710baa3a3ea14e2e41cba227.js" integrity="sha256-ilIeSi2UZNtBqA0IjvVN0aMSeUNxC6o6PqFOLkHLoic=" crossorigin="anonymous"></script><script src="../../../../js/chunks/local-search.min.6e96fff4982b84f9eaece26beffefac00b7d27c36e1d325c8b4ac637a61055e1.js" integrity="sha256-bpb/9JgrhPnq7OJr7/76wAt9J8NuHTJci0rGN6YQVeE=" crossorigin="anonymous"></script><script src="../../../../js/chunks/dark-mode.min.26a1ea15169b5422bd8de20c9df3013b8429dbc1a66b6e9ad70406bf05a344b6.js" integrity="sha256-JqHqFRabVCK9jeIMnfMBO4Qp28Gma26a1wQGvwWjRLY=" crossorigin="anonymous"></script><script src="../../../../js/chunks/appearance.min.9cfa4a9b2c5275a43a8f644d01e9cf659108d9a0e851b3b7687c282bdb298176.js" integrity="sha256-nPpKmyxSdaQ6j2RNAenPZZEI2aDoUbO3aHwoK9spgXY=" crossorigin="anonymous"></script><script src="../../../../js/chunks/code-block.min.08ea71e6304e5c0ef8d712c6e4d684eeeef2255aa6faeaed8acccc2a7a84ab1b.js" integrity="sha256-COpx5jBOXA741xLG5NaE7u7yJVqm&#43;urtiszMKnqEqxs=" crossorigin="anonymous"></script><script src="../../../../js/chunks/mermaid-zh.min.c45255dd802b7323f2f7aff76277f53b7e63d43b3911b41412906da75b71a748.js" integrity="sha256-xFJV3YArcyPy96/3Ynf1O35j1Ds5EbQUEpBtp1txp0g=" crossorigin="anonymous"></script>
+  </body>
+</html>

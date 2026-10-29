@@ -1,0 +1,53 @@
+# Docker 团队知识库
+
+> Apache RocketMQ 中文文档复刻站，从产品认知到生产运维的系统化技术资料。
+
+## Site index
+
+- [Home page](https://example.org/index.md)
+- [文档](https://example.org/docs/index.md): 一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。
+
+## Documentation index
+
+- [导读](https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/index.md): 站在入口：双轨怎么读、八站地图、环境准备，以及这个库的写作规矩。
+  - [环境准备：Windows、macOS 与 Linux](https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/index.md): 按平台把引擎装上，并用四段定位法判断「拉不下镜像」到底卡在哪一段——含本机两轮真实读数、引擎自述报错，以及不依赖镜像仓库验证运行时的办法。
+  - [使用指南、学习路径与贯穿示例总览](https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%8E%E4%B8%BB%E7%BA%BF%E5%85%AB%E7%AB%99%E5%9C%B0%E5%9B%BE/index.md): 主题轨怎么查、实战暗线怎么落、贯穿示例八段各自解决什么遗留问题，以及你上手前该先量自己机器的哪三项。
+  - [写作要求 W1~W6 与文档模板](https://example.org/docs/00-%E5%AF%BC%E8%AF%BB/%E6%80%8E%E4%B9%88%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93/%E5%86%99%E4%BD%9C%E8%A6%81%E6%B1%82%E4%B8%8E%E6%96%87%E6%A1%A3%E6%A8%A1%E6%9D%BF/index.md): 这个库的正文按什么标准算合格：文风三条线、问题驱动四段、新人小结的双段式、结构化载体、七项头部契约，以及基础层的完整性判据。
+- [基础认知](https://example.org/docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/index.md): 先知道容器解决的是什么问题，再亲手跑起第一个容器。
+  - [从环境不一致到容器化](https://example.org/docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%AE%B9%E5%99%A8/%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%AE%B9%E5%99%A8/index.md): 三大痛点与容器化的对应解法；容器与虚拟机的架构、性能、隔离性对比及常见误解。
+  - [第一次运行容器与图形化工具](https://example.org/docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%8A%A8%E6%89%8B/%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%BF%90%E8%A1%8C%E5%AE%B9%E5%99%A8%E4%B8%8E%E5%9B%BE%E5%BD%A2%E5%8C%96%E5%B7%A5%E5%85%B7/index.md): hello-world 走读、跑 nginx 并浏览器访问、ps 与 logs 初体验；Docker Desktop 与 Portainer 能做什么。
+  - [核心概念、Docker 架构与新人 20 词](https://example.org/docs/01-%E5%9F%BA%E7%A1%80%E8%AE%A4%E7%9F%A5/%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E5%AE%B9%E5%99%A8/%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88/index.md): registry/repository/tag 的关系、命名规则拆解、Client-Server 模型，与第一周必须先认识的 20 个术语。
+- [核心操作](https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/index.md): 主线站①的日常命令面：把容器跑起来、看住它、连上网、留住数据。
+  - [端口映射、数据管理与权限时区编码](https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/index.md): 四种内置网络模式与自定义网络 DNS；volume、bind mount、tmpfs 选型与备份；UID/GID 映射、TZ 与中文乱码。
+  - [镜像管理、容器生命周期与导入导出](https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E8%B7%91%E8%B5%B7%E6%9D%A5/%E9%95%9C%E5%83%8F%E7%AE%A1%E7%90%86%E4%B8%8E%E5%AE%B9%E5%99%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/index.md): run 全参数与 restart 策略；pull/images/rmi/tag/save/load/history/inspect；export 与 save 的区别陷阱。
+  - [进容器调试、状态查看与配置注入](https://example.org/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E8%B7%91%E8%B5%B7%E6%9D%A5/%E8%BF%9B%E5%AE%B9%E5%99%A8%E8%B0%83%E8%AF%95%E4%B8%8E%E7%8A%B6%E6%80%81%E6%9F%A5%E7%9C%8B/index.md): exec 与 attach、distroless 无 shell 怎么调、docker cp；logs/inspect/stats/top/diff/events；-e 与 --env-file。
+- [镜像构建](https://example.org/docs/03-%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA/index.md): 主线站③④⑤：从第一份 Dockerfile，到别人也能 build、能拉。
+  - [BuildKit 与 buildx、私有仓库、标签策略与构建排错](https://example.org/docs/03-%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA/%E4%BA%A4%E5%87%BA%E5%8E%BB/buildkit%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93%E6%A0%87%E7%AD%BE%E7%AD%96%E7%95%A5%E4%B8%8E%E6%9E%84%E5%BB%BA%E6%8E%92%E9%94%99/index.md): cache/secret 挂载与多平台构建；Hub/GHCR/ACR/Harbor 取舍；语义化版本 + git sha；构建期故障的成因与修法表。
+  - [Dockerfile 指令全解与构建上下文](https://example.org/docs/03-%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA/%E5%86%99%E5%87%BA%E6%9D%A5/dockerfile%E6%8C%87%E4%BB%A4%E5%85%A8%E8%A7%A3%E4%B8%8E%E6%9E%84%E5%BB%BA%E4%B8%8A%E4%B8%8B%E6%96%87/index.md): 以主线 api-service 为例；FROM/RUN/COPY 与 ADD/WORKDIR/ENV 与 ARG；CMD 与 ENTRYPOINT 的组合语义；.dockerignore。
+  - [分层缓存、依赖层设计、多阶段构建与镜像瘦身](https://example.org/docs/03-%E9%95%9C%E5%83%8F%E6%9E%84%E5%BB%BA/%E5%85%BB%E5%B0%8F%E5%85%BB%E5%BF%AB/%E5%88%86%E5%B1%82%E7%BC%93%E5%AD%98%E5%A4%9A%E9%98%B6%E6%AE%B5%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%95%9C%E5%83%8F%E7%98%A6%E8%BA%AB/index.md): 缓存命中规则与分层设计（Maven/npm/Gradle/pip 四栈对照）；COPY --from；基础镜像选型与体积耗时前后对照表。
+- [单机编排](https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/index.md): 主线站②：把九参数的 docker run 变成一条 compose up。
+  - [常用命令、启动顺序控制与健康检查](https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%90%AF%E5%81%9C/%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F%E4%B8%8E%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5/index.md): up/down/ps/logs/exec/build 的真实语义与数据风险；depends_on 三种条件与健康检查优先级、探测命令集、start_period 怎么定。
+  - [多环境与扩展、开发期热重载与完整实战](https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E6%97%A5%E5%B8%B8/%E5%A4%9A%E7%8E%AF%E5%A2%83%E7%83%AD%E9%87%8D%E8%BD%BD%E4%B8%8E%E4%BA%94%E6%9C%8D%E5%8A%A1%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/index.md): override 合并与 profiles、.env 插值的真实语义；compose watch 三档实测代价；一键起 web + api + MySQL + Redis + nginx 并跑通第②段判据。
+  - [为什么需要 Compose、语法基线与文件全字段参考](https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/compose%E8%AF%AD%E6%B3%95%E5%9F%BA%E7%BA%BF%E4%B8%8E%E6%96%87%E4%BB%B6%E5%85%A8%E5%AD%97%E6%AE%B5%E5%8F%82%E8%80%83/index.md): 从九参数的 docker run 到一份 compose.yaml；compose-spec 与已废弃字段、旧教程辨识、services 与顶层字段的逐条实测。
+- [原理深入](https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/index.md): 按需查阅层：不要求通读，每篇开头的触发条件告诉你什么时候该来。
+  - [容器的本质、Namespace 与 Cgroups](https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E9%9A%94%E7%A6%BB%E4%B8%8E%E8%B5%84%E6%BA%90/%E5%AE%B9%E5%99%A8%E6%9C%AC%E8%B4%A8namespace%E4%B8%8Ecgroups/index.md): unshare/lsns 手搓迷你容器；七种隔离；CPU/内存/IO 限制原理与 OOM Killer，137 的机制根据。
+  - [网络底层实现、跨主机网络、运行时生态与无 root 容器](https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E7%BD%91%E7%BB%9C%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6/%E7%BD%91%E7%BB%9C%E5%BA%95%E5%B1%82%E8%B7%A8%E4%B8%BB%E6%9C%BA%E6%96%B9%E6%A1%88%E4%B8%8E%E8%BF%90%E8%A1%8C%E6%97%B6%E7%94%9F%E6%80%81/index.md): docker0 与 veth pair 逐跳分析；overlay/macvlan/ipvlan 思路；OCI 与 runc/containerd 分工；user namespace 映射。
+  - [联合文件系统与 OverlayFS](https://example.org/docs/05-%E5%8E%9F%E7%90%86%E6%B7%B1%E5%85%A5/%E9%9A%94%E7%A6%BB%E4%B8%8E%E8%B5%84%E6%BA%90/%E8%81%94%E5%90%88%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%8E%E9%95%9C%E5%83%8F%E5%88%86%E5%B1%82/index.md): lowerdir/upperdir/merged 与写时复制；GraphDriver 实地观察；站④分层能省体积的机制解释。
+- [工程化与生产](https://example.org/docs/06-%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8E%E7%94%9F%E4%BA%A7/index.md): 团队尚在本地开发阶段，本篇按「上生产前的准入基线 + 演练」写，不假装有生产事故。
+  - [CI/CD 中的 Docker 与安全基线](https://example.org/docs/06-%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8E%E7%94%9F%E4%BA%A7/%E4%BA%A4%E4%BB%98%E9%93%BE%E8%B7%AF/ci-cd%E4%B8%AD%E7%9A%84docker%E4%B8%8E%E5%AE%89%E5%85%A8%E5%9F%BA%E7%BA%BF/index.md): Actions/GitLab CI/Jenkins 模板与缓存加速；trivy 扫描与漏洞分级处置；最小权限与 Dockerfile 安全基线清单。
+  - [日志与资源限制基线、部署策略与回滚](https://example.org/docs/06-%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8E%E7%94%9F%E4%BA%A7/%E8%BF%90%E8%A1%8C%E5%9F%BA%E7%BA%BF/%E6%97%A5%E5%BF%97%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6%E9%83%A8%E7%BD%B2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%9B%9E%E6%BB%9A/index.md): stdout 与日志轮转、接 ELK/Loki；必设资源限制与 CPU throttling 识别；滚动/蓝绿/灰度在单机的朴素实现。
+  - [监控最小集与备份容灾](https://example.org/docs/06-%E5%B7%A5%E7%A8%8B%E5%8C%96%E4%B8%8E%E7%94%9F%E4%BA%A7/%E8%BF%90%E8%A1%8C%E5%9F%BA%E7%BA%BF/%E7%9B%91%E6%8E%A7%E6%9C%80%E5%B0%8F%E9%9B%86%E4%B8%8E%E5%A4%87%E4%BB%BD%E5%AE%B9%E7%81%BE/index.md): cAdvisor + Prometheus + Grafana 与关键指标；数据卷备份恢复、引擎升级与宿主机迁移；没验证过的备份等于没有备份。
+- [运维手册](https://example.org/docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/index.md): 使用频率最高的一篇，故障域各节一律按「症状 → 判据 → 命令 → 根因」四列写。
+  - [命令速查表、症状索引与团队规范](https://example.org/docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/%E6%A3%80%E7%B4%A2%E4%B8%8E%E8%A7%84%E7%9F%A9/%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5%E7%97%87%E7%8A%B6%E7%B4%A2%E5%BC%95%E4%B8%8E%E5%9B%A2%E9%98%9F%E8%A7%84%E8%8C%83/index.md): 按命令分组的 cheat sheet；按现象（含报错原文关键字）分组的检索入口；命名、标签、Dockerfile 与 compose 规范。
+  - [排错手册：容器起不来与网络不通](https://example.org/docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/%E6%8C%89%E6%95%85%E9%9A%9C%E5%9F%9F%E6%8E%92%E9%94%99/%E5%AE%B9%E5%99%A8%E8%B5%B7%E4%B8%8D%E6%9D%A5%E4%B8%8E%E7%BD%91%E7%BB%9C%E4%B8%8D%E9%80%9A/index.md): exit code 速查与「起来立即退出」流程图；容器内→宿主机→外网→端口映射→DNS 的分段排查与 tcpdump 用法。
+  - [排错手册：磁盘占满与镜像拉取失败](https://example.org/docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/%E6%8C%89%E6%95%85%E9%9A%9C%E5%9F%9F%E6%8E%92%E9%94%99/%E7%A3%81%E7%9B%98%E5%8D%A0%E6%BB%A1%E4%B8%8E%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E5%A4%B1%E8%B4%A5/index.md): /var/lib/docker 膨胀五大来源与清理决策、误删 volume 的 rescue；超时/限流/认证/X509 与国内网络环境应对。
+  - [Windows 与 WSL2、性能排查、应急响应 runbook 与复盘库](https://example.org/docs/07-%E8%BF%90%E7%BB%B4%E6%89%8B%E5%86%8C/%E6%8C%89%E6%95%85%E9%9A%9C%E5%9F%9F%E6%8E%92%E9%94%99/windows%E4%B8%8Ewsl2%E6%80%A7%E8%83%BD%E6%8E%92%E6%9F%A5%E5%BA%94%E6%80%A5runbook%E4%B8%8E%E5%A4%8D%E7%9B%98/index.md): vmmem 暴涨与 vhdx 不回收；CPU/IO/内存三条测量路径；按「第一步敲什么」组织的 runbook 与四段式复盘模板。
+- [生态与附录](https://example.org/docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/index.md): 坐标与查阅件：什么时候该换工具，以及版本口径以谁为准。
+  - [容器生态地图、Kubernetes 衔接与替代品](https://example.org/docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/%E7%94%9F%E6%80%81%E5%9D%90%E6%A0%87/%E5%AE%B9%E5%99%A8%E7%94%9F%E6%80%81%E5%9C%B0%E5%9B%BE%E4%B8%8Ekubernetes%E8%A1%94%E6%8E%A5/index.md): Docker 到 Compose 到 K8s 到服务网格各阶段引入什么；概念对照与单机为何不够的边界；Podman/nerdctl 迁移成本。
+  - [术语表、参考资料、版本兼容矩阵与变更日志](https://example.org/docs/08-%E7%94%9F%E6%80%81%E4%B8%8E%E9%99%84%E5%BD%95/%E6%9F%A5%E9%98%85%E4%BB%B6/%E6%9C%AF%E8%AF%AD%E8%A1%A8%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99%E4%B8%8E%E7%89%88%E6%9C%AC%E5%85%BC%E5%AE%B9%E7%9F%A9%E9%98%B5/index.md): 全量术语中文对照；官方文档与书目索引；Engine/Compose/BuildKit/WSL2 版本组合的 as-of 表与现查命令。
+- [常见问题](https://example.org/docs/09-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/index.md): 压在全库最后：每条按「问题—机制—数字/命令—自查动作」四段作答，并指回正文判据。
+  - [常见问题 FAQ：新手、构建、网络与数据、生产运维](https://example.org/docs/09-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/faq/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98faq/index.md): 四个阶段的高频困惑合集，含 localhost 时通时不通、改代码为何重下依赖、137 是什么、JVM 堆与容器 limits 怎么配。
+
+## Site locales
+
+- [简体中文](https://example.org/index.md)

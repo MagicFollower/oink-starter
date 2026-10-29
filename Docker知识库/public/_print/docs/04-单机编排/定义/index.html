@@ -1,0 +1,872 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f6f3" data-td-canvas-light="#f7f6f3" data-td-canvas-dark="#161513">
+
+<style>
+  html { background: #f7f6f3; color: #21201c; }
+  html[data-bs-theme='dark'] { background: #161513; color: #ece9e3; }
+  html[data-td-preset='slate'] { background: #f1f4f8; color: #16222e; }
+  html[data-td-preset='slate'][data-bs-theme='dark'] { background: #0b1119; color: #e8eef6; }
+  html[data-td-preset='ink'] { background: #ffffff; color: #141414; }
+  html[data-td-preset='ink'][data-bs-theme='dark'] { background: #0b0b0b; color: #ededed; }
+  html[data-td-preset='terminal'] { background: #f4f5f2; color: #1d211f; }
+  html[data-td-preset='terminal'][data-bs-theme='dark'] { background: #0c0f0e; color: #d3dbd6; }
+  html[data-td-theme-init] * { transition: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: none !important; }
+  :is([data-td-theme-toggle], [data-td-theme-icon]) > [hidden] { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--sun { display: none !important; }
+  html[data-bs-theme='dark'] :is([data-td-theme-toggle], [data-td-theme-icon]) > .td-shell-icon--moon { display: inline-block !important; }
+</style>
+
+<script>
+  (function() {
+    var root = document.documentElement;
+    var allowed = ["paper","slate","ink","terminal"];
+    var canvases = {"ink":{"dark":"#0b0b0b","darkInk":"#ededed","light":"#ffffff","lightInk":"#141414"},"paper":{"dark":"#161513","darkInk":"#ece9e3","light":"#f7f6f3","lightInk":"#21201c"},"slate":{"dark":"#0b1119","darkInk":"#e8eef6","light":"#f1f4f8","lightInk":"#16222e"},"terminal":{"dark":"#0c0f0e","darkInk":"#d3dbd6","light":"#f4f5f2","lightInk":"#1d211f"}};
+    var preset = null;
+    try {
+      preset = localStorage.getItem('td-preset');
+      if (preset !== null && allowed.indexOf(preset) < 0) {
+        preset = null;
+        localStorage.removeItem('td-preset');
+      }
+    } catch (_) {
+      
+    }
+    if (preset) root.setAttribute('data-td-preset', preset);
+    var c = canvases[root.getAttribute('data-td-preset')];
+    if (!c) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('data-td-canvas-light', c.light);
+      meta.setAttribute('data-td-canvas-dark', c.dark);
+      meta.setAttribute('content', c.light);
+    });
+  })();
+</script>
+<script>
+  (function() {
+    const themeKey = 'td-color-theme';
+    let storedTheme = null;
+    try {
+      storedTheme = localStorage.getItem(themeKey);
+      if (storedTheme !== null && !['light', 'dark', 'auto'].includes(storedTheme)) {
+        storedTheme = null;
+        localStorage.removeItem(themeKey);
+      }
+    } catch (_) {
+      
+      
+    }
+    let theme = storedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    if (theme === 'auto') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(meta) {
+      meta.setAttribute('content', meta.getAttribute('data-td-canvas-' + theme));
+    });
+    document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+<link rel="canonical" type="text/html" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/">
+<link rel="alternate" type="application/rss&#43;xml" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/index.xml">
+<link rel="alternate" type="text/markdown" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/index.md">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+<title>定义 | Docker 团队知识库</title>
+<meta name="description" content="先把语法基线定死，再谈字段。">
+<link rel="canonical" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/">
+<link rel="alternate" hreflang="zh-CN" href="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/">
+<meta property="og:url" content="https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/">
+	<meta property="og:site_name" content="Docker 团队知识库">
+	<meta property="og:title" content="定义">
+	<meta property="og:description" content="先把语法基线定死，再谈字段。">
+	<meta property="og:locale" content="zh_CN">
+	<meta property="og:type" content="website">
+
+	<meta itemprop="name" content="定义">
+	<meta itemprop="description" content="先把语法基线定死，再谈字段。">
+	<meta itemprop="wordCount" content="46">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="定义">
+	<meta name="twitter:description" content="先把语法基线定死，再谈字段。">
+<link rel="preload" href="/scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" as="style" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+<link href="/scss/fontawesome.min.d1b0898e80994c0e0be2e673debfd8c2e5eb8c0b96d55c483e1be19cb01e5d10.css" rel="stylesheet" integrity="sha256-0bCJjoCZTA4L4uZz3r/YwuXrjAuW1VxIPhvhnLAeXRA=" crossorigin="anonymous">
+<link href="/scss/main.min.dc8890df5aa9983d11498b6baf30e358e5e498014b4041880425b85385b991ce.css" rel="stylesheet" integrity="sha256-3IiQ31qpmD0RSYtrrzDjWOXkmAFLQEGIBCW4U4W5kc4=" crossorigin="anonymous">
+
+  </head>
+  <body class="td-section td-print-view">
+    <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
+
+    <div class="container-fluid td-print-shell">
+      <main id="td-main-content" class="td-print-document" tabindex="-1">
+        
+
+
+
+
+<div class="td-content">
+<div class="td-page-notice td-page-notice--primary d-print-none">
+<p>
+这是本节的多页打印视图。
+<button type="button" class="btn btn-link p-0 align-baseline" data-td-action="print">点击此处打印</button>.
+</p><p>
+<a href="/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/">返回本页常规视图</a>.
+</p>
+</div>
+
+
+
+<h1 class="title">定义</h1>
+<div class="lead">先把语法基线定死，再谈字段。</div>
+
+
+
+
+    <ul>
+    
+  
+  
+  
+  
+
+  
+    
+    
+    <li>
+1: <a href="#pg-827804aef89669d08f53f4cf8e47643a">为什么需要 Compose、语法基线与文件全字段参考</a>
+
+
+    </li>
+  
+
+    </ul>
+<div class="content">
+      <p>先把语法基线定死，再谈字段。</p>
+<p>本板块包含：为什么需要 Compose、语法基线与文件全字段参考。</p>
+
+</div>
+</div>
+
+
+  
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="">
+	<h1 id="pg-827804aef89669d08f53f4cf8e47643a">1 - 为什么需要 Compose、语法基线与文件全字段参考</h1>
+    <div class="lead">从九参数的 docker run 到一份 compose.yaml；compose-spec 与已废弃字段、旧教程辨识、services 与顶层字段的逐条实测。</div>
+	<blockquote>
+<p><strong>实战落点</strong>：示例链第②段 · 一条命令起全栈（本篇负责「第②段那份文件凭什么长这样」，为 4.7~4.9 的动手准备好语法基线）
+<strong>示例版本</strong>：消费 <code>示例/贯穿示例/compose.yaml</code>（本篇不产出文件，但每一条字段读数的来源都是它）；本篇的判据实验另外用了 10 份一次性最小样本，写在正文里可直接复制
+<strong>前置依赖</strong>：<a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E6%8E%A5%E4%B8%8A%E5%8E%BB/%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E4%B8%8E%E6%9D%83%E9%99%90%E6%97%B6%E5%8C%BA/">/docs/02-核心操作/接上去/端口映射数据管理与权限时区/</a>、<a href="/docs/02-%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C/%E8%B7%91%E8%B5%B7%E6%9D%A5/%E9%95%9C%E5%83%8F%E7%AE%A1%E7%90%86%E4%B8%8E%E5%AE%B9%E5%99%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">/docs/02-核心操作/跑起来/镜像管理与容器生命周期/</a>、<a href="/docs/00-%E5%AF%BC%E8%AF%BB/%E6%8A%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%A5%BD/%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87/">/docs/00-导读/把环境搭好/环境准备/</a>
+<strong>本篇产出物</strong>：团队语法基线的一句话结论（并要求在 7.11 落地为唯一事实来源）；一张「哪些写错法会被 <code>config</code> 拦住、哪些不会」的实测表；一张 services 字段速查表，逐列标出本机是否验证过
+<strong>拓展接口</strong>：本篇的「<code>config</code> 是唯一的真相来源」这条判据在 4.7 多文件合并与 6.6 CI 里被反复复用；「已废弃 <code>version:</code> 字段」在 8.6 版本兼容矩阵里作为一条独立条目；「中文目录名导致项目名为空」在 7.2 症状索引里单列
+<strong>难度·耗时</strong>：★☆☆ · 40 分钟（读 + 三条动手判据）
+<strong>自测三题</strong>：</p>
+<ol>
+<li>为什么 <code>docker compose config</code> 输出的模型和你写进文件的内容不完全一样？举两个具体字段。</li>
+<li><code>version: &quot;3.8&quot;</code> 这一行现在会被拒绝吗？依据是什么？旧教程里还有哪三行属于同一类？</li>
+<li>一份文件放在中文目录里、没写 <code>name:</code>，报什么错？为什么？</li>
+</ol>
+</blockquote>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--为什么一条-docker-run-到九个参数就撑不住了">为什么一条 <code>docker run</code> 到九个参数就撑不住了
+</h2>
+<p>第二篇里那条把 redis 跑起来的命令，是<strong>单服务</strong>的极限形态：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-0" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-0-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker run -d --name m-p1 -p 6380:6379 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="go">    -v mdata:/data --memory 512m --tz Asia/Shanghai \
+</span></span></span><span class="line"><span class="cl"><span class="go">    --health-cmd &#34;redis-cli ping&#34; --health-interval 5s \
+</span></span></span><span class="line"><span class="cl"><span class="go">    --health-retries 5 --health-start-period 20s \
+</span></span></span><span class="line"><span class="cl"><span class="go">    redis:7-alpine redis-server --appendonly yes
+</span></span></span></code></pre></div></div>
+</div>
+<p>现在把第②段那个栈（web + api + MySQL + Redis + nginx 反向代理）用同样的方式写出来。下面是按 <code>compose.yaml</code> 逐条推出来的等价展开，<strong>不是实测输出</strong>——它是为了说明规模，行为判据都由后面的 compose 实测给出：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-1" data-td-code data-td-code-auto-id
+     data-td-language="bash" data-td-line-count="20">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-1-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker network create kb-p2-net
+</span></span><span class="line"><span class="cl">docker volume create kb-p2_dbdata
+</span></span><span class="line"><span class="cl">docker volume create kb-p2_cachedata
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">docker run -d --name db    --network kb-p2-net -v kb-p2_dbdata:/var/lib/mysql <span class="se">\
+</span></span></span><span class="line"><span class="cl">  -e <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>… -e <span class="nv">MYSQL_DATABASE</span><span class="o">=</span>kbdemo <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --health-cmd <span class="s1">&#39;…&#39;</span> --health-interval 5s --health-timeout 3s --health-retries <span class="m">20</span> --health-start-period 20s <span class="se">\
+</span></span></span><span class="line"><span class="cl">  mysql:8.4
+</span></span><span class="line"><span class="cl">docker run -d --name cache --network kb-p2-net -v kb-p2_cachedata:/data <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --health-cmd <span class="s1">&#39;redis-cli ping&#39;</span> --health-interval 5s --health-timeout 2s --health-retries <span class="m">10</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl">  redis:7-alpine redis-server --appendonly yes
+</span></span><span class="line"><span class="cl">docker build -t kb-p2-api ./api
+</span></span><span class="line"><span class="cl">docker run -d --name api --network kb-p2-net -e <span class="nv">DB_HOST</span><span class="o">=</span>db -e <span class="nv">REDIS_HOST</span><span class="o">=</span>cache <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --health-cmd <span class="s1">&#39;…&#39;</span> … kb-p2-api                     <span class="c1"># ← 必须先等 db healthy，顺序得自己控</span>
+</span></span><span class="line"><span class="cl">docker build -t kb-p2-web ./web
+</span></span><span class="line"><span class="cl">docker run -d --name web --network kb-p2-web kb-p2-web
+</span></span><span class="line"><span class="cl">docker run -d --name proxy --network kb-p2-net -p 8080:80 <span class="se">\
+</span></span></span><span class="line"><span class="cl">  -v <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --depends-on <span class="nv">api</span><span class="o">=</span>healthy                          <span class="c1"># ← 这条参数在 docker run 里并不存在</span>
+</span></span><span class="line"><span class="cl">nginx:1.27-alpine</span></span></code></pre></div></div>
+</div>
+<p>三个问题立刻出现：<strong>顺序要人控</strong>（<code>docker run</code> 没有「等依赖 healthy」这个参数）、<strong>名字要人对</strong>（网络别名、卷名前缀散在每条命令里）、<strong>改一次要重放全部</strong>（改个环境变量得记住它是第几条 run 的参数）。</p>
+<p>Compose 换掉的正是这个方向：你写下<strong>期望状态</strong>，工具负责把它和实际状态做差集并收敛。这不是修辞——<code>up</code> 的行为在本机量过：改了 <code>.env</code> 里的端口再 <code>up -d</code>，只有那一个服务被 <code>Recreate</code>，其余四个报 <code>Running</code>（读数在 4.4/4.5 那篇）。</p>
+<pre class="td-mermaid-source"><code class="language-mermaid">flowchart TB
+    sub IMP[&#34;命令式：docker run&#34;]
+        R1[&#34;第 1 步：建网络&#34;] --&gt; R2[&#34;第 2 步：建卷&#34;]
+        R2 --&gt; R3[&#34;第 3 步：起 db&#34;]
+        R3 --&gt; R4[&#34;第 4 步：人肉确认 db 可用&#34;]
+        R4 --&gt; R5[&#34;第 5 步：起 api&#34;]
+        R5 --&gt; R6[&#34;第 6 步：改一个参数，从头重放&#34;]
+    end
+    sub DEC[&#34;声明式：compose.yaml&#34;]
+        F1[&#34;一份文件写下期望状态&#34;] --&gt; F2[&#34;up：计算差集&#34;]
+        F2 --&gt; F3[&#34;只动需要动的对象&#34;]
+        F3 --&gt; F4[&#34;再 up 一次：几乎什么都不做&#34;]
+    end
+    IMP -.-&gt;|&#34;顺序、命名、重放都交给人&#34;| HUMAN[&#34;人脑记账&#34;]
+    DEC -.-&gt;|&#34;三项都交给模型&#34;| TOOL[&#34;compose 的收敛循环&#34;]</code></pre><blockquote>
+<p>💡 新人小结：<strong><code>docker run</code> 是「每次开工前手动按十二个按钮」，<code>compose.yaml</code> 是「把工序单贴在机器上」</strong>。按钮按错顺序，机器不启动但也不会告诉你为什么；工序单交给机器之后，机器自己按顺序按，而且每次开工前先对比「现在是不是已经按到位了」。类比之后接机制：工序单就是那份 YAML 描述的<strong>期望模型</strong>，按钮顺序是它的<strong>依赖图</strong>，对比动作是 <code>up</code> 的 diff——所以下面所有语法问题都可以还原成一句：「模型里这个字段声明的是什么，实际对象现在是什么」。</p>
+</blockquote>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--语法基线三个名字两种调用一条已废弃字段">语法基线：三个名字、两种调用、一条已废弃字段
+</h2>
+<p>先把容易混的三个名词钉住：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">名词</th>
+      <th scope="col">是什么</th>
+      <th scope="col">本机读数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>compose-spec</strong></td>
+      <td>文件格式的规范（一套 YAML 字段的定义与合并语义），语言无关</td>
+      <td>下面所有「字段能不能写、写错报什么」的行为都来自它的校验器</td>
+    </tr>
+    <tr>
+      <td><strong>Docker Compose v2</strong>（<code>docker compose</code>）</td>
+      <td>规范的 Go 实现，作为 Docker CLI 插件</td>
+      <td><code>Docker Compose version v5.5.1</code></td>
+    </tr>
+    <tr>
+      <td><strong><code>docker-compose</code>（连字符）</strong></td>
+      <td>老的 Python 实现的名字；现在这台机器上它指的是<strong>同一个</strong> v2 实现</td>
+      <td><code>where docker-compose</code> 指到 Docker Desktop 的 <code>resources\bin\docker-compose.exe</code>，<code>docker-compose version</code> 报的仍是 <code>Docker Compose version v5.5.1</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>这条读数很重要，因为它否定了一种常见的「新旧判断法」：<strong>不要看到 <code>docker-compose</code> 这个写法就断定对方在用 v1</strong>——在同一台机器上这两个名字可能指向同一个二进制。要判断实现与版本，只看 <code>version</code> 输出的字符串。</p>
+<p><code>version:</code> 顶层字段的现状是本机实测的：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-3" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-3-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet           <span class="c1"># 文件第一行写的是 version: &#34;3.8&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]
+</span></span></span><span class="line"><span class="cl"><span class="go">level=warning msg=&#34;…\compose.yaml: the attribute `version` is obsolete,
+</span></span></span><span class="line"><span class="cl"><span class="go">it will be ignored, please remove it to avoid potential confusion&#34;
+</span></span></span></code></pre></div></div>
+</div>
+<p><strong>不报错，只警告，并且明确说「会被忽略」</strong>。所以旧教程里那行 <code>version: '3.7'</code> 拷过来照样能跑，但它已经不再选择任何语法版本——字段校验用的是当前实现自带的那一份 schema。这就是为什么「按 <code>version</code> 行判断这段配置属于哪个年代」这件事已经失效。</p>
+<blockquote>
+<p>💡 新人小结：顶层那行 <code>version: &quot;3.8&quot;</code> 现在像<strong>老地图上印的「1998 年测量」</strong>——地图你照样能看，但那行字已经不决定地图画的是什么了；真正决定内容的是你手上这一版地图本身。类比之后接机制：决定「哪些字段合法」的是这台机器上 Compose 实现自带的那份 schema，<code>config</code> 只会告诉你「这一行我忽略了」，不会替你切回 3.8 的语义。所以判断一段配置新旧，要看<strong>字段级信号</strong>（有没有 <code>links</code>、<code>volumes_from</code>、<code>test: []</code> 这类），不是那行印章。</p>
+</blockquote>
+<p>旧教程的辨识改看这几条信号，每条都给出「现在该怎么写」：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">看到</th>
+      <th scope="col">大致年代/来源</th>
+      <th scope="col">现在的写法</th>
+      <th scope="col">依据</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>顶层 <code>version:</code></td>
+      <td>v1 时代或早期 v2</td>
+      <td>删掉</td>
+      <td>本机 warning 原文</td>
+    </tr>
+    <tr>
+      <td><code>docker-compose up</code>（文档里的命令）</td>
+      <td>可能是 v1，也可能只是旧写法</td>
+      <td>用 <code>docker compose</code>，并在同一台机器上核 <code>version</code> 字符串</td>
+      <td>上面那条 <code>where</code> 读数</td>
+    </tr>
+    <tr>
+      <td><code>links:</code> 字段、<code>--link</code></td>
+      <td>bridge 默认网络时代的容器互通</td>
+      <td><code>networks:</code> + 服务名解析</td>
+      <td>第①段实测：自定义网络里服务名直接可解析</td>
+    </tr>
+    <tr>
+      <td><code>network_mode: default</code></td>
+      <td>旧文档里的「默认网络」写法</td>
+      <td>省略或用 <code>networks: [default]</code></td>
+      <td>本机未跑，属语法层提示</td>
+    </tr>
+    <tr>
+      <td><code>volumes_from:</code></td>
+      <td>用数据卷容器共享数据的旧模式</td>
+      <td>各自声明 named volume</td>
+      <td>本轮卷读数</td>
+    </tr>
+    <tr>
+      <td><code>swarm</code> 专属的 <code>deploy.placement</code>/<code>update_config</code> 用在单机 compose</td>
+      <td>swarm 时代</td>
+      <td>单机上多半被忽略，要按实现确认</td>
+      <td>本轮未实测，见未验证项</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>团队语法基线一句话结论</strong>（这条要在 7.11 团队规范里落地成唯一事实来源，其它章节只链接不复述）：</p>
+<blockquote>
+<p>统一用 <code>docker compose</code>（v2 实现）；文件名统一 <code>compose.yaml</code>，开发期覆盖写 <code>compose.override.yaml</code>；<strong>不写顶层 <code>version:</code></strong>；顶层显式写 <code>name:</code>；口令一类的值一律走 <code>.env</code> 或注入，不进文件。</p>
+</blockquote>
+<div class="td-callout td-callout--note" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-circle-info" aria-hidden="true"></i><span class="td-callout__label">说明</span></div>
+  <div class="td-callout__body">
+<p>为什么必须写 <code>name:</code>：项目名会进容器名、网络名、卷名。Compose 用「第一个指定文件所在目录的<strong>基本名</strong>」当默认项目名，并把非法字符过滤掉。本机实测：把同样的文件放进一个中文命名的目录，<code>config</code> 直接失败——</p>
+  </div>
+</div><div class="td-code td-code--untitled" id="td-code-05fd8770-fence-4" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-4-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet      <span class="c1"># 目录名是中文，文件里没有 name:</span>
+</span></span><span class="line"><span class="cl"><span class="go">[rc=1] project name must not be empty
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet      <span class="c1"># 内容一字不改，只把目录换成 ASCII 名</span>
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]
+</span></span></span></code></pre></div></div>
+</div>
+<p>这条不是抽象风险：团队的仓库路径里出现「文档」「项目」这类中文目录名是常态，而报错文本 <code>project name must not be empty</code> 完全不提示「是目录名导致的」，新人会去查 YAML 语法。</p>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--一个-composeyaml-分几层">一个 <code>compose.yaml</code> 分几层
+</h2>
+<pre class="td-mermaid-source"><code class="language-mermaid">flowchart TD
+    TOP[&#34;顶层&#34;] --&gt; N[&#34;name：项目名，进所有对象名&#34;]
+    TOP --&gt; SVC[&#34;services：唯一必须有内容的一层&#34;]
+    TOP --&gt; NET[&#34;networks：网络定义&#34;]
+    TOP --&gt; VOL[&#34;volumes：命名卷定义&#34;]
+    TOP --&gt; CS[&#34;configs / secrets：文件类注入&#34;]
+    TOP --&gt; INC[&#34;include：把别处的 compose 文件并进来&#34;]
+    TOP --&gt; EXT[&#34;x- 前缀键：自定义扩展，不参与语义&#34;]
+    SVC --&gt; S1[&#34;镜像与构建：image / build&#34;]
+    SVC --&gt; S2[&#34;运行内容：command / entrypoint / environment / working_dir / user&#34;]
+    SVC --&gt; S3[&#34;互通：ports / networks / extra_hosts / hostname / dns&#34;]
+    SVC --&gt; S4[&#34;数据：volumes / tmpfs&#34;]
+    SVC --&gt; S5[&#34;生命周期：restart / healthcheck / depends_on / stop_grace_period&#34;]
+    SVC --&gt; S6[&#34;资源与安全：deploy / cap_add / security_opt / sysctls / read_only&#34;]
+    SVC --&gt; S7[&#34;开发与协作：profiles / develop.watch / labels / extends&#34;]</code></pre><p><code>x-</code> 前缀与 <code>include</code> 是本机能确认「确实支持」的两条：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-6" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-6-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> 顶层写 x-团队约定: <span class="p">&amp;</span>team <span class="o">{</span>labels: <span class="o">{</span>team: platform<span class="o">}}</span>，服务里用 &lt;&lt;: *team
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]  services.a.labels = {&#34;team&#34;: &#34;platform&#34;}
+</span></span></span><span class="line"><span class="cl"><span class="go">        config --format json 的顶层键 = [&#39;name&#39;, &#39;networks&#39;, &#39;services&#39;, &#39;x-团队约定&#39;]
+</span></span></span></code></pre></div></div>
+</div>
+<p>顶层键里 <code>x-团队约定</code> <strong>被保留下来</strong>，说明它是「合法但不参与语义」的容器；YAML 锚点（<code>&amp;team</code> / <code>*team</code> / <code>&lt;&lt;:</code>）也照常生效。这两条组合起来就是团队里最常用的复用手法：用 <code>x-</code> 放一份「约定」，服务用锚点合并它（比如统一的 <code>labels</code>、<code>restart</code>、日志驱动）。</p>
+<p>另外两条同样跑通的复用手段，语义差别要说清：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-7" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-7-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">#</span> extends：从同目录另一个文件里的服务继承
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]  web = {&#34;environment&#34;:{&#34;EXTRA&#34;:&#34;1&#34;,&#34;FROM&#34;:&#34;override&#34;},&#34;image&#34;:&#34;nginx:1.27-alpine&#34;, …}
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="gp">#</span> include：另一个文件整个并进当前项目
+</span></span><span class="line"><span class="cl"><span class="go">[rc=0]  config --services → inc-a main
+</span></span></span></code></pre></div></div>
+</div>
+<p><code>extends</code> 是<strong>服务级继承</strong>（继承来的字段与本地字段按同一套合并规则叠，上例里 <code>FROM</code> 被本地值 <code>override</code> 覆盖、<code>EXTRA</code> 新增、<code>image</code> 继承）；<code>include</code> 是<strong>文件级并入</strong>（那个文件里的服务、网络、卷都进当前模型）。选哪个的判断标准是「要不要改一部分」：要改就用 <code>extends</code>，只是拆分文件就用 <code>include</code>。</p>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--services-字段速查逐列标注本机是否验证">services 字段速查（逐列标注本机是否验证）
+</h2>
+<p>这张表是 4.3 的产出物。「本机读数」列只填真跑出来的值，没跑的写「未跑」——不猜。</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">字段</th>
+      <th scope="col">一句话</th>
+      <th scope="col">本机读数 / 未跑说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>image</code></td>
+      <td>用哪个镜像</td>
+      <td><code>redis:7-alpine</code>、<code>mysql:8.4</code> 直接进模型；<code>docker compose images</code> 列出 <code>IMAGE ID</code> 与 <code>SIZE</code>（<code>mysql:8.4</code> 为 <code>1.1GB</code>）</td>
+    </tr>
+    <tr>
+      <td><code>build</code></td>
+      <td>从 Dockerfile 构建</td>
+      <td>规范化成绝对路径的 <code>context</code> + <code>dockerfile</code>；产出镜像默认名 <code>kb-p2-api</code>（项目名-服务名），<code>25.6MB</code></td>
+    </tr>
+    <tr>
+      <td><code>command</code> / <code>entrypoint</code></td>
+      <td>覆盖镜像的启动命令</td>
+      <td>多文件合并时<strong>整体替换</strong>（不是追加）</td>
+    </tr>
+    <tr>
+      <td><code>environment</code></td>
+      <td>环境变量（map 或 list 写法）</td>
+      <td>合并结果 <code>{&quot;DB_HOST&quot;:&quot;db&quot;,&quot;LOG_LEVEL&quot;:&quot;debug&quot;,&quot;REDIS_HOST&quot;:&quot;cache&quot;}</code>，同键后写胜</td>
+    </tr>
+    <tr>
+      <td><code>env_file</code></td>
+      <td>从文件注入环境</td>
+      <td>未跑（本轮只用 <code>.env</code> + 插值）</td>
+    </tr>
+    <tr>
+      <td><code>ports</code></td>
+      <td>宿主端口映射</td>
+      <td>长写法规范化为 <code>{&quot;mode&quot;:&quot;ingress&quot;,&quot;host_ip&quot;:&quot;127.0.0.1&quot;,&quot;target&quot;:3306,&quot;published&quot;:&quot;3307&quot;,&quot;protocol&quot;:&quot;tcp&quot;}</code>；<code>&quot;99999-80&quot;</code> 这种写不完整的区间报 <code>invalid containerPort: 99999-80</code></td>
+    </tr>
+    <tr>
+      <td><code>expose</code></td>
+      <td>只声明不外发</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td><code>volumes</code></td>
+      <td>挂载</td>
+      <td>短写法 <code>dbdata:/var/lib/mysql</code> 变 <code>{&quot;type&quot;:&quot;volume&quot;,&quot;source&quot;:&quot;dbdata&quot;,&quot;target&quot;:&quot;/var/lib/mysql&quot;}</code>；单段写法 <code>/tmp/x</code> <strong>合法</strong>（匿名卷，不报错）</td>
+    </tr>
+    <tr>
+      <td><code>tmpfs</code></td>
+      <td>内存盘</td>
+      <td>未跑（第①篇量过容器内 <code>tmpfs</code> 是 <code>noexec</code>）</td>
+    </tr>
+    <tr>
+      <td><code>networks</code></td>
+      <td>接哪些网络</td>
+      <td>列表写法 <code>[n1]</code> 与 override 的 <code>[n2]</code> 合并成<strong>并集</strong> <code>{&quot;n1&quot;:null,&quot;n2&quot;:null}</code></td>
+    </tr>
+    <tr>
+      <td><code>network_mode</code></td>
+      <td>单网络简写（<code>host</code>/<code>none</code>/<code>bridge</code>）</td>
+      <td>未跑；与 <code>networks</code> 互斥</td>
+    </tr>
+    <tr>
+      <td><code>hostname</code> / <code>extra_hosts</code> / <code>dns</code></td>
+      <td>容器名与解析</td>
+      <td>未跑；内置 DNS 是 <code>127.0.0.11</code>（第②篇读数）</td>
+    </tr>
+    <tr>
+      <td><code>depends_on</code></td>
+      <td>启动依赖</td>
+      <td>见 4.5：列表形态规范化成 <code>condition: service_started</code>，循环依赖报 <code>dependency cycle detected: a -&gt; b -&gt; a</code></td>
+    </tr>
+    <tr>
+      <td><code>healthcheck</code></td>
+      <td>就绪探测</td>
+      <td>见 4.6：compose 写就覆盖镜像；<code>disable: true</code> → <code>{&quot;Test&quot;:[&quot;NONE&quot;]}</code>；<code>test: []</code> → <code>healthcheck={}</code></td>
+    </tr>
+    <tr>
+      <td><code>restart</code></td>
+      <td>重启策略</td>
+      <td><code>restart: maybe</code> 被 <code>config</code> 放过（rc=0），到运行时才由 daemon 拒绝：<code>invalid restart policy: unknown policy 'maybe'; use one of 'no', 'always', 'on-failure', or 'unless-stopped'</code></td>
+    </tr>
+    <tr>
+      <td><code>profiles</code></td>
+      <td>哪些命令带上这个服务</td>
+      <td>不带 <code>--profile app</code> 时 <code>config --services</code> 只有 <code>cache db</code></td>
+    </tr>
+    <tr>
+      <td><code>develop.watch</code></td>
+      <td>开发期热重载</td>
+      <td>规范化成 <code>{&quot;action&quot;:&quot;sync+restart&quot;,&quot;path&quot;:…,&quot;target&quot;:&quot;/usr/share/nginx/html/index.html&quot;,&quot;exec&quot;:{&quot;command&quot;:null}}</code>；三档代价见 4.8</td>
+    </tr>
+    <tr>
+      <td><code>labels</code></td>
+      <td>打标签</td>
+      <td>锚点合并可用（见上一节）；<code>com.docker.compose.*</code> 是 compose 自己的账本</td>
+    </tr>
+    <tr>
+      <td><code>container_name</code></td>
+      <td>固定容器名</td>
+      <td>未跑；注意它会<strong>破坏 <code>--scale</code></strong>，本团队建议禁用（判据见 4.4）</td>
+    </tr>
+    <tr>
+      <td><code>deploy</code></td>
+      <td>资源与更新策略</td>
+      <td>映射类<strong>深合并</strong>（<code>memory: 128m</code> 与 override 的 <code>cpus</code> 共存，<code>128m</code> 被规范化成 <code>134217728</code>）</td>
+    </tr>
+    <tr>
+      <td><code>cap_add</code> / <code>cap_drop</code> / <code>security_opt</code> / <code>sysctls</code> / <code>read_only</code></td>
+      <td>安全收紧</td>
+      <td>未跑，归 5.2 与 6.3</td>
+    </tr>
+    <tr>
+      <td><code>user</code> / <code>group_add</code> / <code>ulimits</code></td>
+      <td>身份与限额</td>
+      <td>未跑，归 2.7 的 UID/GID 现象与 5.3</td>
+    </tr>
+    <tr>
+      <td><code>stop_grace_period</code> / <code>stop_signal</code></td>
+      <td>怎么被停</td>
+      <td>未跑</td>
+    </tr>
+    <tr>
+      <td><code>secrets</code> / <code>configs</code></td>
+      <td>注入文件</td>
+      <td><code>secrets: [pw]</code> 而顶层没声明 → <code>service &quot;s&quot; refers to undefined secret pw: invalid compose project</code></td>
+    </tr>
+    <tr>
+      <td><code>extends</code></td>
+      <td>服务级继承</td>
+      <td>见上一节读数</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--顶层四个键networks--volumes--configs--secrets">顶层四个键：<code>networks</code> / <code>volumes</code> / <code>configs</code> / <code>secrets</code>
+</h2>
+<p><code>config --format json</code> 是看清楚这一层的唯一办法，因为<strong>规范化会改你的名字</strong>：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-8" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-8-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app config --format json   <span class="c1"># 节选</span>
+</span></span><span class="line"><span class="cl"><span class="go">  顶层 name    = kb-p2
+</span></span></span><span class="line"><span class="cl"><span class="go">  networks     = {&#34;default&#34;: {&#34;name&#34;: &#34;kb-p2-net&#34;, &#34;ipam&#34;: {}}}
+</span></span></span><span class="line"><span class="cl"><span class="go">  volumes      = {&#34;cachedata&#34;: {&#34;name&#34;: &#34;kb-p2_cachedata&#34;}, &#34;dbdata&#34;: {&#34;name&#34;: &#34;kb-p2_dbdata&#34;}}
+</span></span></span></code></pre></div></div>
+</div>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">键</th>
+      <th scope="col">作用</th>
+      <th scope="col">必须知道的落点</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>networks</code></td>
+      <td>定义网络；<code>default</code> 不写就自动建</td>
+      <td>本项目显式命名成 <code>kb-p2-net</code>，所以 <code>docker network ls</code> 里查得到它，不受前缀规则影响</td>
+    </tr>
+    <tr>
+      <td><code>volumes</code></td>
+      <td>定义命名卷</td>
+      <td>不写 <code>name:</code> 时<strong>自动加项目前缀</strong>：声明是 <code>dbdata</code>，实际叫 <code>kb-p2_dbdata</code>。手工 <code>docker volume rm</code> 按前缀名找</td>
+    </tr>
+    <tr>
+      <td><code>configs</code></td>
+      <td>注入配置文件（文本类）</td>
+      <td>本轮未用；<code>services.*.configs</code> 引用未声明的 config 会像 secret 一样在加载期失败</td>
+    </tr>
+    <tr>
+      <td><code>secrets</code></td>
+      <td>注入敏感文件</td>
+      <td>未跑通用法，只跑到「引用未声明」的报错文本；生产写法归 6.3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>前缀这条规则的副作用很实在：<strong>同一个 <code>compose.yaml</code> 换 <code>-p</code> 或换目录名，会得到另一套卷</strong>。这就是「换了个项目名，数据库怎么变空了」的机制解释（症状索引里值得单列）。要绑死就用 <code>name:</code>（卷/网络各自也能写 <code>name:</code>）。</p>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--哪些写错法会被拦住config-的边界">哪些写错法会被拦住：<code>config</code> 的边界
+</h2>
+<p><code>docker compose config --quiet</code> 是校验器（<code>--quiet</code> 只报问题不打印模型）。它的报错形状本机逐条量过，<strong>这张表的价值在于它会给你「原来这条不拦」的反例</strong>：</p>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">写法</th>
+      <th scope="col"><code>config</code></th>
+      <th scope="col">报错原文（截取）</th>
+      <th scope="col">何时才暴露</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>服务里多一个 <code>typo_field: x</code></td>
+      <td>rc=1</td>
+      <td><code>validating &lt;路径&gt;: services.s additional properties 'typo_field' not allowed</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td>顶层多一个 <code>random_top: 1</code></td>
+      <td>rc=1</td>
+      <td><code>validating &lt;路径&gt;:  additional properties 'random_top' not allowed</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td><code>ports: [&quot;99999-80&quot;]</code></td>
+      <td>rc=1</td>
+      <td><code>invalid containerPort: 99999-80</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td><code>depends_on: [ghost]</code>（服务不存在）</td>
+      <td>rc=1</td>
+      <td><code>service &quot;s&quot; depends on undefined service &quot;ghost&quot;: invalid compose project</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td><code>a→b→a</code> 循环依赖</td>
+      <td>rc=1</td>
+      <td><code>dependency cycle detected: a -&gt; b -&gt; a</code></td>
+      <td>加载期（<code>--dry-run</code> 同样报）</td>
+    </tr>
+    <tr>
+      <td><code>secrets: [pw]</code> 未声明</td>
+      <td>rc=1</td>
+      <td><code>service &quot;s&quot; refers to undefined secret pw: invalid compose project</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td>目录名非 ASCII 且无 <code>name:</code></td>
+      <td>rc=1</td>
+      <td><code>project name must not be empty</code></td>
+      <td>加载期</td>
+    </tr>
+    <tr>
+      <td>顶层 <code>version: &quot;3.8&quot;</code></td>
+      <td><strong>rc=0</strong></td>
+      <td>warning：<code>the attribute version is obsolete, it will be ignored…</code></td>
+      <td>不暴露（被忽略）</td>
+    </tr>
+    <tr>
+      <td><code>restart: maybe</code></td>
+      <td><strong>rc=0</strong></td>
+      <td>—</td>
+      <td><strong>运行时</strong>，daemon 拒绝并列出合法值</td>
+    </tr>
+    <tr>
+      <td><code>healthcheck.test: []</code></td>
+      <td><strong>rc=0</strong></td>
+      <td>—</td>
+      <td>不报错，但等于「没有健康检查」；下游 <code>service_healthy</code> 会永远不满足</td>
+    </tr>
+    <tr>
+      <td><code>volumes: [&quot;/tmp/x&quot;]</code></td>
+      <td><strong>rc=0</strong></td>
+      <td>—</td>
+      <td>合法（匿名卷），不是错误</td>
+    </tr>
+    <tr>
+      <td><code>docker compose volume ls</code></td>
+      <td>rc=1</td>
+      <td>一整段用法帮助</td>
+      <td>命令名写错（正确是 <code>volumes</code>）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>两条推论，是团队里最该教的：</p>
+<ul>
+<li><strong>「未知字段」会拦，「值不合法」不一定拦</strong>。<code>restart: maybe</code> 这种拼进模型的错误值要等到容器创建才由 daemon 拒。所以 <code>config --quiet</code> 通过 ≠ 能 <code>up</code>。</li>
+<li><strong>「不报错」不等于「按你想要的方式生效」</strong>。<code>test: []</code> 静默地让健康检查消失，<code>version:</code> 静默地被忽略。想确认语义，只有一条路：<code>config --format json</code> 看规范化后的模型。</li>
+</ul>
+<p><code>config</code> 本身也有几个能救命（或救 CI）的选项，读自 <code>config --help</code>：<code>--format yaml|json</code>、<code>--images</code>、<code>--networks</code>、<code>--models</code>、<code>--hash</code>（打印每个服务的配置哈希，判断「这个服务会不会被重建」的直接依据）、<code>--environment</code>（打印插值用的环境）、<code>--no-consistency</code>、<code>--lock-image-digests</code>（生成一份把镜像钉到 digest 的覆盖文件）。<code>--paths</code> 这一项<strong>本机不存在</strong>（<code>unknown flag: --paths</code>），网上有人用它当字段清单的写法已经过时。</p>
+<blockquote>
+<p>💡 新人小结：<strong><code>config</code> 像「把口语需求整理成正式工单」的那道程序</strong>——你说的是「大概这样」，工单上必须写死编号、负责人、时长，而且工单一旦生成，后面执行只看工单不看你的原话。类比之后接机制：YAML 里的 <code>dbdata</code> 变成 <code>kb-p2_dbdata</code>、<code>depends_on: [db]</code> 变成 <code>{condition: service_started, required: true}</code>、<code>128m</code> 变成 <code>134217728</code>，都是这道「整理」的产物。所以「我的文件里明明写了 X」永远不是证据，<code>config</code> 输出才是。</p>
+</blockquote>
+<div class="td-callout td-callout--tip" role="note">
+  <div class="td-callout__title"><i class="td-callout__icon fa-solid fa-lightbulb" aria-hidden="true"></i><span class="td-callout__label">提示</span></div>
+  <div class="td-callout__body">
+<p><code>.env</code> 缺失的真实失败形状（第②篇的插值规则在这里落地）。主干里写 <code>${DB_ROOT_PW:?在 .env 里设一个}</code>，把 <code>.env</code> 临时移走后：</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-9" data-td-code data-td-code-auto-id
+     data-td-language="" data-td-line-count="3">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-9-viewport" data-td-code-viewport><pre tabindex="0"><code>level=warning msg=&#34;The \&#34;DB_ROOT_PW\&#34; variable is not set. Defaulting to a blank string.&#34;
+error while interpolating services.db.environment.MYSQL_ROOT_PASSWORD:
+  required variable DB_ROOT_PW is missing a value: 在 .env 里设一个</code></pre></div>
+</div>
+<p><code>:?</code> 后面那句自解释文案被原样打进报错——这是团队里该养的习惯：<strong>每个必填变量都写一句「去哪儿设」</strong>。普通 <code>${VAR}</code> 只会警告后按空串继续，MySQL 会拿空密码起，失败点在很后面。</p>
+  </div>
+</div><h2 id="pg-827804aef89669d08f53f4cf8e47643a--实战切入三条判据十分钟内把基线钉死">实战切入：三条判据，十分钟内把基线钉死
+</h2>
+<p>这三条不是阅读练习，每条都有可核对的输出。</p>
+<p><strong>判据一：确认你机器上这两个名字是不是同一个实现。</strong></p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-10" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="4">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-10-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose version
+</span></span><span class="line"><span class="cl"><span class="go">Docker Compose version v5.5.1
+</span></span></span><span class="line"><span class="cl"><span class="gp">$</span> docker-compose version
+</span></span><span class="line"><span class="cl"><span class="go">Docker Compose version v5.5.1
+</span></span></span></code></pre></div></div>
+</div>
+<p>预期：两行字符串一致。不一致的话（本机以外完全可能，比如另装了 v1 的独立包）先把 PATH 里谁赢查清楚再讨论语法。</p>
+<p><strong>判据二：把「写错法」跑一遍，确认你的校验器会拦哪一种。</strong></p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-11" data-td-code data-td-code-auto-id
+     data-td-language="yaml" data-td-line-count="6">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-11-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">kbprobe</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">s</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">busybox:1.37</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l">maybe</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">typo_field</span><span class="p">:</span><span class="w"> </span><span class="l">x</span></span></span></code></pre></div></div>
+</div>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-12" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="5">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-12-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet        <span class="c1"># 期望 rc=1，只报 additional properties</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> <span class="c1"># 把 typo_field 删掉再跑一次</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose config --quiet        <span class="c1"># 期望 rc=0（version/restart 这类不拦）</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose up -d                 <span class="c1"># 期望 rc=1，daemon 拒绝 restart policy</span>
+</span></span><span class="line"><span class="cl"><span class="gp">$</span> docker compose down
+</span></span></code></pre></div></div>
+</div>
+<p>这条的价值是让新人亲自看到「<code>config</code> 绿了但起不来」。<strong>这是本篇最容易被忽略的一条判据</strong>：只跑第一条的人，会以为校验器什么都管。</p>
+<p><strong>判据三：<code>config --format json</code> 里找到三个「被改过的名字」。</strong></p>
+<p>对照自己的项目文件，逐条回答：卷的实际名字有没有项目前缀？<code>depends_on</code> 被展开成什么 <code>condition</code>？映射类资源名（网络）是什么？</p>
+<div class="td-code td-code--untitled" id="td-code-05fd8770-fence-13" data-td-code data-td-code-auto-id
+     data-td-language="console" data-td-line-count="1">
+  <div class="td-code__viewport" id="td-code-05fd8770-fence-13-viewport" data-td-code-viewport><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-console" data-lang="console"><span class="line"><span class="cl"><span class="gp">$</span> docker compose --profile app config --format json <span class="p">|</span> python -c <span class="s2">&#34;import json,sys; d=json.load(sys.stdin); print(d[&#39;name&#39;]); print(list(d[&#39;volumes&#39;].values())); print(list(d[&#39;services&#39;][&#39;api&#39;][&#39;depends_on&#39;].items()))&#34;</span>
+</span></span></code></pre></div></div>
+</div>
+<p>本机读数：<code>kb-p2</code>、<code>[{'name': 'kb-p2_cachedata'}, {'name': 'kb-p2_dbdata'}]</code>、<code>[('cache', {'condition': 'service_healthy', 'required': True}), ('db', {…})]</code>。</p>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--常见误读">常见误读
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">误读</th>
+      <th scope="col">实际</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>「写了 <code>version: '3.8'</code> 就锁定了语法版本」</td>
+      <td>现在这行会被忽略并警告；schema 由实现决定</td>
+    </tr>
+    <tr>
+      <td>「<code>docker-compose</code> 这个写法就说明对方在用 v1」</td>
+      <td>本机两个名字指向同一个 v2 实现，版本串一致。判断要看 <code>version</code> 输出</td>
+    </tr>
+    <tr>
+      <td>「<code>config --quiet</code> 通过就能 <code>up</code>」</td>
+      <td><code>restart: maybe</code> 这条实测：<code>config</code> rc=0，<code>up</code> rc=1</td>
+    </tr>
+    <tr>
+      <td>「不报错就说明我写的字段生效了」</td>
+      <td><code>healthcheck.test: []</code>、<code>version:</code> 都是「不报错但改变语义」的例子</td>
+    </tr>
+    <tr>
+      <td>「声明的卷名就是磁盘上的卷名」</td>
+      <td>不写 <code>name:</code> 时实际名带项目前缀（<code>dbdata</code> → <code>kb-p2_dbdata</code>）</td>
+    </tr>
+    <tr>
+      <td>「<code>environment</code> 写成 list 和写成 map 完全一样」</td>
+      <td>本轮全程用 map 写法，<code>config</code> 出来是 map；list 写法的规范化未跑，别当已验证</td>
+    </tr>
+    <tr>
+      <td>「<code>x-</code> 开头的键会被 Docker 解析」</td>
+      <td>它被保留在模型里但不参与语义，是给人看的约定</td>
+    </tr>
+    <tr>
+      <td>「目录名不影响项目」</td>
+      <td>中文目录名会让默认项目名被过滤成空，直接 <code>project name must not be empty</code></td>
+    </tr>
+    <tr>
+      <td>「<code>include</code> 和 <code>extends</code> 是一回事」</td>
+      <td>前者文件级并入、后者服务级继承，合并规则不同（上文的 <code>FROM: override</code> 是证据）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--要点总结">要点总结
+</h2>
+<ul>
+<li>Compose 的价值不是「少打字」，而是把<strong>顺序、命名、重放</strong>三件事从人脑转移到模型：<code>up</code> 做的是 diff 后的收敛，本机表现为只重建那一个端口变了的 <code>proxy</code>。</li>
+<li>基线一句话：<code>docker compose</code>（v2，本机 v5.5.1）+ 文件名 <code>compose.yaml</code> + 开发覆盖 <code>compose.override.yaml</code> + <strong>不写 <code>version:</code></strong> + <strong>必写顶层 <code>name:</code></strong> + 口令走 <code>.env</code> 注入。</li>
+<li><code>version:</code> 现在只给 warning 并被忽略；<code>docker-compose</code> 这个命令名在本机与 <code>docker compose</code> 是同一实现——辨识旧教程要靠字段级信号（<code>links</code>、<code>volumes_from</code>、<code>network_mode: default</code>），不能靠这两条。</li>
+<li>顶层结构是 <code>name</code> / <code>services</code> / <code>networks</code> / <code>volumes</code> / <code>configs</code> / <code>secrets</code> / <code>include</code> / <code>x-*</code>；<code>x-*</code> 与 YAML 锚点、<code>extends</code>、<code>include</code> 四种复用手法本机都跑通。</li>
+<li>名字会被规范化：卷加项目前缀、<code>depends_on</code> 展开成 <code>condition</code>、<code>128m</code> 变字节。<strong>证据永远是 <code>config --format json</code>，不是源文件</strong>。</li>
+<li>校验器只拦「未知字段/引用不存在/名字非法」这一类；「值不合法」（<code>restart: maybe</code>）留给运行时，「静默改变语义」（<code>test: []</code>、<code>version:</code>）谁都不提醒。</li>
+<li><code>.env</code> 缺失时 <code>${VAR:?文案}</code> 会硬失败并把文案打进报错；普通 <code>${VAR}</code> 只警告并按空串继续。</li>
+</ul>
+<h2 id="pg-827804aef89669d08f53f4cf8e47643a--本篇未验证项">本篇未验证项
+</h2>
+<div class="td-table-scroll td-table-scroll--static" tabindex="0" role="region" aria-label="可横向滚动的表格">
+<table>
+  <thead>
+    <tr>
+      <th scope="col">项</th>
+      <th scope="col">状态</th>
+      <th scope="col">说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>env_file</code>、<code>expose</code>、<code>network_mode</code>、<code>tmpfs</code>、<code>user</code>/<code>ulimits</code>、<code>stop_grace_period</code>、<code>cap_*</code> 等行为字段</td>
+      <td>未跑</td>
+      <td>速查表里逐项标了「未跑」；跑它们需要各自的实验设计，塞进本篇只会得到没有对照的读数</td>
+    </tr>
+    <tr>
+      <td><code>configs</code> / <code>secrets</code> 的正向用法</td>
+      <td>未跑</td>
+      <td>只跑到「引用未声明」的加载期报错；生产写法在 6.3</td>
+    </tr>
+    <tr>
+      <td><code>network_mode: default</code> 现在是否仍被接受</td>
+      <td>未跑</td>
+      <td>表里那条只作旧教程信号提示，不当结论用</td>
+    </tr>
+    <tr>
+      <td><code>deploy.placement</code> 等 swarm 字段在单机 compose 上的实际处理</td>
+      <td>未跑</td>
+      <td>需要真 swarm 或明确的忽略判据，本轮没有</td>
+    </tr>
+    <tr>
+      <td><code>environment</code> 的 list 写法规范化结果</td>
+      <td>未跑</td>
+      <td>本轮示例统一用 map</td>
+    </tr>
+    <tr>
+      <td><code>docker compose config --lock-image-digests</code> 生成的覆盖文件长什么样</td>
+      <td>未跑</td>
+      <td>选项存在（读自 <code>--help</code>），产物形态待验</td>
+    </tr>
+    <tr>
+      <td>v1（Python 实现）的行为差异</td>
+      <td>未测</td>
+      <td>本机没有 v1；本篇只做了一件事：证明这台机器上 <code>docker-compose</code> 这个名字不是 v1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+</div>
+
+
+
+    
+	
+  
+
+
+
+      </main>
+    </div>
+    <script type="application/json" id="td-action-manifest">{"actions":[{"available":true,"description":"复制 Markdown 文本","disabledReason":"","icon":"fa-regular fa-copy","id":"copy_markdown","keywords":["复制 Markdown 文本","markdown","copy"],"kind":"copy","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"复制 Markdown 文本","url":"/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/index.md"},{"available":true,"description":"复制链接","disabledReason":"","icon":"fa-solid fa-link","id":"copy_link","keywords":["复制链接","分享","link","url","permalink"],"kind":"copy","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"复制链接","url":"https://example.org/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/"},{"available":false,"description":"在 ChatGPT 中打开","disabledReason":"在 ChatGPT 中打开: 暂不可用","icon":"fa-brands fa-openai","id":"open_chatgpt","keywords":["在 ChatGPT 中打开","就本页提问","chatgpt","gpt","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 ChatGPT 中打开","url":""},{"available":false,"description":"在 Claude 中打开","disabledReason":"在 Claude 中打开: 暂不可用","icon":"fa-brands fa-claude","id":"open_claude","keywords":["在 Claude 中打开","就本页提问","claude","anthropic","ai","llm"],"kind":"url","options":[],"placements":{"page":false,"palette":false},"promptTemplate":"请阅读 %s 的内容，以便我就此向你提问。","target":"blank","title":"在 Claude 中打开","url":""},{"available":true,"description":"查阅 Markdown 源码","disabledReason":"","icon":"fa-brands fa-markdown","id":"view_markdown","keywords":["查阅 Markdown 源码","markdown","source"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅 Markdown 源码","url":"/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/index.md"},{"available":false,"description":"查阅编辑历史","disabledReason":"查阅编辑历史: 暂不可用","icon":"fa-solid fa-clock-rotate-left","id":"view_history","keywords":["查阅编辑历史","history","commits","changelog","git"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"查阅编辑历史","url":""},{"available":false,"description":"编辑当前页面","disabledReason":"编辑当前页面: 暂不可用","icon":"fa-solid fa-pencil","id":"edit_page","keywords":["编辑当前页面","edit","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"编辑当前页面","url":""},{"available":false,"description":"添加子页面","disabledReason":"添加子页面: 暂不可用","icon":"fa-solid fa-file-circle-plus","id":"create_child_page","keywords":["添加子页面","child","new","page"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"添加子页面","url":""},{"available":false,"description":"提交文档议题","disabledReason":"提交文档议题: 暂不可用","icon":"fa-solid fa-circle-question","id":"create_issue","keywords":["提交文档议题","issue","github"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交文档议题","url":""},{"available":false,"description":"提交项目议题","disabledReason":"提交项目议题: 暂不可用","icon":"fa-solid fa-circle-exclamation","id":"create_project_issue","keywords":["提交项目议题","issue","github","project"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"blank","title":"提交项目议题","url":""},{"available":false,"description":"打印完整章节","disabledReason":"打印完整章节: 暂不可用","icon":"fa-solid fa-print","id":"print_section","keywords":["打印完整章节","print","section"],"kind":"url","options":[],"placements":{"page":true,"palette":true},"target":"self","title":"打印完整章节","url":""},{"available":true,"description":"打印此页面","disabledReason":"","icon":"fa-solid fa-print","id":"print","keywords":["打印此页面","print"],"kind":"invoke","options":[],"placements":{"page":false,"palette":false},"target":"self","title":"打印此页面","url":""},{"available":false,"description":"Version","disabledReason":"Version: 暂不可用","icon":"fa-solid fa-code-branch","id":"switch_version","keywords":["Version","version"],"kind":"choice","options":[],"placements":{"page":false,"palette":true},"target":"self","title":"Version","url":""},{"available":false,"description":"切换语言","disabledReason":"切换语言: 暂不可用","icon":"fa-solid fa-language","id":"switch_language","keywords":["切换语言","language"],"kind":"choice","options":[{"active":true,"available":true,"disabledReason":"","id":"zh-CN","title":"简体中文","url":"/docs/04-%E5%8D%95%E6%9C%BA%E7%BC%96%E6%8E%92/%E5%AE%9A%E4%B9%89/"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换语言","url":""},{"available":true,"description":"外观","disabledReason":"","icon":"fa-solid fa-palette","id":"switch_preset","keywords":["preset","style","Paper","Slate","Ink","Terminal","风格"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"paper","title":"Paper","value":"paper"},{"available":true,"disabledReason":"","id":"slate","title":"Slate","value":"slate"},{"available":true,"disabledReason":"","id":"ink","title":"Ink","value":"ink"},{"available":true,"disabledReason":"","id":"terminal","title":"Terminal","value":"terminal"}],"placements":{"page":false,"palette":true},"target":"self","title":"风格","url":""},{"available":true,"description":"切换配色","disabledReason":"","icon":"fa-solid fa-circle-half-stroke","id":"switch_theme","keywords":["切换配色","亮色","暗色"],"kind":"choice","options":[{"available":true,"disabledReason":"","id":"auto","title":"跟随系统","value":"auto"},{"available":true,"disabledReason":"","id":"light","title":"亮色","value":"light"},{"available":true,"disabledReason":"","id":"dark","title":"暗色","value":"dark"}],"placements":{"page":false,"palette":true},"target":"self","title":"切换配色","url":""},{"available":false,"description":"GitHub","disabledReason":"GitHub: 暂不可用","icon":"fa-brands fa-github","id":"open_github","keywords":["GitHub","repository","source"],"kind":"url","options":[],"placements":{"page":false,"palette":true},"target":"blank","title":"GitHub","url":""}],"commands":[],"language":"zh","quickLinks":[{"available":true,"description":"一条主线八站供通读，十个主题篇供查阅；进度、前置与产出物写在每篇开头。","disabledReason":"","icon":"fa-solid fa-book","id":"quick_docs","keywords":["文档","docs"],"kind":"url","target":"self","title":"文档","url":"/docs/"}],"rootOrder":["docs"],"version":1}</script>
+
+<script src="/js/actions.min.c784a65471d30f25801832ad47eca4fc6e9681b4521bd2414655e6623aa58934.js" integrity="sha256-x4SmVHHTDyWAGDKtR&#43;yk/G6WgbRSG9JBRlXmYjqliTQ=" crossorigin="anonymous"></script>
+
+  </body>
+</html>

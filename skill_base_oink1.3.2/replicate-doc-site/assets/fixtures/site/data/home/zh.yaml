@@ -1,6 +1,0 @@
-sections: [hero]
-hero:
-  actions:
-    - { label: 好链接, url: docs/01-分类/合规板块/good-1/ }
-    - { label: 坏链接, url: docs/01-分类/合规板块/ghost/ }
-# 注释掉的那条不该被计入 home_urls：- { label: 已停用, url: docs/01-分类/合规板块/commented-ghost/ }
