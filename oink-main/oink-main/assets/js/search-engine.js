@@ -2,8 +2,8 @@
  * search-engine.js — deterministic page search for the Command Palette.
  *
  * The index builder is injected so this module can be unit-tested without a
- * DOM. Both Latin/Lunr and CJK substring paths apply keywords and the same
- * final per-document boost multiplier.
+ * DOM. Literal mixed-language matching shares coverage/phrase tiers with
+ * English stemming and typo fallback. Page boosts apply inside those tiers.
  */
 (function () {
   'use strict';
@@ -54,121 +54,230 @@
     return groups;
   }
 
+  function fold(value) {
+    return String(Array.isArray(value) ? value.join(' ') : value || '')
+      .normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim();
+  }
+
+  // Match normalized text but keep offsets into the original label/snippet.
+  // Most text needs no offset map; width/ligature/combining changes do.
+  var segmenter;
+  function matchRanges(value, needles, firstOnly) {
+    var text = String(value || '');
+    var lower = text.toLowerCase();
+    var normalized = text.normalize('NFKC').toLowerCase();
+    var offsets = null;
+    if (normalized !== lower || lower.length !== text.length) {
+      offsets = [];
+      var parts = typeof Intl.Segmenter === 'function'
+        ? (segmenter || (segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' }))).segment(text)
+        : Array.from(text.matchAll(/\P{M}\p{M}*|\p{M}+/gu), function (part) {
+          return { segment: part[0], index: part.index };
+        });
+      for (var part of parts) {
+        var segment = part.segment.normalize('NFKC').toLowerCase();
+        for (var n = 0; n < segment.length; n += 1)
+          offsets.push([part.index, part.index + part.segment.length]);
+      }
+    }
+    var ranges = [];
+    needles.filter(Boolean).forEach(function (needle) {
+      var at = normalized.indexOf(needle);
+      while (at >= 0) {
+        ranges.push(offsets ? [offsets[at][0], offsets[at + needle.length - 1][1]]
+          : [at, at + needle.length]);
+        if (firstOnly) break;
+        at = normalized.indexOf(needle, at + needle.length);
+      }
+    });
+    ranges.sort(function (a, b) { return a[0] - b[0]; });
+    var merged = [];
+    ranges.forEach(function (range) {
+      var last = merged[merged.length - 1];
+      if (last && range[0] <= last[1]) last[1] = Math.max(last[1], range[1]);
+      else merged.push(range.slice());
+    });
+    return merged;
+  }
+
+  // Keep code identifiers intact; split CJK/Latin boundaries even without spaces.
+  // No dictionary: a contiguous CJK run remains a literal substring term.
+  function terms(value) {
+    var atoms = fold(value).match(
+      /[-./\\\p{L}\p{N}_]+(?:[=:][-./\\\p{L}\p{N}_]+)*/gu,
+    ) || [];
+    var split = [];
+    atoms.forEach(function (atom) {
+      // Paths and code names can themselves contain Chinese or Windows slashes.
+      if (/[_./\\:=\-]/.test(atom)) split.push(atom);
+      else split = split.concat(atom.replace(
+        /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}ー]+/gu,
+        ' $& ',
+      ).trim().split(/\s+/));
+    });
+    return Array.from(new Set(split)).filter(function (term) {
+      return /[\p{L}\p{N}]/u.test(term);
+    }).slice(0, 24);
+  }
+
+  var weights = { title: 100, keywords: 80, categories: 60, tags: 60,
+    headings: 50, description: 30, body: 10 };
+
   function create(documents, lunrApi, maxResults) {
-    var docs = documents || [];
+    var docs = Array.from(new Map((documents || []).map(function (doc) {
+      return [doc.ref, doc];
+    })).values());
     var limit = number(maxResults, 10);
-    var docByRef = new Map();
-    docs.forEach(function (doc) {
-      docByRef.set(doc.ref, doc);
-    });
-
-    // Case-fold every searchable field once. queryCjk scans the whole corpus on
-    // every keystroke, so folding here avoids re-allocating a lowercase copy of
-    // each document per character typed.
+    var index = null;
     var folded = docs.map(function (doc) {
-      var keywordText = Array.isArray(doc.keywords)
-        ? doc.keywords.join(' ')
-        : doc.keywords || '';
-      return {
-        title: (doc.title || '').toLowerCase(),
-        keywords: keywordText.toLowerCase(),
-        headings: (doc.headings || '').toLowerCase(),
-        description: (doc.description || '').toLowerCase(),
-        body: (doc.body || '').toLowerCase(),
-      };
+      var fields = {};
+      Object.keys(weights).forEach(function (key) { fields[key] = fold(doc[key]); });
+      return fields;
     });
+    var sectionCache = new Map();
 
-    var index = lunrApi(function () {
-      this.ref('ref');
-      this.field('title', { boost: 5 });
-      this.field('categories', { boost: 3 });
-      this.field('tags', { boost: 3 });
-      this.field('keywords', { boost: 4 });
-      this.field('headings', { boost: 3 });
-      this.field('description', { boost: 2 });
-      this.field('body');
-      docs.forEach(function (doc) {
-        this.add(doc);
-      }, this);
-    });
-
-    function queryCjk(query) {
-      var needle = query.toLowerCase();
-      var hits = [];
-      docs.forEach(function (doc, docIndex) {
-        var fields = folded[docIndex];
-        var titleAt = fields.title.indexOf(needle);
-        var keywordAt = fields.keywords.indexOf(needle);
-        var headingAt = fields.headings.indexOf(needle);
-        var descAt = fields.description.indexOf(needle);
-        var bodyAt = fields.body.indexOf(needle);
-        var textScore =
-          (titleAt >= 0 ? 100 : 0) +
-          (keywordAt >= 0 ? 80 : 0) +
-          (headingAt >= 0 ? 50 : 0) +
-          (descAt >= 0 ? 30 : 0) +
-          (bodyAt >= 0 ? 10 : 0);
-        if (!textScore) return;
-        var excerpt = doc.excerpt || '';
-        if (bodyAt >= 0) {
-          var start = Math.max(0, bodyAt - 24);
-          excerpt =
-            (start > 0 ? '…' : '') +
-            doc.body.slice(start, bodyAt + 56) +
-            '…';
-        } else if (descAt >= 0) {
-          excerpt = doc.description;
-        } else if (keywordAt >= 0) {
-          excerpt = doc.description || doc.excerpt || '';
-        }
-        hits.push({
-          doc: doc,
-          excerpt: excerpt,
-          score: textScore * number(doc.boost, 1),
-          textScore: textScore,
+    function englishMatches(term, eligible) {
+      var matches = new Map();
+      // Technical punctuation is literal, never Lunr query syntax or a typo.
+      if (!lunrApi || !/^[a-z0-9]+$/.test(term)) return matches;
+      if (!index) {
+        index = lunrApi(function () {
+          this.ref('ref');
+          Object.keys(weights).forEach(function (key) {
+            this.field(key, { boost: weights[key] / 10 });
+          }, this);
+          docs.forEach(function (doc) { this.add(doc); }, this);
         });
-      });
-      return hits.sort(compare).slice(0, limit);
-    }
-
-    function queryLatin(query) {
-      var found = index.query(function (builder) {
-        lunrApi.tokenizer(query.toLowerCase()).forEach(function (token) {
-          var term = token.toString();
-          builder.term(term, { boost: 100 });
-          builder.term(term, {
-            wildcard:
-              lunrApi.Query.wildcard.LEADING |
-              lunrApi.Query.wildcard.TRAILING,
-            boost: 10,
+      }
+      // Exact/stemmed English matches retain the bundled language pipeline.
+      var found = index.query(function (builder) { builder.term(term); })
+        .filter(function (hit) { return !eligible || eligible.has(hit.ref); });
+      function remember(hit, quality) {
+        var score = 0;
+        Object.values(hit.matchData.metadata).forEach(function (fields) {
+          Object.keys(fields).forEach(function (field) {
+            score = Math.max(score, weights[field] || 0);
           });
-          builder.term(term, { editDistance: 2 });
         });
-      });
-      return found
-        .map(function (result) {
-          var doc = docByRef.get(result.ref);
-          return doc
-            ? {
-                doc: doc,
-                excerpt: doc.excerpt || doc.description || '',
-                score: result.score * number(doc.boost, 1),
-                textScore: result.score,
-              }
-            : null;
-        })
-        .filter(Boolean)
-        .sort(compare)
-        .slice(0, limit);
+        matches.set(hit.ref, score * quality);
+      }
+      found.forEach(function (hit) { remember(hit, 0.9); });
+      // Substrings are handled literally below. Typo expansion is a fallback,
+      // bounded for short terms to avoid unrelated two-letter matches.
+      if (!found.length && term.length >= 5) {
+        index.query(function (builder) {
+          builder.term(term, { editDistance: term.length >= 8 ? 2 : 1 });
+        }).forEach(function (hit) { remember(hit, 0.35); });
+      }
+      return matches;
     }
 
-    return {
-      query: function (query) {
-        return CJK.test(query) ? queryCjk(query) : queryLatin(query);
-      },
-      queryCjk: queryCjk,
-      queryLatin: queryLatin,
-    };
+    function snippet(text, needles, phrase) {
+      text = String(text || '');
+      var matches = phrase ? matchRanges(text, [phrase], true) : [];
+      if (!matches.length) matches = matchRanges(text, needles, true);
+      if (!matches.length) return '';
+      var at = matches[0][0];
+      var start = Math.max(0, at - 40);
+      var end = Math.min(text.length, at + 120);
+      // Never cut a supplementary character in half at the excerpt boundary.
+      if (start && /[\uDC00-\uDFFF]/.test(text[start])) start -= 1;
+      if (end < text.length && /[\uDC00-\uDFFF]/.test(text[end])) end += 1;
+      return (start ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
+    }
+
+    function sectionsFor(doc) {
+      if (sectionCache.has(doc.ref)) return sectionCache.get(doc.ref);
+      var sections = doc.sections || [];
+      var bytes = doc.body ? new TextEncoder().encode(doc.body) : null;
+      var decoder = new TextDecoder();
+      var result = sections.map(function (section, n) {
+        var end = n + 1 < sections.length ? sections[n + 1].start : undefined;
+        var body = bytes && Number.isInteger(section.start)
+          ? decoder.decode(bytes.subarray(section.start, end)) : '';
+        return { id: section.id, title: section.title, body: body,
+          heading: fold(section.title), text: fold(body) };
+      });
+      // Introductory text is a real page-level match and must compete with
+      // sections, otherwise a strong intro hit can jump to an unrelated heading.
+      if (bytes && (!sections.length || sections[0].start > 0)) {
+        var intro = decoder.decode(bytes.subarray(0, sections.length ? sections[0].start : undefined));
+        result.unshift({ id: '', title: '', body: intro, heading: '', text: fold(intro) });
+      }
+      sectionCache.set(doc.ref, result);
+      return result;
+    }
+
+    function context(result, needles, phrase) {
+      var doc = result.doc;
+      var best = null;
+      sectionsFor(doc).forEach(function (section) {
+        var matched = 0;
+        var score = 0;
+        needles.forEach(function (term) {
+          var titleMatch = section.heading.indexOf(term) >= 0;
+          var bodyMatch = section.text.indexOf(term) >= 0;
+          if (titleMatch || bodyMatch) matched += 1;
+          score += titleMatch ? 50 : bodyMatch ? 10 : 0;
+        });
+        var exact = section.heading.indexOf(phrase) >= 0 || section.text.indexOf(phrase) >= 0;
+        var rank = matched * 1000 + (exact ? 200 : 0) + score;
+        if (matched && (!best || rank > best.rank)) best = { section: section, rank: rank };
+      });
+      result.ref = doc.ref;
+      result.heading = '';
+      result.excerpt = snippet(doc.body, needles) || snippet(doc.description, needles) ||
+        doc.description || doc.excerpt || '';
+      if (best) {
+        result.excerpt = snippet(best.section.body, needles, phrase) || best.section.title;
+      }
+      if (best && best.section.id) {
+        result.ref = doc.ref.split('#')[0] + '#' + encodeURIComponent(best.section.id);
+        result.heading = best.section.title;
+      }
+      return result;
+    }
+
+    function query(value, options) {
+      var needles = terms(value);
+      var phrase = needles.join(' ');
+      if (!needles.length) return [];
+      var root = options && options.root ? fold(options.root) : '';
+      var eligible = root ? new Set(docs.filter(function (doc) {
+        return fold(doc.root || doc.type) === root;
+      }).map(function (doc) { return doc.ref; })) : null;
+      var alternatives = needles.map(function (term) { return englishMatches(term, eligible); });
+      var hits = [];
+      docs.forEach(function (doc, n) {
+        if (eligible && !eligible.has(doc.ref)) return;
+        var fields = folded[n];
+        var matched = 0;
+        var textScore = 0;
+        var phraseMatch = false;
+        needles.forEach(function (term, t) {
+          var score = 0;
+          Object.keys(weights).forEach(function (key) {
+            if (fields[key].indexOf(term) >= 0) score = Math.max(score, weights[key]);
+          });
+          var alternative = alternatives[t].get(doc.ref) || 0;
+          if (score || alternative) matched += 1;
+          textScore += Math.max(score, alternative);
+        });
+        Object.keys(weights).forEach(function (key) {
+          if (needles.length > 1 && fields[key].indexOf(phrase) >= 0) phraseMatch = true;
+        });
+        if (matched) hits.push({ doc: doc, textScore: textScore,
+          score: textScore * number(doc.boost, 1), matched: matched,
+          total: needles.length, phrase: phraseMatch, partial: matched < needles.length });
+      });
+      var complete = hits.some(function (hit) { return !hit.partial; });
+      return hits.filter(function (hit) { return !complete || !hit.partial; })
+        .sort(function (a, b) {
+          return b.matched - a.matched || Number(b.phrase) - Number(a.phrase) || compare(a, b);
+        }).slice(0, limit).map(function (hit) { return context(hit, needles, phrase); });
+    }
+
+    return { query: query, queryCjk: query, queryLatin: query };
   }
 
   window.OinkSearchEngine = {
@@ -177,6 +286,8 @@
     group: group,
     lexical: lexical,
     create: create,
+    terms: terms,
+    matchRanges: matchRanges,
   };
   if (typeof module === 'object' && module.exports)
     module.exports = window.OinkSearchEngine;

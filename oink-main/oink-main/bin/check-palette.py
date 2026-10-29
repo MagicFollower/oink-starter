@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Any
 
 from runtime_assets import referenced_chunks
+from test_site import theme_warnings
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ACTIONS_SCRIPT = ROOT / "bin" / "check-actions.py"
@@ -57,7 +59,7 @@ def main() -> int:
                     actions.action_config(helper, subpath),
                 )
                 require(
-                    all("invalid search_boost" in line for line in log.splitlines() if "WARN" in line),
+                    all("invalid search_boost" in line for line in theme_warnings(log)),
                     f"{deployment} Palette fixture emitted an unrelated warning",
                 )
                 for lang in helper.LANGUAGES:

@@ -4,13 +4,18 @@
 from __future__ import annotations
 
 import gzip
+from html.parser import HTMLParser
+from urllib.parse import unquote
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
+
+from test_site import theme_warnings
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -129,6 +134,59 @@ def validate_language(
     require(tutorial["icon"] == "fa-solid fa-rocket", f"{lang} page icon fallback changed")
 
 
+class Headings(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.ids: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in {"h1", "h2", "h3", "h4", "h5", "h6"}:
+            value = dict(attrs).get("id")
+            if value:
+                self.ids.append(value)
+
+
+def validate_sections(documents: list[dict[str, Any]], output: Path, prefix: str) -> None:
+    for doc in documents:
+        sections = doc.get("sections", [])
+        if not sections:
+            continue
+        relative = unquote(doc["ref"][len(prefix):])
+        parser = Headings()
+        parser.feed((output / relative / "index.html").read_text())
+        offsets = []
+        for section in sections:
+            require(section["id"] in parser.ids, f"invented heading anchor: {doc['ref']}#{section['id']}")
+            if "start" in section:
+                offsets.append(section["start"])
+                body = doc["body"].encode()[section["start"]:].decode()
+                require(body.startswith(section["title"]), f"invalid UTF-8 section offset: {doc['ref']}")
+        require(offsets == sorted(set(offsets)), f"non-increasing offsets: {doc['ref']}")
+
+
+def write_section_probe(site: Path) -> None:
+    shortcode = site / "layouts" / "_shortcodes" / "search-headings.html"
+    shortcode.parent.mkdir(parents=True, exist_ok=True)
+    shortcode.write_text(
+        '<h3 id="real-id" data-id="not-an-anchor" aria-label="a > b id=\'fake\'">Real  heading</h3>\n'
+        "<h3 id='single-quote'>Single quote</h3>\n"
+        '<script>const hidden = "<h3 id=\'phantom\'>Hidden</h3>";</script>\n',
+        encoding="utf-8")
+    for suffix, title in (("", "Search probe"), (".zh", "搜索探针")):
+        (site / "content" / "docs" / f"search-probe{suffix}.md").write_text(
+            f'---\ntitle: "{title}"\noutputs: [HTML, Print, Markdown]\n---\n\n简介 😀 before headings.\n\n'
+            '# 顶层标题\n\nPostgreSQL 物理备份。\n\n'
+            '## Repeat\n\nshared_buffers controls cache.\n\n'
+            '## Repeat\n\npg_basebackup -D /pg/data --checkpoint=fast\n\n'
+            '### A & B `technical-name` {#stable-id}\n\n连接池 超时。\n\n'
+            '###### 深层标题\n\nLast section.\n\n'
+            '### Special & heading {id="特殊&id"}\n\n--special-option\n\n'
+            '## 重复标题\n\nFirst Chinese section.\n\n'
+            '## 重复标题\n\nSecond Chinese section.\n\n'
+            '{{< search-headings >}}\n\n'
+            '```filetree {title="Search output probe"}\n- docs/\n  - search.md # Local search\n```\n', encoding="utf-8")
+
+
 def main() -> int:
     reports: list[str] = []
     built_indexes: dict[str, dict[str, Path]] = {}
@@ -147,11 +205,12 @@ def main() -> int:
                 site = workspace / f"site-{deployment}"
                 output = workspace / f"public-{deployment}"
                 helper.copy_fixture_site(site, "flat", True, subpath=subpath)
+                write_section_probe(site)
                 log = helper.run_hugo(site, output, workspace / "cache")
-                warnings = [line for line in log.splitlines() if "WARN" in line]
+                warnings = theme_warnings(log)
                 require(
                     warnings and all("invalid search_boost" in line for line in warnings),
-                    f"{deployment} build did not emit only invalid-boost warnings",
+                    f"{deployment} build did not emit only invalid-boost warnings: {warnings}",
                 )
 
                 for lang in helper.LANGUAGES:
@@ -161,6 +220,23 @@ def main() -> int:
                     documents = json.loads(payload)
                     require(isinstance(documents, list), f"{lang} index is not an array")
                     validate_language(documents, lang, prefix, required_fields)
+                    validate_sections(documents, output, prefix)
+                    for suffix in ("/docs/guides/tutorial/", "/blog/post/"):
+                        doc = by_suffix(documents, suffix)
+                        html = (output / doc["ref"][len(prefix):] / "index.html").read_text()
+                        scopes = re.findall(r'<input\b[^>]*name="td-search-scope"[^>]*>', html)
+                        require(len(scopes) == 2 and 'role="radiogroup"' in html
+                                and 'aria-labelledby="td-search-scope-label"' in html
+                                and 'value=""' in scopes[0] and 'checked' in scopes[0]
+                                and f'value="{doc["root"]}"' in scopes[1],
+                                f"{doc['ref']} inherited another root's cached search dialog")
+                    probe = by_suffix(documents, "/docs/search-probe/")
+                    probe_html = (output / probe["ref"][len(prefix):] / "index.html").read_text()
+                    require('class="td-filetree' in probe_html and 'class="td-filetree-source"' not in probe_html,
+                            "search traversal rendered RSS source inside an HTML page")
+                    ids = [section["id"] for section in probe["sections"]]
+                    require(ids == ["顶层标题", "repeat", "repeat-1", "stable-id", "深层标题", "特殊&id", "重复标题", "重复标题-1", "real-id", "single-quote"],
+                            f"{lang} duplicate/Unicode/explicit/deep headings changed: {ids}")
                     raw_size = len(payload)
                     gzip_size = len(gzip.compress(payload, mtime=0))
                     require(raw_size <= budget["uncompressed_bytes"], f"{lang} raw index exceeds budget")
@@ -198,6 +274,25 @@ def main() -> int:
                     f"{deployment} search ranking behavior test failed:\n"
                     + (behavior.stdout + behavior.stderr).strip(),
                 )
+
+            # Scope reductions must retain only the promised searchable fields.
+            for scope in ("title", "heading", "summary"):
+                site = workspace / f"scope-{scope}"
+                output = workspace / f"public-{scope}"
+                helper.copy_fixture_site(site, "flat", True, subpath=True)
+                write_section_probe(site)
+                config_path = site / "hugo.yaml"
+                config_path.write_text(config_path.read_text().replace(
+                    "params:\n", f"params:\n  offline_search_index: {scope}\n", 1))
+                helper.run_hugo(site, output, workspace / f"cache-{scope}")
+                for lang in helper.LANGUAGES:
+                    documents = json.loads(index_path(output, lang).read_text())
+                    validate_sections(documents, output, "/preview/")
+                    probe = by_suffix(documents, "/docs/search-probe/")
+                    require("body" not in probe, f"{scope} leaked full text")
+                    require(bool(probe.get("sections")) == (scope != "title"), f"{scope} section scope")
+                    require(all("start" not in section for section in probe.get("sections", [])),
+                            f"{scope} emitted offsets without bodies")
 
             invalid_site = workspace / "site-algolia-invalid"
             invalid_output = workspace / "public-algolia-invalid"

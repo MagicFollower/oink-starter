@@ -1,7 +1,6 @@
 <!doctype html>
 <html itemscope itemtype="http://schema.org/WebPage" dir="ltr" lang="zh-CN" data-td-typography="technical" data-td-preset="paper" data-td-site-preset="paper" data-td-theme-init>
 <head>
-<meta name="generator" content="Hugo <version>">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="color-scheme" content="light dark">
@@ -75,6 +74,7 @@ html.setAttribute('data-td-kbd-zen', '');
 } catch (_) {}
 })();
 </script><script defer src="/js/third_party/lunr.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>
+<meta name="generator" content="Hugo <version>">
 </head>
 <body class="td-home">
 <a class="td-skip-link d-print-none" href="#td-main-content">跳转到主要内容</a>
@@ -958,6 +958,8 @@ data-td-index-src="/offline-search-index.zh.<hash>.json"
 data-td-max-results="10"
 data-td-t-empty="未找到结果"
 data-td-t-loading="正在加载搜索索引……"
+data-td-t-partial="部分匹配：{matched}/{total} 个关键词"
+data-td-t-partial-results="没有页面包含全部关键词，以下为部分匹配"
 data-td-t-results="找到 {count} 条结果"
 data-td-t-actions="操作"
 data-td-t-page-actions="页面操作"
@@ -983,14 +985,30 @@ aria-label="关闭">
 <kbd>esc</kbd>
 </button>
 </div>
+<div class="td-shell-search__scope" data-td-search-scope-row>
+<span id="td-search-scope-label" class="td-shell-search__scope-label">搜索范围</span>
+<div id="td-search-scope" class="td-shell-search__scope-options" role="radiogroup"
+aria-labelledby="td-search-scope-label">
+<label class="td-shell-search__scope-option">
+<input type="radio" name="td-search-scope" value="" tabindex="0" data-td-search-scope checked>
+<span>全部栏目</span>
+</label>
+<label class="td-shell-search__scope-option">
+<input type="radio" name="td-search-scope" value="" tabindex="-1" data-td-search-scope>
+<span>Oink 示例站</span>
+</label>
+</div>
+</div>
 <div id="td-shell-search-results" class="td-shell-search__list" role="listbox"
 aria-label="搜索…"></div>
-<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"
+<div class="td-shell-search__footer">
+<div class="td-shell-search__status" role="status" aria-live="polite" aria-atomic="true"
 data-td-shell-search-status></div>
 <div class="td-shell-search__foot" aria-hidden="true">
 <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
 <span><kbd>↵</kbd> 打开</span>
 <span><kbd>esc</kbd> 关闭</span>
+</div>
 </div>
 </div>
 </div><script src="/js/chunks/keyboard.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/footer-collapse.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/local-search.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/dark-mode.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/appearance.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script><script src="/js/chunks/landing.min.<hash>.js" integrity="<sri>" crossorigin="anonymous"></script>

@@ -110,7 +110,7 @@
       inset-block-start: 0.5rem;
       inset-inline-end: 0.5rem;
       opacity: 0;
-      transition: opacity 120ms ease;
+      transition: opacity var(--td-motion-duration-fast) ease;
     }
   }
 
@@ -154,22 +154,28 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--bs-focus-ring-color);
+      outline: 2px solid var(--bs-link-color);
       outline-offset: 1px;
     }
   }
 
   .td-code__copy {
+    @include td-control-surface;
     display: inline-flex;
-    width: 1.75rem;
-    min-width: 1.75rem;
-    min-height: 1.75rem;
+    width: 2rem;
+    min-width: 2rem;
+    min-height: 2rem;
     align-items: center;
     justify-content: center;
     padding: 0;
-    border-radius: 0.375rem;
+    border-radius: var(--td-control-radius);
     font-size: 0.8125rem;
     line-height: 1;
+
+    &:hover {
+      --td-control-bg: var(--td-code-inline-bg);
+      background: transparent;
+    }
 
     &[hidden] {
       display: none;
@@ -186,14 +192,13 @@
 
   // Floating over code, the button needs its own surface to stay legible.
   .td-code__utilities--compact .td-code__copy {
-    border: 1px solid var(--td-code-border-color);
-    background: var(--td-pre-bg);
+    --td-control-border: var(--td-code-border-color);
+    --td-control-bg: var(--td-pre-bg);
     color: var(--bs-secondary-color);
-    box-shadow: 0 1px 2px rgba($black, 0.06);
 
     &:hover {
       color: var(--bs-emphasis-color);
-      background: var(--td-code-header-bg);
+      --td-control-bg: var(--td-code-header-bg);
     }
 
     &[data-td-state='success'] {
@@ -216,7 +221,7 @@
     > .highlight > div.chroma {
       // Leave inline room for the floating Copy control without drawing an
       // empty title row or changing the copied source text.
-      padding-inline-end: 3rem;
+      padding-inline-end: 3.5rem;
     }
   }
 
@@ -234,7 +239,7 @@
   }
 
   .td-code.is-collapsible .td-code__viewport {
-    transition: max-height 180ms ease;
+    transition: max-height var(--td-motion-duration) ease;
   }
 
   .td-code.td-is-collapsed .td-code__viewport {
@@ -274,6 +279,41 @@
     &[hidden] {
       display: none;
     }
+  }
+
+  // Explicit short-command presentation: keep utilities out of the scrolling
+  // source column. No JS is needed for its layout or fallback content.
+  .td-code.td-code-command {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+
+    > .td-code__header { grid-column: 1 / -1; }
+    > .td-code__viewport { grid-column: 1; grid-row: 1; min-width: 0; }
+    &.td-code--titled > .td-code__viewport { grid-row: 2; grid-column: 1 / -1; }
+    > .td-code__utilities--compact {
+      position: static;
+      grid-column: 2;
+      grid-row: 1;
+      margin: 0;
+      padding: 0.375rem;
+      opacity: 1;
+      border-inline-start: 1px solid var(--td-code-border-color);
+
+      &:not(:has(> button:not([hidden]))) { display: none; }
+    }
+    .td-code__viewport > .highlight > pre,
+    .td-code__viewport > .highlight > div.chroma { padding: 0.75rem 1rem; }
+  }
+
+  @media (pointer: coarse) {
+    .td-code__copy { width: 44px; min-width: 44px; min-height: 44px; }
+    .td-code__expand { min-height: 44px; }
+    .td-code__utilities--compact { inset-block-start: 0.25rem; inset-inline-end: 0.25rem; }
+    .td-code--untitled .td-code__viewport > .highlight > pre,
+    .td-code--untitled .td-code__viewport > .highlight > div.chroma { padding-inline-end: 4rem; }
+    .td-code.td-code-command .td-code__viewport > .highlight > pre,
+    .td-code.td-code-command .td-code__viewport > .highlight > div.chroma { padding-inline-end: 1rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {

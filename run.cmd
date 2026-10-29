@@ -8,7 +8,7 @@ set "DEFAULT_PORT=8768"
 set "PORT_MAX=8787"
 set "HUGO_FALLBACK=%USERPROFILE%\tools\hugo\hugo.exe"
 set "GO_FALLBACK=%USERPROFILE%\tools\go1.27.3\go\bin"
-set "GO_MIN_NOTE=1.27.0"
+set "GO_MIN_NOTE=1.27.3"
 rem ==== END PROJECT CONFIG ====
 
 title %SITE_TITLE%

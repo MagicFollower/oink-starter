@@ -242,14 +242,24 @@ a {
 
     > :not(caption) > * > th,
     > :not(caption) > * > td {
-      padding: 0.6rem 0.75rem;
+      padding: 0.75rem 0.875rem;
+      vertical-align: top;
     }
 
     thead th,
     thead td {
+      background: var(--bs-secondary-bg);
+      font-family: var(--td-ui-font-family);
+      font-size: 0.875rem;
       border-bottom: 1px solid var(--td-brand-line-strong);
       color: var(--bs-emphasis-color);
       font-weight: $font-weight-semibold;
+    }
+
+    @media (hover: hover) {
+      tbody tr:hover > * {
+        background-color: color-mix(in srgb, var(--bs-body-color) 3%, var(--bs-body-bg));
+      }
     }
 
     tbody tr:last-child > * {

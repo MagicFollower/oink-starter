@@ -1,6 +1,6 @@
 # Docker 团队知识库 — AI Agent 操作规范
 
-本项目是基于 Hugo + OINK 主题的 **中文文档站**，主题本地副本为 OINK **v1.3.2**（`oink-main/oink-main/`，1,273 个文件）。仅简体中文，可完全离线构建：`GOTOOLCHAIN=local` + `GOPROXY=off` 下不触网。
+本项目是基于 Hugo + OINK 主题的 **中文文档站**，主题本地副本为 OINK **v1.4.0**（`oink-main/oink-main/`，1,292 个文件 / 27,213,292 字节）。仅简体中文，可完全离线构建：`GOTOOLCHAIN=local` + `GOPROXY=off` 下不触网。
 
 结构源是《Docker知识库内容结构与组织清单》v2.1。**该清单不在仓库内**，`.staging/` 目录（含取源、建矩阵、矩阵校验脚本与 `matrix.json`）也已从磁盘移除，且从未进过 git 历史。因此本文件描述的一律是**磁盘现状**：结构一致性靠人工比对目录树，没有自动闸门兜着。第八节列了当前跑不了的校验与仓库里的遗留物。
 
@@ -21,7 +21,9 @@ Docker知识库/
 │           └── 中文板块名/
 │               ├── _index.md      # 板块页
 │               └── 中文文章名.md
-├── assets/icons/logo.svg          # 站点 logo；hugo.yaml 不写 logo 键，主题默认就取这个路径
+├── assets/
+│   ├── icons/logo.svg             # 站点 logo；hugo.yaml 不写 logo 键，主题默认就取这个路径
+│   └── scss/_styles_project.scss  # 站点级 SCSS 覆盖（主题 _main.scss 末尾 @import 它），表格列宽规则在这里
 ├── static/
 │   ├── favicon.svg
 │   └── picture/.gitkeep           # 配图目录，当前是空的（只有占位文件）
@@ -29,7 +31,7 @@ Docker知识库/
 ├── layouts/_partials/shell/root-menu-roots.html   # 唯一的站点级 partial 覆盖
 ├── hugo.yaml                      # 站点唯一配置
 ├── go.mod / go.sum                # 主题走 replace 本地化
-├── oink-main/oink-main/           # 本地化主题副本（1,273 文件，勿改）
+├── oink-main/oink-main/           # 本地化主题副本（v1.4.0，1,292 文件 / 27,213,292 字节，勿改）
 ├── doc/
 │   ├── 技术文档编写规范.md          # 19,067 字节
 │   ├── 复刻覆盖矩阵.md             # 15,743 字节，数字已滞后（见第八节）
@@ -41,7 +43,7 @@ Docker知识库/
 │   └── Harbor私有仓库/
 ├── run.cmd                        # Windows 启动入口（141 行 CRLF / 4,214 字节 / 纯 ASCII）
 ├── .gitignore / LICENSE(MIT) / README.md
-└── 构建产物与遗留物：public/ resources/ .hugo_build.lock noopen2.out Docker知识库/
+└── 构建产物与遗留物：public/ resources/ .hugo_build.lock .tmp/ noopen2.out Docker知识库/
 ```
 
 `示例/` 四个子目录各自带 `README.md`，其中三个还带校验脚本（`入门跑一遍.py`、`verify_storage.py`、`verify_chain.py`），`Harbor私有仓库/` 另带 `Harbor.cmd`、`harborctl.py`、`docker-compose.yml` 与官方安装包留档。它们在 `content/` 之外，Hugo 不构建，正文用站内链接指过去而不是把它们当页面。
@@ -134,19 +136,36 @@ hugo --cleanDestinationDir --gc --minify   # 发布档
 |------|------|------|------|
 | Hugo | `where hugo` → `D:\Apps\hugo_extended_0.168.0_windows-amd64\hugo.exe` | v0.168.0 **+extended** | `run.cmd` 走的就是这一份 |
 | Hugo | `C:\Users\webtu\tools\hugo\hugo.exe`（`run.cmd` 的 `HUGO_FALLBACK`） | v0.168.0 **+extended** | 与上面同版本，PATH 失效时的兜底 |
-| Go | `where go` → `C:\Program Files\Go\bin\go.exe` | **go1.27.2** | 系统 PATH 选中它 |
-| Go | `C:\Users\webtu\tools\go1.27.3\go\bin\go.exe`（`run.cmd` 的 `GO_FALLBACK`） | **go1.27.3** | **`GO_FALLBACK` 排在 PATH 之前**，所以 `run.cmd` 里生效的是这一份，不是 1.27.2 |
+| Go | `where go` → `C:\Program Files\Go\bin\go.exe` | **go1.27.2** | 系统 PATH 选中它；**升级到 1.4.0 后它已低于下界，直接拿它构建会失败**（实测 `go: go.mod requires go >= 1.27.3 (running go 1.27.2; GOTOOLCHAIN=local)`，rc=1） |
+| Go | `C:\Users\webtu\tools\go1.27.3\go\bin\go.exe`（`run.cmd` 的 `GO_FALLBACK`） | **go1.27.3** | **`GO_FALLBACK` 排在 PATH 之前**，所以 `run.cmd` 里生效的是这一份；升级后它是本机唯一能满足下界的那一份 |
 | Go | `C:\Users\webtu\tools\go\bin\go.exe` | **go1.25.4** | 低于 `go.mod` 下界，把它顶到 PATH 前面构建就会失败，见第七节 |
 
-两处 `go.mod`（站点与 `oink-main/oink-main/`）的 `go` 指令都是 **1.27.0**，取下界时要看两处、不是只看站点那一条。标准版 Hugo 编不了 SCSS，`hugo.yaml` 的 `module.hugoVersion` 写的是 `extended: true` / `min: 0.166.0`。
+两处 `go.mod`（站点与 `oink-main/oink-main/`）的 `go` 指令都是 **1.27.3**——这是 OINK 1.4.0 抬上去的，1.3.2 时代两处都是 1.27.0。取下界时要看两处、不是只看站点那一条。标准版 Hugo 编不了 SCSS，`hugo.yaml` 的 `module.hugoVersion` 写的是 `extended: true` / `min: 0.168.0`（1.4.0 要求 ≥ 0.168.0，1.3.2 时代是 0.166.0）。
 
 `GOTOOLCHAIN=local` 与 `GOPROXY=off` 这两条**实测过的**后果是：在 `local` 口径下，若被选中的 Go 低于 `go.mod` 的 `go` 指令，Hugo 会报 `failed to load modules: failed to download modules: ... go.mod requires go >= 1.27.0 (running go 1.25.4; GOTOOLCHAIN=local)` 并以返回码 1 退出——文本长得像内容错误，其实是工具链闸门（见第七节 A/B 的 B 臂）。不设 `GOTOOLCHAIN=local` 时 Go 会自己去 proxy 拉工具链：本轮在 `C:\Users\webtu\tools\go\bin` 上直接复现到 `go: downloading go1.27.0 (windows/amd64)` 后接 `dial tcp 142.250.204.49:443: connectex: ... failed to respond`，离线机必败。
 
+**升级到 OINK 1.4.0 之后这条闸门的样子变了**（2026-10-30 同日 A/B，两臂都回读确认，不是空跑）：同一个站点、同一条 `hugo --cleanDestinationDir`，只换被选中的 Go：
+
+| 臂 | 生效 Go | 结果 |
+|---|---|---|
+| A | `C:\Program Files\Go` = go1.27.2（PATH 默认） | **rc=1**，`go: go.mod requires go >= 1.27.3 (running go 1.27.2; GOTOOLCHAIN=local)` |
+| B | `C:\Users\webtu\tools\go1.27.3` = go1.27.3 | **rc=0**，`Pages 239 / Static files 35 / Total in 2972 ms` |
+
+所以直接在 PATH 默认环境里敲 `hugo` 现在会失败；`run.cmd` 因为把 `GO_FALLBACK` 排在 PATH 之前，照常成功（横幅实跑读到 `Go 1.27.3 or newer is required by go.mod.` 与 `go version go1.27.3`）。手动构建时把 `C:\Users\webtu\tools\go1.27.3\go\bin` 前置即可。
+
 本轮构建实测（`run.cmd`，`NO_OPEN=1 NO_PAUSE=1`）：`Pages 239 / Static files 35`，`Built in 2157 ms` 与 `2239 ms` 两次，**0 个 ERROR**，唯一 WARN 是主题侧 `css.Sass: libsass was deprecated`（主题固有，不是失败，也不要为此加 `--panicOnWarning`）。
+
+**1.4.0 带来的三样东西，产物层逐个核过**（`Static files` 仍是 35，不是 1,292 副本带来的增量——新资产只在使用它们的页面才输出）：
+
+| 能力 | 产物证据 |
+|---|---|
+| 图表懒渲染（`assets/js/diagram.js`，`IntersectionObserver rootMargin: 320px`） | 产出 `public/js/chunks/diagram.min.fce3cf5c…js`；76 个页面出现 1.4.0 新增的 `<pre class="td-mermaid-source">`，`figure.td-diagram--mermaid` 共 47 个，`stage` 为空待脚本填充 |
+| PlantUML 本地渲染 | **默认关闭**，全站 `grep -rl plantuml public --include=*.html` 命中 **0** —— 与技能「未启用时产物里没有 plantuml 引用」一致。要启用得在 `params.ui.plantuml.enable` 打开，本站没开 |
+| 表格 `.wide` / `.expand` 阅读抽屉 | `td-table-frame` / `data-td-table-reader` / `class="wide` 全站计数均 **0**，因为内容里 `.wide` 与 `.expand` 标记实测也是 **0**；这是「没用就没输出」，不是回归 |
 
 ## 六、约束与禁止事项
 
-1. 不可修改 `oink-main/` 主题目录下任何文件（当前 1,273 个文件与技能物料逐字节一致，第七节记录了唯一一次偏离及其撤销）。
+1. 不可修改 `oink-main/` 主题目录下任何文件（当前 OINK **v1.4.0**，1,292 个文件与技能物料逐字节一致——74 件 vendored 产物 sha256 全对、三棵树文件数全对，见第七节）。
 2. 不可添加非中文内容文件，不可改动 `hugo.yaml` 的语言配置。
 3. 新建板块必须同时创建其 `_index.md` 并更新父级分类的「知识板块」列表；新建一级分类还要同步 `content/docs/_index.md` 的卡片行与第二节那张表。目录与索引成对出现。
 4. 不可删除已有 `_index.md`；不可让文章缺失 front matter。
@@ -156,10 +175,13 @@ hugo --cleanDestinationDir --gc --minify   # 发布档
 8. `hugo.yaml` 的 goldmark 三项（`renderer.unsafe`、`parser.attribute.block`、`parser.wrapStandAloneImageWithinParagraph`）、`relativeURLs: true`，以及 `ui.preset` / `ui.preset_menu` 两行不许删或注释掉——后者是 4 套观感可切换的唯一开关，配在 1.0/1.1 主题副本上不生效但**构建一个错都不报**。
 9. `baseURL` 一律写根（当前是 `https://example.org/`，仍是待改的占位）。要挂子路径靠部署时把 `public/` 放进那个子目录，**不要**把子路径写进 `baseURL`：与 `relativeURLs: true` 冲突，会把子路径烤进每个资源 URL，页面 200 但 CSS 与 logo 全 404。
 10. 站点级自定义开关写进配置文件的 `params` 段，不要指望手改能活过下一轮重新生成。
+11. 要改观感（字体、表格、间距一类）**改 `assets/scss/_styles_project.scss`，不要去动 `oink-main/`**。主题 `assets/scss/td/_main.scss` 第 76 行 `@import '../styles_project'` 就是给站点的扩展点，站点 `assets/` 下同名文件会遮住主题里那份空壳——这是唯一既生效又不破坏「主题副本逐字节等于技能物料」的改法。
 
 ## 七、偏离登记：一处曾登记、现已撤销的误诊
 
-**当前状态：对本地主题副本零改动。** 这次不是只看 `go.mod` 一行——整棵主题树逐文件比对了 MD5：物料与站点各 **1,273 个文件**，「仅物料有 0 / 仅站点有 0 / 内容不同 0」（文件数本轮复核仍是 1,273）。站点 `go.mod` 也已还原成与上游模板一致（先前我改写它时把 CRLF 换成了 LF，属于又一次过度声称——当时写的是「两处逐字节一致」，实际只差行尾，现已核实并修正；仓库 `core.autocrlf=true`，磁盘 CRLF 与库内 LF 是同一份内容）。
+**当前状态：主题副本是技能物料 OINK v1.4.0 的逐字节拷贝，零手改。** 2026-10-30 从技能 `assets/theme/oink-main/oink-main/` 整棵换入（`cp -a`，不过任何 eol 转换）：1,292 个文件 / 27,213,292 字节，与技能副本 `diff -rq` 干净。校验不是只数文件——用主题自带 `VENDOR.json` 逐件核 sha256：**74 件 vendored 产物 `missing=0 hash_bad=0`**，三棵树（`assets/third_party` 246、`assets/js/third_party` 1、`static/webfonts` 33）声明文件数与实测全对；技能点名的 CRLF 文件也保住了（`viz-global.js` 9/9 行、`LICENSE` 72/72 行）。站点侧 `go.mod` / `go.sum` / `hugo.yaml` 的版本号同步到 `v1.4.0` / `go 1.27.3` / `min: 0.168.0`。
+
+升级前那棵 1.3.2 树（1,273 文件）留了站点外备份 `%TEMP%\oink132-backup`，确认无误后可删；git 里也提交过，随时可 `git checkout` 复原。`go.mod` 的 CRLF/LF 说明照旧：仓库 `core.autocrlf=true`，磁盘 CRLF 与库内 LF 是同一份内容。
 
 这一节保留误诊记录本身，因为它比「没偏离」更有用。
 
@@ -203,5 +225,6 @@ hugo --cleanDestinationDir --gc --minify   # 发布档
 | `static/picture/` | 只有 `.gitkeep`，`content/` 里 `picture/` 引用数 0 | 第一节旧版说的「drawio 源 + 导出 png」当前不成立 |
 | `content/docs/_index.md` 正文 | 第 4 行 `description` 写「十一个主题篇」，第 18 行正文写「十个主题篇」 | 卡片行实测是 11 条，正文那句少算了一个；属站点内容缺陷，不在本轮范围 |
 | `.gitignore` | 仍是 7 行旧基线 | 缺 `/_mermaid-harness/`、`*.log`、`Thumbs.db`、`desktop.ini`、`.vscode/`、`*.swp`、`node_modules/` |
+| `layouts/_partials/shell/root-menu-roots.html` | 站点级 override 已**冗余**：它与主题 1.3.2 / 1.4.0 两版的差异只在注释，而且比主题版**少** `sidebar_divider` 支持；主题 1.4.0 早已自带它当初要补的 `sidebar_root_menu` 判断 | 内容里 `sidebar_root_menu` 与 `sidebar_divider` 的使用数都是 **0**，所以产物无差别；但它会遮住主题的后续修复。**本轮未删，等你点头** |
 
-**当前唯一能实测的闸门是 `hugo` 构建本身**：0 ERROR、WARN 只允许主题侧 `libsass deprecated` 一条。要恢复自动校验，得先把 `replicate-doc-site` 技能装回来，或改用 `oink-doc-site` 技能的脚本——但后者要求 OINK v1.4.0 主题副本与一份 `site.plan.json`，本站两者都不满足（主题是 1.3.2、没有 `site.plan.json`），直接跑会在 scaffold 与 plan 两道闸上失败。
+**当前唯一能实测的闸门是 `hugo` 构建本身**：0 ERROR、WARN 只允许主题侧 `libsass deprecated` 一条。升级后另有两项可跑通的：`oink-doc-site` 的 `check_links.py --site .`（以 `public/` 为准，实测 `links_checked=360 broken=0 unmapped=0`，资源判据 `pages=118 checked=1548` 全落地）与 `validate_mermaid.py` 生成的离线解析台（真解析实测 `TOTAL=47 REAL_FAIL=0 SELFTEST=1/2 SELFTEST_PASS`）。要跑 `verify_site.py` 的全套仍需一份 `site.plan.json`——本站没有，且主题已是 1.4.0，只剩 plan 这一道闸挡着。

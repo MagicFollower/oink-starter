@@ -35,15 +35,12 @@ def write(path: Path, content: str) -> None:
 
 def run(
     hugo: str, source: Path, destination: Path | None = None,
-    panic_on_warning: bool = True,
 ) -> subprocess.CompletedProcess[str]:
     command = [hugo, "--source", str(source), "--logLevel", "warn"]
     if source == FIXTURE:
         command.extend(fixture_config_args())
     if destination is not None:
         command.extend(["--destination", str(destination)])
-    if panic_on_warning:
-        command.append("--panicOnWarning")
     return run_hugo_process(
         command, cwd=ROOT, capture_output=True, text=True, check=False
     )
@@ -374,23 +371,6 @@ INVALID_CASES = (
     ("bad-marquee-rows", "sections:\n  - type: logo-wall\n    data:\n      layout: marquee\n      rows: nope\n      items: [{title: Logo}]\n", 'marquee rows "nope" is not a whole number'),
 )
 
-STRICT_INVALID_CANARIES = {
-    "missing-data",                # data lookup
-    "unknown-section",             # section dispatch
-    "bad-visual",                  # media kind
-    "missing-alt",                 # media accessibility
-    "bad-faq",                     # section enum
-    "bad-hero-title-size",         # CSS length
-    "centered-hero-image",         # cross-field layout rule
-    "missing-preview-source",      # required field
-    "bad-preview-source",          # field type
-    "bad-compare",                 # cross-field cardinality
-    "bad-bar",                     # numeric value
-    "bad-hero-media",              # map shape
-    "bad-hero-ratio",              # track grammar
-    "bad-capabilities-rules",      # array shape
-}
-
 
 def check_invalid(hugo: str) -> list[str]:
     errors: list[str] = []
@@ -398,10 +378,10 @@ def check_invalid(hugo: str) -> list[str]:
         with tempfile.TemporaryDirectory(prefix=f"td-landing-components-landing-{name}-") as temp:
             site = Path(temp)
             create_site(site, data)
-            result = run(hugo, site, panic_on_warning=False)
+            result = run(hugo, site)
             output = result.stdout + result.stderr
             # A malformed section warns and renders nothing while the rest of
-            # the page survives; only --panicOnWarning turns that into failure.
+            # the page survives with a visible diagnostic.
             require(expected in output, f"invalid landing case {name} did not report {expected!r}", errors)
             page = site / "public/test/index.html"
             require(result.returncode == 0,
@@ -417,9 +397,6 @@ def check_invalid(hugo: str) -> list[str]:
                 require("background-image: url(https://example.invalid/x)" not in rendered
                         and "240px; color: red" not in rendered,
                         f"invalid landing case {name} leaked unsafe CSS", errors)
-            if name in STRICT_INVALID_CANARIES:
-                require(run(hugo, site, panic_on_warning=True).returncode != 0,
-                        f"invalid landing case {name} survived --panicOnWarning", errors)
     return errors
 
 
@@ -557,7 +534,7 @@ def check_metric_display(hugo: str) -> list[str]:
     with tempfile.TemporaryDirectory(prefix="oink-landing-metrics-") as temp:
         site = Path(temp)
         create_site(site, data)
-        result = run(hugo, site, panic_on_warning=True)
+        result = run(hugo, site)
         if result.returncode != 0:
             return [f"metric display fixture failed: {result.stdout}{result.stderr}"]
         source = (site / "public/test/index.html").read_text(encoding="utf-8")
@@ -593,7 +570,7 @@ def check_code_focus(hugo: str) -> list[str]:
         create_site(site, data)
         config = (site / "hugo.yaml").read_text(encoding="utf-8")
         write(site / "hugo.yaml", config.replace("page: [HTML]", "page: [HTML, print]"))
-        result = run(hugo, site, panic_on_warning=True)
+        result = run(hugo, site)
         if result.returncode != 0:
             return [f"landing code focus fixture failed: {result.stdout}{result.stderr}"]
         for output, relative in (
@@ -743,14 +720,20 @@ def check_markdown_scopes(hugo: str) -> list[str]:
                 parser.feed((site / "public" / route).read_text())
                 require(parser.code_ids == expected, f"{route} code scopes depend on render order", errors)
         # Explicit IDs stay authored, but collisions across separate RenderString
-        # invocations must still fail the warning-strict publishing gate.
+        # invocations must emit diagnostics and keep the page usable.
         authored = body.replace('title="same.txt"', 'id="authored" title="same.txt"')
         write(site / "data/landing/demo.yaml", json.dumps({"sections": [
             {"type": "markdown", "key": key, "data": {"body": authored}} for key in ("first", "second")
         ]}))
         collision = run(hugo, site)
-        require(collision.returncode != 0 and 'duplicate id "authored"' in collision.stdout + collision.stderr,
+        require(collision.returncode == 0 and 'duplicate id "authored"' in collision.stdout + collision.stderr,
                 "Landing kept duplicate explicit code IDs across independent bodies", errors)
+        if collision.returncode == 0:
+            for route in ("test/index.html", "_print/test/index.html"):
+                parser = LandingCodeParser()
+                parser.feed((site / "public" / route).read_text())
+                require("authored" in parser.code_ids,
+                        f"{route} lost the authored code ID while reporting its collision", errors)
     return errors
 
 

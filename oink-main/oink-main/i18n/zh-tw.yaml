@@ -15,6 +15,10 @@ callout_details: 詳情
 ui_pager_prev: 上一頁
 ui_pager_next: 下一頁
 ui_search: 搜尋…
+ui_search_scope: 搜尋範圍
+ui_search_scope_all: 全部欄目
+ui_search_partial: '部分符合：{matched}/{total} 個關鍵字'
+ui_search_partial_results: 沒有頁面包含全部關鍵字，以下為部分符合
 ui_search_empty: 找不到結果
 ui_search_loading: 正在載入搜尋索引…
 ui_search_nav: 選擇
@@ -207,6 +211,9 @@ comments_noscript_link: 在 GitHub 上檢視討論。
 ui_open_in_prompt_label: 就本頁提問
 ui_view_history: 檢視編輯歷史
 ui_table_scroll: "可橫向捲動的表格"
+ui_table_expand: "展開表格"
+ui_table_reader: "表格閱讀器"
+ui_table_reader_scroll: "表格內容，可水平與垂直捲動"
 ui_filetree_divider: "拖曳以調整目錄樹備註欄寬度"
 book_figure: 圖
 book_table: 表
@@ -241,6 +248,10 @@ ui_diagram_zoom_in: 放大
 ui_diagram_zoom_out: 縮小
 ui_diagram_zoom_reset: 重設檢視
 ui_diagram_error: 圖表無法呈現
+ui_diagram_fit: 符合視窗大小
+ui_diagram_download: 下載 SVG
+ui_diagram_download_started: 已開始下載 SVG
+ui_diagram_download_error: 無法下載 SVG
 
 # Expo icon tooltips and accessible names.
 ui_expo_layout: "圖片佈局"

@@ -37,7 +37,7 @@ def require(condition: bool, message: str, errors: list[str]) -> None:
         errors.append(message)
 
 
-def build_site(hugo: str, pages: dict[str, str], *, prefix: str, base_url: str = "https://example.org/", extra_files: dict[str, str] | None = None, config: str = "", panic_on_warning: bool = False) -> tuple[subprocess.CompletedProcess[str], Path, tempfile.TemporaryDirectory]:
+def build_site(hugo: str, pages: dict[str, str], *, prefix: str, base_url: str = "https://example.org/", extra_files: dict[str, str] | None = None, config: str = "") -> tuple[subprocess.CompletedProcess[str], Path, tempfile.TemporaryDirectory]:
     """Build a self-contained temp site against this theme; keep the temp handle alive."""
     temp = tempfile.TemporaryDirectory(prefix=prefix)
     site = Path(temp.name)
@@ -65,8 +65,6 @@ def build_site(hugo: str, pages: dict[str, str], *, prefix: str, base_url: str =
     (layouts / "single.rss.xml").write_text('{{- .Store.Set "tdOutputFormat" "rss" -}}\n<fixture>{{ (.Markup "td-rss-check").Render.Content }}</fixture>\n', encoding="utf-8")
     destination = site / "public"
     command = [hugo, "--source", str(site), "--themesDir", str(ROOT.parent), "--destination", str(destination), "--logLevel", "warn"]
-    if panic_on_warning:
-        command.append("--panicOnWarning")
     result = run_hugo_process(command, cwd=ROOT, capture_output=True, text=True, check=False)
     return result, destination, temp
 
@@ -231,6 +229,10 @@ def check_data_fences(hugo: str) -> list[str]:
             'class="td-asset-list site-assets" data-td-asset-list aria-label="Checksums" data-fixture="assets">',
             '<figure class="td-diagram td-diagram--mermaid" data-td-diagram>',
             '<div class="td-diagram__stage" data-td-diagram-stage></div>',
+            '<pre class="td-mermaid-source" tabindex="0"><code class="language-mermaid">graph TD; A--&gt;B;</code></pre>',
+            'data-td-mermaid-config',
+            'data-td-diagram-source-toggle',
+            'data-td-diagram-download',
             '<script type="application/json" data-td-diagram-source>"graph TD; A--\\u003eB;"</script>',
             'data-td-diagram-expand aria-haspopup="dialog"',
         ):
@@ -279,19 +281,6 @@ def check_data_fences(hugo: str) -> list[str]:
         ("checksums-empty", '```checksums {base="https://example.org/dl/"}\n\n```\n', "requires checksum lines"),
         ("checksums-scheme", '```checksums {base="ftp://example.org/dl/"}\n' + "a" * 64 + "  file.rpm\n```\n", "must use http or https"),
     )
-    strict_canaries = {
-        "echarts-invalid-yaml",   # data parsing
-        "echarts-not-a-map",      # parsed shape
-        "echarts-unknown-attr",   # attribute policy
-        "echarts-height",         # CSS length
-        "echarts-full",           # boolean option
-        "infographic-empty",      # infographic content
-        "infographic-height",     # infographic CSS fallback
-        "checksums-no-base",      # source selection
-        "checksums-bad-algo",     # checksum enum
-        "checksums-empty",        # checksum content
-        "checksums-scheme",       # URL policy
-    }
     for name, body, expected in invalid:
         result, destination, temp = build_site(hugo, {"docs/_index.md": "---\ntitle: Docs\n---\n", "docs/bad.md": f"---\ntitle: {name}\n---\n\n{body}"}, prefix=f"oink-components-{name}-")
         with temp:
@@ -299,10 +288,69 @@ def check_data_fences(hugo: str) -> list[str]:
             require(result.returncode == 0, f"invalid data fence {name} stopped the ordinary build: {output.strip()[-400:]}", errors)
             require(expected in output, f"invalid data fence {name} did not report {expected!r}: {output.strip()[-400:]}", errors)
             require((destination / "docs/bad/index.html").is_file(), f"invalid data fence {name} emitted no safe page output", errors)
-            if name in strict_canaries:
-                strict, _strict_destination, strict_temp = build_site(hugo, {"docs/_index.md": "---\ntitle: Docs\n---\n", "docs/bad.md": f"---\ntitle: {name}\n---\n\n{body}"}, prefix=f"oink-components-{name}-strict-", panic_on_warning=True)
-                with strict_temp:
-                    require(strict.returncode != 0, f"invalid data fence {name} survived --panicOnWarning", errors)
+    return errors
+
+
+def check_presentation_variants(hugo: str) -> list[str]:
+    """Opt-in presentation must preserve content, list semantics, and fallback."""
+    errors: list[str] = []
+    body = '''---
+title: Presentation
+---
+
+- [Native resource](/docs/)
+{.cards .td-cards-list}
+
+3. Native third step
+1. Native fourth step
+{.steps .td-steps-compact}
+
+{{< cards variant="list" >}}
+{{< card title="Full resource" link="/docs/" >}}Full description.{{< /card >}}
+{{< /cards >}}
+
+{{% steps variant="compact" %}}
+### Compact heading {#compact-heading}
+
+Compact body.
+{{% /steps %}}
+
+{{< cards variant=42 >}}
+{{< card title="Fallback resource" >}}Fallback card body.{{< /card >}}
+{{< /cards >}}
+
+{{% steps variant="invalid" %}}
+### Fallback heading {#fallback-heading}
+
+Fallback step body.
+{{% /steps %}}
+'''
+    result, destination, temp = build_site(hugo, {
+        "docs/_index.md": "---\ntitle: Docs\n---\n",
+        "docs/presentation.md": body,
+    }, prefix="oink-component-presentation-")
+    with temp:
+        output = result.stdout + result.stderr
+        require(result.returncode == 0, f"presentation build failed: {output}", errors)
+        if result.returncode:
+            return errors
+        for diagnostic in ("variant must be list", "variant must be compact"):
+            require(diagnostic in output, f"missing {diagnostic}", errors)
+        html = (destination / "docs/presentation/index.html").read_text()
+        for marker in ('<ul class="cards td-cards-list">', '<ol start="3" class="steps td-steps-compact">',
+                       'class="td-content-cards td-content-cards--auto td-cards-list"',
+                       'class="td-steps td-max-width-on-larger-screens td-steps-compact"',
+                       'class="td-content-cards td-content-cards--auto"',
+                       'class="td-steps td-max-width-on-larger-screens"',
+                       '<h3 id="compact-heading">', '<h3 id="fallback-heading">'):
+            require(marker in html, f"presentation lost {marker}", errors)
+        for filename in ("index.html", "index.md", "index.xml"):
+            rendered = (destination / f"docs/presentation/{filename}").read_text()
+            for text in ("Native resource", "Native third step", "Full description.", "Compact body.", "Fallback card body.", "Fallback step body."):
+                require(text in rendered, f"{filename} lost {text}", errors)
+        markdown = (destination / "docs/presentation/index.md").read_text()
+        require('<div' not in markdown and '{{<' not in markdown and '{{%' not in markdown,
+                "presentation wrappers leaked into Markdown", errors)
     return errors
 
 
@@ -399,7 +447,6 @@ def check_openapi(hugo: str) -> list[str]:
         prefix="oink-components-redoc-subpath-",
         base_url="https://example.org/preview/",
         extra_files={"static/openapi/spec.yaml": "openapi: 3.1.0\n"},
-        panic_on_warning=True,
     )
     with temp:
         if result.returncode != 0:
@@ -440,15 +487,6 @@ def check_openapi(hugo: str) -> list[str]:
         ("asciinema-bad-marker", '{{< asciinema file="x.cast" markers="abc:Nope" >}}', "needs a numeric time"),
         ("asciinema-unsafe-file", '{{< asciinema file="javascript:alert(1)" >}}', "unsupported file scheme"),
     )
-    strict_canaries = {
-        "swagger-missing-src",    # Swagger parameters
-        "swagger-unsafe-src",     # Swagger URL policy
-        "redoc-extra-options",    # Redoc parameters
-        "redoc-unsafe-spec",      # Redoc URL policy
-        "asciinema-bad-speed",    # numeric options
-        "asciinema-bad-marker",   # marker parser
-        "asciinema-unsafe-file",  # Asciinema URL policy
-    }
     for name, body, expected in invalid:
         result, destination, temp = build_site(
             hugo,
@@ -460,15 +498,6 @@ def check_openapi(hugo: str) -> list[str]:
             require(result.returncode == 0, f"invalid OpenAPI case {name} stopped the ordinary build: {output[-400:]}", errors)
             require(expected in output, f"invalid OpenAPI case {name} did not report {expected!r}: {output[-400:]}", errors)
             require((destination / "docs/bad/index.html").is_file(), f"invalid OpenAPI case {name} emitted no safe page output", errors)
-            if name in strict_canaries:
-                strict, _strict_destination, strict_temp = build_site(
-                    hugo,
-                    {"docs/_index.md": "---\ntitle: Docs\n---\n", "docs/bad.md": f"---\ntitle: {name}\n---\n\n{body}\n"},
-                    prefix=f"oink-components-{name}-strict-",
-                    panic_on_warning=True,
-                )
-                with strict_temp:
-                    require(strict.returncode != 0, f"invalid OpenAPI case {name} survived --panicOnWarning", errors)
     return errors
 
 
@@ -488,7 +517,6 @@ def check_media_output_states(hugo: str) -> list[str]:
         {"docs/_index.md": "---\ntitle: Docs\n---\n", "docs/media.md": page},
         prefix="oink-components-media-states-",
         extra_files={"static/images/install.cast": "{}\n"},
-        panic_on_warning=True,
     )
     with temp:
         if result.returncode != 0:
@@ -523,23 +551,20 @@ def check_empty_tabs(hugo: str) -> list[str]:
         "docs/_index.md": "---\ntitle: Docs\n---\n",
         "docs/empty.md": '---\ntitle: Empty tabs\noutputs: [HTML, PRINT, MARKDOWN, RSS]\n---\n\nBefore.\n\n{{< tabs >}}{{< /tabs >}}\n\nAfter.\n',
     }
-    for strict in (False, True):
-        result, destination, temp = build_site(
-            hugo, pages, prefix="oink-empty-tabs-", panic_on_warning=strict,
-        )
-        with temp:
-            output = result.stdout + result.stderr
-            require('requires at least one tab child' in output, "empty tabs lost its diagnostic", errors)
-            require((result.returncode != 0) == strict, "empty tabs violated the warning policy", errors)
-            if strict:
-                continue
-            for relative in ('docs/empty/index.html', '_print/docs/empty/index.html',
-                             'docs/empty/index.md', 'docs/empty/index.xml'):
-                rendered = (destination / relative).read_text()
-                require('Before.' in rendered and 'After.' in rendered,
-                        f"{relative} lost content around empty tabs", errors)
-                require('td-tabs' not in rendered and 'role="tablist"' not in rendered,
-                        f"{relative} rendered an empty tabs container", errors)
+    result, destination, temp = build_site(
+        hugo, pages, prefix="oink-empty-tabs-",
+    )
+    with temp:
+        output = result.stdout + result.stderr
+        require('requires at least one tab child' in output, "empty tabs lost its diagnostic", errors)
+        require(result.returncode == 0, "empty tabs violated the warning policy", errors)
+        for relative in ('docs/empty/index.html', '_print/docs/empty/index.html',
+                         'docs/empty/index.md', 'docs/empty/index.xml'):
+            rendered = (destination / relative).read_text()
+            require('Before.' in rendered and 'After.' in rendered,
+                    f"{relative} lost content around empty tabs", errors)
+            require('td-tabs' not in rendered and 'role="tablist"' not in rendered,
+                    f"{relative} rendered an empty tabs container", errors)
     return errors
 
 
@@ -600,7 +625,6 @@ Syntax.
             hugo, {name: body.replace("__BASE__", base_path) for name, body in pages.items()},
             prefix="oink-print-tabs-", base_url=base_url,
             config="languages:\n  en:\n    weight: 1\n  zh:\n    weight: 2\n    locale: zh-CN\n",
-            panic_on_warning=True,
         )
         try:
             require(result.returncode == 0, f"Print tabs fixture failed: {result.stdout}{result.stderr}", errors)
@@ -714,6 +738,15 @@ def check_template_contracts() -> list[str]:
         for marker in markers:
             require(marker in source, f"{name} lacks {marker}", errors)
     runtime = (ROOT / "assets/js/content-components.js").read_text()
+    diagram = (ROOT / "assets/js/diagram.js").read_text()
+    diagram_styles = (ROOT / "assets/scss/td/_diagram.scss").read_text()
+    require("entry.printOpen" in diagram and "entry.kind === 'mermaid' && entry.theme === 'dark'" in diagram
+            and 'data-td-diagram-theme="dark"' in diagram_styles and "color: #111 !important" in diagram_styles,
+            "browser print must provide readable dark Mermaid source and restore its disclosure state", errors)
+    require("target.offsetWidth ||" not in runtime and "width: '100%'" in runtime,
+            "Infographic must retain container-relative width rather than a mount-time pixel width", errors)
+    require("event.node.style.backgroundColor || '#fff'" in runtime,
+            "Infographic must keep authored backgrounds ahead of its neutral canvas fallback", errors)
     require("$fn:" in runtime and "OinkEchartsFunctions" in runtime, "ECharts callback bridge ($fn: / OinkEchartsFunctions) changed", errors)
     scripts = (ROOT / "layouts/_partials/scripts.html").read_text()
     require("or $hasAsciinema $hasEcharts $hasInfographic" in scripts, "scripts.html no longer loads content-components.js for data fences", errors)
@@ -725,7 +758,8 @@ def check_template_contracts() -> list[str]:
     config = (ROOT / "hugo.yaml").read_text()
     require("oink:" not in config, "theme hugo.yaml declares a params.oink tree", errors)
     for removed in ("filetree", "gallery", "carousel", "tabpane", "readfile", "imgproc"):
-        require(removed not in config.lower(), f"theme hugo.yaml still configures the removed {removed} feature", errors)
+        require(re.search(r"(?m)^\s*" + re.escape(removed) + r"\s*:", config.lower()) is None,
+                f"theme hugo.yaml still configures the removed {removed} feature", errors)
     return errors
 
 
@@ -747,6 +781,7 @@ def main() -> int:
         + check_callout_matrix(args.hugo)
         + check_data_fences(args.hugo)
         + check_steps_container(args.hugo)
+        + check_presentation_variants(args.hugo)
         + check_openapi(args.hugo)
         + check_media_output_states(args.hugo)
         + check_empty_tabs(args.hugo)

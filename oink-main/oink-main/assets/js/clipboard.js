@@ -20,7 +20,11 @@
     textarea.setAttribute('readonly', '');
     textarea.style.position = 'fixed';
     textarea.style.inset = '-9999px auto auto -9999px';
-    doc.body.appendChild(textarea);
+    // A modal makes the rest of the document inert. A field in the body can
+    // report execCommand success while leaving the old clipboard untouched.
+    var modal = previous && typeof previous.closest === 'function'
+      ? previous.closest('dialog[open]') : null;
+    (modal || doc.body).appendChild(textarea);
     var copied = false;
     try {
       textarea.select();

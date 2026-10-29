@@ -12,6 +12,8 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
+from test_site import theme_warnings
+
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_SCRIPT = ROOT / "bin" / "check-navigation-contract.py"
@@ -113,12 +115,10 @@ def main() -> int:
                     helper, workspace, name, value
                 )
 
-            require("WARN" not in logs["unset"], "unset policy emitted a warning")
+            require(not theme_warnings(logs["unset"]), "unset policy emitted a warning")
             for name in ("all", "groups", "none"):
-                require("WARN" not in logs[name], f"{name} policy emitted a warning")
-            invalid_warnings = [
-                line for line in logs["invalid"].splitlines() if "WARN" in line
-            ]
+                require(not theme_warnings(logs[name]), f"{name} policy emitted a warning")
+            invalid_warnings = theme_warnings(logs["invalid"])
             require(
                 invalid_warnings
                 and all(

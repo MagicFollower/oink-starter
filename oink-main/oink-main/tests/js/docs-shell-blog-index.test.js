@@ -165,15 +165,24 @@ test('the first click reads a stored choice ahead of the published form', () => 
   assert.equal(root.getAttribute('data-td-blog-index'), 'table');
 });
 
-test('three clicks walk list, cards, table and return', () => {
+test('four clicks walk list, cards, table, gallery and return', () => {
   const { toggle, root, store } = bootstrap({ published: 'cards' });
   toggle.handlers.click();
   assert.equal(root.getAttribute('data-td-blog-index'), 'table');
+  toggle.handlers.click();
+  assert.equal(root.getAttribute('data-td-blog-index'), 'gallery');
   toggle.handlers.click();
   assert.equal(root.getAttribute('data-td-blog-index'), 'list');
   toggle.handlers.click();
   assert.equal(root.getAttribute('data-td-blog-index'), 'cards');
   assert.equal(store.get('td-blog-index'), 'cards');
+});
+
+test('a saved gallery starts at gallery and returns to the list', () => {
+  const { toggle, root } = bootstrap({ stored: 'gallery', published: 'cards' });
+  assert.equal(root.getAttribute('data-td-blog-index'), 'gallery');
+  toggle.handlers.click();
+  assert.equal(root.getAttribute('data-td-blog-index'), 'list');
 });
 
 test('a refused write does not break the switch', () => {

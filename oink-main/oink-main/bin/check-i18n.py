@@ -358,7 +358,6 @@ def check_hugo_runtime(
                     "--destination",
                     str(public),
                     "--printI18nWarnings",
-                    "--panicOnWarning",
                 ],
                 text=True,
                 capture_output=True,

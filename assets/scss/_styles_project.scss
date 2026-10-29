@@ -1,0 +1,31 @@
+// 站点级样式覆盖。主题 `assets/scss/td/_main.scss` 在末尾 @import 本文件，
+// 站点 assets/ 同名文件会替代主题里那份空壳，无需改动 oink-main/。
+//
+// 为什么要这一段：文档正文里的裸 <table> 由主题包成 .td-table-scroll（overflow-x:auto），
+// 但没有任何规则约束单元格的最小宽度。单元格里出现一个很长的不可断 token（Windows 路径、
+// 一长串命令行）时，自动布局把宽度几乎全给那一列，相邻列塌到 min-content —— 中文的
+// min-content 是一个字，于是表头被渲染成「一 字 一 行」，整表还横向溢出。
+// 这里给出两件事：列有下限，长 token 允许断行。
+
+.td-content .td-table-scroll > table {
+  th,
+  td {
+    // 4.5em（正文字号 16px 时约 72px，扣掉左右各 14px 内边距约容 2.75 个汉字）
+    min-width: 4.5em;
+    overflow-wrap: anywhere;
+  }
+
+  // 代码片段常是路径或命令，本身没有天然断点，单独放宽断行规则
+  code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  // 窄屏：4.5em 的下界会让 4~5 列的表刚好多出几个像素、冒出横向滚动条。
+  // 放到 3.75em（正文区约 32px，仍容得下 2 个汉字），列不至于塌成一字一行，
+  // 表也能正好落进屏宽；列数更多的表本来就该横向滚动，不受影响。
+  @media (max-width: 575.98px) {
+    th,
+    td { min-width: 3.75em; }
+  }
+}

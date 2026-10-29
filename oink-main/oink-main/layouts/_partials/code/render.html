@@ -1,6 +1,11 @@
 {{- $config := .config -}}
 {{- $highlighted := .highlighted -}}
 {{- $externalActions := .externalActions | default false -}}
+{{- $classTokens := findRE `\S+` $config.classes -}}
+{{- if and (in $classTokens "td-code-command") (findRE `class="[^"]*\b(ln|lnt|lntable)\b` (printf "%s" $highlighted)) -}}
+  {{- warnf "code block: td-code-command cannot use rendered line numbers at %s; using the regular block" $config.position -}}
+  {{- $config = merge $config (dict "classes" (delimit (complement (slice "td-code-command") $classTokens) " ")) -}}
+{{- end -}}
 {{- if and $config.wrap (strings.Contains (printf "%s" $highlighted) "lntable") -}}
   {{- warnf "code block: wrap=true is incompatible with rendered table line numbers at %s; disabling wrapping (use lineNos=inline to keep it)" $config.position -}}
 {{- end -}}

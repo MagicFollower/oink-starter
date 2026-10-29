@@ -23,8 +23,6 @@ LIBSASS_WARNING = (
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--hugo", default="hugo")
-    parser.add_argument("--allow-libsass-warning", action="store_true",
-                        help="accept only Hugo 0.168's known LibSass warning")
     args = parser.parse_args()
     hugo = shutil.which(args.hugo)
     if not hugo:
@@ -71,19 +69,16 @@ markup:
                    "--destination", str(site / "public"), "--cacheDir", str(site / "cache"),
                    "--ignoreCache", "--noBuildLock", "--logLevel", "warn",
                    "--environment", "development"]
-        if not args.allow_libsass_warning:
-            command.append("--panicOnWarning")
         result = run_hugo_process(command, env=env, text=True, capture_output=True)
         output = result.stdout + result.stderr
         if result.returncode:
             raise SystemExit(output)
         diagnostics = [line for line in output.splitlines() if re.match(r"^(WARN|ERROR)\b", line)]
         unexpected = [line for line in diagnostics
-                      if not (args.allow_libsass_warning and line == LIBSASS_WARNING)]
+                      if not (line == LIBSASS_WARNING)]
         if unexpected:
             raise SystemExit("Unexpected build diagnostics:\n" + "\n".join(unexpected))
-        if args.allow_libsass_warning and LIBSASS_WARNING not in diagnostics:
-            raise SystemExit("Expected the Hugo 0.168 LibSass warning to remain visible")
+
         public = site / "public"
         page = (public / "docs/api/index.html").read_text()
         styles = {path.name: path.read_text() for path in (public / "scss").glob("*.css")}

@@ -104,7 +104,7 @@ hugo server -D                                     # 手动，默认端口 1313
 | `PORT_MAX` | `8787` | 模板默认，顺延窗口 20 个端口 |
 | `HUGO_FALLBACK` | `%USERPROFILE%\tools\hugo\hugo.exe` | 模板默认；实测该副本是 `v0.168.0+extended`，与 PATH 上 `D:\Apps\hugo_extended_0.168.0_windows-amd64\hugo.exe` 同版本 |
 | `GO_FALLBACK` | `%USERPROFILE%\tools\go1.27.3\go\bin` | 模板默认；实测 `go1.27.3`。**注意它排在 PATH 之前**，所以生效的是 1.27.3，不是 PATH 上 `C:\Program Files\Go` 的 1.27.2 |
-| `GO_MIN_NOTE` | `1.27.0` | 本站 `go.mod` 与 `oink-main/oink-main/go.mod` 的下界都是 `go 1.27.0`（技能模板出厂值 1.27.3 是 1.4.0 基线的口径，与本站不符） |
+| `GO_MIN_NOTE` | `1.27.3` | 升级到 OINK 1.4.0 后两处 `go.mod` 都抬到 `go 1.27.3`（1.3.2 时代是 1.27.0），技能模板出厂值本来就是 1.27.3 |
 
 新模板比旧模板多四件事：`chcp 65001`、端口占用自动顺延并打印 `Note`、校验 Hugo 必须是 Extended、解析并回显 Go 路径与版本。可用变量：`PORT`（显式给值则跳过顺延探测）、`HUGO_EXE`、`GO_BIN`、`NO_OPEN=1`、`NO_PAUSE=1`。
 
@@ -117,7 +117,7 @@ hugo server -D                                     # 手动，默认端口 1313
 | 第一次：端口顺延 | 8768 当时被一个**先前遗留**的 hugo 实例（PID 20648，命令行带 `--openBrowser`）占着，脚本打印 `Note    : port 8768 was busy, using 8769.`，服务起在 8769。遗留实例不是本轮起的，只对**自己记下的 PID** 下过 `Stop-Process`；那个 20648 后来自己退了 |
 | 第二次：默认端口 | 8768 空闲后重跑，横幅打 `URL     : http://127.0.0.1:8768/` 且**没有** `Note` 行——`PORT_EXPLICIT` 与顺延探测两条分支都验到了 |
 | Hugo | 两次都由 `where hugo` 命中 `D:\Apps\hugo_extended_0.168.0_windows-amd64\hugo.exe`；Extended 校验通过，回显 `v0.168.0-…+extended`（`HUGO_FALLBACK` 未被用到） |
-| Go | 两次都是 `C:\Users\webtu\tools\go1.27.3\go\bin\go.exe`、`go version go1.27.3 windows/amd64`，随后打印 `Note    : Go 1.27.0 or newer is required by go.mod.`——走的是 `GO_FALLBACK`，不是 PATH 上 `C:\Program Files\Go` 的 1.27.2 |
+| Go | 两次都是 `C:\Users\webtu\tools\go1.27.3\go\bin\go.exe`、`go version go1.27.3 windows/amd64`——走的是 `GO_FALLBACK`，不是 PATH 上 `C:\Program Files\Go` 的 1.27.2。（**这一行是 1.3.2 时代录的**，当时横幅那句写的是 `Go 1.27.0 or newer`；升级 1.4.0 后同一格改成 `Go 1.27.3 or newer`，实跑见第九节） |
 | 构建 | `Pages 239 / Static files 35`，两次分别 `Built in 2239 ms` / `2157 ms`，0 个 ERROR，唯一 WARN 仍是 `css.Sass: libsass was deprecated` |
 | 中文路径回显 | `Project : C:\Users\webtu\Desktop\Docker文档站\Docker知识库` 与 `Watching for changes in …` 在**重定向到文件、按 UTF-8 读回**的日志里完全正确（`chcp 65001` 生效） |
 | 探活 | 8769 那次：`/` 200、`/docs/` 200、`/index.xml` 200、`/nope-404/` **404**，`<title>Docker 团队知识库</title>`。8768 那次：`/` 200、`/docs/` 200、`/icons/logo.svg` 200、`/favicon.svg` 200、`/nope-404/` **404** |
@@ -538,3 +538,169 @@ Total in 1624 ms
 | 「三维判断表」里的阈值本身（几个服务、几台机器、几个人） | **刻意不钉** | 没有本团队真实拓扑与人力数据，表里档位全部标为示例；本库的纪律是「团队规范类内容不编造团队规则」，只给判据与代价 |
 | **35 节「本篇不覆盖什么」的内容本身是谁写的** | 判据管不到取舍，只管指向 | `核不覆盖节.py` 保证的是三件事：**这一节存在、每条都点名了可解析的去处、锚点在去处正文里逐字出现**。它**不保证**「这件事确实不该由本篇讲」这个取舍正确，也不保证「去处那篇讲的正是读者想要的那部分」——取舍由本库维护者按各篇自己的「实战落点/前置依赖/拓展接口」三行撰写（发现 184 抓到的那条错指回就是这类人为失误的实例，能被抓到是因为它同时写错了去处，纯取舍不当判据看不见） |
 | **旧三篇里 12 条无锚点的边界条目** | 未纳入 L2 对账 | 1.1 的 6 条与 2.6 的 6 条用的是 `「见 5.4（本篇只给……这个结论）」这种散文写法，没有反引号或「」锚点，L2 只能记「无可核锚点」而不判红。**按「只动被点名」原则本轮不改写这三篇**（1.2 那节因为被 L2 抓到真错指回，只改了那一条）。要不要把 12 条补上锚点，属下一轮决定 |
+
+## 九、OINK 1.3.2 → 1.4.0 升级实录（2026-10-30）
+
+### 9.1 换了什么
+
+主题整棵树按字节替换，不是挑文件补：把站点 `oink-main/oink-main`（1,273 文件）移到 `%TEMP%\oink132-backup`，再用 `cp -a` 把技能 `assets/theme/oink-main/oink-main` 拷进来。结果是 **1,292 文件 / 27,213,292 字节**、`theme.toml` 的 `min_version` 从 `0.166.0` 变 `0.168.0`。相对旧树 `diff -rq` 共 **192 条**：175 改、13 新增（`assets/js/diagram.js`、`assets/js/plantuml-browser.js`、`assets/js/table-reader.js`、`assets/js/blog-gallery.js`、`assets/third_party/plantuml/`、`assets/scss/td/shell/_blog-gallery.scss` 等），其余是文档类差异。
+
+站点侧同步四处：
+
+| 文件 | 改动 |
+|---|---|
+| `go.mod` | `go 1.27.0` → `go 1.27.3`；`require github.com/pgsty/oink` `v1.3.2` → `v1.4.0` |
+| `go.sum` | 占位行版本号改 `v1.4.0`，并补一句「下界取两处最大值，本基线两处都是 1.27.3」 |
+| `hugo.yaml` | `module.hugoVersion.min` `0.166.0` → `0.168.0`；`footer_center_info` 里「主题 OINK v1.3.2」→ `v1.4.0` |
+| `run.cmd` | `GO_MIN_NOTE` `1.27.0` → `1.27.3`（PROJECT CONFIG 块内，逻辑一字未动） |
+
+### 9.2 校验（先证明判据有东西可咬）
+
+不靠数文件，用主题自带的 `VENDOR.json`：
+
+| 判据 | 读数 |
+|---|---|
+| `dependencies[].artifacts[]` 逐件 sha256 | **artifacts=74 missing=0 hash_bad=0**（29 个依赖） |
+| 三棵树声明文件数 vs 实测 | `assets/third_party` 246=246、`assets/js/third_party` 1=1、`static/webfonts` 33=33，全 OK |
+| 技能点名的 CRLF 文件 | `viz-global.js` crlf=9 / lf=9；`LICENSE` crlf=72 / lf=72，行尾未被转换 |
+| `run.cmd` 契约（技能原函数 `check_run_cmd`） | `OK`；141 行 CRLF、4,214 字节、非 ASCII 字节 0；与技能模板 `diff` 只差 `SITE_TITLE` 一行 |
+
+### 9.3 构建：Go 下界抬到 1.27.3 之后的两臂
+
+同一条 `hugo --cleanDestinationDir`、同一个站点，只换被选中的 Go（每臂都 `GOTOOLCHAIN=local GOPROXY=off`）：
+
+| 臂 | 生效 Go | 结果 |
+|---|---|---|
+| A（PATH 默认） | `C:\Program Files\Go` = go1.27.2 | **rc=1**：`go: go.mod requires go >= 1.27.3 (running go 1.27.2; GOTOOLCHAIN=local)`，Hugo 报 `failed to load modules` |
+| B | `C:\Users\webtu\tools\go1.27.3` = go1.27.3 | **rc=0**：`Pages 239 / Static files 35 / Total in 2972 ms`，0 ERROR，唯一 WARN 仍是 `css.Sass: libsass was deprecated` |
+
+这条口径与第七节那条同源但数不同：**升级前下界是 1.27.0，PATH 的 1.27.2 够用；升级后下界 1.27.3，PATH 那份不再够**。`run.cmd` 因为 `GO_FALLBACK` 排在 PATH 之前，不受影响。
+
+### 9.4 `run.cmd` 实跑
+
+`NO_OPEN=1 NO_PAUSE=1 cmd /c run.cmd`，日志重定向到站点外：
+
+| 项 | 读数 |
+|---|---|
+| 横幅 | `Docker Knowledge Base - Local Preview`；`Hugo : D:\Apps\hugo_extended_0.168.0_windows-amd64\hugo.exe` + `v0.168.0-…+extended` |
+| Go | `C:\Users\webtu\tools\go1.27.3\go\bin\go.exe`、`go version go1.27.3 windows/amd64`；横幅 **`Note : Go 1.27.3 or newer is required by go.mod.`** |
+| 端口 | 8768 空闲，直接用 8768，无 `Note` 顺延行 |
+| 构建 | `Pages 239 / Built in 2295 ms` |
+| 探活 | `/` 200、`/docs/` 200、`/nope-404/` **404**；`<title>Docker 团队知识库</title>` |
+
+停止方式与旧轮一致：按端口找到属主 PID、确认命令行是本轮起的那个 `hugo server --port 8768 --disableFastRender`（**无 `--openBrowser`**，即 `NO_OPEN=1` 分支），再 `Stop-Process -Force`；收摊后 `hugo.exe` 进程数 0。
+
+### 9.5 两项真判据
+
+| 判据 | 读数 |
+|---|---|
+| `oink-doc-site/scripts/check_links.py --site .` | 先跑 `--selftest`：`asset_probe 报红=1（期望 1）checked=5`、`SELFTEST_PASS`；真站点 `links_checked=360 external_or_anchor=0 broken=0 unmapped=0 uglyURLs=False lowercase=True assets(pages=118 checked=1548)` |
+| `oink-doc-site/scripts/validate_mermaid.py --site . --selftest` + headless Edge | 解析台 **blocks=49**（47 真图 + 好坏各一），引擎取新主题的 `mermaid.min.js`（3,572,661 字节）；`python -m http.server 8791` 起台后用 `msedge --headless=new --virtual-time-budget=20000 --dump-dom` 读回 **`TOTAL=47 REAL_FAIL=0 SELFTEST=1/2 SELFTEST_PASS`** |
+
+Mermaid 那条读数做了防假绿：生成页里 `<pre id="out">` 的初始内容是 `RUNNING`，dump 里变成 `TOTAL=…`，且页面脚本里 `TOTAL=` 只出现在字符串拼接处、没有硬编码值——所以这个数是脚本跑完写进去的，不是模板常量。台子用完即删（`_mermaid-harness` 不在 `.gitignore` 里，留着会脏仓库）；8791 先 `netstat` 数到 0 才起，收摊后监听归零。
+
+### 9.6 1.4.0 的三个新能力，产物层逐个核
+
+`Static files` 仍是 35，不是 1,292 副本带来的增量——新资产只在使用它们的页面才输出。
+
+| 能力 | 产物证据 |
+|---|---|
+| 图表懒渲染 | 产出 `public/js/chunks/diagram.min.fce3cf5c…js`；76 个页面出现新增的 `<pre class="td-mermaid-source" tabindex="0">`；`figure.td-diagram td-diagram--mermaid[data-td-diagram]` 共 47 个，`stage` 内 `children.length=0`（等脚本填充） |
+| PlantUML 本地渲染 | **默认关闭**；`grep -rl plantuml public --include=*.html` 命中 **0**，与技能「未启用时产物里没有 plantuml 引用」一致。本站没有开 `params.ui.plantuml.enable` |
+| 表格 `.wide` / `.expand` 阅读抽屉 | `td-table-frame` / `data-td-table-reader` / `class="wide` 全站计数都是 **0**；`content/` 里 `.wide` 与 `.expand` 标记实测也是 **0**——是「没用就没输出」，不是功能坏了 |
+
+### 9.7 浏览器侧补充验收，与遗留
+
+**布局类判据改用 headless Edge + CDP 补齐，已实测。** Qoder 内置浏览器当时没有可见视口（`take_screenshot` 报 `viewport=0x0, visible=false, visibilityState=hidden`，`window.innerWidth` 读到 0），所以先绕开它：起 `msedge --headless=new --remote-debugging-port=9223`，用 Node 24 内置 `WebSocket` 连 CDP，`Emulation.setDeviceMetricsOverride` 设真设备尺寸后 `Runtime.evaluate` 读数。
+
+布局与交互实测（`Emulation.setDeviceMetricsOverride` 生效后读回）：
+
+| 项 | 读数 |
+|---|---|
+| 390×844 首页 | `innerW=390 / scrollW=390 / bodyW=390` —— **无横向溢出** |
+| 1440×900 文章页 | `innerW=1440 / scrollW=1425` —— 无溢出 |
+| 面包屑 | `文档 → 导读 → 怎么用这个库` 三级齐全 |
+| 侧边栏 | 文章页 `aside a, .td-sidebar a` 共 40 条 |
+| 预设 | 全新 profile 读到 `data-td-preset="paper"`（服务端默认）；同一机器上带 localStorage 的会话读到 `slate` —— 说明 Appearance 的选择确实跨页持久生效 |
+| **懒渲染真出图** | 同一篇里 `stageSvgBefore=0` → `figure.scrollIntoView()` 后等 3.5s → `stageSvgAfter=1`，stage 内 HTML 长度 **42,023** 字节。这是 1.4.0 `diagram.js` 的 `IntersectionObserver` 在起作用，也印证「不滚到图前就是源码态」 |
+
+**一条判据假象要记下来**：先用 `msedge --screenshot --window-size=390,844` 截图，得到的 PNG 里正文与右侧按钮被右边缘切掉，看着像横向溢出。换成 CDP 设 `setDeviceMetricsOverride` 再量，`scrollW` 恰好等于 390 —— 截图那条路不把 `--window-size` 套进移动视口，是按默认布局宽度裁的。**裁图 ≠ 溢出；溢出只认 `scrollWidth` vs `innerWidth`。**
+
+搜索与外观面板也真点了一遍（选择器从产物里取：`[data-td-shell-search-open]`、`[data-td-appearance-trigger]`、`[data-td-preset-value]`；先用 `[data-td-preset-set]` / `[data-td-search-open]` 猜，计数都是 0 **不是功能缺失，是选择器猜错**）：
+
+| 项 | 读数 |
+|---|---|
+| 搜索 | 点开顶栏搜索框，用原生 setter 写入「安装」并派发 `input` 事件，2.5s 后状态行读到 **`找到 8 条结果`** |
+| 外观面板 | 打开后 `[data-td-preset-value]` 共 **12** 个（4 套预设 × 3 处渲染：导航栏/移动抽屉/模态），取值 `paper, slate, ink, terminal` 各三份 |
+| 预设切换 | 点 `ink` → `data-td-preset` 变 **`ink`**；再点 `paper` → 复原 **`paper`** |
+
+（`resultLinks` 那一项读到 0 是我容器选择器写错，同一时刻的状态行已经明写「找到 8 条结果」，以状态行为准。）
+还没收尾的三件事：
+
+| 项 | 状态 |
+|---|---|
+| `layouts/_partials/shell/root-menu-roots.html` 站点 override | **已冗余**。它与主题 1.3.2 / 1.4.0 两版只差注释，且比主题版少 `sidebar_divider` 支持；主题 1.4.0 早已自带它当初要补的 `sidebar_root_menu` 判断。内容里这两个字段使用数都是 0，所以产物无差别；留着会遮住主题后续修复。**本轮未删**，等确认 |
+| 侧边栏根切换器 | 本站没开 `params.ui.sidebar_root_menu`，所以 `td-shell-root` 根本不渲染——不是升级弄坏的 |
+| `verify_site.py` 全套 | 仍缺 `site.plan.json`。主题已满足 1.4.0，只剩 plan 这一道闸 |
+
+## 十、文档表格「一字一行」修复（2026-10-30）
+
+### 10.1 症状与定位
+
+用户截图报的是 `00-导读/把环境搭好/环境准备` 里那张「两轮读数对照」表：末列表头渲染成竖排的「这 一 对 读 数 说 明 什 么」，首列也被压成一个字宽。
+
+先排除源文本：4 列表、分隔行 4 段、每行 4 个单元格，**markdown 完全合法**；渲染出的 HTML 也是 `<table><thead><tr>` 四个 `<th>`，列数一致。所以问题不在源文件。
+
+再用 CDP 量（1500×900，`Emulation.setDeviceMetricsOverride` 之后读 `getBoundingClientRect`）：
+
+| 项 | 修复前 |
+|---|---|
+| 列宽 | `[44, 146, 691, 44]` |
+| 包裹层 `.td-table-scroll` | `clientWidth=801`、`scrollWidth=925` —— 横向溢出 124px |
+| `<td>` 字号 / 左右内边距 | `16px` / 各 `14px` |
+
+44px 的列减去两侧 28px 内边距，正文区正好 **16px = 一个汉字**，这就是「一字一行」的来源。
+
+根因在 CSS：主题给裸 `<table>` 包了一层 `.td-table-scroll{overflow-x:auto}`，并且 `.td-table-scroll > table` 被设成 `width:max-content; min-width:100%`，但**没有任何规则约束单元格最小宽度**。表里出现一个不可断的长 token（本例是 `C:\Users\webtu\AppData\Local\Programs\DockerDesktop\resources\bin\docker.exe`）时，自动布局把宽度几乎全给那一列，其余列落到 min-content（中文 = 一个字），整表还超出容器。
+
+### 10.2 修法（不动主题）
+
+用主题预留的扩展点：新建站点级 `assets/scss/_styles_project.scss`，主题 `assets/scss/td/_main.scss:76` 的 `@import '../styles_project'` 本来就在等它。站点 `assets/` 同名文件遮住主题里那份空壳，主题树保持与技能物料逐字节一致。
+
+规则两件事：单元格 `min-width: 4.5em` 给列一个下限（正文区约 44px ≈ 2.75 个汉字，不会再塌成一字一行）；单元格与 `code` 加 `overflow-wrap: anywhere`，让长 token 参与断行——这一条同时把表格的 max-content 宽度压下来，所以溢出是**减少**而不是增加。窄屏 `≤575.98px` 另把下界放到 `3.75em`，否则 4~5 列的表会刚好多出几个像素、平白长出横向滚动条。
+
+主题其实给了作者侧的另一个答案：给表加 `.wide` / `.td-table--wide` 标记（`tests/site/content/fixtures/table-layout-policy.md` 是它的策略夹具）。但本站 `content/` 里这两类标记实测 **0 处**——417 张表全都没标。逐张补标记要改上百个文件，而「列不许塌成一字一行、长 token 允许断」本来就该是全局约束，所以选全局样式，不逐表标注。两者不冲突：将来真要用 `.wide` 让某张表外溢到正文栏之外，这条 `min-width` 只约束列下限，不限制表宽。
+
+### 10.3 全站前后对照
+
+扫描口径：遍历 `public/sitemap.xml` 的 77 个文档页（排除 `_print/`、分类与标签页），在无头 Edge 里用 CDP `Emulation.setDeviceMetricsOverride` 设真视口，逐页统计 `.td-table-scroll` 的 `scrollWidth-clientWidth`（溢出）与该列「总宽减左右内边距」是否容得下 2 个汉字（32px，即被压成一字一行的判据）。
+
+| 视口 | 表数 | 横向溢出 | 列被压 |
+|---|---|---|---|
+| 1500×900 修复前 | 417 | **26** | 判据未定（见 10.4） |
+| 1500×900 修复后 | 417 | **0** | **0** |
+| 390×844 修复后（仅 4.5em） | 417 | 41（全部为 4px） | 0 |
+| 390×844 修复后（加 3.75em 窄屏规则） | 417 | **9**（7 个 4px + 2 个 8/9 列宽表 124px / 184px） | **0** |
+
+留在 390 的那两个 124px / 184px 是 8 列与 9 列的表，手机屏宽本来放不下，横向滚动是 `.td-table-scroll` 的设计意图，不算缺陷；其余 4px 是列数 × 下界与容器宽度的舍入差，肉眼不可见。
+
+用户报的那张表单独复核（生产产物 `public/` 静态服务上量）：
+
+| 视口 | 列宽 | 表溢出 | 页面溢出 |
+|---|---|---|---|
+| 1500×900 | `[87, 220, 312, 181]`（原 `[44,146,691,44]`） | 0 | `scrollW 1485 < innerW 1500` |
+| 390×844 | `[64, 93, 114, 85]` | 0 | `scrollW 390 = innerW 390` |
+
+### 10.4 内容层同时清了一遍
+
+源文本扫描（77 个 md、416 张表，按未转义竖线切分、校验表头/分隔行/数据行列数、表头空单元格）结果：**列数不一致 0 处、单列表 0 处**，只有 2 处 `EMPTY_HEADER`——`CI-CD中的Docker与安全基线.md:193` 与 `常见问题FAQ.md:188`，都是「行标签列留空角格」的常规写法（表头写成 `| | 命令 | 结果 |`），不是缺陷，未改。
+
+### 10.5 这轮踩到的四个坑
+
+1. **判据太松会报一片假问题。** 第一版用「列宽 < 60px」判，417 张表报出 105 张——把 `#`、`步`、`rc` 这类**本该窄**的序号列全算了进去。换成「中文表头且正文宽度容不下 2 个汉字」才收敛到真问题。
+2. **用 `clientHeight / lineHeight` 数行数也是错的。** 同一行所有 `<th>` 高度相同，一行里只要有一格高，整行都会被算成「多行」。`Range.getClientRects()` 在单元格含 `<code>`/`<strong>` 时同样会多算。最后只认宽度。
+3. **开发服务器会改写 `public/`。** `run.cmd` 用的是 `hugo server`（默认渲染到磁盘并注入 `/livereload.js`），此时跑 `check_links` 会报 40+ 条 `BROKEN … -> /livereload.js`。**验收必须停服后 `hugo --cleanDestinationDir` 再跑**，本轮重来后是 `links_checked=360 broken=0 assets(pages=118 checked=1548)`。
+4. **旧 hugo 实例会在你背后答 404。** 停掉端口占用者再 `hugo --cleanDestinationDir` 时，若还有别的实例活着，它会用一份**半写状态的磁盘树**应答：`/` 与 `/docs/` 返回 200、`/docs/00-导读/` 却 404，而磁盘上文件明明在。用 `netstat -ano | grep :8768` 找到属主 PID、确认命令行后杀掉，再起服务才干净。
+
+另有一条与此无关但同样浪费时间的：`python -m http.server` 逐页导航时单页最长要 8 秒，批量脚本的固定 sleep 会在页面提交前就取值，读回 `tables=0` 这种**假绿**。判定「0」之前先确认页面真的换过了（比对 `location.href` 与 `document.readyState`）。
+

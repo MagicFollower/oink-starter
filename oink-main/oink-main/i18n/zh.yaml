@@ -15,6 +15,10 @@ callout_details: 详情
 ui_pager_prev: 上一页
 ui_pager_next: 下一页
 ui_search: 搜索…
+ui_search_scope: 搜索范围
+ui_search_scope_all: 全部栏目
+ui_search_partial: '部分匹配：{matched}/{total} 个关键词'
+ui_search_partial_results: 没有页面包含全部关键词，以下为部分匹配
 ui_search_empty: 未找到结果
 ui_search_loading: 正在加载搜索索引……
 ui_search_results: '找到 {count} 条结果'
@@ -205,6 +209,9 @@ comments_noscript_link: 在 GitHub 上查看讨论。
 ui_open_in_prompt_label: 就本页提问
 ui_view_history: 查阅编辑历史
 ui_table_scroll: "可横向滚动的表格"
+ui_table_expand: "展开表格"
+ui_table_reader: "表格阅读"
+ui_table_reader_scroll: "表格内容，可横向和纵向滚动"
 ui_filetree_divider: "拖动以调整目录树备注列宽度"
 book_figure: 图
 book_table: 表
@@ -237,6 +244,10 @@ ui_diagram_zoom_in: 放大
 ui_diagram_zoom_out: 缩小
 ui_diagram_zoom_reset: 复位视图
 ui_diagram_error: 图表无法渲染
+ui_diagram_fit: 适应窗口
+ui_diagram_download: 下载 SVG
+ui_diagram_download_started: 已发起 SVG 下载
+ui_diagram_download_error: 无法下载 SVG
 
 # Expo icon tooltips and accessible names.
 ui_expo_layout: "图片布局"

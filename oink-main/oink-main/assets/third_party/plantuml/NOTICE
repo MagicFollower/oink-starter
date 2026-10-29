@@ -1,0 +1,24 @@
+OINK vendors these files unchanged from @plantuml/core 1.2026.9:
+https://registry.npmjs.org/@plantuml/core/-/core-1.2026.9.tgz
+
+plantuml.js: PlantUML MIT browser engine, copyright Arnaud Roques.
+Source and build instructions: https://github.com/plantuml/plantuml
+See LICENSE.
+
+viz-global.js: Viz.js 3.24.0, copyright Michael Daines (MIT).
+Source and build instructions: https://github.com/mdaines/viz-js
+See LICENSE.viz. It contains the following software in object code form:
+
+Graphviz 14.1.1 (EPL-1.0, as specified by that version's COPYING).
+Source is available under EPL-1.0 from:
+https://gitlab.com/graphviz/graphviz/-/tree/14.1.1
+See LICENSE.graphviz.
+
+Expat (MIT): https://libexpat.github.io/
+Source: https://github.com/libexpat/libexpat
+See LICENSE.expat.
+
+Only the two runtime files are shipped. Optional PlantUML themes, emoji,
+OpenIconic and standard-library bundles are not included. Maintainers can
+reproduce this import by extracting these two files and LICENSE from the
+pinned npm tarball (no install scripts). VENDOR.json records SHA-256 hashes.

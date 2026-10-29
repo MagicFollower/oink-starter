@@ -134,6 +134,10 @@
     var syntax = configOf(root, '[data-td-infographic-syntax]');
     var target = root.querySelector('[data-td-infographic-canvas]');
     if (typeof syntax !== 'string' || !target) return;
+    function failed(error) {
+      target.textContent = 'Infographic: ' + error.message;
+      target.setAttribute('role', 'alert');
+    }
     try {
       [
         'Alibaba PuHuiTi',
@@ -149,15 +153,41 @@
         });
       });
       window.AntVInfographic.setDefaultFont('sans-serif');
-      var chart = new window.AntVInfographic.Infographic({
-        container: '#' + target.id,
-        width: target.offsetWidth || '100%',
-        height: root.getAttribute('data-td-height') || 'auto',
-      });
-      chart.render(syntax);
+      var started = false;
+      var observer;
+      function renderWhenVisible() {
+        if (started || !target.getBoundingClientRect().width) return;
+        started = true;
+        if (observer) observer.disconnect();
+        window.removeEventListener('resize', renderWhenVisible);
+        document.removeEventListener('td:tab-shown', renderWhenVisible);
+        document.removeEventListener('toggle', renderWhenVisible, true);
+        try {
+          var chart = new window.AntVInfographic.Infographic({
+            container: '#' + target.id,
+            // The viewBox scales with the container, without rerendering the DSL.
+            width: '100%',
+            height: root.getAttribute('data-td-height') || 'auto',
+          });
+          chart.on('rendered', function (event) {
+            // Keep the authored SVG palette. Transparent default/hand-drawn
+            // diagrams need their own light canvas even on a dark article.
+            target.style.backgroundColor = event.node.style.backgroundColor || '#fff';
+          });
+          chart.render(syntax);
+        } catch (error) { failed(error); }
+      }
+      if (window.ResizeObserver) {
+        observer = new ResizeObserver(renderWhenVisible);
+        observer.observe(target);
+      } else {
+        window.addEventListener('resize', renderWhenVisible);
+        document.addEventListener('td:tab-shown', renderWhenVisible);
+        document.addEventListener('toggle', renderWhenVisible, true);
+      }
+      renderWhenVisible();
     } catch (error) {
-      target.textContent = 'Infographic: ' + error.message;
-      target.setAttribute('role', 'alert');
+      failed(error);
     }
   }
 

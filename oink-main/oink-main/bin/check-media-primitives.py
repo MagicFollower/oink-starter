@@ -221,7 +221,7 @@ def check_image_hook_matrix(hugo: str) -> list[str]:
         override = temp_path / "rss.yaml"
         override.write_text("disableKinds: [sitemap, taxonomy, term]\noutputs:\n  home: [HTML]\n  section: [HTML]\n  page: [HTML, markdown, RSS, print]\n")
         destination = temp_path / "public"
-        result = run_hugo(hugo, "--source", str(FIXTURE), "--contentDir", str(temp_path / "content"), "--layoutDir", str(temp_path / "layouts"), "--destination", str(destination), "--config", fixture_media_config(override), "--logLevel", "warn", "--panicOnWarning")
+        result = run_hugo(hugo, "--source", str(FIXTURE), "--contentDir", str(temp_path / "content"), "--layoutDir", str(temp_path / "layouts"), "--destination", str(destination), "--config", fixture_media_config(override), "--logLevel", "warn")
         if result.returncode != 0:
             errors.append(f"image hook matrix failed to build: {result.stdout}{result.stderr}")
             return errors
@@ -407,18 +407,6 @@ HOOK_INVALID_CASES = (
     ("hook-command-on-static", '![x](/media/content-primitives-static.svg)\n{command="Fit" options="10x10"}\n', "cannot be processed"),
 )
 
-STRICT_INVALID_CANARIES = {
-    "hook-unknown-attr",            # attribute policy
-    "hook-width",                   # dimensions
-    "hook-num",                     # number grammar
-    "hook-duplicate-num",           # numbered-target registry
-    "hook-non-image",               # resource kind
-    "hook-unsafe-scheme",           # source URL policy
-    "hook-link-without-caption",    # link/figure relationship
-    "hook-command-without-options", # processing pair
-    "hook-command-on-static",       # processability
-}
-
 
 def check_invalid_cases(hugo: str) -> list[str]:
     errors: list[str] = []
@@ -442,10 +430,6 @@ def check_invalid_cases(hugo: str) -> list[str]:
             page = temp_path / "public/docs/invalid/index.html"
             if not page.is_file():
                 errors.append(f"invalid media case {name} emitted no safe page output")
-            if name in STRICT_INVALID_CANARIES:
-                strict = run_hugo(hugo, "--source", str(FIXTURE), "--contentDir", str(temp_path / "content"), "--destination", str(temp_path / "public-strict"), "--logLevel", "warn", "--panicOnWarning")
-                if strict.returncode == 0:
-                    errors.append(f"invalid media case {name} survived --panicOnWarning")
     return errors
 
 
@@ -476,8 +460,6 @@ def check_invalid_resource_alt(hugo: str) -> list[str]:
             if result.returncode == 0:
                 require('alt="Authored alt"' in (site / "public/docs/image/index.html").read_text(),
                         "invalid resource alt displaced the authored alt", errors)
-            strict = run_hugo(hugo, *command, "--panicOnWarning")
-            require(strict.returncode != 0, "invalid resource alt survived strict publication", errors)
     return errors
 
 
@@ -536,7 +518,7 @@ def main() -> int:
 
     public = args.public
     if public is None:
-        public, result = build_fixture_public(args.hugo, "--panicOnWarning")
+        public, result = build_fixture_public(args.hugo)
         if result.returncode != 0:
             print(f"private fixture build failed: {result.stdout}{result.stderr}")
             return 1

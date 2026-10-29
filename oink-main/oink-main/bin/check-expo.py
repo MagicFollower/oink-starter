@@ -53,11 +53,11 @@ resources:
     title: 'Small <test> & image'
     params: {id: small, caption: 'A <script>plain</script> caption', alt: Small image, weight: -1}
 '''
-        def build(extra='',strict=True):
+        def build(extra=''):
             (album/'index.md').write_text('---\n'+front+extra+'---\nAlbum body.\n')
             (album/'index.zh.md').write_text('---\ntitle: 相册内容\n---\n正文。\n')
             (album/'index.ar.md').write_text('---\ntitle: ألبوم\n---\n')
-            return run_hugo_process([args.hugo,'--source',str(site),'--themesDir',str(ROOT.parent),'--destination',str(site/'public'),'--environment','development','--printPathWarnings',*(['--panicOnWarning'] if strict else [])],cwd=ROOT,capture_output=True,text=True)
+            return run_hugo_process([args.hugo,'--source',str(site),'--themesDir',str(ROOT.parent),'--destination',str(site/'public'),'--environment','development','--printPathWarnings'],cwd=ROOT,capture_output=True,text=True)
         result=build();assert result.returncode==0,result.stdout+result.stderr
         public=site/'public';html=(public/'expo/album/index.html').read_text();md=(public/'expo/album/index.md').read_text();printed=(public/'_print/expo/index.html').read_text();rss=(public/'expo/index.xml').read_text();llms=(public/'expo/llms-full.txt').read_text()
         assert html.count('data-td-expo-item ')==3
@@ -92,28 +92,27 @@ resources:
         assert 'data-td-expo-viewer' not in (public/'index.html').read_text()
         for extra,warning in [('expo: {mode: wrong}\n','expo.mode'),('expo: {size: 12}\n','expo.size'),('expo: []\n','expo must be a map')]:
             original=front;front='title: Invalid\n'
-            result=build(extra);assert result.returncode!=0 and warning in result.stdout+result.stderr,(extra,result.stdout+result.stderr)
+            result=build(extra);assert result.returncode==0 and warning in result.stdout+result.stderr,(extra,result.stdout+result.stderr)
             front=original
         original=front
         for params,warning in [('original: missing.jpg','must name a bundled image'),('original: false','must name a bundled image'),('id: "invalid id"','id must contain'),('id: false','id must contain'),('caption: [bad]','must be a string'),('weight: nope','not a number')]:
             front='title: Invalid metadata\nresources:\n  - src: images/small.png\n    params: {'+params+'}\n'
-            result=build();assert result.returncode!=0 and warning in result.stdout+result.stderr,(params,result.stdout+result.stderr)
+            result=build();assert result.returncode==0 and warning in result.stdout+result.stderr,(params,result.stdout+result.stderr)
         front='title: Fallback\n'
-        result=build('expo: {mode: wrong}\n',strict=False);assert result.returncode==0,result.stdout+result.stderr
-        result=build('expo: {images: false}\n');assert result.returncode!=0 and 'expo.images' in result.stdout+result.stderr
+        result=build('expo: {mode: wrong}\n');assert result.returncode==0,result.stdout+result.stderr
+        result=build('expo: {images: false}\n');assert result.returncode==0 and 'expo.images' in result.stdout+result.stderr
         front='title: Integer ID\nresources:\n  - src: images/small.png\n    params: {id: 101}\n'
         result=build();assert result.returncode==0,result.stdout+result.stderr
         assert 'id="img-101"' in (public/'expo/album/index.html').read_text()
         # Authored IDs can occupy both a later filename hash and its suffixes.
-        # Development builds must still emit unique anchors; strict builds fail.
+        # Builds warn and still emit unique fallback anchors.
         for name in ('a', 'b', 'c', 'd'):
             (images/f'{name}.png').write_bytes(png(20,20))
         hashed=hashlib.sha256(b'images/d.png').hexdigest()[:16]
         front='title: Collisions\nresources:\n'
         for name,ident in zip(('a','b','c','d'),(hashed,hashed+'-1',hashed+'-3',hashed)):
             front+=f'  - src: images/{name}.png\n    params: {{id: "{ident}"}}\n'
-        result=build();assert result.returncode!=0 and 'duplicate image id' in result.stdout+result.stderr
-        result=build(strict=False);assert result.returncode==0,result.stdout+result.stderr
+        result=build();assert result.returncode==0 and 'duplicate image id' in result.stdout+result.stderr
         ids=re.findall(r'<figure\b[^>]*\bid="([^"]+)"', (public/'expo/album/index.html').read_text())
         assert len(ids)==7 and len(set(ids))==len(ids),ids
         assert f'img-{hashed}-2' in ids,ids

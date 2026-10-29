@@ -44,7 +44,7 @@ params:
   copyright:
     authors: Docker 团队知识库
     from_year: 2026
-  footer_center_info: '内部技术知识库 · 依据《Docker知识库内容结构与组织清单》v2.1 建设 · 主题 OINK v1.3.2（Apache 2.0，本地副本）'
+  footer_center_info: '内部技术知识库 · 依据《Docker知识库内容结构与组织清单》v2.1 建设 · 主题 OINK v1.4.0（Apache 2.0，本地副本）'
   ui:
     dark_mode: true
     section_index: cards
@@ -77,4 +77,4 @@ module:
       replacement: ./oink-main/oink-main
   hugoVersion:
     extended: true
-    min: 0.166.0
+    min: 0.168.0

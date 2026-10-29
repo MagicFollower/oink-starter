@@ -15,6 +15,10 @@ callout_details: Details
 ui_pager_prev: Previous
 ui_pager_next: Next
 ui_search: Search…
+ui_search_scope: Search in
+ui_search_scope_all: All sections
+ui_search_partial: 'Partial match: {matched}/{total} terms'
+ui_search_partial_results: No page matches every term; showing partial matches
 ui_search_empty: No results found
 ui_search_loading: Loading search index…
 ui_search_results: '{count} results found'
@@ -125,6 +129,10 @@ ui_diagram_zoom_in: Zoom in
 ui_diagram_zoom_out: Zoom out
 ui_diagram_zoom_reset: Reset view
 ui_diagram_error: The diagram could not be rendered
+ui_diagram_fit: Fit to window
+ui_diagram_download: Download SVG
+ui_diagram_download_started: SVG download requested
+ui_diagram_download_error: Could not download SVG
 ui_print_page: Print this page
 ui_sidebar_expand_section: Expand section
 ui_sidebar_collapse_section: Collapse section
@@ -218,6 +226,9 @@ comments_noscript_link: View discussions on GitHub.
 ui_open_in_prompt_label: Ask about this page
 ui_view_history: View edit history
 ui_table_scroll: "Scrollable table"
+ui_table_expand: "Expand table"
+ui_table_reader: "Table reader"
+ui_table_reader_scroll: "Table content, scroll horizontally and vertically"
 ui_filetree_divider: "Resize the file tree comment column"
 book_figure: Figure
 book_table: Table

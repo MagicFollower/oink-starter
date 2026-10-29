@@ -1,12 +1,12 @@
 {
  "schema": 1,
- "generated": "2026-10-05",
+ "generated": "2026-10-25",
  "hash": "sha256",
  "trees": [
   {
    "path": "assets/third_party",
-   "files": 239,
-   "sha256": "ef4577f74516e879f7aed560505f0884ade04480446a8f25fbaf3b6f96643241"
+   "files": 246,
+   "sha256": "2a653bb389aa26c7c2e1e6510535c2b944caa168f298ae206f12b42c19710810"
   },
   {
    "path": "assets/js/third_party",
@@ -608,6 +608,39 @@
     {
      "path": "assets/third_party/external-svg-loader/svg-loader.min.js",
      "sha256": "a3301df36135fff595018610d75e8c54cf024d90a7f0bd39bc0ae5211ea8440d"
+    }
+   ]
+  },
+  {
+   "name": "@plantuml/core",
+   "version": "1.2026.9",
+   "source": "https://registry.npmjs.org/@plantuml/core/-/core-1.2026.9.tgz",
+   "license": "MIT",
+   "licenseFiles": [
+    "assets/third_party/plantuml/LICENSE"
+   ],
+   "artifacts": [
+    {
+     "path": "assets/third_party/plantuml/plantuml.js",
+     "sha256": "21c049ce47d087eff61ae0836f9c62a2b0c0d2528a5f16c2247057544228fae7"
+    }
+   ]
+  },
+  {
+   "name": "@viz-js/viz",
+   "version": "3.24.0",
+   "source": "https://registry.npmjs.org/@plantuml/core/-/core-1.2026.9.tgz",
+   "license": "MIT AND EPL-1.0",
+   "licenseFiles": [
+    "assets/third_party/plantuml/LICENSE.viz",
+    "assets/third_party/plantuml/LICENSE.graphviz",
+    "assets/third_party/plantuml/LICENSE.expat",
+    "assets/third_party/plantuml/NOTICE"
+   ],
+   "artifacts": [
+    {
+     "path": "assets/third_party/plantuml/viz-global.js",
+     "sha256": "fc6ca2de83dd4e3fca967d5214122777890a5cd1ab101115a1f716fc84e6dc5e"
     }
    ]
   }
