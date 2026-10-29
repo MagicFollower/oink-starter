@@ -1,0 +1,40 @@
+{{- /* Params already includes cascade values. Read only source front matter
+     to distinguish an authored images key; Hugo still owns cascade matching.
+     Pages without source files (content adapters) use resolved images as
+     explicit values. Unrecognized source formats use the same fallback. */ -}}
+{{- $authored := true -}}
+{{- with .File -}}
+  {{- $source := os.ReadFile .Filename -}}
+  {{- $raw := $.RawContent -}}
+  {{- if hasSuffix $source $raw -}}
+    {{- $header := strings.TrimSpace (strings.TrimPrefix "\ufeff" (strings.TrimSuffix $raw $source)) -}}
+    {{- $format := "" -}}
+    {{- if and (hasPrefix $header "---") (hasSuffix $header "---") -}}
+      {{- $format = "yaml" -}}
+      {{- $header = strings.TrimSuffix "---" (strings.TrimPrefix "---" $header) -}}
+    {{- else if and (hasPrefix $header "+++") (hasSuffix $header "+++") -}}
+      {{- $format = "toml" -}}
+      {{- $header = strings.TrimSuffix "+++" (strings.TrimPrefix "+++" $header) -}}
+    {{- else if hasPrefix $header "{" -}}
+      {{- $format = "json" -}}
+    {{- else if not $header -}}
+      {{- $authored = false -}}
+    {{- end -}}
+    {{- with $format -}}
+      {{- with try (transform.Unmarshal (dict "format" .) $header) -}}
+        {{- if not .Err -}}
+          {{- $authored = false -}}
+          {{- range $key, $value := .Value -}}
+            {{- if eq (lower $key) "images" }}{{ $authored = true }}{{ end -}}
+            {{- if and (eq (lower $key) "params") (reflect.IsMap $value) -}}
+              {{- range $key, $_ := $value -}}
+                {{- if eq (lower $key) "images" }}{{ $authored = true }}{{ end -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $authored -}}

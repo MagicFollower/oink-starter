@@ -1,0 +1,82 @@
+# 站点配置 —— 由 oink-doc-site 技能的 plan_site.py 生成
+# 站点身份请优先改 site.plan.json 后重跑；下面的主题契约项不要手删。
+title: &siteTitle OINK 1.4.0 文档站示例
+baseURL: https://docs.example.com/
+relativeURLs: true # 产物可挂任意子路径；file:// 只有文字预览，完整功能走 HTTP
+defaultContentLanguage: zh
+enableGitInfo: false # 未入 Git 或内网环境保持 false，避免 dubious ownership 中断构建
+enableRobotsTXT: true
+enableEmoji: true
+timeZone: UTC
+
+# 顶栏导航：OINK 1.4.0 只渲染 .Site.Menus.main，不会自动挂 docs 入口。
+# 这个入口由 plan_site.py 每次生成；重跑计划会保留，不要手删。
+menus:
+  main:
+    - identifier: docs
+      name: 文档
+      pageRef: /docs
+      weight: 1
+
+languages:
+  zh:
+    label: 简体中文
+    locale: zh-CN
+    weight: 1
+    title: *siteTitle
+    hasCJKLanguage: true
+    params:
+      description: 用最小篇幅演示 OINK 1.4.0 的作者侧新写法：表格阅读抽屉、卡片与步骤变体、命令条、Mermaid 与 PlantUML 的渲染口径。
+
+# OINK 的 Markdown 组件依赖这三项 Goldmark 设置，删掉会让 callout/图表/卡片失效。
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+    parser:
+      attribute:
+        block: true
+      wrapStandAloneImageWithinParagraph: false
+  highlight:
+    noClasses: false
+
+# markdown 输出让每页额外产出可下载的 .md；print 供整节打印档。
+outputs:
+  home: [HTML, RSS, markdown, LLMS]
+  page: [HTML, markdown]
+  section: [HTML, RSS, print, markdown]
+
+params:
+  offline_search: true
+  copyright:
+    authors: 站点贡献者
+    from_year: 2026
+  footer_center_info: '内容以站点实际发布为准。'
+  ui:
+    dark_mode: true
+    section_index: cards
+    blog_index: cards
+    sidebar_menu_foldable: true
+    sidebar_expand_levels: 4
+    sidebar_icon_policy: groups
+    backlinks: true
+    # 视觉预设（OINK 1.2+）：读者可在 Appearance 面板一键切换，选择写入
+    # localStorage 跨页记住、首帧前应用无闪烁。`preset` 必须出现在 `preset_menu` 里。
+    # 只想要单一外观：把 preset_menu 改成 false。
+    preset: paper
+    preset_menu: [paper, slate, ink, terminal]
+  # github_repo: https://github.com/OWNER/REPOSITORY
+  # github_branch: main
+  # logo: icons/logo.svg
+
+# 站点级自定义：来自 site.plan.json 的 site.params，重跑计划会保留
+  plantuml:
+    enable: true
+
+module:
+  imports:
+    - path: github.com/pgsty/oink
+      replacement: ./oink-main/oink-main
+  hugoVersion:
+    extended: true
+    min: 0.168.0

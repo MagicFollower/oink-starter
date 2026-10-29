@@ -1,0 +1,88 @@
+{
+  "site": {
+    "title": "OINK 1.4.0 图库示例",
+    "description": "演示 1.4.0 新增的第四种博客索引形态 gallery 与 Expo 相册：封面墙、卡片与无缝三种排布、尺寸滑块，以及读者偏好的独立存储。",
+    "baseURL": "https://docs.example.com/",
+    "preset": "paper",
+    "presetMenu": [
+      "paper",
+      "slate",
+      "ink",
+      "terminal"
+    ],
+    "menu": [
+      {
+        "name": "图集",
+        "url": "/blog/",
+        "weight": 2
+      },
+      {
+        "name": "相册",
+        "url": "/albums/",
+        "weight": 3
+      }
+    ]
+  },
+  "home": {
+    "eyebrow": "OINK 1.4.0 图库示例",
+    "title": [
+      "图库示例站"
+    ],
+    "lead": "12 条目走 gallery 索引，2 个相册走 Expo 外壳，图片全部由站内脚本生成。",
+    "actions": [
+      {
+        "label": "进入图集",
+        "url": "/blog/",
+        "icon": "fa-solid fa-images",
+        "style": "primary"
+      },
+      {
+        "label": "看相册",
+        "url": "/albums/",
+        "icon": "fa-solid fa-photo-film",
+        "style": "secondary"
+      },
+      {
+        "label": "读说明",
+        "url": "/docs/01-gallery/构成/assets-and-switches/",
+        "icon": "fa-solid fa-book",
+        "style": "secondary"
+      }
+    ],
+    "cta": {
+      "title": "先看图",
+      "text": "图集索引支持四种形态切换；相册页可以直接放大看原图。",
+      "label": "进入图集",
+      "url": "/blog/"
+    }
+  },
+  "categories": [
+    {
+      "dir": "01-gallery",
+      "title": "图库说明",
+      "weight": 1,
+      "desc": "说明这个示例站的构成：gallery 索引与 Expo 相册两块、图片再生成命令、开关位置与读者偏好存储口径。",
+      "sections": [
+        {
+          "dir": "构成",
+          "title": "构成",
+          "weight": 1,
+          "desc": "图片生成脚本、两种内容模型的分工与站点配置三者之间的关系。",
+          "articles": [
+            {
+              "file": "assets-and-switches.md",
+              "title": "这个图库站由哪些部件组成",
+              "weight": 1,
+              "desc": "列出 gallery 索引与 Expo 相册的开关位置、图片契约、再生成命令，以及本轮实测读数与未验证项。",
+              "sources": [
+                "本地 OINK v1.4.0 主题副本 hugo.yaml 的 blog_index / blog_gallery / expo 段",
+                "主题 layouts/_partials/expo/*.html 与 shell/blog-index-toggle.html 的源码阅读",
+                "站内 scripts/make-placeholders.py 实测输出"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

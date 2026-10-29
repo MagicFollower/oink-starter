@@ -1,0 +1,34 @@
+{{- /* Scope the explicit tree by content identity and navigation ownership,
+       not published URL. A manual may keep its files at the content root
+       while resolving their sidebar to the Docs section. */ -}}
+{{- $page := .page -}}
+{{- $root := .root -}}
+{{- $sections := slice -}}
+{{- if ne $root $page.Site.Home -}}
+  {{- $nodes := slice -}}
+  {{- if isset . "nodes" -}}
+    {{- $nodes = .nodes -}}
+  {{- else -}}
+    {{- $data := index hugo.Data "docs_nav" | default dict -}}
+    {{- $nodes = index $data "sections" | default (slice) -}}
+    {{- if and (isset $data "sections") (not $nodes) -}}
+      {{- warnf "data/docs_nav.json does not define any Docs navigation sections; falling back to the section tree" -}}
+    {{- end -}}
+  {{- end -}}
+  {{- range $nodes -}}
+    {{- $target := $page.Site.GetPage .page -}}
+    {{- if not $target -}}
+      {{- warnf "docs navigation: page %s was not found; skipping the entry" .page -}}
+    {{- else if or (eq $root $target) ($root.IsAncestor $target)
+        (and (in (slice "docs" "book") $target.Type)
+          (eq (partial "shell/sidebar-root.html" $target) $root)) -}}
+      {{- $sections = $sections | append . -}}
+    {{- else -}}
+      {{- /* Explicit parents need not be physical ancestors of a nested root. */ -}}
+      {{- range partial "shell/docs-nav-sections.html" (dict "page" $page "root" $root "nodes" (.children | default (slice))) -}}
+        {{- $sections = $sections | append . -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $sections -}}

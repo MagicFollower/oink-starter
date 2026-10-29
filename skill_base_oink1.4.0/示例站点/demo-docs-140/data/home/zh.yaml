@@ -1,0 +1,26 @@
+sections: [hero, cards, cta]
+
+hero:
+  align: center
+  eyebrow: "OINK 1.4.0 文档站示例"
+  title_lines:
+    - words: [{ text: "OINK 1.4.0 文档站示例" }]
+  lead: "用最小篇幅演示 OINK 1.4.0 的作者侧新写法：表格阅读抽屉、卡片与步骤变体、命令条、Mermaid 与 PlantUML 的渲染口径。"
+  actions:
+    - { label: "开始阅读", url: "docs/01-tour/排版增强/feature-tour/", icon: "fa-solid fa-book", style: "primary" }
+    - { label: "浏览全部文档", url: "docs/", icon: "fa-solid fa-layer-group", style: "ghost" }
+
+cards:
+  eyebrow: "按主题浏览"
+  title: "文档地图"
+  columns: 3
+  items:
+    - { title: "特性巡礼", desc: "把 1.4.0 新增的作者侧标记一次走一遍，每件都给出写法、主题退路与适用场合。", icon: "fa-solid fa-folder", url: "docs/01-tour/" }
+    - { title: "图表与渲染", desc: "1.4.0 把图的加载与渲染推迟到接近视口，验收口径随之改变；PlantUML 也可以本地渲染了。", icon: "fa-solid fa-folder", url: "docs/02-diagrams/" }
+
+cta:
+  title: "从第一篇开始"
+  text: "按顺序阅读，或者直接从左侧目录跳到需要的章节。"
+  label: "开始阅读"
+  url: "docs/01-tour/排版增强/feature-tour/"
+  style: "primary"

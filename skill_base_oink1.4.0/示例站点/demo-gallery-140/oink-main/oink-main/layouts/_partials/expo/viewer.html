@@ -1,0 +1,28 @@
+<dialog class="td-expo-viewer" data-td-expo-viewer aria-labelledby="td-expo-viewer-title">
+  <header class="td-expo-viewer__bar">
+    <span data-td-expo-position aria-live="polite"></span>
+    <div class="td-expo-viewer__tools">
+      <button type="button" class="td-expo-button" data-td-expo-fit aria-keyshortcuts="R 0" aria-label="{{ T "ui_expo_fit" }}" title="{{ T "ui_expo_fit" }} (R / 0)">{{ partial "shell/icon.html" "fit" }}</button>
+      <button type="button" class="td-expo-button" data-td-expo-expand aria-keyshortcuts="F" aria-label="{{ T "ui_expo_expand" }}" title="{{ T "ui_expo_expand" }} (F)">{{ partial "shell/icon.html" "expand" }}</button>
+      <button type="button" class="td-expo-button" data-td-expo-minus aria-keyshortcuts="J -" aria-label="{{ T "ui_diagram_zoom_out" }}" title="{{ T "ui_diagram_zoom_out" }} (J / −)">{{ partial "shell/icon.html" "zoom-out" }}</button>
+      <output data-td-expo-scale></output>
+      <button type="button" class="td-expo-button" data-td-expo-plus aria-keyshortcuts="K +" aria-label="{{ T "ui_diagram_zoom_in" }}" title="{{ T "ui_diagram_zoom_in" }} (K / +)">{{ partial "shell/icon.html" "zoom-in" }}</button>
+    </div>
+    <button type="button" class="td-expo-button" data-td-expo-close aria-keyshortcuts="Escape" aria-label="{{ T "ui_image_zoom_close" }}" title="{{ T "ui_image_zoom_close" }} (Esc)">{{ partial "shell/icon.html" "x" }}</button>
+  </header>
+  <div class="td-expo-viewer__stage" data-td-expo-stage aria-keyshortcuts="W A S D" tabindex="0" aria-label="{{ T "ui_image_zoom_dialog" }}"><div class="td-expo-viewer__canvas"><img data-td-expo-full alt="" draggable="false"></div></div>
+  <footer class="td-expo-viewer__footer">
+    <div class="td-expo-viewer__caption"><h2 id="td-expo-viewer-title"></h2><p data-td-expo-caption></p><small data-td-expo-byline></small></div>
+    <div class="td-expo-viewer__actions">
+      <button type="button" class="td-expo-button" data-td-expo-viewer-motion hidden aria-label="{{ T "ui_expo_pause" }}" title="{{ T "ui_expo_pause" }}">{{ partial "shell/icon.html" "pause" }}</button>
+      <a class="td-expo-button" data-td-expo-original target="_blank" rel="noopener" aria-label="{{ T "ui_expo_original" }}" title="{{ T "ui_expo_original" }}">{{ partial "shell/icon.html" "external-link" }}</a>
+      <a class="td-expo-button" data-td-expo-locate aria-label="{{ T "ui_expo_locate" }}" title="{{ T "ui_expo_locate" }}">{{ partial "shell/icon.html" "locate" }}</a>
+      {{- /* The grid mirrors in RTL; the arrow toward the start means previous. */ -}}
+      {{- $rtl := eq .Site.Language.Direction "rtl" -}}
+      {{- $back := cond $rtl (dict "key" "ArrowRight" "glyph" "→") (dict "key" "ArrowLeft" "glyph" "←") -}}
+      {{- $forward := cond $rtl (dict "key" "ArrowLeft" "glyph" "←") (dict "key" "ArrowRight" "glyph" "→") }}
+      <button type="button" class="td-expo-button" data-td-expo-prev aria-keyshortcuts="Q H {{ $back.key }}" aria-label="{{ T "ui_expo_prev" }}" title="{{ T "ui_expo_prev" }} (Q / H / {{ $back.glyph }})">{{ partial "shell/icon.html" "prev" }}</button>
+      <button type="button" class="td-expo-button" data-td-expo-next aria-keyshortcuts="E L {{ $forward.key }}" aria-label="{{ T "ui_expo_next" }}" title="{{ T "ui_expo_next" }} (E / L / {{ $forward.glyph }})">{{ partial "shell/icon.html" "next" }}</button>
+    </div>
+  </footer>
+</dialog>

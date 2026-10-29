@@ -1,0 +1,18 @@
+{{- /* These precompiled runtimes stay separate and byte-for-byte vendored.
+     Ordinary Hugo builds need no npm, Java, Graphviz or network fetch. */ -}}
+{{- $engine := resources.Get "third_party/plantuml/plantuml.js" -}}
+{{- $viz := resources.Get "third_party/plantuml/viz-global.js" -}}
+{{- range slice "LICENSE" "LICENSE.viz" "LICENSE.graphviz" "LICENSE.expat" "NOTICE" -}}
+  {{- $notice := resources.Get (printf "third_party/plantuml/%s" .) -}}
+  {{- $published := $notice.Publish -}}
+{{- end -}}
+{{- if hugo.IsProduction -}}
+  {{- $engine = $engine | fingerprint -}}
+  {{- $viz = $viz | fingerprint -}}
+{{- end -}}
+{{- $runtime := resources.Get "js/plantuml-browser.js" | resources.ExecuteAsTemplate
+  (printf "js/chunks/plantuml-browser-%s.js" .Site.Language.Lang)
+  (dict "engine" $engine.RelPermalink "viz" $viz.RelPermalink) -}}
+{{- if hugo.IsProduction }}{{ $runtime = $runtime | minify | fingerprint }}{{ end -}}
+<script type="module" src="{{ $runtime.RelPermalink }}"
+  {{- with $runtime.Data.Integrity }} integrity="{{ . }}" crossorigin="anonymous"{{ end }}></script>

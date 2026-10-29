@@ -1,0 +1,29 @@
+/* Appended to the shared giscus stylesheet; no font or network imports. */
+main {
+  --color-fg-default: #ece9e3;
+  --color-fg-muted: #b6b1a7;
+  --color-fg-subtle: #958f84;
+  --color-canvas-default: #161513;
+  --color-canvas-overlay: #1f1e1a;
+  --color-canvas-inset: #121110;
+  --color-canvas-subtle: #1f1e1a;
+  --color-border-default: rgba(236, 233, 227, 0.13);
+  --color-border-muted: rgba(236, 233, 227, 0.1);
+  --color-neutral-muted: rgba(236, 233, 227, 0.12);
+  --color-accent-fg: #7db5e6;
+  --color-accent-emphasis: #a3cdf3;
+  --color-accent-muted: rgba(125, 181, 230, 0.36);
+  --color-accent-subtle: rgba(125, 181, 230, 0.13);
+  --color-btn-text: #ece9e3;
+  --color-btn-bg: #262420;
+  --color-btn-hover-bg: #302d28;
+  --color-btn-active-bg: #39362f;
+  --color-btn-border: var(--color-border-default);
+  --color-btn-primary-bg: #2b5f8c;
+  --color-btn-primary-border: #7db5e6;
+  --color-segmented-control-bg: #1f1e1a;
+  --color-segmented-control-button-bg: #262420;
+  --color-scale-gray-1: #262420;
+  --oink-comment-border: rgba(236, 233, 227, 0.26);
+  --oink-comment-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}

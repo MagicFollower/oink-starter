@@ -1,0 +1,128 @@
+{
+ "min_lines": 20,
+ "full": {
+  "content/docs/01-分类/元数据板块/enhead.md": [
+   "ENGLISH_HEADING"
+  ],
+  "content/docs/01-分类/元数据板块/thindesc.md": [
+   "THIN_DESC"
+  ],
+  "content/docs/01-分类/合规板块/stub.md": [
+   "STUB_PAGE"
+  ],
+  "content/docs/01-分类/无头板块/nofm.md": [
+   "NO_FRONT_MATTER"
+  ],
+  "content/docs/01-分类/无索引板块": [
+   "MISSING_INDEX"
+  ],
+  "content/docs/01-分类/缺字段板块/fmfield.md": [
+   "FM_FIELD"
+  ],
+  "content/docs/01-分类/缺文件板块/listed-missing.md": [
+   "NOT_WRITTEN"
+  ],
+  "content/docs/01-分类/缺陷板块": [
+   "DUP_WEIGHT",
+   "WEIGHT_GAP"
+  ],
+  "content/docs/01-分类/缺陷板块/box.md": [
+   "BOX_CHARS"
+  ],
+  "content/docs/01-分类/缺陷板块/image.md": [
+   "BROKEN_IMAGE"
+  ],
+  "content/docs/01-分类/缺陷板块/legacy.en.md": [
+   "UNLISTED"
+  ],
+  "content/docs/01-分类/缺陷板块/newbie.md": [
+   "FEW_NEWBIE"
+  ],
+  "content/docs/01-分类/缺陷板块/nocode.md": [
+   "NO_CODE"
+  ],
+  "content/docs/01-分类/缺陷板块/nomermaid.md": [
+   "NO_MERMAID"
+  ],
+  "content/docs/01-分类/缺陷板块/painopen.md": [
+   "NO_PAIN_OPEN"
+  ],
+  "content/docs/01-分类/缺陷板块/selfcheck.md": [
+   "SELF_CHECK_LEAK"
+  ],
+  "content/docs/01-分类/缺陷板块/short.md": [
+   "FEW_NEWBIE",
+   "FEW_TABLES",
+   "NO_CODE",
+   "NO_MERMAID",
+   "NO_SUMMARY",
+   "TOO_SHORT"
+  ],
+  "content/docs/01-分类/缺陷板块/skip.md": [
+   "SKIP_LANGUAGE"
+  ],
+  "content/docs/01-分类/缺陷板块/summary.md": [
+   "NO_SUMMARY"
+  ],
+  "content/docs/01-分类/缺陷板块/unlisted.md": [
+   "UNLISTED"
+  ]
+ },
+ "skeleton": {
+  "content/docs/01-分类/元数据板块/thindesc.md": [
+   "THIN_DESC"
+  ],
+  "content/docs/01-分类/无头板块/nofm.md": [
+   "NO_FRONT_MATTER"
+  ],
+  "content/docs/01-分类/无索引板块": [
+   "MISSING_INDEX"
+  ],
+  "content/docs/01-分类/缺字段板块/fmfield.md": [
+   "FM_FIELD"
+  ],
+  "content/docs/01-分类/缺文件板块/listed-missing.md": [
+   "NOT_WRITTEN"
+  ],
+  "content/docs/01-分类/缺陷板块": [
+   "DUP_WEIGHT",
+   "WEIGHT_GAP"
+  ],
+  "content/docs/01-分类/缺陷板块/image.md": [
+   "BROKEN_IMAGE"
+  ],
+  "content/docs/01-分类/缺陷板块/legacy.en.md": [
+   "UNLISTED"
+  ],
+  "content/docs/01-分类/缺陷板块/selfcheck.md": [
+   "SELF_CHECK_LEAK"
+  ],
+  "content/docs/01-分类/缺陷板块/unlisted.md": [
+   "UNLISTED"
+  ]
+ },
+ "silent": [
+  "content/docs/01-分类/合规板块/good-1.md",
+  "content/docs/01-分类/合规板块/good-2.md",
+  "content/docs/01-分类/合规板块/unmapped.md",
+  "content/docs/01-分类/缺陷板块/scratch.md",
+  "content/docs/01-分类/缺陷板块/dupweight.md",
+  "content/docs/01-分类/无索引板块/orphan.md"
+ ],
+ "stub_file": "content/docs/01-分类/合规板块/stub.md",
+ "links": {
+  "content/docs/01-分类/合规板块/good-2.md": [
+   "BROKEN"
+  ],
+  "content/docs/01-分类/合规板块/unmapped.md": [
+   "UNMAPPED"
+  ],
+  "data/home/zh.yaml": [
+   "BROKEN"
+  ],
+  "content/docs/01-分类/缺陷板块/image.md": [
+   "BROKEN"
+  ]
+ },
+ "note": "fixtures/plan.json 故意保留重复 weight（审计红样本）；它不是可写盘计划。links 契约与源夹具一致（1.4.0 基线复验，产物文件名口径未变）。"
+}

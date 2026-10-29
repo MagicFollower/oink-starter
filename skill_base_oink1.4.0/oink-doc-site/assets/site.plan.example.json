@@ -1,0 +1,127 @@
+{
+  "site": {
+    "title": "示例文档",
+    "description": "一个从零搭建的 Hugo + OINK 文档站示例，用来验证建站流程、导航结构与构建判据。",
+    "baseURL": "https://example.org/",
+    "lang": "zh",
+    "copyright": {
+      "authors": "示例项目贡献者",
+      "fromYear": 2026
+    },
+    "footer": "示例内容仅用于验证建站流程。",
+    "preset": "paper",
+    "presetMenu": ["paper", "slate", "ink", "terminal"]
+  },
+  "home": {
+    "eyebrow": "示例项目文档",
+    "title": ["把复杂系统讲清楚"],
+    "lead": "从问题出发，按「认识 → 上手 → 运维」的顺序建立一套可读、可查、可验证的文档。",
+    "actions": [
+      { "label": "开始阅读", "url": "docs/01-overview/认识系统/what-is-it/", "icon": "fa-solid fa-book", "style": "primary" },
+      { "label": "浏览全部文档", "url": "docs/", "icon": "fa-solid fa-layer-group", "style": "ghost" }
+    ],
+    "cardsEyebrow": "按主题浏览",
+    "cardsTitle": "文档地图",
+    "cta": {
+      "title": "从第一篇开始",
+      "text": "先建立整体认识，再进入安装、配置与运维章节。",
+      "label": "开始阅读",
+      "url": "docs/01-overview/认识系统/what-is-it/"
+    }
+  },
+  "categories": [
+    {
+      "dir": "01-overview",
+      "title": "概览",
+      "icon": "fa-solid fa-compass",
+      "weight": 1,
+      "desc": "先回答「它是什么、为什么需要它、由哪些部分组成」，建立后续章节共同的语言。",
+      "sections": [
+        {
+          "dir": "认识系统",
+          "title": "认识系统",
+          "weight": 1,
+          "desc": "从痛点与设计目标出发，建立整体心智模型。",
+          "articles": [
+            {
+              "file": "what-is-it.md",
+              "title": "它是什么，为什么需要它",
+              "weight": 1,
+              "desc": "从真实痛点出发，说明系统解决的问题、核心抽象与适用边界。",
+              "sources": ["用户提供的项目简介"]
+            },
+            {
+              "file": "architecture.md",
+              "title": "整体架构与核心对象",
+              "weight": 2,
+              "desc": "用一张架构图和对象表讲清各组件职责、数据流向与协作边界。",
+              "sources": ["官方架构文档"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dir": "02-getting-started",
+      "title": "快速开始",
+      "icon": "fa-solid fa-rocket",
+      "weight": 2,
+      "desc": "让读者在最短路径内完成安装、最小配置与第一次成功运行。",
+      "sections": [
+        {
+          "dir": "安装与首次运行",
+          "title": "安装与首次运行",
+          "weight": 1,
+          "desc": "从环境准备到验证第一条命令，每一步都给出可核对的输出。",
+          "articles": [
+            {
+              "file": "install.md",
+              "title": "安装与环境准备",
+              "weight": 1,
+              "desc": "列出前置依赖、版本要求、安装命令与验证安装是否成功的判据。",
+              "sources": ["官方安装文档"]
+            },
+            {
+              "file": "first-run.md",
+              "title": "第一次运行与结果验证",
+              "weight": 2,
+              "desc": "用最小配置跑通第一条链路，并说明如何判断结果真的正确。",
+              "sources": ["官方快速开始"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "dir": "03-operations",
+      "title": "运维与排障",
+      "icon": "fa-solid fa-screwdriver-wrench",
+      "weight": 3,
+      "desc": "面向生产环境的配置、监控、故障定位与常见问题处理。",
+      "sections": [
+        {
+          "dir": "配置与排障",
+          "title": "配置与排障",
+          "weight": 1,
+          "desc": "把配置项、默认值、日志与故障现象放在同一张排查表里。",
+          "articles": [
+            {
+              "file": "configuration.md",
+              "title": "关键配置项与默认值",
+              "weight": 1,
+              "desc": "按场景整理关键配置、默认值、影响范围与修改后的验证方法。",
+              "sources": ["官方配置参考"]
+            },
+            {
+              "file": "troubleshooting.md",
+              "title": "常见故障排查",
+              "weight": 2,
+              "desc": "按现象组织的排查清单，每条给出根因假设与可验证的处理动作。",
+              "sources": ["官方 FAQ"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

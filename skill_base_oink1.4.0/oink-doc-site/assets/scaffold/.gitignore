@@ -1,0 +1,22 @@
+# Hugo 构建产物与本地缓存
+/public/
+/resources/
+/.hugo_cache/
+/.hugo_build.lock
+
+# 技能与判据脚本的临时落点（verify_site / validate_mermaid / 接管脚本的临时目录）
+/.tmp/
+/_mermaid-harness/
+
+# 依赖与日志（验收时容易落在仓库根的构建/探针日志）
+node_modules/
+*.log
+
+# 操作系统与编辑器垃圾（Windows 桌面与资源管理器会自己长出来）
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+

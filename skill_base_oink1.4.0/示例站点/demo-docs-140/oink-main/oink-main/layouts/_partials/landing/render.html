@@ -1,0 +1,16 @@
+{{- $page := .page -}}
+{{- $data := .data -}}
+{{- $sections := $data.sections | default (slice) -}}
+{{- $interactive := eq (lower ($page.Store.Get "tdOutputFormat" | default "html")) "html" -}}
+{{- if $interactive }}{{ $page.Store.Set "hasLanding" true }}{{ end -}}
+{{- $rendered := slice -}}
+{{- range $index, $section := $sections -}}
+  {{- $rendered = $rendered | append (partial "landing/section.html" (dict
+    "page" $page "home" $data "entry" $section "index" $index
+  )) -}}
+{{- end -}}
+{{- $content := delimit $rendered "" | safeHTML -}}
+{{- partial "code/register-rendered-ids.html" (dict "page" $page "content" $content) -}}
+<div class="td-landing-landing{{ if not $page.IsHome }} td-landing-landing--page{{ end }}"{{ if $interactive }} data-td-landing{{ end }}>
+  {{- $content -}}
+</div>

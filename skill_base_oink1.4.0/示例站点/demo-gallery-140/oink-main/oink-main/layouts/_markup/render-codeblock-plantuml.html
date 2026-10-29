@@ -1,0 +1,7 @@
+{{- $page := .PageInner | default .Page -}}
+{{- if eq (lower ($page.Store.Get "tdOutputFormat" | default "html")) "html" -}}
+  {{- $page.Store.Set "hasPlantuml" true -}}
+{{- end -}}
+{{- /* html/template escapes text once. An explicit htmlEscape here corrupts
+       arrows, quotes and ampersands before either renderer reads textContent. */ -}}
+<pre tabindex="0"><code class="language-plantuml">{{ .Inner }}</code></pre>

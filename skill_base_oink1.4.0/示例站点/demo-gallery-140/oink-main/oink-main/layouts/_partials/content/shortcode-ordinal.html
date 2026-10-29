@@ -1,0 +1,7 @@
+{{- /* Ordinal is local to each shortcode parent. Keep its ancestry when a
+       generated DOM ID must distinguish nested shortcode instances. */ -}}
+{{- $key := printf "%d" .Ordinal -}}
+{{- with .Parent -}}
+  {{- $key = printf "%s-%s" (partial "content/shortcode-ordinal.html" .) $key -}}
+{{- end -}}
+{{- return $key -}}

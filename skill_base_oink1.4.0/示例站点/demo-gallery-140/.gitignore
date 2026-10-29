@@ -1,0 +1,32 @@
+# Hugo 构建产物与本地缓存
+/public/
+/resources/
+/.hugo_cache/
+/.hugo_build.lock
+
+# 技能与判据脚本的临时落点（verify_site / validate_mermaid / 接管脚本的临时目录）
+/.tmp/
+/_mermaid-harness/
+
+# 依赖与日志（验收时容易落在仓库根的构建/探针日志）
+node_modules/
+*.log
+
+# 操作系统与编辑器垃圾（Windows 桌面与资源管理器会自己长出来）
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+
+# 实验案例包里的依赖与产物：不进仓库，也不该进 zip（口径同 cases/*/*/.gitignore）
+cases/**/node_modules/
+cases/**/__pycache__/
+cases/**/*.pyc
+cases/**/.venv/
+cases/**/venv/
+cases/**/dist/
+cases/**/build/
+cases/**/.pytest_cache/
+cases/**/*.env

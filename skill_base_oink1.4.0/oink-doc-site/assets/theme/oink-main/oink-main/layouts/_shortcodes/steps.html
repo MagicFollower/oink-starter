@@ -1,0 +1,19 @@
+{{- partial "content/shortcode-params.html" (dict "shortcode" . "allowed" (slice "variant")) -}}
+{{- $compact := false -}}
+{{- if and .IsNamedParams (isset .Params "variant") -}}
+  {{- if eq (printf "%v" (.Get "variant")) "compact" -}}
+    {{- $compact = true -}}
+  {{- else -}}
+    {{- warnf "shortcode steps: variant must be compact at %s; using the default steps" .Position -}}
+  {{- end -}}
+{{- end -}}
+{{- $format := lower (.Page.Store.Get "tdOutputFormat" | default "html") -}}
+{{- if eq $format "markdown" -}}
+{{ .Inner }}
+{{- else -}}
+<div class="td-steps td-max-width-on-larger-screens{{ if $compact }} td-steps-compact{{ end }}">
+
+{{ .Inner }}
+
+</div>
+{{- end -}}

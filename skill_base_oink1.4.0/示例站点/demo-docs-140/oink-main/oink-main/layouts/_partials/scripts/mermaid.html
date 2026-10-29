@@ -1,0 +1,5 @@
+{{- /* Publish without requesting the engine. The small adapter loads it once
+       when a visible diagram approaches the viewport. */ -}}
+{{- $mermaid := resources.Get "third_party/mermaid/mermaid.min.js" -}}
+{{- if hugo.IsProduction }}{{ $mermaid = $mermaid | fingerprint }}{{ end -}}
+<script type="application/json" data-td-mermaid-config>{{ dict "src" $mermaid.RelPermalink "integrity" ($mermaid.Data.Integrity | default "") | jsonify | safeJS }}</script>
