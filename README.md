@@ -1,50 +1,74 @@
 # Docker 团队知识库 — AI Agent 操作规范
 
-本项目是基于 Hugo + OINK 主题的 **中文文档站**（由 `replicate-doc-site` 技能搭建；主题本地副本为 OINK **v1.3.2**）。仅简体中文，主题本地化在 `oink-main/`，可完全离线构建。
+本项目是基于 Hugo + OINK 主题的 **中文文档站**，主题本地副本为 OINK **v1.3.2**（`oink-main/oink-main/`，1,273 个文件）。仅简体中文，可完全离线构建：`GOTOOLCHAIN=local` + `GOPROXY=off` 下不触网。
 
-与技能原始场景的一处差别，先说清免得按错口径干活：**本站没有上游文档站**。唯一的结构源是同仓库的《Docker知识库内容结构与组织清单》v2.1（76 章规划），它被 `.staging/取源与建矩阵.py` 逐章拆成 76 个章节 stub 充当「源」，再由 `.staging/建矩阵.py` 归成 28 篇长文。因此凡下文提到「上游」，本站的实际对应物是这个本地清单源；技能里关于多版本查重的部分对本站不适用。
+结构源是《Docker知识库内容结构与组织清单》v2.1。**该清单不在仓库内**，`.staging/` 目录（含取源、建矩阵、矩阵校验脚本与 `matrix.json`）也已从磁盘移除，且从未进过 git 历史。因此本文件描述的一律是**磁盘现状**：结构一致性靠人工比对目录树，没有自动闸门兜着。第八节列了当前跑不了的校验与仓库里的遗留物。
 
 读取本文件后，AI 应能自主完成文档的归类、格式化、放置、关联更新与构建验证。
 
 ## 一、项目结构
 
+下面是 `ls -A` 与 `find` 实测出来的树，不含 `public/`、`resources/` 的内容明细（两者是构建产物，已被 `.gitignore` 忽略）：
+
 ```text
 Docker知识库/
 ├── content/
 │   ├── _index.md                  # 首页
-│   └── docs/                      # 文档主区域（编号递增的一级分类）
-│       ├── _index.md              # 文档总览页（卡片导航，条目数 = 分类数）
+│   └── docs/
+│       ├── _index.md              # 文档总览页：11 行 `- [显示名](/docs/NN-目录名/)` + `{.cards}`
 │       └── NN-中文分类名/          # 一级分类 → 中文板块子目录 → 中文文章文件
-├── static/picture/                # 架构图与流程图（drawio 源 + 导出 png）
-├── data/home/zh.yaml              # 首页 hero / 卡片 / CTA 数据
+│           ├── _index.md          # 分类页（带 cascade）
+│           └── 中文板块名/
+│               ├── _index.md      # 板块页
+│               └── 中文文章名.md
+├── assets/icons/logo.svg          # 站点 logo；hugo.yaml 不写 logo 键，主题默认就取这个路径
+├── static/
+│   ├── favicon.svg
+│   └── picture/.gitkeep           # 配图目录，当前是空的（只有占位文件）
+├── data/home/zh.yaml              # 首页 hero / cards / cta 三段数据
+├── layouts/_partials/shell/root-menu-roots.html   # 唯一的站点级 partial 覆盖
 ├── hugo.yaml                      # 站点唯一配置
-├── go.mod                         # 主题走 replace 本地化
-├── oink-main/oink-main/           # 本地化主题（与技能物料逐字节一致，勿改）
-├── layouts/_partials/             # 站点级 partial 覆盖
-├── doc/                           # 编写规范、覆盖矩阵、运行与构建
-└── README.md                      # 本文件
+├── go.mod / go.sum                # 主题走 replace 本地化
+├── oink-main/oink-main/           # 本地化主题副本（1,273 文件，勿改）
+├── doc/
+│   ├── 技术文档编写规范.md          # 19,067 字节
+│   ├── 复刻覆盖矩阵.md             # 15,743 字节，数字已滞后（见第八节）
+│   └── 运行与构建（T0Level）.md     # 252,824 字节，逐轮实测台账
+├── 示例/                          # 可跑的配套示例，不参与 Hugo 构建
+│   ├── 入门-hello与nginx/
+│   ├── 贯穿示例/
+│   ├── 存储双案例/
+│   └── Harbor私有仓库/
+├── run.cmd                        # Windows 启动入口（141 行 CRLF / 4,214 字节 / 纯 ASCII）
+├── .gitignore / LICENSE(MIT) / README.md
+└── 构建产物与遗留物：public/ resources/ .hugo_build.lock noopen2.out Docker知识库/
 ```
+
+`示例/` 四个子目录各自带 `README.md`，其中三个还带校验脚本（`入门跑一遍.py`、`verify_storage.py`、`verify_chain.py`），`Harbor私有仓库/` 另带 `Harbor.cmd`、`harborctl.py`、`docker-compose.yml` 与官方安装包留档。它们在 `content/` 之外，Hugo 不构建，正文用站内链接指过去而不是把它们当页面。
 
 ## 二、内容分类体系
 
-| 目录 | 分类名 | 知识板块 | 篇数 |
-|------|--------|----------|-----|
-| `00-导读/` | 导读 | 怎么用这个库、把环境搭好 | 3 |
-| `01-基础认知/` | 基础认知 | 为什么是容器、第一次动手 | 3 |
-| `02-核心操作/` | 核心操作 | 跑起来、接上去 | 3 |
-| `03-镜像构建/` | 镜像构建 | 写出来、养小养快、交出去 | 3 |
-| `04-单机编排/` | 单机编排 | 定义、启停、日常 | 3 |
-| `05-原理深入/` | 原理深入 | 隔离与资源、网络与运行时 | 3 |
-| `06-工程化与生产/` | 工程化与生产 | 交付链路、运行基线 | 3 |
-| `07-运维手册/` | 运维手册 | 检索与规矩、按故障域排错 | 4 |
-| `08-生态与附录/` | 生态与附录 | 生态坐标、查阅件 | 2 |
-| `09-常见问题/` | 常见问题 | FAQ | 1 |
+磁盘实测：**11 个一级分类 / 26 个知识板块 / 38 篇文章**。`content/` 下共 77 个 `.md`，其中 39 个是 `_index.md`（1 个首页 + 1 个文档总览 + 11 个分类 + 26 个板块），77 − 39 = 38 与文章数吻合。
 
-合计 **10 分类 / 21 板块 / 28 篇文章**，认领清单的 **76 章**（逐条归属见 `doc/复刻覆盖矩阵.md`）。
+| 目录 | `weight` | 分类名 | 知识板块（各板块篇数） | 篇数 |
+|------|-----|--------|----------|-----|
+| `00-导读/` | 1 | 导读 | 怎么用这个库(2)、把环境搭好(1) | 3 |
+| `01-基础认知/` | 2 | 基础认知 | 为什么是容器(2)、第一次动手(1) | 3 |
+| `02-核心操作/` | 3 | 核心操作 | 跑起来(2)、接上去(1) | 3 |
+| `03-镜像构建/` | 4 | 镜像构建 | 写出来(1)、养小养快(1)、交出去(1) | 3 |
+| `04-单机编排/` | 5 | 单机编排 | 定义(1)、启停(1)、日常(1) | 3 |
+| `05-原理深入/` | 6 | 原理深入 | 隔离与资源(2)、网络与运行时(1) | 3 |
+| `06-工程化与生产/` | 7 | 工程化与生产 | 交付链路(1)、运行基线(2) | 3 |
+| `07-运维手册/` | 8 | 运维手册 | 检索与规矩(1)、按故障域排错(3) | 4 |
+| `08-生态与附录/` | 9 | 生态与附录 | 生态坐标(1)、查阅件(1) | 2 |
+| `09-常见问题/` | 10 | 常见问题 | FAQ(1) | 1 |
+| `10-存储专题/` | 11 | 存储专题 | 基础(2)、落点与生命周期(2)、配置与内容(1)、数据保护(2)、故障手册(3) | 10 |
 
-> 新增一级分类：优先归入现有分类；确需新增时按编号递增建目录，并同步更新本表、`content/docs/_index.md` 的卡片链接与 `.staging/matrix.json`。矩阵是目录树的唯一事实来源，只改磁盘不改矩阵会被 `matrix_check.py` 判为 `UNCOVERED`。
+`weight` 从 1 到 11 连续无跳号，与 `content/docs/_index.md` 的 11 行卡片顺序一致（落地清单写在该文件末尾的 HTML 注释里：链接条目数必须等于一级分类目录数）。
 
-**归类原则**：一篇文档只归属一个板块，判据是「读者在什么场景下需要它」，不是「清单把它编在第几章」。讲机制原理、讲怎么搭、讲参数默认值、讲踩坑约束，各归各处。清单的 76 章与本站的 28 篇是多对一关系，合并边界以「同一个意图能概括」为准。
+> **新增一级分类**：优先归入现有分类；确需新增时按编号递增建目录，`weight` 取同级最大值 +1，并同步更新本表、`content/docs/_index.md` 的卡片行、以及父级分类 `_index.md` 里的「知识板块」列表。矩阵校验脚本已不在仓库，这三处只能靠人工对齐——改完务必 `grep -c '^- \[' content/docs/_index.md` 数一遍卡片行是否等于分类目录数。
+
+**归类原则**：一篇文档只归属一个板块，判据是「读者在什么场景下需要它」，不是「清单把它编在第几章」。讲机制原理、讲怎么搭、讲参数默认值、讲踩坑约束，各归各处。清单的章节与本站的 38 篇是多对一关系，合并边界以「同一个意图能概括」为准。
 
 ## 三、命名与 Front Matter
 
@@ -56,7 +80,7 @@ Docker知识库/
 
 不使用 `.zh.md` / `.en.md` 后缀；`defaultContentLanguage: zh` 下 `.md` 即中文。
 
-文件名那条「必须 `.md` 结尾」的硬校验写在 `.staging/取源与建矩阵.py` 的 `validate()` 里，起因是实测事故：清单曾有 `7.1-命令速查表.md（置顶）` 与 `复盘库/（一事故一文件）` 三种写法，它们照样建得出 stub、照样被认领、`isfile` 照样过，但 `matrix_check.py` 的 `walk_md` 按 `.md` 后缀收集，于是这三个源**永远不会被判为漏覆盖**——`UNCOVERED=0` 是假的。
+「必须 `.md` 结尾」这条要当硬规矩守，起因是一次实测事故：清单曾出现 `7.1-命令速查表.md（置顶）` 与 `复盘库/（一事故一文件）` 这类写法，它们照样建得出文件、照样被认领、`isfile` 照样过，但按 `.md` 后缀收集文章的校验器看不见它们，于是这些源**永远不会被判为漏覆盖**——`UNCOVERED=0` 是假的。当时兜住这条的校验脚本在 `.staging/` 里，现已移除，所以只能靠人守：新建文件后用 `find content -name '*.md' ! -name '_index.md' | wc -l` 数一遍，看是否等于本表「篇数」列的合计。
 
 文章三字段缺一不可，`weight` 取同目录最大值 +1：
 
@@ -72,7 +96,7 @@ weight: 1
 
 ## 四、AI 操作流程
 
-1. **判断归属** → 2. **定路径** `content/docs/{一级}/{板块}/{文件}.md` → 3. **写 front matter 与正文** → 4. **新建板块时成对操作**（先建板块 `_index.md`，再在父级分类的「知识板块」列表补一行，并同步 `.staging/matrix.json`）→ 5. **构建验证**。
+1. **判断归属** → 2. **定路径** `content/docs/{一级}/{板块}/{文件}.md` → 3. **写 front matter 与正文** → 4. **新建板块时成对操作**（先建板块 `_index.md`，再在父级分类 `_index.md` 的「知识板块」列表补一行；新建一级分类还要补 `content/docs/_index.md` 的卡片行与第二节那张表）→ 5. **构建验证**。
 
 正文按 `doc/技术文档编写规范.md` 写（对应清单的写作要求 W1~W5），硬性门槛：
 
@@ -85,73 +109,99 @@ weight: 1
 - 禁止「限于篇幅」「此处从略」「自行查阅」「待补充」「TODO」；
 - 正文 ≥ 260 行（参考量级，不是灌水指标）。
 
-**技术事实的出处口径**（本站与技能原场景不同，按这条走）：本站无上游仓库可抄，事实只有两个合法来源——**Docker 官方文档**（写清版本与 as-of 日期）与**本机实测输出**（贴真实终端文本）。不得按「同类 API 惯例」推定默认值、版本号、超时值或异常行为；查不到就写「官方文档未给出」或「未实测」。凡引用清单的结论，出处写**章节号**（如 `清单 3.6`），不写本地暂存目录路径。
+**技术事实的出处口径**：本站无上游仓库可抄，事实只有两个合法来源——**Docker 官方文档**（写清版本与 as-of 日期）与**本机实测输出**（贴真实终端文本）。不得按「同类 API 惯例」推定默认值、版本号、超时值或异常行为；查不到就写「官方文档未给出」或「未实测」。凡引用清单的结论，出处写**章节号**（如 `清单 3.6`），不写本地暂存目录路径。
 
-**版本查重**：本站只有一份清单源、不存在多版本分叉，`matrix_check.py` 的 `same_name_pairs` / `per_article_pairs` 实测恒为 0。将来若引入 Docker 4.x/5.x 之类的版本分叉，必须回到技能的逐字节 MD5 口径，不得只取一版。
+**版本查重**：本站只有一份清单源、不存在多版本分叉。将来若引入 Docker 4.x/5.x 之类的版本分叉，必须回到逐字节 MD5 比对的口径，不得只取一版。
 
-**配图引用**：`![说明](/picture/xxx.png)` 绝对路径即可，构建时自动改写为相对路径；中文与空格文件名要 URL 编码。写作时只准引用 `picture_map.py` 清单内的路径。
+**配图引用**：`![说明](/picture/xxx.png)` 绝对路径即可，构建时自动改写为相对路径；中文与空格文件名要 URL 编码。`static/picture/` 目前只有一个 `.gitkeep`，`content/` 里对 `picture/` 的引用数实测为 **0**——要配图先把文件放进 `static/picture/` 再引用，不要写指向空目录的链接。
 
 ## 五、构建与环境
 
-| 工具 | 本机实测版本 | 要求 |
-|------|------|------|
-| Hugo | v0.168.0 Extended（`C:\Users\webtu\tools\hugo`） | 标准版无法编译 SCSS；0.168.0 可构建，但其 libsass 弃用 WARN 在 `--panicOnWarning` 闸门下会致败，严格闸门须用 0.166.0 |
-| Go | **两个版本共存**：`C:\Program Files\Go` = go1.27.2（系统 PATH 选中它），`C:\Users\webtu\tools\go` = go1.25.4 | 必须 ≥ 两处 `go.mod` 的 `go` 指令（1.27.0）。**哪个生效取决于 PATH 顺序**，不取决于装了哪个——把 1.25.4 排到前面就会构建失败，见第七节 |
+**日常入口是站点根的 `run.cmd`**（双击即可）：设 `GOTOOLCHAIN=local`/`GOPROXY=off`、解析 Hugo 与 Go、从 8768 起探测空闲端口（被占自动顺延并打印 `Note`）、校验 Hugo 必须是 Extended、然后 `hugo server --disableFastRender --openBrowser`。可用变量 `PORT`、`HUGO_EXE`、`GO_BIN`、`NO_OPEN=1`、`NO_PAUSE=1`。**只改顶部 PROJECT CONFIG 块**（第 5–12 行），下面的逻辑是技能物料。逐轮实测读数见 `doc/运行与构建（T0Level）.md` 第三节。
+
+手动方式：
 
 ```powershell
-$env:PATH = "C:\Users\webtu\tools\go\bin;C:\Users\webtu\tools\hugo;" + $env:PATH
 $env:GOTOOLCHAIN = "local"; $env:GOPROXY = "off"
-hugo --cleanDestinationDir          # 验证构建
-hugo server -D                      # 本地预览
+hugo --cleanDestinationDir                 # 验证构建
+hugo server -D                             # 本地预览，默认端口 1313
 hugo --cleanDestinationDir --gc --minify   # 发布档
 ```
 
-`GOTOOLCHAIN=local` 与 `GOPROXY=off` 这两条**实测过的**后果是：在 `local` 口径下，若 PATH 选中的 Go 低于 `go.mod` 的 `go` 指令，Hugo 会报 `failed to load modules: failed to download modules: ... go.mod requires go >= 1.27.0 (running go 1.25.4; GOTOOLCHAIN=local)` 并以返回码 1 退出——文本长得像内容错误，其实是工具链闸门（见第七节 A/B 的 B 臂）。
+本机工具链实测（**「本机版本是 X」必须绑定解析顺序说**，这台机器上同名工具有多份）：
 
-至于「不设这两个变量会怎样」（Hugo 是否会自动去下载 1.27 工具链、在离线环境里会不会长时间挂住），**未实测**：本机始终带着这两个变量操作，不给结论。
+| 工具 | 解析位置 | 实测版本 | 说明 |
+|------|------|------|------|
+| Hugo | `where hugo` → `D:\Apps\hugo_extended_0.168.0_windows-amd64\hugo.exe` | v0.168.0 **+extended** | `run.cmd` 走的就是这一份 |
+| Hugo | `C:\Users\webtu\tools\hugo\hugo.exe`（`run.cmd` 的 `HUGO_FALLBACK`） | v0.168.0 **+extended** | 与上面同版本，PATH 失效时的兜底 |
+| Go | `where go` → `C:\Program Files\Go\bin\go.exe` | **go1.27.2** | 系统 PATH 选中它 |
+| Go | `C:\Users\webtu\tools\go1.27.3\go\bin\go.exe`（`run.cmd` 的 `GO_FALLBACK`） | **go1.27.3** | **`GO_FALLBACK` 排在 PATH 之前**，所以 `run.cmd` 里生效的是这一份，不是 1.27.2 |
+| Go | `C:\Users\webtu\tools\go\bin\go.exe` | **go1.25.4** | 低于 `go.mod` 下界，把它顶到 PATH 前面构建就会失败，见第七节 |
 
-验收判据（四个脚本，见技能 `replicate-doc-site`）：构建 0 ERROR（只允许主题侧 `libsass deprecated` 一条 WARN）、结构审计 `problems=0`、站内链接 `broken=0`、Mermaid 真解析 `FAIL=0`。**判据要先证明会红**：技能自证 `verify_all.py --selftest` 必须 `SELFTEST_PASS`（实测 20 个红样本逐条报出、5 个合规样本一条不误报），空骨架时审计必须报大量问题，注入坏图时解析台必须报 FAIL。
+两处 `go.mod`（站点与 `oink-main/oink-main/`）的 `go` 指令都是 **1.27.0**，取下界时要看两处、不是只看站点那一条。标准版 Hugo 编不了 SCSS，`hugo.yaml` 的 `module.hugoVersion` 写的是 `extended: true` / `min: 0.166.0`。
+
+`GOTOOLCHAIN=local` 与 `GOPROXY=off` 这两条**实测过的**后果是：在 `local` 口径下，若被选中的 Go 低于 `go.mod` 的 `go` 指令，Hugo 会报 `failed to load modules: failed to download modules: ... go.mod requires go >= 1.27.0 (running go 1.25.4; GOTOOLCHAIN=local)` 并以返回码 1 退出——文本长得像内容错误，其实是工具链闸门（见第七节 A/B 的 B 臂）。不设 `GOTOOLCHAIN=local` 时 Go 会自己去 proxy 拉工具链：本轮在 `C:\Users\webtu\tools\go\bin` 上直接复现到 `go: downloading go1.27.0 (windows/amd64)` 后接 `dial tcp 142.250.204.49:443: connectex: ... failed to respond`，离线机必败。
+
+本轮构建实测（`run.cmd`，`NO_OPEN=1 NO_PAUSE=1`）：`Pages 239 / Static files 35`，`Built in 2157 ms` 与 `2239 ms` 两次，**0 个 ERROR**，唯一 WARN 是主题侧 `css.Sass: libsass was deprecated`（主题固有，不是失败，也不要为此加 `--panicOnWarning`）。
 
 ## 六、约束与禁止事项
 
-1. 不可修改 `oink-main/` 主题目录下任何文件（当前与技能物料逐字节一致，第七节记录了唯一一次偏离及其撤销）。
+1. 不可修改 `oink-main/` 主题目录下任何文件（当前 1,273 个文件与技能物料逐字节一致，第七节记录了唯一一次偏离及其撤销）。
 2. 不可添加非中文内容文件，不可改动 `hugo.yaml` 的语言配置。
-3. 新建板块必须同时创建其 `_index.md` 并更新父级分类「知识板块」列表与 `.staging/matrix.json`；目录与索引成对出现。
+3. 新建板块必须同时创建其 `_index.md` 并更新父级分类的「知识板块」列表；新建一级分类还要同步 `content/docs/_index.md` 的卡片行与第二节那张表。目录与索引成对出现。
 4. 不可删除已有 `_index.md`；不可让文章缺失 front matter。
 5. 不可把「官方未给出」「未实测」的句子写成肯定结论；重组结构、补类比与图示是本职。
 6. 一篇文档只属一个板块；跨板块关联用站内链接，不复制正文。
-7. 正文不得出现 `.staging/` 等本地暂存路径。
-8. `hugo.yaml` 的 goldmark 三项、`relativeURLs: true`，以及 `ui.preset` / `ui.preset_menu` 两行不许删或注释掉——后者是 4 套观感可切换的唯一开关，配在 1.0/1.1 主题副本上不生效但**构建一个错都不报**。
+7. 正文不得出现本地暂存目录路径（`.staging/` 一类）。该目录现已不存在，但规矩照旧：交付正文里不该出现只在本机成立的路径。
+8. `hugo.yaml` 的 goldmark 三项（`renderer.unsafe`、`parser.attribute.block`、`parser.wrapStandAloneImageWithinParagraph`）、`relativeURLs: true`，以及 `ui.preset` / `ui.preset_menu` 两行不许删或注释掉——后者是 4 套观感可切换的唯一开关，配在 1.0/1.1 主题副本上不生效但**构建一个错都不报**。
+9. `baseURL` 一律写根（当前是 `https://example.org/`，仍是待改的占位）。要挂子路径靠部署时把 `public/` 放进那个子目录，**不要**把子路径写进 `baseURL`：与 `relativeURLs: true` 冲突，会把子路径烤进每个资源 URL，页面 200 但 CSS 与 logo 全 404。
+10. 站点级自定义开关写进配置文件的 `params` 段，不要指望手改能活过下一轮重新生成。
 
 ## 七、偏离登记：一处曾登记、现已撤销的误诊
 
-**当前状态：对本地主题副本零改动。** 这次不是只看 `go.mod` 一行——整棵主题树逐文件比对了 MD5：物料与站点各 **1,273 个文件**，「仅物料有 0 / 仅站点有 0 / 内容不同 0」。站点 `go.mod` 也已还原成与上游模板逐字节相同（先前我改写它时把 CRLF 换成了 LF，属于又一次过度声称——当时写的是"两处逐字节一致"，实际只差行尾，现已核实并修正）。
+**当前状态：对本地主题副本零改动。** 这次不是只看 `go.mod` 一行——整棵主题树逐文件比对了 MD5：物料与站点各 **1,273 个文件**，「仅物料有 0 / 仅站点有 0 / 内容不同 0」（文件数本轮复核仍是 1,273）。站点 `go.mod` 也已还原成与上游模板一致（先前我改写它时把 CRLF 换成了 LF，属于又一次过度声称——当时写的是「两处逐字节一致」，实际只差行尾，现已核实并修正；仓库 `core.autocrlf=true`，磁盘 CRLF 与库内 LF 是同一份内容）。
 
-这一节保留误诊记录本身，因为它比"没偏离"更有用。
+这一节保留误诊记录本身，因为它比「没偏离」更有用。
 
-2026-10-25 建骨架时，我登记过一条偏离：把两处 `go.mod` 的 `go 1.27.0` 降成 `go 1.25`，理由是"本机 Go 是 1.25.4，离线口径下 1.27.0 会让 Hugo 加载模块失败"，还做了 A/B 并贴出过 `go: go.mod requires go >= 1.27.0 (running go 1.25.4; GOTOOLCHAIN=local)` 这条真实报错。
+2026-10-25 建骨架时，我登记过一条偏离：把两处 `go.mod` 的 `go 1.27.0` 降成 `go 1.25`，理由是「本机 Go 是 1.25.4，离线口径下 1.27.0 会让 Hugo 加载模块失败」，还做了 A/B 并贴出过 `go: go.mod requires go >= 1.27.0 (running go 1.25.4; GOTOOLCHAIN=local)` 这条真实报错。
 
 报错是真的，结论是错的。2026-10-27 复核时发现两件事：
 
 | 事实 | 读数 |
 |---|---|
 | 本机其实装着两个 Go | `C:\Program Files\Go` = **go1.27.2**；`C:\Users\webtu\tools\go` = go1.25.4。系统 PATH 选中的是前者 |
-| 我上一轮把后者顶到了前面 | 所有测量都在 `export PATH="/c/Users/webtu/tools/go/bin:$PATH"` 之后做，所以"本机 Go"这个说法从一开始就只对我自己造的 PATH 成立 |
-| 上一次 A/B 其实是空跑 | 那条命令链里 `cp` 先失败，**`&&` 短路导致写入 go.mod 的 Python 根本没执行**，两臂都跑在 `go 1.25` 上。我把"两臂都成功"当成了对照成立 |
+| 我上一轮把后者顶到了前面 | 所有测量都在 `export PATH="/c/Users/webtu/tools/go/bin:$PATH"` 之后做，所以「本机 Go」这个说法从一开始就只对我自己造的 PATH 成立 |
+| 上一次 A/B 其实是空跑 | 那条命令链里 `cp` 先失败，**`&&` 短路导致写入 go.mod 的 Python 根本没执行**，两臂都跑在 `go 1.25` 上。我把「两臂都成功」当成了对照成立 |
 
 重做的 A/B（每步都回读 `go.mod` 确认写入生效，Hugo 前后都不改写它）：
 
 | 臂 | `go.mod` | 生效 Go | 结果 |
 |---|---|---|---|
-| A | `go 1.27.0` | go1.27.2 | 返回码 0，`Pages 195 / Static files 35 / Total in 1634 ms` |
+| A | `go 1.27.0` | go1.27.2 | 返回码 0，构建通过 |
 | B | `go 1.27.0` | go1.25.4 | 返回码 1，`go.mod requires go >= 1.27.0 (running go 1.25.4; GOTOOLCHAIN=local)` |
 
-所以真正的约束不是"降级 go.mod 迁就本机"，而是**"保证 PATH 里被选中的 Go ≥ 1.27.0"**。撤销偏离后站点照常构建，已实测。
+所以真正的约束不是「降级 go.mod 迁就本机」，而是**「保证被选中的 Go ≥ 1.27.0」**。撤销偏离后站点照常构建，已实测。
 
 三条可复用的教训，留在文档里比删掉划算：
 
-1. **别让 `&&` 链的前置失败悄悄吃掉你的写入。** 写入命令失败或被跳过时，后续"对照实验"测的是同一份配置，两臂读数会高度一致——那种一致恰恰是假的。凡是改配置再做 A/B，中间必须插一次**回读确认**。
-2. **`$?` 不要接在管道后面。** 本文早期一次读数里，`hugo … | grep …` 的退出码属于 `grep`，构建失败也会显示"命令成功"。要判成败就重定向到文件，单独看退出码。
-3. **"本机版本是 X"必须绑定 PATH 说。** 多个工具链共存的机器上，不指明解析顺序的版本结论没有意义。
+1. **别让 `&&` 链的前置失败悄悄吃掉你的写入。** 写入命令失败或被跳过时，后续「对照实验」测的是同一份配置，两臂读数会高度一致——那种一致恰恰是假的。凡是改配置再做 A/B，中间必须插一次**回读确认**。
+2. **`$?` 不要接在管道后面。** 本文早期一次读数里，`hugo … | grep …` 的退出码属于 `grep`，构建失败也会显示「命令成功」。要判成败就重定向到文件，单独看退出码。
+3. **「本机版本是 X」必须绑定 PATH 说。** 多个工具链共存的机器上，不指明解析顺序的版本结论没有意义。第五节那张表就是按这条重写的。
 
-其余部分：主题副本 1,273 个文件与技能基线一致，未作任何改动。
+## 八、已知遗留与当前跑不了的校验
+
+如实登记，别把它们当成可用能力：
+
+| 项 | 现状 | 影响 |
+|---|---|---|
+| `.staging/`（取源、建矩阵、`matrix_check.py`、`picture_map.py`、`verify_all.py`、`matrix.json`） | 目录已从磁盘移除，且从未进过 git 历史（`git log --all` 里查不到任何 `.staging/` 路径） | 结构审计、链接检查、Mermaid 真解析、覆盖矩阵校验**四类判据全部跑不了**。「矩阵是目录树的唯一事实来源」这句话目前没有任何脚本兜着 |
+| `replicate-doc-site` 技能 | 未安装（`~/.qoder-cn/skills/` 下只有 `oink-doc-site`）。`matrix_check.py` / `picture_map.py` 只在 git 历史的 `skill_base_oink1.3.2/replicate-doc-site/scripts/` 等路径下出现过 | 本站最初由它搭建，但要复跑得先把技能装回来 |
+| 《Docker知识库内容结构与组织清单》v2.1 | 仓库内与上级目录都找不到（`hugo.yaml` 的 `footer_center_info` 与 `content/docs/_index.md` 正文仍引用它） | 章节归属只能查 `doc/复刻覆盖矩阵.md`，而那份也滞后 |
+| `doc/复刻覆盖矩阵.md` | 表头仍是 `一级分类 10 / 知识板块 21 / 重写文档 28 / 源文档归属条目 76`，磁盘实测是 **11 / 26 / 38** | 整个 `10-存储专题/`（5 板块 10 篇）不在矩阵里。生成它的脚本已不在，逐篇归属明细无法从源清单重算，所以本轮**未动这个文件**，只在此登记 |
+| `Docker知识库/public/` | 仓库**跟踪着**一个嵌套的 `Docker知识库/public/`，共 246 个构建产物文件 | 根 `public/` 已被 `.gitignore` 忽略，这份嵌套副本看着像误提交。未确认归属前不要删 |
+| `noopen2.out` | 2,582 字节，内容是旧版 `run.cmd` 的横幅（`Docs Site - Local Preview`，即换模板前的 `SITE_TITLE`） | 一次 `NO_OPEN` 实跑留下的日志残留，被跟踪进了仓库 |
+| `static/picture/` | 只有 `.gitkeep`，`content/` 里 `picture/` 引用数 0 | 第一节旧版说的「drawio 源 + 导出 png」当前不成立 |
+| `content/docs/_index.md` 正文 | 第 4 行 `description` 写「十一个主题篇」，第 18 行正文写「十个主题篇」 | 卡片行实测是 11 条，正文那句少算了一个；属站点内容缺陷，不在本轮范围 |
+| `.gitignore` | 仍是 7 行旧基线 | 缺 `/_mermaid-harness/`、`*.log`、`Thumbs.db`、`desktop.ini`、`.vscode/`、`*.swp`、`node_modules/` |
+
+**当前唯一能实测的闸门是 `hugo` 构建本身**：0 ERROR、WARN 只允许主题侧 `libsass deprecated` 一条。要恢复自动校验，得先把 `replicate-doc-site` 技能装回来，或改用 `oink-doc-site` 技能的脚本——但后者要求 OINK v1.4.0 主题副本与一份 `site.plan.json`，本站两者都不满足（主题是 1.3.2、没有 `site.plan.json`），直接跑会在 scaffold 与 plan 两道闸上失败。
