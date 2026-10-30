@@ -72,7 +72,7 @@ python <技能目录>/scripts/scaffold.py --out <站点目录>
 
 ```
 theme -> <站点目录>/oink-main  copied=1292 skipped=0 files=1292
-scaffold -> <站点目录>  copied=9 skipped=0
+scaffold -> <站点目录>  copied=10 skipped=0
 plan -> <站点目录>/site.plan.json  copied=1
 ```
 
@@ -303,7 +303,7 @@ python <技能目录>/scripts/audit_content.py --site <站点目录> --plan <站
 - `scripts/verify_site.py` —— 统一入口：plan/scaffold/build/preset/nav/audit/links/mermaid/delivery；`--selftest` 用四个子脚本 + 假站点注入缺陷自证。
 - `assets/site.plan.example.json` —— 三分类示例计划，可复制成 `<站点>/site.plan.json` 后改。
 - `assets/templates/hugo.yaml` —— 站点配置模板；由 `plan_site.py` 填值，不要直接拷进站点手改。
-- `assets/scaffold/` —— 9 个骨架文件：`.gitignore`、`LICENSE`、`run.cmd`（PROJECT CONFIG 块 + 固定逻辑，只改配置块）、`go.mod`/`go.sum`、品牌 SVG、写作规范、T0Level 模板。
+- `assets/scaffold/` —— 10 个骨架文件：`.gitignore`、`LICENSE`、`run.cmd`（PROJECT CONFIG 块 + 固定逻辑，只改配置块）、`go.mod`/`go.sum`、品牌 SVG、写作规范、T0Level 模板、**`assets/scss/_styles_project.scss`**（站点级样式覆盖：表格里行内 `code` 默认可折行，防止一条长路径把邻列压成一字一行——落在站点的 `assets/scss/` 下即覆盖主题那份空壳，主题副本仍逐字节不变）。
 - `assets/example-docs/` —— 6 份体裁样章（216–540 行）；结构照它，事实不照抄。
 - `assets/theme/oink-main/oink-main/` —— OINK v1.3.2 主题本体（1,273 文件）；`scaffold.py` 整目录拷入。
 - `assets/fixtures/` —— 自证夹具（site / plan.json / expected.json）；只被 `--selftest` 消费。
@@ -335,7 +335,7 @@ verify_site --selftest: 子脚本 PASS；注入十类全部 FAIL —— scaffold
 端到端 · **1.4.0 基线**（2026-10-29；Hugo Extended 0.168.0 + Go 1.27.3，验收时显式给 `--hugo` 与 `--go-bin`）：
 
 ```text
-scaffold -> theme copied=1292 skipped=0 files=1292；scaffold copied=9；plan copied=1
+scaffold -> theme copied=1292 skipped=0 files=1292；scaffold copied=10；plan copied=1
 plan_site --check-only -> PLAN_OK problems=0（categories=3 sections=3 articles=6）
 plan_site --site -> generated=11 articles_stubbed=6 articles_kept=0 placeholders_remaining=0
 hugo --cleanDestinationDir -> Pages 51 / Static files 34 / Total in 1292 ms / 0 ERROR
@@ -352,6 +352,14 @@ Mermaid 解析台真跑（demo 骨架站）-> id="out" 读数 TOTAL=0 REAL_FAIL=
 ```
 
 六个子脚本 `--selftest` 全部 `SELFTEST_PASS`。
+
+**骨架默认带表格折行规则（2026-10-30 新增 `assets/scaffold/assets/scss/_styles_project.scss`）**：它落在站点的 `assets/scss/` 下，覆盖主题那份空壳，主题副本仍逐字节不变。作用是默认让表格里的行内 `code` 可折行，避免一条长路径把邻列压成「一字一行」（主题给 `code` 的 `overflow-wrap: break-word` 不降 min-content）。实测（scaffold + `docs-min` 示例，1500 视口，页内注入 4 列含 76 字符路径的表）：
+
+```text
+骨架默认（规则在）: cols=[87, 539, 87, 88]  tableW=801  overflow=0
+临时禁掉该规则    : cols=[44, 675, 44, 44]  tableW=807  overflow=6   ← 回到原始缺陷
+scaffold -> copied=10（新增 1 个文件）；--selftest 的 scaffold_ok 已把该文件纳入检查，缺件即 FAIL
+```
 
 端到端 · 技能内示例包（`assets/examples/`；换机器照下面两行命令即可复现，全程只读技能目录）
 

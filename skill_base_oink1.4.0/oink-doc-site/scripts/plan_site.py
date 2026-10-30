@@ -644,7 +644,7 @@ python -m http.server 8766 --directory public   # 纯静态产物预览
 hugo --cleanDestinationDir --gc --minify   # 发布档
 ```
 
-Windows 的 `run.cmd` 会自动设置离线构建变量、查找 Hugo（找不到时可用 `HUGO_EXE` 指定完整路径）、在 `127.0.0.1:8768` 启动 Hugo server 并打开浏览器；端口冲突时先 `set PORT=9000` 再运行。`NO_OPEN=1` 可跳过自动打开浏览器，适合脚本验证。
+Windows 的 `run.cmd` 会自动设置离线构建变量、按 `HUGO_EXE → PATH → HUGO_FALLBACK` 找 Hugo（并校验 Extended）、按 `GO_BIN → GO_FALLBACK → PATH` 找 Go 并把它插到 PATH 前面，再从 `DEFAULT_PORT`（默认 8768）起用 `netstat` 逐个探到 `PORT_MAX`（默认 8787）找空闲端口启动并打开浏览器；要固定端口就 `set PORT=9000`，全段被占时脚本会打印 `[ERROR] No free port found …` 并以退出码 1 结束。`NO_OPEN=1` 跳过自动打开浏览器、`NO_PAUSE=1` 跳过结束后的按键等待，适合脚本验证。
 
 离线构建要同时满足：主题副本在 `oink-main/oink-main/`、`go.mod` 的 replace 指向它、被执行的 Go ≥ 1.27.3。Hugo 报 `failed to load modules` 时先查 Go，不是内容错误：`binary with name "go" not found in PATH` 是没装，`go: downloading go1.27.3 …` 是装了但版本低于要求（Go 正试图自己下载新工具链，离线机必然失败）。设 `GOTOOLCHAIN=local` 只是把报错换成 `go.mod requires go >= 1.27.3`，并不会让旧 Go 够用；把实际执行的那个 go.exe 换成 1.27.3 才是解。验收时用 `--go-bin` 显式指向正确的 bin。
 

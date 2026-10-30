@@ -1,0 +1,34 @@
+// 站点级样式覆盖。主题 `assets/scss/td/_main.scss` 末尾 @import 本文件，
+// 站点 assets/ 下同名文件会替代主题里那份空壳（oink-main/…/_styles_project.scss），
+// 所以这里改样式不会破坏「主题副本逐字节等于上游」这条约束。
+//
+// 这一段解决「表格里的一条长路径把邻列压成一字一行」：
+// 主题给行内 code 的是 overflow-wrap: break-word——它允许视觉折行，但**不把断点计入
+// min-content**；于是一条 76 字符的路径会让那一列索要整条路径的宽度（实测 ≈608px），
+// 邻列被压到「一个字一行」，整表还横向溢出。
+// 换成 overflow-wrap: anywhere 后断点计入 min-content（同一路径降到 ≈8px），
+// 表不再被钉住，宽度按内容分配；min-width 只负责兜底。
+
+.td-content .td-table-scroll > table {
+  th,
+  td {
+    // 4.5em：正文字号 16px 时约 72px，扣掉左右各 14px 内边距约容 2.75 个汉字。
+    // 它只在「表放不下、每列被钉在最小宽度」时才显形——平日里列宽仍按内容分配。
+    min-width: 4.5em;
+    overflow-wrap: anywhere;
+  }
+
+  // 行内代码常是路径、命令或哈希，本身没有天然断点，单独放宽断行规则
+  code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  // 窄屏：4.5em 会让 4~5 列的表刚好多出几像素、平白冒出一条横向滚动条。
+  // 放到 3.75em（正文区约 32px，仍容得下 2 个汉字），表能落进屏宽；
+  // 列数更多的表本来就该横向滚动，不受影响。
+  @media (max-width: 575.98px) {
+    th,
+    td { min-width: 3.75em; }
+  }
+}

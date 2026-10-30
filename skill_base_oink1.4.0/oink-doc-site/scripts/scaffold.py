@@ -164,7 +164,8 @@ def selftest():
         theme_files = count_files(os.path.join(out, "oink-main"))
         src_files = count_files(THEME)
         scaffold_ok = all(os.path.isfile(os.path.join(out, p)) for p in (
-            "go.mod", "LICENSE", "run.cmd", "doc/技术文档编写规范.md", "doc/运行与构建（T0Level）.md"))
+            "go.mod", "LICENSE", "run.cmd", "doc/技术文档编写规范.md", "doc/运行与构建（T0Level）.md",
+            "assets/scss/_styles_project.scss"))
         plan_ok = os.path.isfile(os.path.join(out, "site.plan.json"))
         rc2 = scaffold(out, force=False)
         kept = os.path.isfile(os.path.join(out, "site.plan.json"))
